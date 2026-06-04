@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { generateDungeonOptions, rollNodeLine } from '../game/data/dungeons.js'
 import { addLineToItem } from '../game/Gear.js'
-import { rollOreDrops } from '../game/data/ores.js'
 import { useEnergyStore } from './useEnergyStore.js'
 import { useInventoryStore } from './useInventoryStore.js'
 import { useResourceStore } from './useResourceStore.js'
@@ -56,9 +55,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     const dungeon = findDungeon(dungeonId)
     if (!dungeon) return { oreDrops: [] }
 
-    const oreDrops = rollOreDrops(dungeon.tier)
     const resources = useResourceStore()
-    oreDrops.forEach(({ oreId, amount }) => resources.addOre(oreId, amount))
 
     currentOptions.value = currentOptions.value.filter(d => d.id !== dungeonId)
     pinnedDungeons.value = pinnedDungeons.value.filter(d => d.id !== dungeonId)
@@ -76,7 +73,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     }
 
     persist()
-    return { oreDrops, componentDrops }
+    return { componentDrops }
   }
 
   function findDungeon(id) {

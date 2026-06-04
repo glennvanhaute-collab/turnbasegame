@@ -64,6 +64,23 @@
         </div>
       </div>
 
+      <!-- Component drops -->
+      <div class="ore-drops" v-if="store.lastReward.componentDrops?.length">
+        <div class="drops-title">⚙ Components</div>
+        <div class="drops-list">
+          <div
+            v-for="key in store.lastReward.componentDrops"
+            :key="key"
+            class="drop-chip component"
+            :style="{ '--ore-color': UPGRADE_COMPONENTS[key]?.color ?? '#888' }"
+          >
+            <span class="ore-dot" />
+            <span class="drop-name">{{ UPGRADE_COMPONENTS[key]?.name ?? key }}</span>
+            <span class="drop-amount">×1</span>
+          </div>
+        </div>
+      </div>
+
       <!-- XP bar -->
       <div class="xp-bar-wrap" v-if="playerHero.isCreated">
         <div class="xp-bar-label">
@@ -95,6 +112,7 @@ import { useBattleStore } from '../stores/useBattleStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { ORES } from '../game/data/ores.js'
+import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import CombatStage from './PixiCombatStage.vue'
 import SkillPanel from './SkillPanel.vue'
 import BattleLog from './BattleLog.vue'
