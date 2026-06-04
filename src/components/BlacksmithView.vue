@@ -1,0 +1,1382 @@
+<template>
+  <div class="blacksmith">
+
+    <div class="smith-bg" :style="{ backgroundImage: `url(${arsenalBg})` }" />
+    <div class="smith-overlay" />
+
+    <!-- ── Left: Recipe list ───────────────────────────────────────── -->
+    <aside class="recipe-panel">
+      <div class="panel-label">Recipes</div>
+
+      <!-- Smelt section -->
+      <div class="recipe-section-head">⊕ Smelt</div>
+      <div class="smelt-group">
+        <template v-for="bar in BAR_LIST" :key="bar.id">
+          <!-- Special encounter-unlocked forge (elven/goblin/dwarf) -->
+          <template v-if="FORGE_TIERS[bar.requiredForge]?.special">
+            <div class="smelt-forge-divider" :style="{ '--elven-color': FORGE_TIERS[bar.requiredForge].color }">
+              <span class="sfd-dot" />
+              <span class="sfd-name">{{ FORGE_TIERS[bar.requiredForge].name }}</span>
+              <span class="sfd-lock" v-if="!isSpecialForgeUnlocked(bar.requiredForge)">Encounter</span>
+            </div>
+            <button
+              class="smelt-btn elven"
+              :class="{ active: selectedType === 'smelt' && selectedId === bar.id, locked: !isSpecialForgeUnlocked(bar.requiredForge) }"
+              :style="{ '--bar-color': bar.color }"
+              :disabled="!isSpecialForgeUnlocked(bar.requiredForge)"
+              @click="selectSmelt(bar)"
+            >
+              <span class="smelt-btn-dot" />
+              <span class="smelt-btn-name">{{ bar.name }}</span>
+              <span class="smelt-btn-cost" v-if="isSpecialForgeUnlocked(bar.requiredForge)">{{ bar.oreCost }}× ore</span>
+              <span class="smelt-btn-lock" v-else>Locked</span>
+            </button>
+          </template>
+          <!-- Standard codex-gated bars -->
+          <button
+            v-else
+            class="smelt-btn"
+            :class="{
+              active: selectedType === 'smelt' && selectedId === bar.id,
+              locked: resources.forgeLevel < bar.requiredForge
+            }"
+            :style="{ '--bar-color': bar.color }"
+            :disabled="resources.forgeLevel < bar.requiredForge"
+            @click="selectSmelt(bar)"
+          >
+            <span class="smelt-btn-dot" />
+            <span class="smelt-btn-name">{{ bar.name }}</span>
+            <span class="smelt-btn-cost" v-if="resources.forgeLevel >= bar.requiredForge">
+              {{ bar.oreCost }}× ore
+            </span>
+            <span class="smelt-btn-lock" v-else>{{ FORGE_TIERS[bar.requiredForge]?.name }}</span>
+          </button>
+        </template>
+      </div>
+
+      <!-- Forge section -->
+      <div class="recipe-section-head">⚒ Forge</div>
+      <div class="tier-group" v-for="tier in RECIPE_TIERS" :key="tier.id">
+        <div
+          class="tier-header"
+          :class="{ locked: !tier.recipes.length }"
+          :style="{ '--tier-color': tier.color }"
+        >
+          <span class="tier-dot" />
+          <span class="tier-name">{{ tier.name }}</span>
+          <span class="tier-count" v-if="tier.recipes.length">{{ tier.recipes.length }}</span>
+          <span class="tier-soon" v-else>—</span>
+        </div>
+
+        <button
+          v-for="recipe in tier.recipes"
+          :key="recipe.id"
+          class="recipe-btn"
+          :class="{ active: selectedType === 'forge' && selectedId === recipe.id, unaffordable: !canAfford(recipe) }"
+          :style="{ '--tier-color': tier.color }"
+          @click="selectForge(recipe)"
+        >
+          <span class="recipe-slot-icon">{{ SLOT_ICONS[recipe.slot] }}</span>
+          <span class="recipe-name">{{ recipe.name }}</span>
+          <span class="recipe-cost">
+            <span
+              v-for="(amt, barId) in recipe.barCost"
+              :key="barId"
+              class="cost-pill"
+              :class="{ short: (resources.bars[barId] ?? 0) < amt }"
+            >{{ amt }}</span>
+          </span>
+        </button>
+      </div>
+      <!-- Artisan section -->
+      <div class="recipe-section-head">⚙ Artisan</div>
+      <div class="artisan-item-list">
+        <div v-if="craftedItems.length === 0" class="artisan-empty">No crafted items yet</div>
+        <button
+          v-for="item in craftedItems"
+          :key="item.instanceId"
+          class="artisan-item-btn"
+          :class="{ active: selectedType === 'artisan' && artisanItemId === item.instanceId, maxed: item.stars >= 10 }"
+          :style="{ '--tier-color': tierColorForItem(item) }"
+          @click="selectArtisan(item)"
+        >
+          <span class="aib-icon">{{ SLOT_ICONS[item.slot] ?? '◆' }}</span>
+          <span class="aib-name">{{ item.name }}</span>
+          <span class="aib-stars" v-if="item.stars > 0 && item.stars < 10">{{ '★'.repeat(item.stars / 2) }}</span>
+          <span class="aib-maxed" v-else-if="item.stars >= 10">✦</span>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ── Center: Forge area ─────────────────────────────────────── -->
+    <main class="forge-area">
+
+      <!-- ── SMELT MODE ── -->
+      <template v-if="selectedType === 'smelt' && selectedBar">
+
+        <!-- Forge image fills the entire center — all UI overlaid -->
+        <div class="smelt-forge-wrap"
+          :style="{ '--forge-glow': activeForgeGlow }"
+          :class="{ 'forge-busy-other': busyOther }"
+        >
+          <div class="smelt-forge-glow" />
+          <img :src="activeForgeImage" class="smelt-forge-img" :alt="activeForge.name" />
+
+          <!-- Top: dramatic forge name -->
+          <div class="smelt-forge-top">
+            <div class="smelt-forge-name-badge">{{ activeForge.name }}</div>
+            <div class="smelt-forge-xp">{{ Math.ceil(selectedBar.xp * 0.5) }} XP per bar</div>
+          </div>
+
+          <!-- Bottom: unified cinematic overlay — conversion info + controls -->
+          <div class="smelt-bottom-overlay">
+
+            <!-- Conversion info row -->
+            <div class="smelt-conv-row">
+              <div class="sco-side">
+                <span class="sco-dot" :style="{ '--sco-color': ORES[selectedBar.oreId]?.color }" />
+                <div class="sco-info">
+                  <span class="sco-name">{{ ORES[selectedBar.oreId]?.name }}</span>
+                  <span class="sco-stock">{{ resources.ores[selectedBar.oreId] ?? 0 }} in stock</span>
+                </div>
+              </div>
+              <div class="sco-middle">
+                <span class="sco-cost-label">×{{ selectedBar.oreCost }}</span>
+                <span class="sco-arrow">→</span>
+                <span class="sco-yield">1 bar</span>
+              </div>
+              <div class="sco-side sco-right">
+                <div class="sco-info sco-info-right">
+                  <span class="sco-name">{{ selectedBar.name }}</span>
+                  <span class="sco-stock" :class="{ 'sco-none': maxSmelt === 0 }">{{ maxSmelt }} can smelt</span>
+                </div>
+                <span class="sco-dot" :style="{ '--sco-color': selectedBar.color }" />
+              </div>
+            </div>
+
+            <!-- IDLE: qty selector + start -->
+            <template v-if="!smelting.isRunning">
+              <div class="smelt-qty-row">
+                <button class="sqr-adj" @click="adjustQty(-5)" :disabled="smeltQty <= 1">−5</button>
+                <button class="sqr-adj" @click="adjustQty(-1)" :disabled="smeltQty <= 1">−</button>
+                <span class="sqr-qty">{{ smeltQty }}</span>
+                <button class="sqr-adj" @click="adjustQty(1)"  :disabled="smeltQty >= maxSmelt">+</button>
+                <button class="sqr-adj" @click="adjustQty(5)"  :disabled="smeltQty >= maxSmelt">+5</button>
+                <button class="sqr-max" @click="smeltQty = maxSmelt" :disabled="smeltQty >= maxSmelt || maxSmelt === 0">Max</button>
+              </div>
+              <span class="smelt-eta-hint" v-if="maxSmelt > 0">
+                Est. {{ formatSmeltTime(smeltQty * selectedBar.smeltTime * 1000) }}
+              </span>
+              <button
+                class="smelt-start-btn"
+                :class="{ ready: maxSmelt > 0 }"
+                :disabled="maxSmelt <= 0 || smeltQty <= 0"
+                @click="startSmelt"
+              >⊕ Smelt ×{{ smeltQty }}</button>
+            </template>
+
+            <!-- RUNNING (this bar): progress + cancel -->
+            <template v-else-if="isMyJob">
+              <div class="smelt-run-header">
+                <span class="srh-title">Smelting in progress</span>
+                <span class="srh-count">{{ smelting.completedCount }} / {{ smelting.job.totalBars }}</span>
+              </div>
+              <div class="srp-wrap">
+                <div class="srp-track">
+                  <div class="srp-fill" :style="{ width: (smelting.currentBarProgress * 100) + '%' }" />
+                </div>
+                <span class="srp-eta">{{ formatSmeltTime(smeltEta) }}</span>
+              </div>
+              <button class="smelt-cancel-btn" @click="cancelSmelt">Cancel &amp; Refund Ores</button>
+            </template>
+
+            <!-- BLOCKED (other bar running) -->
+            <template v-else>
+              <div class="smelt-busy-msg">
+                <span class="sbm-icon">⊕</span>
+                <div class="sbm-text">
+                  <span class="sbm-title">Forge busy</span>
+                  <span class="sbm-sub">Currently smelting {{ BARS[smelting.job?.barId]?.name }}</span>
+                </div>
+              </div>
+              <div class="smelt-busy-bar">
+                <div class="sbb-fill" :style="{ width: (smelting.currentBarProgress * 100) + '%' }" />
+              </div>
+            </template>
+
+          </div><!-- /smelt-bottom-overlay -->
+        </div><!-- /smelt-forge-wrap -->
+
+      </template>
+
+      <!-- ── ARTISAN MODE ── -->
+      <template v-else-if="selectedType === 'artisan'">
+        <div class="forge-idle" v-if="!artisanItem">
+          <div class="forge-idle-icon">⚙</div>
+          <div class="forge-idle-text">Select a crafted item to upgrade</div>
+        </div>
+
+        <div class="artisan-content" v-else :style="{ '--tier-color': artisanTierColor }">
+
+          <div class="forge-header">
+            <div class="forge-item-name">{{ artisanItem.name }}</div>
+            <div class="forge-badges">
+              <span class="forge-badge tier-badge" :style="{ '--tier-color': artisanTierColor }">{{ artisanTier }} Tier</span>
+              <span class="forge-badge slot-badge">{{ SLOT_LABELS[artisanItem.slot] }}</span>
+              <span class="forge-badge rarity-badge" :class="artisanItem.rarity?.toLowerCase()">{{ artisanItem.rarity }}</span>
+            </div>
+          </div>
+
+          <!-- Item showcase with animated stars -->
+          <div class="artisan-showcase" :class="{ maxed: artisanItem.stars >= 10 }">
+            <div class="artisan-glow" />
+            <div v-if="artisanItem.image && GEAR_IMAGES[artisanItem.image]" class="artisan-frame-wrap">
+              <div class="gear-frame-inner">
+                <img :src="GEAR_IMAGES[artisanItem.image]" class="artisan-gear-img" :alt="artisanItem.name" />
+              </div>
+              <img :src="itemFrameImg" class="artisan-frame-img" alt="" aria-hidden="true" />
+            </div>
+            <div v-else class="artisan-slot-icon">{{ SLOT_ICONS[artisanItem.slot] ?? '◆' }}</div>
+            <div class="artisan-stars-row">
+              <span
+                v-for="tier in STAR_RARITY.slice(1)" :key="tier.stars"
+                class="artisan-star-pip"
+                :class="{ filled: artisanItem.stars >= tier.stars }"
+              >★</span>
+            </div>
+            <div class="artisan-rarity-name" :class="artisanItem.rarity?.toLowerCase()">{{ artisanItem.rarity }}</div>
+          </div>
+
+          <!-- Stat comparison -->
+          <div class="artisan-stats-panel">
+            <div class="forge-col-label">Stats</div>
+            <div class="artisan-stat-rows">
+              <div v-for="(baseStat, key) in artisanItem.baseStats" :key="key" class="artisan-stat-row">
+                <span class="asr-label">{{ STAT_LABELS[key] ?? key }}</span>
+                <span class="asr-current">{{ formatStatValue(key, artisanItem.stats[key]) }}</span>
+                <template v-if="artisanItem.stars < 10">
+                  <span class="asr-arrow">→</span>
+                  <span class="asr-next">{{ formatStatValue(key, nextStatValue(key, baseStat)) }}</span>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upgrade panel -->
+          <div class="artisan-upgrade-panel" v-if="artisanItem.stars < 10">
+            <div class="material-row" :style="{ '--ore-color': BARS[artisanBarId]?.color ?? '#888' }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ BARS[artisanBarId]?.name ?? artisanBarId }}</span>
+              <span class="mat-tally">
+                <span class="mat-have" :class="{ ok: canUpgrade }">{{ resources.bars[artisanBarId] ?? 0 }}</span>
+                <span class="mat-sep">/</span>
+                <span class="mat-need">{{ upgradeCost }}</span>
+              </span>
+            </div>
+            <div class="artisan-btn-row">
+              <button class="artisan-upgrade-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeItem">
+                ⚒ Upgrade · ★{{ artisanItem.stars }} → ★{{ artisanItem.stars + 2 }}
+              </button>
+              <span class="artisan-next-rarity" v-if="nextRarity !== artisanItem.rarity">↑ {{ nextRarity }}</span>
+            </div>
+          </div>
+
+          <!-- Maxed -->
+          <div class="artisan-maxed-msg" v-else>
+            <span class="artisan-maxed-icon">✦</span>
+            <div>
+              <div class="artisan-maxed-title">Mythical — Fully Upgraded</div>
+              <div class="artisan-maxed-sub">This item has reached its maximum potential</div>
+            </div>
+          </div>
+
+        </div>
+      </template>
+
+      <!-- ── FORGE MODE / IDLE ── -->
+      <template v-else>
+
+        <!-- Item header -->
+        <div class="forge-header" v-if="selected">
+          <div class="forge-item-name">{{ selected.name }}</div>
+          <div class="forge-badges">
+            <span class="forge-badge tier-badge" :style="{ '--tier-color': selectedTierColor }">
+              {{ selectedTier?.name }} Tier
+            </span>
+            <span class="forge-badge slot-badge">{{ SLOT_LABELS[selected.slot] }}</span>
+            <span class="forge-badge rarity-badge common">Common</span>
+          </div>
+        </div>
+
+        <!-- Idle placeholder -->
+        <div class="forge-idle" v-if="!selected">
+          <div class="forge-idle-icon">⚒</div>
+          <div class="forge-idle-text">Select a recipe to begin forging</div>
+        </div>
+
+        <!-- Gear art showcase (named items) or generic anvil -->
+        <template v-if="selected">
+          <div
+            v-if="selected.image && GEAR_IMAGES[selected.image]"
+            class="gear-showcase"
+            :class="{ ready: canAfford(selected) }"
+            :style="{ '--tier-color': selectedTierColor }"
+          >
+            <div class="gear-showcase-glow" />
+            <div class="gear-frame-wrap">
+              <div class="gear-frame-inner">
+                <img :src="GEAR_IMAGES[selected.image]" class="gear-showcase-img" :alt="selected.name" />
+              </div>
+              <img :src="itemFrameImg" class="gear-frame-img" alt="" aria-hidden="true" />
+            </div>
+          </div>
+          <div v-else class="anvil-wrap" :class="{ ready: canAfford(selected) }">
+            <div class="anvil-glow" />
+            <img :src="anvilImg" class="anvil-img" alt="Forge" />
+            <Transition name="item-appear">
+              <div class="anvil-item-badge" :style="{ '--tier-color': selectedTierColor }">
+                <span class="anvil-item-icon">{{ SLOT_ICONS[selected.slot] }}</span>
+              </div>
+            </Transition>
+          </div>
+        </template>
+
+        <!-- Description -->
+        <p class="forge-desc" v-if="selected">{{ selected.desc }}</p>
+
+        <!-- Base stats + materials -->
+        <div class="forge-details" v-if="selected">
+          <div class="forge-col">
+            <div class="forge-col-label">Base Stats</div>
+            <div class="forge-stats">
+              <div class="forge-stat" v-for="(val, key) in selected.baseStats" :key="key">
+                <span class="forge-stat-label">{{ STAT_LABELS[key] ?? key }}</span>
+                <span class="forge-stat-val">{{ formatStatValue(key, val) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="forge-col">
+            <div class="forge-col-label">Materials</div>
+            <div class="forge-materials">
+              <div
+                class="material-row"
+                v-for="(amt, barId) in selected.barCost"
+                :key="barId"
+                :style="{ '--ore-color': BARS[barId]?.color ?? '#888' }"
+              >
+                <span class="mat-dot" />
+                <span class="mat-name">{{ BARS[barId]?.name ?? barId }}</span>
+                <span class="mat-tally">
+                  <span class="mat-have" :class="{ ok: (resources.bars[barId] ?? 0) >= amt }">{{ resources.bars[barId] ?? 0 }}</span>
+                  <span class="mat-sep">/</span>
+                  <span class="mat-need">{{ amt }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upgrade path -->
+        <div class="stars-track" v-if="selected">
+          <div
+            v-for="tier in STAR_RARITY"
+            :key="tier.stars"
+            class="star-node"
+            :class="[tier.rarity.toLowerCase(), { current: tier.stars === 0 }]"
+          >
+            <span class="star-node-stars">{{ '★'.repeat(tier.stars) || '—' }}</span>
+            <span class="star-node-rarity">{{ tier.rarity }}</span>
+          </div>
+        </div>
+
+        <!-- Forge button -->
+        <div class="forge-actions" v-if="selected">
+          <button
+            class="forge-btn"
+            :class="{ ready: canAfford(selected) }"
+            :disabled="!canAfford(selected)"
+            @click="forge"
+          >
+            <span class="forge-btn-icon">⚒</span>
+            Forge
+          </button>
+          <span class="forge-hint" v-if="!canAfford(selected)">Need more bars</span>
+        </div>
+
+        <!-- Success flash -->
+        <Transition name="forge-pop">
+          <div class="forge-result" v-if="forgeResult">
+            <span class="forge-result-icon">✓</span>
+            <div class="forge-result-text">
+              <span class="forge-result-name">{{ forgeResult }}</span>
+              <span class="forge-result-sub">added to inventory</span>
+            </div>
+          </div>
+        </Transition>
+
+      </template>
+
+      <!-- Blacksmithing proficiency bar — always visible -->
+      <div class="smith-xp-bar">
+        <div class="smith-xp-header">
+          <span class="smith-xp-label">⚒ Blacksmithing</span>
+          <span class="smith-xp-level">Lv. {{ resources.smithingLevel }}</span>
+          <span class="smith-xp-count">{{ resources.smithingXpInLevel }} / {{ resources.XP_PER_LEVEL }} XP</span>
+        </div>
+        <div class="smith-xp-track">
+          <div class="smith-xp-fill" :style="{ width: (resources.smithingProgress * 100) + '%' }" />
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── Right: Stockpile ───────────────────────────────────────── -->
+    <aside class="ore-panel">
+      <div class="panel-label">Stockpile</div>
+
+      <div class="panel-sublabel">Ores</div>
+      <div class="ore-list">
+        <div
+          v-for="ore in ORE_LIST"
+          :key="ore.id"
+          class="ore-row"
+          :class="{ empty: !resources.ores[ore.id] }"
+          :style="{ '--ore-color': ore.color }"
+        >
+          <span class="ore-dot" />
+          <span class="ore-name">{{ ore.name }}</span>
+          <span class="ore-count">{{ resources.ores[ore.id] ?? 0 }}</span>
+        </div>
+      </div>
+
+      <div class="panel-sublabel bar-sublabel">Bars</div>
+      <div class="ore-list">
+        <div
+          v-for="bar in BAR_LIST"
+          :key="bar.id"
+          class="ore-row"
+          :class="{ empty: !resources.bars[bar.id] }"
+          :style="{ '--ore-color': bar.color }"
+        >
+          <span class="ore-dot" />
+          <span class="ore-name">{{ bar.name }}</span>
+          <span class="ore-count">{{ resources.bars[bar.id] ?? 0 }}</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useResourceStore } from '../stores/useResourceStore.js'
+import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { useSmeltingStore } from '../stores/useSmeltingStore.js'
+import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
+import { ORE_LIST, ORES } from '../game/data/ores.js'
+import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
+import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, STAR_RARITY, formatStatValue, rarityForStars } from '../game/data/recipes.js'
+import arsenalBg    from '../assets/arsenal.png'
+import anvilImg     from '../assets/anvil.png'
+import forge01Img   from '../assets/forge_01.png'
+import forge02Img   from '../assets/forge_02.png'
+import forge03Img   from '../assets/forge_03.png'
+import forge04Img   from '../assets/forge_04.png'
+import elvenForgeImg  from '../assets/elven_forge.png'
+import goblinForgeImg from '../assets/goblin_forge.png'
+import dwarfForgeImg  from '../assets/dwarven_forge.png'
+import itemFrameImg      from '../assets/item_frame.png'
+import elvenSwordImg     from '../assets/gear/elven/sword.png'
+import elvenSpearImg     from '../assets/gear/elven/spear.png'
+import elvenShieldImg    from '../assets/gear/elven/shield.png'
+import elvenHelmImg      from '../assets/gear/elven/helm.png'
+import elvenChestImg     from '../assets/gear/elven/chest.png'
+import elvenPlateImg     from '../assets/gear/elven/platelegs.png'
+import elvenGlovesImg    from '../assets/gear/elven/gloves.png'
+
+const FORGE_IMAGES = {
+  forge_01:    forge01Img,
+  forge_02:    forge02Img,
+  forge_03:    forge03Img,
+  forge_04:    forge04Img,
+  elven_forge:  elvenForgeImg,
+  goblin_forge: goblinForgeImg,
+  dwarven_forge: dwarfForgeImg,
+}
+
+const GEAR_IMAGES = {
+  'elven/sword':      elvenSwordImg,
+  'elven/spear':      elvenSpearImg,
+  'elven/shield':     elvenShieldImg,
+  'elven/helm':       elvenHelmImg,
+  'elven/chest':      elvenChestImg,
+  'elven/platelegs':  elvenPlateImg,
+  'elven/gloves':     elvenGlovesImg,
+}
+
+const XP_PER_TIER    = { copper: 10, tin: 20, steel: 35, darksteel: 55, mithril: 80, moonsilver: 120 }
+const ARTISAN_XP     = { copper: 8,  tin: 12, steel: 20, darksteel: 32, mithril: 50, moonsilver: 80  }
+const TIER_TO_BAR    = { copper: 'copper', tin: 'tin', steel: 'steel', darksteel: 'darksteel', mithril: 'mithril', moonsilver: 'moonsilver' }
+const TIER_ORDER     = { copper: 0, tin: 1, steel: 2, darksteel: 3, mithril: 4, moonsilver: 5 }
+
+const resources = useResourceStore()
+const inventory = useInventoryStore()
+const smelting  = useSmeltingStore()
+
+const selectedType = ref(null)   // 'smelt' | 'forge' | 'artisan' | null
+const selectedId   = ref(null)
+const forgeResult  = ref(null)
+const smeltQty     = ref(1)
+const artisanItemId = ref(null)
+let _flashTimer = null
+
+watch(selectedId, () => { smeltQty.value = 1 })
+
+// ── Smelt ────────────────────────────────────────────────────────
+const selected = computed(() => {
+  if (selectedType.value !== 'forge' || !selectedId.value) return null
+  for (const tier of RECIPE_TIERS) {
+    const found = tier.recipes.find(r => r.id === selectedId.value)
+    if (found) return found
+  }
+  return null
+})
+
+const selectedBar = computed(() => {
+  if (selectedType.value !== 'smelt' || !selectedId.value) return null
+  return BARS[selectedId.value] ?? null
+})
+
+const selectedTier      = computed(() => selected.value ? RECIPE_TIERS.find(t => t.id === selected.value.tier) : null)
+const selectedTierColor = computed(() => selectedTier.value?.color ?? '#888')
+
+const maxSmelt = computed(() => {
+  if (!selectedBar.value) return 0
+  return Math.floor((resources.ores[selectedBar.value.oreId] ?? 0) / selectedBar.value.oreCost)
+})
+
+const activeForge = computed(() => {
+  if (!selectedBar.value) return FORGE_TIERS[0]
+  return FORGE_TIERS[selectedBar.value.requiredForge] ?? FORGE_TIERS[0]
+})
+const activeForgeImage = computed(() => FORGE_IMAGES[activeForge.value.image])
+const activeForgeGlow  = computed(() => activeForge.value.glow)
+
+const isMyJob   = computed(() => smelting.isRunning && smelting.job?.barId === selectedId.value)
+const busyOther = computed(() => smelting.isRunning && !isMyJob.value)
+
+const smeltEta = computed(() => {
+  if (!smelting.isRunning || !smelting.job) return 0
+  return Math.max(0, (smelting.remainingCount - smelting.currentBarProgress) * smelting.job.timePerBar)
+})
+
+function formatSmeltTime(ms) {
+  const s = Math.ceil(ms / 1000)
+  if (s < 60)  return `${s}s`
+  const m = Math.floor(s / 60), r = s % 60
+  if (m < 60)  return r > 0 ? `${m}m ${r}s` : `${m}m`
+  const h = Math.floor(m / 60), rm = m % 60
+  return rm > 0 ? `${h}h ${rm}m` : `${h}h`
+}
+
+function adjustQty(delta) {
+  smeltQty.value = Math.max(1, Math.min(Math.max(1, maxSmelt.value), smeltQty.value + delta))
+}
+
+function isSpecialForgeUnlocked(level) {
+  if (level === 4) return resources.elvenForgeUnlocked
+  if (level === 5) return resources.goblinForgeUnlocked
+  if (level === 6) return resources.dwarfForgeUnlocked
+  return false
+}
+
+function selectSmelt(bar)    { selectedType.value = 'smelt';   selectedId.value = bar.id }
+function selectForge(recipe) { selectedType.value = 'forge';   selectedId.value = recipe.id }
+function selectArtisan(item) { selectedType.value = 'artisan'; artisanItemId.value = item.instanceId }
+
+function canAfford(recipe) {
+  if (!recipe?.barCost) return false
+  return Object.entries(recipe.barCost).every(([id, amt]) => (resources.bars[id] ?? 0) >= amt)
+}
+
+function startSmelt() {
+  if (!selectedBar.value || maxSmelt.value <= 0) return
+  smelting.startSmelt(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value))
+}
+
+function cancelSmelt() { smelting.cancelSmelt() }
+
+function forge() {
+  if (!selected.value || !canAfford(selected.value)) return
+  const recipe = selected.value
+  Object.entries(recipe.barCost).forEach(([id, amt]) => resources.removeBar(id, amt))
+  const instance = createItemInstance({
+    id:          recipe.id,
+    name:        recipe.name,
+    gearType:    recipe.gearType,
+    weaponType:  recipe.weaponType ?? null,
+    rarity:      recipe.rarity,
+    description: recipe.desc,
+    stats:       { ...recipe.baseStats },
+    baseStats:   { ...recipe.baseStats },
+    tier:        recipe.tier,
+    slot:        recipe.slot,
+    image:       recipe.image ?? null,
+  })
+  instance.craftedAt = Date.now()
+  instance.crafted   = true
+  inventory.addInstance(instance)
+  resources.addSmithingXp(XP_PER_TIER[recipe.tier] ?? 10)
+  forgeResult.value = recipe.name
+  clearTimeout(_flashTimer)
+  _flashTimer = setTimeout(() => { forgeResult.value = null }, 3000)
+}
+
+// ── Artisan ──────────────────────────────────────────────────────
+const craftedItems = computed(() =>
+  inventory.ownedItems
+    .filter(item => item.craftedAt && item.tier)
+    .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))
+)
+
+const artisanItem = computed(() =>
+  artisanItemId.value ? inventory.instanceById(artisanItemId.value) : null
+)
+const artisanTier      = computed(() => artisanItem.value?.tier ?? null)
+const artisanTierColor = computed(() => RECIPE_TIERS.find(t => t.id === artisanTier.value)?.color ?? '#888')
+const artisanBarId     = computed(() => TIER_TO_BAR[artisanTier.value] ?? null)
+const upgradeCost      = computed(() => artisanItem.value ? artisanItem.value.stars + 2 : 0)
+const canUpgrade       = computed(() => {
+  if (!artisanItem.value || !artisanBarId.value || artisanItem.value.stars >= 10) return false
+  return (resources.bars[artisanBarId.value] ?? 0) >= upgradeCost.value
+})
+const nextRarity = computed(() => artisanItem.value ? rarityForStars(artisanItem.value.stars + 2) : '')
+
+function nextStatValue(key, baseStat) {
+  if (!artisanItem.value) return baseStat
+  const mult = 1 + ((artisanItem.value.stars + 2) / 2) * 0.12
+  const pct = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','resistance','accuracy']
+  return pct.includes(key) ? Math.round(baseStat * mult * 1000) / 1000 : Math.round(baseStat * mult)
+}
+
+function tierColorForItem(item) {
+  return RECIPE_TIERS.find(t => t.id === item.tier)?.color ?? '#888'
+}
+
+function upgradeItem() {
+  const item = artisanItem.value
+  if (!item || !canUpgrade.value) return
+  resources.removeBar(artisanBarId.value, upgradeCost.value)
+  item.stars += 2
+  item.rarity = rarityForStars(item.stars)
+  const mult = 1 + (item.stars / 2) * 0.12
+  const pct  = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','resistance','accuracy']
+  Object.keys(item.baseStats).forEach(key => {
+    item.stats[key] = pct.includes(key)
+      ? Math.round(item.baseStats[key] * mult * 1000) / 1000
+      : Math.round(item.baseStats[key] * mult)
+  })
+  resources.addSmithingXp(ARTISAN_XP[artisanTier.value] ?? 10)
+}
+</script>
+
+<style scoped>
+/* ── Shell ─────────────────────────────────────────────────────── */
+.blacksmith {
+  position: relative;
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.smith-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.65; pointer-events: none; z-index: 0; border-radius: 12px;
+}
+.smith-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right,
+    rgba(4,2,1,0.94) 0%,
+    rgba(4,2,1,0.55) 18%,
+    rgba(4,2,1,0.30) 50%,
+    rgba(4,2,1,0.55) 82%,
+    rgba(4,2,1,0.94) 100%
+  );
+  pointer-events: none; z-index: 1; border-radius: 12px;
+}
+
+.panel-label {
+  font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase;
+  letter-spacing: 2.5px; color: var(--text-muted); font-weight: 700;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border-brown); margin-bottom: 12px;
+}
+
+/* ── Left: Recipe panel ─────────────────────────────────────────── */
+.recipe-panel {
+  width: 210px; flex-shrink: 0; position: relative; z-index: 2;
+  border-right: 1px solid var(--border-gold);
+  background: rgba(4,2,1,0.88); backdrop-filter: blur(8px);
+  padding: 16px 12px; display: flex; flex-direction: column; overflow-y: auto;
+}
+
+.recipe-section-head {
+  font-family: var(--font-head); font-size: 0.56rem; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text-dim); font-weight: 700;
+  padding: 8px 4px 6px; margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.recipe-section-head + .smelt-group { margin-bottom: 10px; }
+
+/* Smelt buttons */
+.smelt-group { display: flex; flex-direction: column; gap: 2px; }
+.smelt-btn {
+  width: 100%; display: flex; align-items: center; gap: 7px;
+  padding: 7px 8px; background: transparent; border: 1px solid transparent;
+  border-radius: 6px; cursor: pointer; text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+}
+.smelt-btn:not(.locked):hover {
+  background: rgba(255,255,255,0.04);
+  border-color: color-mix(in srgb, var(--bar-color) 25%, transparent);
+}
+.smelt-btn.active {
+  background: color-mix(in srgb, var(--bar-color) 12%, rgba(0,0,0,0.4));
+  border-color: color-mix(in srgb, var(--bar-color) 50%, transparent);
+}
+.smelt-btn.locked { opacity: 0.3; cursor: not-allowed; }
+.smelt-btn-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bar-color); flex-shrink: 0;
+}
+.smelt-btn.active .smelt-btn-dot { box-shadow: 0 0 5px var(--bar-color); }
+.smelt-btn-name { flex: 1; font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); }
+.smelt-btn-cost {
+  font-size: 0.58rem; font-family: var(--font-head); color: var(--text-muted);
+  background: rgba(255,255,255,0.04); border-radius: 6px; padding: 1px 5px;
+}
+.smelt-btn-lock {
+  font-size: 0.52rem; font-family: var(--font-head); color: #4a3a3a;
+  letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 72px;
+}
+
+/* Forge tier groups */
+.tier-group { margin-bottom: 6px; }
+.tier-header {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px 5px; margin-bottom: 2px;
+}
+.tier-header.locked { opacity: 0.35; }
+.tier-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tier-color); flex-shrink: 0; }
+.tier-name {
+  font-family: var(--font-head); font-size: 0.62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px; color: var(--tier-color); flex: 1;
+}
+.tier-count { font-size: 0.55rem; color: var(--text-dim); background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0 5px; line-height: 1.6; }
+.tier-soon  { font-size: 0.55rem; color: var(--text-dim); }
+
+.recipe-btn {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px; background: transparent; border: 1px solid transparent;
+  border-radius: 6px; cursor: pointer; text-align: left;
+  transition: background 0.12s, border-color 0.12s; margin-bottom: 2px;
+}
+.recipe-btn:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: color-mix(in srgb, var(--tier-color) 25%, transparent);
+}
+.recipe-btn.active {
+  background: color-mix(in srgb, var(--tier-color) 12%, rgba(0,0,0,0.4));
+  border-color: color-mix(in srgb, var(--tier-color) 50%, transparent);
+}
+.recipe-btn.unaffordable { opacity: 0.42; }
+.recipe-slot-icon { font-size: 0.8rem; flex-shrink: 0; width: 16px; text-align: center; }
+.recipe-name { flex: 1; font-size: 0.68rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recipe-cost { display: flex; gap: 3px; flex-shrink: 0; }
+.cost-pill {
+  font-size: 0.6rem; font-family: var(--font-head); font-weight: 700;
+  color: var(--tier-color); background: color-mix(in srgb, var(--tier-color) 12%, transparent);
+  border-radius: 8px; padding: 0 5px; line-height: 1.6;
+}
+.cost-pill.short { color: #ff6b6b; background: rgba(255,107,107,0.12); }
+
+/* ── Center: Forge area ─────────────────────────────────────────── */
+.forge-area {
+  flex: 1; position: relative; z-index: 2;
+  padding: 0 16px 20px; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+
+.forge-header { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 7px; width: 100%; }
+.forge-item-name {
+  font-family: var(--font-head); font-size: 1.3rem; font-weight: 800;
+  color: #fff; letter-spacing: 2px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.95), 0 0 32px rgba(255,160,60,0.15);
+}
+.forge-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.forge-badge {
+  font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase;
+  letter-spacing: 1.5px; font-weight: 700; padding: 2px 10px;
+  border-radius: 10px; border: 1px solid;
+}
+.tier-badge { color: var(--tier-color); border-color: color-mix(in srgb, var(--tier-color) 40%, transparent); background: color-mix(in srgb, var(--tier-color) 10%, transparent); }
+.slot-badge { color: var(--text-muted); border-color: var(--border-brown); background: rgba(255,255,255,0.03); }
+.rarity-badge.common { color: #aaa; border-color: #333; background: rgba(255,255,255,0.03); }
+
+/* Idle */
+.forge-idle {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; opacity: 0.35; padding: 40px 0;
+}
+.forge-idle-icon { font-size: 2.4rem; }
+.forge-idle-text { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
+
+/* Gear art showcase */
+.gear-showcase {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: visible;
+}
+.gear-showcase-glow {
+  position: absolute; inset: -32px;
+  background: radial-gradient(ellipse at 50% 55%, color-mix(in srgb, var(--tier-color) 22%, transparent) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+.gear-frame-wrap {
+  position: relative; width: 280px; height: 280px;
+  z-index: 1;
+  animation: item-float 2.8s ease-in-out infinite;
+}
+.gear-frame-inner {
+  position: absolute; inset: 17%;
+  overflow: hidden;
+  background: rgba(4,2,10,0.92);
+  display: flex; align-items: center; justify-content: center;
+}
+.gear-showcase-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(1.0);
+  transition: filter 0.5s ease;
+}
+.gear-showcase.ready .gear-showcase-img {
+  filter:
+    drop-shadow(0 0 14px var(--tier-color))
+    brightness(1.08);
+}
+.gear-frame-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; pointer-events: none; z-index: 2;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.8));
+  transition: filter 0.5s ease;
+}
+.gear-showcase.ready .gear-frame-img {
+  filter:
+    drop-shadow(0 4px 16px rgba(0,0,0,0.8))
+    drop-shadow(0 0 12px color-mix(in srgb, var(--tier-color) 30%, transparent));
+}
+
+/* Anvil showcase */
+.anvil-wrap {
+  position: relative; display: flex;
+  align-items: center; justify-content: center;
+  flex-shrink: 0; overflow: visible;
+}
+.anvil-img {
+  width: 220px; height: auto; object-fit: contain; display: block;
+  position: relative; z-index: 1;
+  transition: filter 0.5s ease;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.9)) brightness(0.85);
+}
+.anvil-wrap.ready .anvil-img {
+  filter:
+    drop-shadow(0 8px 24px rgba(0,0,0,0.9))
+    drop-shadow(0 0 10px rgba(255,140,40,0.30))
+    drop-shadow(0 0 22px rgba(200,90,20,0.15))
+    brightness(1.03);
+  animation: forge-breathe 2.4s ease-in-out infinite;
+}
+@keyframes forge-breathe {
+  0%, 100% { filter:
+    drop-shadow(0 8px 24px rgba(0,0,0,0.9))
+    drop-shadow(0 0 10px rgba(255,140,40,0.30))
+    drop-shadow(0 0 22px rgba(200,90,20,0.15))
+    brightness(1.03); }
+  50% { filter:
+    drop-shadow(0 8px 24px rgba(0,0,0,0.9))
+    drop-shadow(0 0 16px rgba(255,160,60,0.45))
+    drop-shadow(0 0 32px rgba(220,100,20,0.25))
+    brightness(1.07); }
+}
+.anvil-glow {
+  position: absolute; top: 0; left: -24px; right: -24px; bottom: -24px;
+  background: radial-gradient(ellipse at 50% 70%, rgba(255,120,30,0.10) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.85; }
+}
+.anvil-item-badge {
+  position: absolute; top: 22%; left: 50%;
+  transform: translateX(-50%); z-index: 2;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: color-mix(in srgb, var(--tier-color) 18%, rgba(8,4,2,0.85));
+  border: 2px solid var(--tier-color);
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  box-shadow: 0 0 16px var(--tier-color), 0 4px 12px rgba(0,0,0,0.8);
+  animation: item-float 2.8s ease-in-out infinite;
+}
+@keyframes item-float {
+  0%, 100% { transform: translateX(-50%) translateY(0px); }
+  50%       { transform: translateX(-50%) translateY(-6px); }
+}
+.item-appear-enter-active { transition: opacity 0.25s, transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+.item-appear-leave-active { transition: opacity 0.15s; }
+.item-appear-enter-from   { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.7); }
+.item-appear-leave-to     { opacity: 0; }
+
+.forge-desc {
+  font-size: 0.7rem; color: var(--text-muted); line-height: 1.6;
+  font-style: italic; text-align: center; max-width: 380px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+}
+
+/* Stats + materials */
+.forge-details { display: flex; gap: 16px; width: 100%; max-width: 440px; }
+.forge-col { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.forge-col-label {
+  font-family: var(--font-head); font-size: 0.56rem; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text-muted); font-weight: 700;
+  padding-bottom: 5px; border-bottom: 1px solid rgba(58,30,10,0.5);
+}
+.forge-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.forge-stat {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  background: rgba(0,0,0,0.35); border: 1px solid var(--border-brown);
+  border-radius: 6px; padding: 7px 12px; backdrop-filter: blur(4px); min-width: 58px;
+}
+.forge-stat-label { font-size: 0.54rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-family: var(--font-head); }
+.forge-stat-val { font-size: 0.95rem; font-weight: 800; color: #ffd700; font-family: var(--font-head); }
+
+.forge-materials { display: flex; flex-direction: column; gap: 5px; }
+.material-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+  border-radius: 6px; border: 1px solid color-mix(in srgb, var(--ore-color) 20%, transparent);
+  background: color-mix(in srgb, var(--ore-color) 6%, rgba(0,0,0,0.3));
+  backdrop-filter: blur(4px);
+}
+.mat-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ore-color); box-shadow: 0 0 5px var(--ore-color); flex-shrink: 0; }
+.mat-name { flex: 1; font-size: 0.68rem; font-weight: 600; color: var(--text-parchment); }
+.mat-tally { display: flex; align-items: baseline; gap: 2px; flex-shrink: 0; }
+.mat-have { font-family: var(--font-head); font-size: 0.78rem; font-weight: 700; color: #666; }
+.mat-have.ok { color: var(--ore-color); }
+.mat-sep { font-size: 0.6rem; color: var(--text-dim); }
+.mat-need { font-family: var(--font-head); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); }
+
+/* Stars track */
+.stars-track { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 440px; }
+.star-node {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 4px 8px; border-radius: 5px; border: 1px solid transparent; opacity: 0.35;
+}
+.star-node.current { opacity: 1; border-color: var(--border-gold); background: rgba(201,162,39,0.08); }
+.star-node-stars { font-size: 0.55rem; color: #ffd700; letter-spacing: 1px; min-height: 12px; }
+.star-node-rarity { font-size: 0.5rem; font-family: var(--font-head); text-transform: uppercase; letter-spacing: 1px; }
+.star-node.common    .star-node-rarity { color: #888; }
+.star-node.uncommon  .star-node-rarity { color: #4dff88; }
+.star-node.rare      .star-node-rarity { color: #4fa8ff; }
+.star-node.epic      .star-node-rarity { color: #b44fff; }
+.star-node.legendary .star-node-rarity { color: #ffd700; }
+.star-node.mythical  .star-node-rarity { color: #ff88ff; }
+
+/* Forge button */
+.forge-actions { display: flex; align-items: center; gap: 12px; }
+.forge-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 40px; border-radius: 8px;
+  border: 1px solid var(--border-brown);
+  background: linear-gradient(135deg, #2a1408 0%, #160a04 100%);
+  color: var(--text-dim);
+  font-family: var(--font-head); font-size: 0.9rem; font-weight: 800;
+  letter-spacing: 3px; text-transform: uppercase;
+  cursor: not-allowed; transition: all 0.2s;
+}
+.forge-btn.ready {
+  border-color: #8a5a18;
+  background: linear-gradient(135deg, #4a2808 0%, #2a1408 100%);
+  color: var(--gold); cursor: pointer;
+  box-shadow: 0 0 20px rgba(150,90,20,0.25);
+}
+.forge-btn.ready:hover {
+  background: linear-gradient(135deg, #6a3810 0%, #3a1c08 100%);
+  border-color: var(--gold);
+  box-shadow: 0 0 32px rgba(201,162,39,0.40), inset 0 1px 0 rgba(255,220,100,0.1);
+}
+.forge-btn-icon { font-size: 1rem; }
+.forge-hint { font-size: 0.62rem; color: #884444; font-style: italic; }
+
+/* Elven forge divider in left panel */
+.smelt-forge-divider {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 4px 4px; margin-top: 6px;
+}
+.sfd-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--elven-color); box-shadow: 0 0 6px var(--elven-color); flex-shrink: 0;
+}
+.sfd-name {
+  flex: 1; font-family: var(--font-head); font-size: 0.56rem; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--elven-color); font-weight: 700;
+}
+.sfd-lock {
+  font-size: 0.52rem; font-family: var(--font-head); color: #664466;
+  background: rgba(126,232,255,0.06); border: 1px solid rgba(126,232,255,0.12);
+  border-radius: 6px; padding: 1px 5px; letter-spacing: 0.5px;
+}
+.smelt-btn.elven { border-color: transparent; }
+.smelt-btn.elven.active {
+  background: color-mix(in srgb, #7ee8ff 10%, rgba(0,0,0,0.5));
+  border-color: rgba(126,232,255,0.35);
+}
+
+/* ── Smelt mode: forge image fills center ───────────────────────── */
+.smelt-forge-wrap {
+  flex: 1; position: relative; width: 100%; min-height: 520px;
+  border-radius: 0 0 12px 12px; overflow: hidden; flex-shrink: 0;
+  border: 1px solid rgba(255,200,100,0.18); border-top: none;
+  box-shadow: 0 12px 64px rgba(0,0,0,0.9);
+}
+.forge-busy-other { filter: saturate(0.2) brightness(0.45); transition: filter 0.4s; }
+.smelt-forge-img {
+  width: 100%; height: 100%; min-height: 520px;
+  object-fit: cover; object-position: center 25%;
+  display: block; filter: brightness(0.68) contrast(1.14) saturate(1.1);
+  transition: filter 0.5s ease;
+}
+.smelt-forge-wrap:hover .smelt-forge-img { filter: brightness(0.82) contrast(1.1) saturate(1.1); }
+.smelt-forge-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 90%, var(--forge-glow) 0%, transparent 58%);
+  pointer-events: none; z-index: 1;
+  animation: forge-glow-pulse 3s ease-in-out infinite;
+}
+@keyframes forge-glow-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%       { opacity: 1.0; }
+}
+
+/* Top banner — forge name, large and dramatic */
+.smelt-forge-top {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 22px 20px 42px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
+}
+.smelt-forge-name-badge {
+  font-family: var(--font-head); font-size: 1.3rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 6px; color: rgba(255,235,175,0.98);
+  text-shadow:
+    0 0 32px rgba(255,150,40,0.9),
+    0 0 64px rgba(255,100,20,0.5),
+    0 2px 12px rgba(0,0,0,0.98);
+}
+.smelt-forge-xp {
+  font-family: var(--font-head); font-size: 0.56rem; letter-spacing: 2px;
+  color: rgba(255,200,120,0.5); text-transform: uppercase;
+}
+
+/* Unified bottom overlay — conversion row + action controls */
+.smelt-bottom-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 70px 32px 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.7) 38%, transparent 100%);
+}
+
+/* Conversion info row */
+.smelt-conv-row {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  padding-bottom: 14px; margin-bottom: 2px;
+  border-bottom: 1px solid rgba(255,200,100,0.12);
+}
+.sco-side { display: flex; align-items: center; gap: 12px; }
+.sco-right { flex-direction: row-reverse; }
+.sco-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  background: var(--sco-color);
+  box-shadow: 0 0 10px var(--sco-color), 0 0 20px color-mix(in srgb, var(--sco-color) 40%, transparent);
+}
+.sco-info { display: flex; flex-direction: column; gap: 2px; }
+.sco-info-right { text-align: right; }
+.sco-name { font-size: 0.78rem; font-weight: 700; color: rgba(255,230,180,0.95); font-family: var(--font-head); letter-spacing: 0.5px; }
+.sco-stock { font-size: 0.6rem; color: rgba(180,150,100,0.7); text-transform: uppercase; letter-spacing: 1px; }
+.sco-none { color: #884444 !important; }
+.sco-middle { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
+.sco-cost-label { font-family: var(--font-head); font-size: 0.65rem; font-weight: 700; color: rgba(255,200,100,0.6); letter-spacing: 1px; }
+.sco-arrow { font-size: 1.4rem; color: rgba(255,200,100,0.35); line-height: 1; }
+.sco-yield { font-family: var(--font-head); font-size: 0.6rem; color: rgba(180,150,100,0.55); letter-spacing: 1px; }
+
+/* Idle: qty row + start */
+.smelt-qty-row { display: flex; align-items: center; gap: 4px; }
+.sqr-adj {
+  width: 34px; height: 34px; border-radius: 6px;
+  border: 1px solid var(--border-brown); background: rgba(255,255,255,0.03);
+  color: var(--text-muted); font-family: var(--font-head); font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; transition: all 0.12s;
+}
+.sqr-adj:not(:disabled):hover { background: rgba(255,255,255,0.07); border-color: #8a5a18; color: var(--gold); }
+.sqr-adj:disabled { opacity: 0.28; cursor: not-allowed; }
+.sqr-qty {
+  min-width: 48px; text-align: center;
+  font-family: var(--font-head); font-size: 1.1rem; font-weight: 800; color: var(--gold);
+}
+.sqr-max {
+  padding: 0 10px; height: 34px; border-radius: 6px;
+  border: 1px solid var(--border-brown); background: rgba(255,255,255,0.03);
+  color: var(--text-dim); font-family: var(--font-head); font-size: 0.6rem; font-weight: 700;
+  cursor: pointer; letter-spacing: 1px; text-transform: uppercase;
+  transition: all 0.12s; margin-left: 4px;
+}
+.sqr-max:not(:disabled):hover { background: rgba(255,255,255,0.06); border-color: #8a5a18; color: var(--gold); }
+.sqr-max:disabled { opacity: 0.28; cursor: not-allowed; }
+.smelt-eta-hint { font-size: 0.6rem; color: var(--text-dim); font-style: italic; }
+.smelt-start-btn {
+  padding: 12px 44px; border-radius: 8px;
+  border: 1px solid var(--border-brown);
+  background: linear-gradient(135deg, #2a1408 0%, #160a04 100%);
+  color: var(--text-dim);
+  font-family: var(--font-head); font-size: 0.9rem; font-weight: 800;
+  letter-spacing: 3px; text-transform: uppercase;
+  cursor: not-allowed; transition: all 0.2s;
+}
+.smelt-start-btn.ready {
+  border-color: #8a5a18;
+  background: linear-gradient(135deg, #4a2808 0%, #2a1408 100%);
+  color: var(--gold); cursor: pointer;
+  box-shadow: 0 0 20px rgba(150,90,20,0.25);
+}
+.smelt-start-btn.ready:hover {
+  background: linear-gradient(135deg, #6a3810 0%, #3a1c08 100%);
+  border-color: var(--gold);
+  box-shadow: 0 0 32px rgba(201,162,39,0.40), inset 0 1px 0 rgba(255,220,100,0.1);
+}
+
+/* Running: progress */
+.smelt-running { gap: 8px; }
+.smelt-run-header { display: flex; align-items: baseline; gap: 10px; width: 100%; max-width: 360px; }
+.srh-title { flex: 1; font-family: var(--font-head); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+.srh-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--gold); }
+.srp-wrap { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 360px; }
+.srp-track { flex: 1; height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; border: 1px solid var(--border-brown); }
+.srp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 4px; transition: width 0.8s linear; }
+.srp-eta { font-family: var(--font-head); font-size: 0.68rem; color: rgba(255,200,100,0.7); flex-shrink: 0; min-width: 50px; text-align: right; }
+.smelt-cancel-btn {
+  padding: 8px 24px; border-radius: 6px;
+  border: 1px solid #5a2020; background: rgba(90,20,20,0.25);
+  color: #c08080; font-family: var(--font-head); font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+}
+.smelt-cancel-btn:hover { border-color: #cc4444; background: rgba(120,20,20,0.4); color: #ffaaaa; }
+
+/* Blocked: other job running */
+.smelt-blocked { gap: 8px; opacity: 0.75; }
+.smelt-busy-msg {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: 8px;
+  border: 1px solid rgba(255,120,40,0.15); background: rgba(30,12,4,0.6);
+}
+.sbm-icon { font-size: 1.1rem; color: #cd7f32; opacity: 0.7; }
+.sbm-text { display: flex; flex-direction: column; gap: 1px; }
+.sbm-title { font-family: var(--font-head); font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.sbm-sub   { font-size: 0.62rem; color: var(--text-dim); }
+.smelt-busy-bar { width: 100%; max-width: 300px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.sbb-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 2px; transition: width 0.8s linear; }
+
+/* Result flash */
+.forge-result {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-radius: 8px;
+  border: 1px solid #2a5a2a; background: rgba(10,30,10,0.75);
+  backdrop-filter: blur(4px);
+}
+.forge-result-icon { font-size: 1.1rem; color: #4dff88; }
+.forge-result-text { display: flex; flex-direction: column; gap: 1px; }
+.forge-result-name { font-size: 0.8rem; font-weight: 700; color: #aaffcc; font-family: var(--font-head); }
+.forge-result-sub  { font-size: 0.6rem; color: #3a6a3a; }
+.forge-pop-enter-active { animation: forge-flash 0.3s ease-out; }
+.forge-pop-leave-active { transition: opacity 0.4s ease; }
+.forge-pop-leave-to     { opacity: 0; }
+@keyframes forge-flash {
+  from { transform: translateY(6px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+
+/* Smithing XP bar */
+.smith-xp-bar { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+.smith-xp-header { display: flex; align-items: baseline; gap: 8px; }
+.smith-xp-label { font-family: var(--font-head); font-size: 0.62rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; flex: 1; }
+.smith-xp-level { font-family: var(--font-head); font-size: 0.75rem; font-weight: 800; color: #ffd700; }
+.smith-xp-count { font-size: 0.6rem; color: var(--text-muted); }
+.smith-xp-track { height: 6px; background: #1a0e04; border-radius: 3px; overflow: hidden; border: 1px solid var(--border-brown); }
+.smith-xp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 3px; transition: width 0.6s ease; }
+
+/* ── Right: Stockpile ────────────────────────────────────────────── */
+.ore-panel {
+  width: 190px; flex-shrink: 0; position: relative; z-index: 2;
+  border-left: 1px solid var(--border-gold);
+  background: rgba(4,2,1,0.88); backdrop-filter: blur(8px);
+  padding: 16px 14px; display: flex; flex-direction: column; overflow-y: auto;
+}
+.panel-sublabel {
+  font-family: var(--font-head); font-size: 0.52rem; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px;
+}
+.bar-sublabel { margin-top: 14px; }
+.ore-list { display: flex; flex-direction: column; gap: 5px; }
+.ore-row {
+  display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+  border-radius: 6px; border: 1px solid transparent; transition: background 0.12s;
+}
+.ore-row:not(.empty) {
+  border-color: color-mix(in srgb, var(--ore-color) 20%, transparent);
+  background: color-mix(in srgb, var(--ore-color) 5%, transparent);
+}
+.ore-row.empty { opacity: 0.28; filter: saturate(0.2); }
+.ore-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ore-color); flex-shrink: 0; }
+.ore-row:not(.empty) .ore-dot { box-shadow: 0 0 6px var(--ore-color); }
+.ore-name { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ore-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--ore-color); min-width: 20px; text-align: right; }
+.ore-row.empty .ore-count { color: var(--text-dim); }
+
+/* ── Artisan: left panel ─────────────────────────────────────────── */
+.artisan-item-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.artisan-empty { font-size: 0.6rem; color: var(--text-dim); font-style: italic; padding: 6px 8px; opacity: 0.6; }
+.artisan-item-btn {
+  width: 100%; display: flex; align-items: center; gap: 7px;
+  padding: 7px 8px; background: transparent; border: 1px solid transparent;
+  border-radius: 6px; cursor: pointer; text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+}
+.artisan-item-btn:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: color-mix(in srgb, var(--tier-color) 25%, transparent);
+}
+.artisan-item-btn.active {
+  background: color-mix(in srgb, var(--tier-color) 12%, rgba(0,0,0,0.4));
+  border-color: color-mix(in srgb, var(--tier-color) 50%, transparent);
+}
+.aib-icon { font-size: 0.8rem; flex-shrink: 0; width: 16px; text-align: center; }
+.aib-name { flex: 1; font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aib-stars { font-size: 0.55rem; color: var(--tier-color); letter-spacing: 1px; }
+.aib-maxed { font-size: 0.65rem; color: #ff88ff; }
+
+/* ── Artisan: center content ─────────────────────────────────────── */
+.artisan-content { display: contents; }
+
+/* Item showcase */
+.artisan-showcase {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 36px 48px 28px;
+  background: color-mix(in srgb, var(--tier-color) 6%, rgba(0,0,0,0.45));
+  border: 1px solid color-mix(in srgb, var(--tier-color) 22%, transparent);
+  border-radius: 16px; width: 100%; max-width: 380px;
+  overflow: hidden;
+}
+.artisan-glow {
+  position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--tier-color) 14%, transparent) 0%, transparent 65%);
+  animation: artisan-breathe 3s ease-in-out infinite;
+}
+@keyframes artisan-breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.artisan-frame-wrap {
+  position: relative; width: 140px; height: 140px;
+  z-index: 1;
+  animation: item-float 2.8s ease-in-out infinite;
+}
+.artisan-gear-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter:
+    drop-shadow(0 0 10px var(--tier-color))
+    brightness(1.0);
+}
+.artisan-frame-img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; pointer-events: none; z-index: 2;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7)) drop-shadow(0 0 8px color-mix(in srgb, var(--tier-color) 25%, transparent));
+}
+.artisan-slot-icon {
+  font-size: 4rem; line-height: 1; position: relative; z-index: 1;
+  filter: drop-shadow(0 0 18px var(--tier-color)) drop-shadow(0 4px 12px rgba(0,0,0,0.8));
+  animation: item-float 2.8s ease-in-out infinite;
+}
+.artisan-stars-row { display: flex; gap: 8px; position: relative; z-index: 1; }
+.artisan-star-pip {
+  font-size: 1.1rem; color: rgba(255,255,255,0.12); transition: color 0.3s, text-shadow 0.3s;
+}
+.artisan-star-pip.filled {
+  color: var(--tier-color);
+  text-shadow: 0 0 10px var(--tier-color), 0 0 20px color-mix(in srgb, var(--tier-color) 40%, transparent);
+}
+.artisan-rarity-name {
+  font-family: var(--font-head); font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2.5px; position: relative; z-index: 1;
+}
+.artisan-rarity-name.common    { color: #888; }
+.artisan-rarity-name.uncommon  { color: #4dff88; }
+.artisan-rarity-name.rare      { color: #4fa8ff; }
+.artisan-rarity-name.epic      { color: #b44fff; text-shadow: 0 0 10px rgba(180,79,255,0.5); }
+.artisan-rarity-name.legendary { color: #ffd700; text-shadow: 0 0 14px rgba(255,215,0,0.55); }
+.artisan-rarity-name.mythical  { color: #ff88ff; text-shadow: 0 0 14px rgba(255,136,255,0.55); }
+.artisan-showcase.maxed { border-color: rgba(255,136,255,0.35); }
+
+/* Stats comparison */
+.artisan-stats-panel { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 8px; }
+.artisan-stat-rows   { display: flex; flex-direction: column; gap: 5px; }
+.artisan-stat-row    { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.04); }
+.asr-label   { flex: 1; font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+.asr-current { font-family: var(--font-head); font-size: 0.85rem; font-weight: 700; color: var(--text-parchment); }
+.asr-arrow   { font-size: 0.75rem; color: rgba(255,200,100,0.35); }
+.asr-next    { font-family: var(--font-head); font-size: 0.85rem; font-weight: 700; color: var(--tier-color); text-shadow: 0 0 8px color-mix(in srgb, var(--tier-color) 40%, transparent); }
+
+/* Upgrade panel */
+.artisan-upgrade-panel { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+.artisan-btn-row { display: flex; align-items: center; gap: 14px; }
+.artisan-upgrade-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 32px; border-radius: 8px;
+  border: 1px solid var(--border-brown);
+  background: linear-gradient(135deg, #2a1408 0%, #160a04 100%);
+  color: var(--text-dim);
+  font-family: var(--font-head); font-size: 0.82rem; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; cursor: not-allowed; transition: all 0.2s;
+}
+.artisan-upgrade-btn.ready {
+  border-color: color-mix(in srgb, var(--tier-color) 55%, transparent);
+  background: color-mix(in srgb, var(--tier-color) 14%, rgba(5,3,1,0.9));
+  color: var(--tier-color); cursor: pointer;
+  box-shadow: 0 0 22px color-mix(in srgb, var(--tier-color) 18%, transparent);
+}
+.artisan-upgrade-btn.ready:hover {
+  background: color-mix(in srgb, var(--tier-color) 22%, rgba(5,3,1,0.85));
+  border-color: var(--tier-color);
+  box-shadow: 0 0 36px color-mix(in srgb, var(--tier-color) 32%, transparent);
+}
+.artisan-next-rarity { font-family: var(--font-head); font-size: 0.6rem; color: rgba(255,200,100,0.6); letter-spacing: 1.5px; }
+
+/* Maxed */
+.artisan-maxed-msg {
+  display: flex; align-items: center; gap: 14px; padding: 16px 24px;
+  border-radius: 12px; border: 1px solid rgba(255,136,255,0.22);
+  background: rgba(255,136,255,0.05);
+}
+.artisan-maxed-icon  { font-size: 1.6rem; color: #ff88ff; }
+.artisan-maxed-title { font-family: var(--font-head); font-size: 0.72rem; font-weight: 700; color: #ff88ff; text-transform: uppercase; letter-spacing: 2px; }
+.artisan-maxed-sub   { font-size: 0.6rem; color: var(--text-muted); margin-top: 3px; }
+</style>

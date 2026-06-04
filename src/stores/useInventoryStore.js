@@ -1,0 +1,229 @@
+import { defineStore } from 'pinia'
+import { ref, computed, watch } from 'vue'
+import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, createItemInstance, computeLineStats } from '../game/Gear.js'
+import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
+import { HERO_TEMPLATES } from '../game/data/heroes.js'
+import { usePlayerHeroStore } from './usePlayerHeroStore.js'
+import { computeCP } from '../game/cp.js'
+
+const STARTER_IDS = []
+
+const PLAYER_KEYS = ['IRON_BLADE', 'EMBER_SAGE', 'LIRIEN', 'SHADOW_FANG']
+
+const EMPTY_LOADOUT = () => ({
+  [GearSlot.MAIN_HAND]: null,
+  [GearSlot.OFF_HAND]:  null,
+  [GearSlot.HEAD]:      null,
+  [GearSlot.CHEST]:     null,
+  [GearSlot.LEGS]:      null,
+  [GearSlot.BOOTS]:     null,
+  [GearSlot.GLOVES]:    null,
+})
+
+const SOUL_KEY = 'raid-soul-vessels'
+function loadSoulData() {
+  try { return JSON.parse(localStorage.getItem(SOUL_KEY) ?? 'null') } catch { return null }
+}
+
+export const useInventoryStore = defineStore('inventory', () => {
+  const _soul = loadSoulData()
+  const soulVessels        = ref(_soul?.count ?? 0)
+  const progressiveHeroKeys = ref(_soul?.progressiveKeys ?? [])
+
+  watch([soulVessels, progressiveHeroKeys], () => {
+    localStorage.setItem(SOUL_KEY, JSON.stringify({
+      count:          soulVessels.value,
+      progressiveKeys: progressiveHeroKeys.value,
+    }))
+  }, { deep: true })
+
+  function awardSoulVessel() {
+    soulVessels.value++
+  }
+
+  function useSoulVessel(heroKey) {
+    if (soulVessels.value <= 0) return false
+    if (progressiveHeroKeys.value.includes(heroKey)) return false
+    soulVessels.value--
+    progressiveHeroKeys.value = [...progressiveHeroKeys.value, heroKey]
+    return true
+  }
+
+  function isProgressive(heroKey) {
+    return progressiveHeroKeys.value.includes(heroKey)
+  }
+
+  // Each owned item is a unique instance object (not a raw ID string)
+  const ownedInstances = ref(
+    STARTER_IDS.map(id => createItemInstance(GEAR_BY_ID[id])).filter(Boolean)
+  )
+
+  // { [heroKey]: { main_hand: instanceId|null, ... } }
+  const loadouts = ref({})
+
+  const focusedHeroKey = ref(null)
+  const pendingSlot    = ref(null)
+
+  const gearDisabled = ref({})
+
+  // Alias for components that iterate owned items
+  const ownedItems = computed(() => ownedInstances.value)
+
+  function instanceById(instanceId) {
+    return ownedInstances.value.find(i => i.instanceId === instanceId) ?? null
+  }
+
+  function getLoadout(heroKey) {
+    if (!loadouts.value[heroKey]) loadouts.value[heroKey] = EMPTY_LOADOUT()
+    return loadouts.value[heroKey]
+  }
+
+  function getEquippedItem(heroKey, slot) {
+    const iid = getLoadout(heroKey)[slot]
+    return iid ? instanceById(iid) : null
+  }
+
+  function equip(heroKey, slot, instanceId) {
+    const item = instanceById(instanceId)
+    if (!item) return
+    if (!item.fitsSlot(slot)) return
+    // Remove from any other slot first (one item, one hero)
+    for (const key of Object.keys(loadouts.value)) {
+      for (const s of Object.values(GearSlot)) {
+        if (loadouts.value[key][s] === instanceId) loadouts.value[key][s] = null
+      }
+    }
+    getLoadout(heroKey)[slot] = instanceId
+  }
+
+  function getEquippedBy(instanceId) {
+    for (const [key, loadout] of Object.entries(loadouts.value)) {
+      for (const [slot, iid] of Object.entries(loadout)) {
+        if (iid === instanceId) return { heroKey: key, slot }
+      }
+    }
+    return null
+  }
+
+  function equipTargets(instanceId) {
+    const item = instanceById(instanceId)
+    if (!item) return []
+    const results = []
+    for (const key of PLAYER_KEYS) {
+      for (const slot of Object.values(GearSlot)) {
+        if (item.fitsSlot(slot)) results.push({ heroKey: key, slot })
+      }
+    }
+    return results
+  }
+
+  function unequip(heroKey, slot) {
+    getLoadout(heroKey)[slot] = null
+  }
+
+  function isDualWielding(heroKey) {
+    const loadout = getLoadout(heroKey)
+    const mh = loadout[GearSlot.MAIN_HAND] ? instanceById(loadout[GearSlot.MAIN_HAND]) : null
+    const oh = loadout[GearSlot.OFF_HAND]  ? instanceById(loadout[GearSlot.OFF_HAND])  : null
+    return mh?.gearType === GearType.WEAPON && oh?.gearType === GearType.WEAPON
+  }
+
+  function hasShield(heroKey) {
+    const oh = getLoadout(heroKey)[GearSlot.OFF_HAND]
+    return oh ? instanceById(oh)?.gearType === GearType.SHIELD : false
+  }
+
+  function isGearEnabled(heroKey)  { return gearDisabled.value[heroKey] !== true }
+  function toggleGearEnabled(heroKey) {
+    gearDisabled.value[heroKey] = isGearEnabled(heroKey) ? true : false
+  }
+
+  const EMPTY_STATS = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0 }
+
+  function computeGearStats(heroKey) {
+    if (!isGearEnabled(heroKey)) return { stats: { ...EMPTY_STATS }, damageReduction: 0 }
+
+    const totals = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0 }
+    const loadout = getLoadout(heroKey)
+
+    for (const slot of Object.values(GearSlot)) {
+      const item = loadout[slot] ? instanceById(loadout[slot]) : null
+      if (!item) continue
+
+      // Base stats
+      for (const [key, val] of Object.entries(item.stats)) {
+        if (key in totals) totals[key] += val
+      }
+
+      // Line bonuses
+      if (item.lines?.length) {
+        const lineStats = computeLineStats(item.lines)
+        for (const [key, val] of Object.entries(lineStats)) {
+          if (key in totals) totals[key] += val
+        }
+      }
+    }
+
+    if (isDualWielding(heroKey)) {
+      totals.atkPct   += DUAL_WIELD_BONUS.atkPct
+      totals.critRate += DUAL_WIELD_BONUS.critRate
+    }
+
+    const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
+    return { stats: totals, damageReduction: dr }
+  }
+
+  function availableForSlot(heroKey, slot) {
+    const allowedTypes = SLOT_ALLOWED_TYPES[slot] ?? []
+    return ownedInstances.value.filter(item => allowedTypes.includes(item.gearType))
+  }
+
+  function openPicker(heroKey, slot) {
+    focusedHeroKey.value = heroKey
+    pendingSlot.value = slot
+  }
+  function closePicker() { pendingSlot.value = null }
+
+  function addToInventory(gearId) {
+    const base = GEAR_BY_ID[gearId]
+    if (base) ownedInstances.value.push(createItemInstance(base))
+  }
+
+  function addInstance(instance) {
+    if (instance) ownedInstances.value.push(instance)
+  }
+
+  function heroCP(heroKey) {
+    let hero
+    if (heroKey === 'PLAYER_CHARACTER') {
+      const ph = usePlayerHeroStore()
+      if (!ph.isCreated) return 0
+      hero = ph.buildHeroInstance()
+    } else {
+      const template = HERO_TEMPLATES[heroKey]
+      if (!template) return 0
+      hero = template()
+    }
+    const { stats, damageReduction } = computeGearStats(heroKey)
+    hero.applyGear(stats, damageReduction)
+    return computeCP(hero)
+  }
+
+  return {
+    ownedInstances, ownedItems, loadouts,
+    focusedHeroKey, pendingSlot,
+    GEAR_CATALOG,
+    GearSlot, GearType,
+    instanceById,
+    getLoadout, getEquippedItem,
+    equip, unequip,
+    isDualWielding, hasShield,
+    isGearEnabled, toggleGearEnabled,
+    computeGearStats, availableForSlot,
+    getEquippedBy, equipTargets,
+    openPicker, closePicker,
+    addToInventory, addInstance, heroCP,
+    soulVessels, progressiveHeroKeys,
+    awardSoulVessel, useSoulVessel, isProgressive,
+  }
+})

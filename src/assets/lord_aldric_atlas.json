@@ -1,0 +1,973 @@
+{
+  "frames": {
+    "lord_aldric_idle_01.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_02.png": {
+      "frame": {
+        "x": 115,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_03.png": {
+      "frame": {
+        "x": 230,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_04.png": {
+      "frame": {
+        "x": 345,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_05.png": {
+      "frame": {
+        "x": 460,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_06.png": {
+      "frame": {
+        "x": 575,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_07.png": {
+      "frame": {
+        "x": 690,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_idle_08.png": {
+      "frame": {
+        "x": 805,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill1_01.png": {
+      "frame": {
+        "x": 0,
+        "y": 205,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill1_02.png": {
+      "frame": {
+        "x": 115,
+        "y": 205,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill1_03.png": {
+      "frame": {
+        "x": 230,
+        "y": 205,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill1_04.png": {
+      "frame": {
+        "x": 345,
+        "y": 205,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill1_05.png": {
+      "frame": {
+        "x": 460,
+        "y": 205,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill1_06.png": {
+      "frame": {
+        "x": 575,
+        "y": 205,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_01.png": {
+      "frame": {
+        "x": 0,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_02.png": {
+      "frame": {
+        "x": 115,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_03.png": {
+      "frame": {
+        "x": 230,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_04.png": {
+      "frame": {
+        "x": 345,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_05.png": {
+      "frame": {
+        "x": 460,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_06.png": {
+      "frame": {
+        "x": 575,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_07.png": {
+      "frame": {
+        "x": 690,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_08.png": {
+      "frame": {
+        "x": 805,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_09.png": {
+      "frame": {
+        "x": 920,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill2_10.png": {
+      "frame": {
+        "x": 1035,
+        "y": 410,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill3_01.png": {
+      "frame": {
+        "x": 0,
+        "y": 615,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill3_02.png": {
+      "frame": {
+        "x": 115,
+        "y": 615,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill3_03.png": {
+      "frame": {
+        "x": 230,
+        "y": 615,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill3_04.png": {
+      "frame": {
+        "x": 345,
+        "y": 615,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill3_05.png": {
+      "frame": {
+        "x": 460,
+        "y": 615,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_skill3_06.png": {
+      "frame": {
+        "x": 575,
+        "y": 615,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_01.png": {
+      "frame": {
+        "x": 0,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_02.png": {
+      "frame": {
+        "x": 115,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_03.png": {
+      "frame": {
+        "x": 230,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_04.png": {
+      "frame": {
+        "x": 345,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_05.png": {
+      "frame": {
+        "x": 460,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_06.png": {
+      "frame": {
+        "x": 575,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_07.png": {
+      "frame": {
+        "x": 690,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    },
+    "lord_aldric_death_08.png": {
+      "frame": {
+        "x": 805,
+        "y": 820,
+        "w": 115,
+        "h": 205
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 115,
+        "h": 205
+      },
+      "sourceSize": {
+        "w": 115,
+        "h": 205
+      },
+      "anchor": {
+        "x": 0.5,
+        "y": 1.0
+      }
+    }
+  },
+  "animations": {
+    "lord_aldric_idle": [
+      "lord_aldric_idle_01.png",
+      "lord_aldric_idle_02.png",
+      "lord_aldric_idle_03.png",
+      "lord_aldric_idle_04.png",
+      "lord_aldric_idle_05.png",
+      "lord_aldric_idle_06.png",
+      "lord_aldric_idle_07.png",
+      "lord_aldric_idle_08.png"
+    ],
+    "lord_aldric_skill1": [
+      "lord_aldric_skill1_01.png",
+      "lord_aldric_skill1_02.png",
+      "lord_aldric_skill1_03.png",
+      "lord_aldric_skill1_04.png",
+      "lord_aldric_skill1_05.png",
+      "lord_aldric_skill1_06.png"
+    ],
+    "lord_aldric_skill2": [
+      "lord_aldric_skill2_01.png",
+      "lord_aldric_skill2_02.png",
+      "lord_aldric_skill2_03.png",
+      "lord_aldric_skill2_04.png",
+      "lord_aldric_skill2_05.png",
+      "lord_aldric_skill2_06.png",
+      "lord_aldric_skill2_07.png",
+      "lord_aldric_skill2_08.png",
+      "lord_aldric_skill2_09.png",
+      "lord_aldric_skill2_10.png"
+    ],
+    "lord_aldric_skill3": [
+      "lord_aldric_skill3_01.png",
+      "lord_aldric_skill3_02.png",
+      "lord_aldric_skill3_03.png",
+      "lord_aldric_skill3_04.png",
+      "lord_aldric_skill3_05.png",
+      "lord_aldric_skill3_06.png"
+    ],
+    "lord_aldric_death": [
+      "lord_aldric_death_01.png",
+      "lord_aldric_death_02.png",
+      "lord_aldric_death_03.png",
+      "lord_aldric_death_04.png",
+      "lord_aldric_death_05.png",
+      "lord_aldric_death_06.png",
+      "lord_aldric_death_07.png",
+      "lord_aldric_death_08.png"
+    ]
+  },
+  "meta": {
+    "image": "sprite_lord_aldric.png",
+    "size": {
+      "w": 1536,
+      "h": 1024
+    }
+  }
+}
