@@ -21,13 +21,31 @@
     <!-- Rank distribution -->
     <div class="rank-table">
       <div class="rank-title">Expected Calibre</div>
-      <div class="rank-row" v-for="(weight, rarity) in visibleRates" :key="rarity">
-        <span class="rank-label" :class="rarity.toLowerCase()">{{ rarity }}</span>
+      <div
+        class="rank-row"
+        v-for="(weight, rarity) in visibleRates"
+        :key="rarity"
+        :class="{ locked: isLocked(rarity) }"
+      >
+        <span class="rank-label" :class="rarity.toLowerCase()">
+          <span class="lock-icon" v-if="isLocked(rarity)">⌁</span>
+          {{ rarity }}
+        </span>
         <div class="rank-bar-wrap">
-          <div class="rank-bar" :class="rarity.toLowerCase()" :style="{ width: (weight * 100) + '%' }" />
+          <div class="rank-bar" :class="[rarity.toLowerCase(), { 'rank-bar--locked': isLocked(rarity) }]" :style="{ width: (weight * 100) + '%' }" />
         </div>
         <span class="rank-pct">{{ (weight * 100).toFixed(0) }}%</span>
       </div>
+    </div>
+
+    <!-- Recruitment ceiling -->
+    <div class="ceiling-badge">
+      <span class="ceiling-icon">⚑</span>
+      <span class="ceiling-text">
+        Ceiling: <strong :class="recruitmentCeiling.toLowerCase()">{{ recruitmentCeiling }}</strong>
+        <span class="ceiling-next" v-if="nextUnlock"> · {{ nextUnlock.rarity }} unlocks at level {{ nextUnlock.level }}</span>
+        <span class="ceiling-next" v-else> · Max tier reached</span>
+      </span>
     </div>
 
     <!-- Fate's promise (pity) -->
@@ -73,16 +91,24 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  portal:      { type: Object,  required: true },
-  canAfford:   { type: Boolean, default: false },
-  canAfford10: { type: Boolean, default: false },
-  pulling:     { type: Boolean, default: false },
-  progress:    { type: Object,  required: true },
+  portal:             { type: Object,  required: true },
+  canAfford:          { type: Boolean, default: false },
+  canAfford10:        { type: Boolean, default: false },
+  pulling:            { type: Boolean, default: false },
+  progress:           { type: Object,  required: true },
+  recruitmentCeiling: { type: String,  default: 'Rare' },
+  nextUnlock:         { type: Object,  default: null },
 })
 defineEmits(['summon', 'summon10'])
 
+const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical']
+function rarityIndex(r) { return RARITY_ORDER.indexOf(r) }
+
+const ceilingIdx = computed(() => rarityIndex(props.recruitmentCeiling))
+function isLocked(rarity) { return rarityIndex(rarity) > ceilingIdx.value }
+
 const visibleRates = computed(() =>
-  Object.fromEntries(Object.entries(props.portal.rates).filter(([r]) => r !== 'Mythical' && r !== 'Ancient'))
+  Object.fromEntries(Object.entries(props.portal.rates).filter(([r]) => r !== 'Ancient'))
 )
 
 const cost10Label = computed(() => {
@@ -206,6 +232,31 @@ const cost10Label = computed(() => {
 .rank-bar.uncommon  { background: #4dff88; }
 .rank-bar.common    { background: #555; }
 .rank-pct { font-size: 0.62rem; color: var(--text-muted); text-align: right; }
+
+.rank-row.locked { opacity: 0.28; }
+.lock-icon { font-size: 0.60rem; margin-right: 3px; opacity: 0.6; }
+.rank-bar--locked { background: #333 !important; }
+
+/* Ceiling badge */
+.ceiling-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  background: rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 4px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+.ceiling-icon { opacity: 0.4; font-size: 0.72rem; }
+.ceiling-text strong.rare      { color: #4fa8ff; }
+.ceiling-text strong.epic      { color: #b44fff; }
+.ceiling-text strong.legendary { color: #ffd700; }
+.ceiling-text strong.mythical  { color: #ff88cc; }
+.ceiling-text strong.uncommon  { color: #4dff88; }
+.ceiling-text strong.common    { color: #888; }
+.ceiling-next { color: #444; }
 
 /* Fate's promise */
 .fate-row    { display: flex; align-items: center; gap: 10px; }

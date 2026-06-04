@@ -4,6 +4,7 @@ import { HERO_TEMPLATES, RECRUIT_POOL } from '../game/data/heroes.js'
 import { Rarity } from '../game/Hero.js'
 import { useCurrencyStore } from './useCurrencyStore.js'
 import { useCollectionStore } from './useCollectionStore.js'
+import { usePlayerHeroStore } from './usePlayerHeroStore.js'
 
 // ── Portal definitions ──────────────────────────────────────────────────────
 export const PORTALS = {
@@ -14,14 +15,12 @@ export const PORTALS = {
     cost: { gold: 2000, diamonds: 0 },
     pool: RECRUIT_POOL,
     rates: {
-      [Rarity.COMMON]:    0.40,
-      [Rarity.UNCOMMON]:  0.30,
-      [Rarity.RARE]:      0.20,
-      [Rarity.EPIC]:      0.08,
-      [Rarity.LEGENDARY]: 0.015,
+      [Rarity.RARE]:      0.880,
+      [Rarity.EPIC]:      0.090,
+      [Rarity.LEGENDARY]: 0.025,
       [Rarity.MYTHICAL]:  0.005,
     },
-    pity: { threshold: Rarity.RARE, every: 10 },
+    pity: { threshold: Rarity.EPIC, every: 40 },
   },
 }
 
@@ -31,26 +30,26 @@ const RARITY_ORDER = [
 
 function rarityIndex(r) { return RARITY_ORDER.indexOf(r) }
 
-function rollRarity(rates, guaranteeMinRarity = null) {
-  if (guaranteeMinRarity) {
-    // Filter to only rarities >= minimum and re-normalise
-    const minIdx = rarityIndex(guaranteeMinRarity)
-    const eligible = Object.entries(rates).filter(([r]) => rarityIndex(r) >= minIdx)
-    const total = eligible.reduce((s, [, w]) => s + w, 0)
-    let roll = Math.random() * total
-    for (const [rarity, weight] of eligible) {
-      roll -= weight
-      if (roll <= 0) return rarity
-    }
-    return eligible[eligible.length - 1][0]
+function rollRarity(rates, guaranteeMinRarity = null, maxRarity = null) {
+  let eligible = Object.entries(rates)
+
+  if (maxRarity !== null) {
+    const maxIdx = rarityIndex(maxRarity)
+    eligible = eligible.filter(([r]) => rarityIndex(r) <= maxIdx)
   }
 
-  let roll = Math.random()
-  for (const [rarity, weight] of Object.entries(rates)) {
+  if (guaranteeMinRarity) {
+    const minIdx = rarityIndex(guaranteeMinRarity)
+    eligible = eligible.filter(([r]) => rarityIndex(r) >= minIdx)
+  }
+
+  const total = eligible.reduce((s, [, w]) => s + w, 0)
+  let roll = Math.random() * total
+  for (const [rarity, weight] of eligible) {
     roll -= weight
     if (roll <= 0) return rarity
   }
-  return Object.keys(rates).at(-1)
+  return eligible[eligible.length - 1][0]
 }
 
 function pickFromPool(pool, rarity) {
@@ -60,8 +59,9 @@ function pickFromPool(pool, rarity) {
 }
 
 export const useSummonStore = defineStore('summon', () => {
-  const currency   = useCurrencyStore()
-  const collection = useCollectionStore()
+  const currency    = useCurrencyStore()
+  const collection  = useCollectionStore()
+  const playerHero  = usePlayerHeroStore()
 
   // Per-portal pity counters (pulls since last pity-threshold hit)
   const pityCounters = ref({ normal: 0 })
@@ -101,8 +101,8 @@ export const useSummonStore = defineStore('summon', () => {
       const triggerPity = counter >= portal.pity.every - 1
       const guarantee   = triggerPity ? portal.pity.threshold : null
 
-      // Roll rarity then hero
-      const rarity = rollRarity(portal.rates, guarantee)
+      // Roll rarity then hero — capped at player's current recruitment ceiling
+      const rarity = rollRarity(portal.rates, guarantee, playerHero.rarity)
       const entry  = pickFromPool(portal.pool, rarity)
 
       if (!entry) return
@@ -158,7 +158,7 @@ export const useSummonStore = defineStore('summon', () => {
         const triggerPity = counter >= portal.pity.every - 1
         const guarantee   = triggerPity ? portal.pity.threshold : null
 
-        const rarity = rollRarity(portal.rates, guarantee)
+        const rarity = rollRarity(portal.rates, guarantee, playerHero.rarity)
         const entry  = pickFromPool(portal.pool, rarity)
         if (!entry) continue
 

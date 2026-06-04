@@ -25,6 +25,8 @@
         :canAfford10="store.canAfford10(portal.id)"
         :pulling="store.pulling"
         :progress="store.pityProgress(portal.id)"
+        :recruitmentCeiling="playerHero.rarity"
+        :nextUnlock="playerHero.nextUnlock"
         @summon="store.summon($event)"
         @summon10="store.summon10($event)"
       />
@@ -131,6 +133,7 @@ import { useSummonStore } from '../stores/useSummonStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useEnergyStore } from '../stores/useEnergyStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import SummonPortal from './SummonPortal.vue'
 import HeroAvatar from './HeroAvatar.vue'
 
@@ -138,6 +141,7 @@ const store = useSummonStore()
 const currency = useCurrencyStore()
 const energyDev = useEnergyStore()
 const collection = useCollectionStore()
+const playerHero = usePlayerHeroStore()
 
 function confirmReset() {
   if (!confirm('Reset all progress and start over? This cannot be undone.')) return

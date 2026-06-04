@@ -83,6 +83,12 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
   const rarity     = computed(() => rarityFromLevel(level.value))
   const xpProgress = computed(() => xp.value % XP_PER_LEVEL)
 
+  // Next rarity tier and the level required to unlock it (null when at max)
+  const nextUnlock = computed(() => {
+    const entry = [...RARITY_THRESHOLDS].reverse().find(([lv]) => lv > level.value)
+    return entry ? { level: entry[0], rarity: entry[1] } : null
+  })
+
   function persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       heroName:    heroName.value,
@@ -158,6 +164,6 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
     XP_PER_LEVEL,
     PLAYER_FACTIONS: [Faction.ALDRIC, Faction.VALDRIS, Faction.CAELWYN, Faction.MORDAINE],
     HOUSE_META,
-    create, addXp, xpForDifficulty, buildHeroInstance, levelMultiplier,
+    create, addXp, xpForDifficulty, buildHeroInstance, levelMultiplier, nextUnlock,
   }
 })
