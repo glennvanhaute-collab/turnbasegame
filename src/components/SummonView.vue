@@ -7,7 +7,7 @@
       <p class="summon-sub">You are a hedge knight without a banner. Post your call — champions seek gold, glory, and a worthy cause.</p>
     </div>
 
-    <div class="debug-bar">
+    <div class="debug-bar" v-if="$isDev">
       <span class="debug-label">Dev</span>
       <button class="debug-btn" @click="currency.addGold(10000)">+10k 🪙</button>
       <button class="debug-btn" @click="currency.addDiamonds(10000)">+10k 💎</button>

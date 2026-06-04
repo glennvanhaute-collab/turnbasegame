@@ -3,6 +3,50 @@
 
     <div class="map-bg" :style="{ backgroundImage: `url(${trainingBg})` }" />
 
+    <!-- Tab bar -->
+    <div class="tg-tab-bar">
+      <div class="tg-tabs">
+        <button class="tg-tab tg-tab--active">⚔ Training Grounds</button>
+      </div>
+      <div class="tg-team">
+        <span v-if="collection.team.length === 0" class="no-team">No team set — visit Collection</span>
+        <template v-else>
+          <div class="team-hero-chip" v-for="key in collection.team" :key="key">
+            <span class="chip-dot" :class="teamEntry(key)?.hero.rarity.toLowerCase()">●</span>
+            <span class="chip-name">{{ teamEntry(key)?.hero.name }}</span>
+          </div>
+          <span class="team-cp">⚡ {{ formatCP(teamCP) }}</span>
+        </template>
+        <span class="team-gold-rate">🪙 +{{ camp.goldPerMin }}/min</span>
+        <span class="idle-strip-indicator" v-if="idle.isRunning">
+          <span class="idle-running-dot" />⏱ {{ idle.session.encounterName }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Left sidebar — encounter list -->
+    <div class="tg-sidebar">
+      <div class="sidebar-section" v-for="diff in difficultyGroups" :key="diff.label">
+        <div class="sidebar-diff-label" :class="diff.cls">{{ diff.label }}</div>
+        <button
+          v-for="enc in diff.encounters"
+          :key="enc.id"
+          class="sidebar-enc-btn"
+          :class="[enc.difficulty.toLowerCase(), {
+            active:    selectedIndex === enc.index,
+            completed: campaign.isCompleted(enc.id),
+            idling:    idle.session?.encounterId === enc.id,
+          }]"
+          @click="selectZone(enc.index)"
+        >
+          <span class="sidebar-enc-indicator" :class="enc.difficulty.toLowerCase()" />
+          <span class="sidebar-enc-name">{{ enc.name }}</span>
+          <span class="sidebar-enc-check" v-if="campaign.isCompleted(enc.id)">✓</span>
+          <span class="sidebar-idle-dot" v-if="idle.session?.encounterId === enc.id" />
+        </button>
+      </div>
+    </div>
+
     <!-- Zone hotspots on the map -->
     <button
       v-for="(enc, i) in ENCOUNTERS"
@@ -15,7 +59,6 @@
       <span class="zone-pulse" />
       <span class="zone-dot">
         <span v-if="campaign.isCompleted(enc.id)">✓</span>
-        <span v-else>{{ i + 1 }}</span>
       </span>
       <span class="zone-label">{{ enc.name }}</span>
     </button>
@@ -138,22 +181,6 @@
     <div class="hotspot-enc" title="Encampment">
       <span class="enc-ping" />
       <span class="enc-label">⚑ Encampment</span>
-    </div>
-
-    <!-- Team strip — floating top bar -->
-    <div class="team-strip">
-      <span v-if="collection.team.length === 0" class="no-team">No team set — click Encampment</span>
-      <template v-else>
-        <div class="team-hero-chip" v-for="key in collection.team" :key="key">
-          <span class="chip-dot" :class="teamEntry(key)?.hero.rarity.toLowerCase()">●</span>
-          <span class="chip-name">{{ teamEntry(key)?.hero.name }}</span>
-        </div>
-      </template>
-      <span class="team-cp" v-if="collection.team.length > 0">⚡ {{ formatCP(teamCP) }}</span>
-      <span class="team-gold-rate">🪙 +{{ camp.goldPerMin }}/min</span>
-      <span class="idle-strip-indicator" v-if="idle.isRunning">
-        <span class="idle-running-dot" />⏱ {{ idle.session.encounterName }}
-      </span>
     </div>
 
     <!-- Encampment right panel (AoE2 style) -->
@@ -287,6 +314,18 @@ function cpVerdict(enc) {
 
 const selectedIndex = ref(null)
 const selectedEnc   = computed(() => selectedIndex.value !== null ? ENCOUNTERS[selectedIndex.value] : null)
+
+const DIFFICULTY_ORDER = ['Easy', 'Normal', 'Hard', 'Brutal', 'Nightmare']
+const difficultyGroups = computed(() => {
+  const groups = {}
+  ENCOUNTERS.forEach((enc, i) => {
+    if (!groups[enc.difficulty]) groups[enc.difficulty] = []
+    groups[enc.difficulty].push({ ...enc, index: i })
+  })
+  return DIFFICULTY_ORDER
+    .filter(d => groups[d])
+    .map(d => ({ label: d, cls: d.toLowerCase(), encounters: groups[d] }))
+})
 
 function selectZone(i) {
   selectedIndex.value = selectedIndex.value === i ? null : i
@@ -565,26 +604,52 @@ function formatElapsed(ms) {
 
 .battle-hint-text { font-size: 0.65rem; color: #555; font-style: italic; text-align: center; margin-top: -8px; }
 
-/* ── Team strip — floating top bar ── */
-.team-strip {
+/* ── Tab bar ── */
+.tg-tab-bar {
   position: absolute;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  z-index: 15;
+  display: flex;
+  align-items: stretch;
+  background: rgba(8, 4, 2, 0.92);
+  border-bottom: 1px solid var(--border-brown);
+  backdrop-filter: blur(10px);
+  padding: 0 12px 0 0;
+}
+.tg-tabs {
+  display: flex;
+  align-items: stretch;
+}
+.tg-tab {
+  height: 100%;
+  padding: 0 22px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-head);
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tg-tab--active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+.tg-team {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(10, 5, 2, 0.82);
-  border: 1px solid var(--border-brown);
-  border-radius: 20px;
-  padding: 6px 16px;
-  backdrop-filter: blur(8px);
-  max-width: 90vw;
-  flex-wrap: wrap;
-  justify-content: center;
+  padding: 0 4px;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
-.no-team    { font-size: 0.7rem; color: #444; font-style: italic; }
+.no-team    { font-size: 0.68rem; color: #444; font-style: italic; }
 .team-hero-chip { display: flex; align-items: center; gap: 4px; }
 .chip-dot { font-size: 0.55rem; }
 .chip-dot.mythical  { color: #ff6ef7; }
@@ -593,8 +658,94 @@ function formatElapsed(ms) {
 .chip-dot.rare      { color: #4fa8ff; }
 .chip-dot.uncommon  { color: #4dff88; }
 .chip-dot.common    { color: #666; }
-.chip-name { font-size: 0.7rem; color: #ccc; font-weight: 600; }
-.team-cp   { font-size: 0.72rem; color: #aa8833; font-weight: 700; margin-left: 4px; padding-left: 10px; border-left: 1px solid #2a1a0a; }
+.chip-name { font-size: 0.68rem; color: #ccc; font-weight: 600; }
+.team-cp   { font-size: 0.70rem; color: #aa8833; font-weight: 700; padding-left: 10px; border-left: 1px solid #2a1a0a; }
+
+/* ── Left sidebar ── */
+.tg-sidebar {
+  position: absolute;
+  top: 48px; left: 0; bottom: 0;
+  width: 220px;
+  z-index: 10;
+  background: rgba(8, 4, 2, 0.90);
+  border-right: 1px solid var(--border-brown);
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 14px 8px 20px;
+}
+.sidebar-section { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-diff-label {
+  font-family: var(--font-head);
+  font-size: 0.54rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  padding: 0 8px 7px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 4px;
+}
+.sidebar-diff-label.easy      { color: #4dff88; }
+.sidebar-diff-label.normal    { color: #4fa8ff; }
+.sidebar-diff-label.hard      { color: #ff9944; }
+.sidebar-diff-label.brutal    { color: #ff5544; }
+.sidebar-diff-label.nightmare { color: #cc44ff; }
+
+.sidebar-enc-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+.sidebar-enc-btn:hover { background: rgba(255,255,255,0.04); border-color: var(--border-brown); }
+.sidebar-enc-btn.active {
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), transparent);
+  border-color: transparent;
+  border-left: 2px solid currentColor;
+  padding-left: 9px;
+}
+.sidebar-enc-btn.easy      { color: #4dff88; }
+.sidebar-enc-btn.normal    { color: #4fa8ff; }
+.sidebar-enc-btn.hard      { color: #ff9944; }
+.sidebar-enc-btn.brutal    { color: #ff5544; }
+.sidebar-enc-btn.nightmare { color: #cc44ff; }
+
+.sidebar-enc-indicator {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sidebar-enc-indicator.easy      { background: #4dff88; box-shadow: 0 0 5px #4dff88; }
+.sidebar-enc-indicator.normal    { background: #4fa8ff; box-shadow: 0 0 5px #4fa8ff; }
+.sidebar-enc-indicator.hard      { background: #ff9944; box-shadow: 0 0 5px #ff9944; }
+.sidebar-enc-indicator.brutal    { background: #ff5544; box-shadow: 0 0 5px #ff5544; }
+.sidebar-enc-indicator.nightmare { background: #cc44ff; box-shadow: 0 0 5px #cc44ff; }
+
+.sidebar-enc-name {
+  font-size: 0.70rem;
+  color: var(--text-parchment);
+  font-weight: 600;
+  flex: 1;
+  line-height: 1.3;
+}
+.sidebar-enc-btn.completed .sidebar-enc-name { opacity: 0.55; }
+.sidebar-enc-check { font-size: 0.62rem; color: #4dff88; font-weight: 800; }
+.sidebar-idle-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #44ffaa;
+  animation: idle-pulse 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
 
 /* Transitions */
 .fade-up-enter-active { transition: opacity 0.2s, transform 0.2s; }
@@ -845,7 +996,6 @@ function formatElapsed(ms) {
   border-color: var(--gold);
 }
 
-/* Gold rate in team strip */
 .team-gold-rate {
   font-size: 0.65rem;
   color: var(--gold);
@@ -858,7 +1008,7 @@ function formatElapsed(ms) {
 /* Encampment right panel */
 .enc-panel {
   position: absolute;
-  top: 0;
+  top: 48px;
   right: 0;
   bottom: 0;
   width: 260px;
@@ -922,7 +1072,7 @@ function formatElapsed(ms) {
   background: rgba(201,162,39,0.08);
   border-color: var(--border-gold);
 }
-.enc-option.locked { opacity: 0.45; cursor: not-allowed; }
+.enc-option.locked { opacity: 0.58; cursor: not-allowed; }
 
 .enc-opt-icon {
   font-size: 1.2rem;

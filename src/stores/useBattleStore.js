@@ -27,8 +27,11 @@ export const useBattleStore = defineStore('battle', () => {
 
   const lastAction = ref(null)
 
-  const autoplay = ref(false)
-  const battleSpeed = ref(1)   // 1 | 2 | 3
+  const _savedSpeed = Number(localStorage.getItem('battle-speed')) || 1
+  const _savedAuto  = localStorage.getItem('battle-auto') === 'true'
+
+  const autoplay    = ref(_savedAuto)
+  const battleSpeed = ref([1, 2, 3].includes(_savedSpeed) ? _savedSpeed : 1)
 
   const SPEED_DELAY = { 1: 800, 2: 400, 3: 120 }
   const turnDelay = computed(() => SPEED_DELAY[battleSpeed.value] ?? 800)
@@ -37,8 +40,14 @@ export const useBattleStore = defineStore('battle', () => {
   const canAct = computed(() => state.value === BattleState.SELECTING_SKILL)
   const isOver = computed(() => state.value === BattleState.VICTORY || state.value === BattleState.DEFEAT)
 
-  function toggleAutoplay() { autoplay.value = !autoplay.value }
-  function setSpeed(s) { battleSpeed.value = s }
+  function toggleAutoplay() {
+    autoplay.value = !autoplay.value
+    localStorage.setItem('battle-auto', autoplay.value)
+  }
+  function setSpeed(s) {
+    battleSpeed.value = s
+    localStorage.setItem('battle-speed', s)
+  }
 
   // If autoplay is switched on while already waiting for player input, kick things off
   watch(autoplay, (on) => {

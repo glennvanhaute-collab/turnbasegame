@@ -37,7 +37,7 @@
     <DiamondShopModal v-if="showShop"  @close="showShop = false" />
     <CodexModal        v-if="showCodex" @close="showCodex = false" />
     <AdvisorMessage />
-    <DevMenu />
+    <DevMenu v-if="$isDev" />
 
     <!-- Floating Codex button — hidden on home, available everywhere else -->
     <button class="codex-fab" v-if="view !== 'campaign'" @click="showCodex = true" title="Open Codex">
@@ -69,6 +69,21 @@
               <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
             </button>
             <BlacksmithView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Battle modal — floats over whatever view is active -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap battle-modal-wrap" v-if="showBattle">
+          <div class="coll-modal-backdrop" @click="showBattle = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showBattle = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <BattleArena @back="showBattle = false" />
           </div>
         </div>
       </Transition>
@@ -114,16 +129,12 @@
         <ExplorationView v-else />
       </div>
       <RealmView v-else-if="view === 'realm'" />
-      <BattleArena
-        v-else-if="view === 'battle'"
-        @back="view = 'campaign'"
-      />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useMusic } from './composables/useMusic.js'
 import { useSmeltingTick } from './composables/useSmeltingTick.js'
 import logoNav from './assets/ui/logo-nav.png'
@@ -166,11 +177,11 @@ import { buildDungeonEncounter } from './game/data/dungeons.js'
 const view       = ref('campaign')
 const gearTab    = ref('inventory')
 const expTab     = ref('dungeons')
-const inBattle   = ref(false)
 const showShop   = ref(false)
 const showCodex  = ref(false)
 const showCollection  = ref(false)
 const showBlacksmith  = ref(false)
+const showBattle      = ref(false)
 
 const { muted, toggleMute, onViewChange, startOnFirstInteraction } = useMusic()
 useSmeltingTick()
@@ -181,7 +192,21 @@ watch(view, (v) => {
   onViewChange(v)
 })
 
-onMounted(() => startOnFirstInteraction())
+function handleEscape(e) {
+  if (e.key !== 'Escape') return
+  if (showBattle.value)     { showBattle.value = false; return }
+  if (showCollection.value) { showCollection.value = false; return }
+  if (showBlacksmith.value) { showBlacksmith.value = false; return }
+  if (showCodex.value)      { showCodex.value = false; return }
+  if (showShop.value)       { showShop.value = false; return }
+}
+
+onMounted(() => {
+  startOnFirstInteraction()
+  window.addEventListener('keydown', handleEscape)
+})
+
+onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 
 const advisorStore = useAdvisorStore()
 const battleStore = useBattleStore()
@@ -206,16 +231,14 @@ function onHeroCreated() {
 function startBattle(encounterIndex) {
   const team = collectionStore.buildTeam()
   battleStore.initBattle(encounterIndex, team)
-  inBattle.value = true
-  view.value = 'battle'
+  showBattle.value = true
 }
 
 function startDungeonBattle(dungeon) {
   const team = collectionStore.buildTeam()
   const encounter = buildDungeonEncounter(dungeon)
   battleStore.initBattle(encounter, team)
-  inBattle.value = true
-  view.value = 'battle'
+  showBattle.value = true
 }
 </script>
 

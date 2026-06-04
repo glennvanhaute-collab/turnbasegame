@@ -164,6 +164,14 @@
             <!-- Footer actions -->
             <div class="info-footer">
               <button
+                v-if="$isDev && hero.isPlayerCharacter"
+                class="btn btn-dev-xp"
+                @click="playerHero.addXp(1000)"
+                title="Dev: add 1000 XP"
+              >
+                +1k XP
+              </button>
+              <button
                 v-if="!collectionStore.isInTeam(entry.key)"
                 class="btn btn-add"
                 :disabled="collectionStore.isFull"
@@ -536,8 +544,9 @@ const stats = computed(() => {
 }
 .btn { padding: 8px 18px; border-radius: 6px; border: none; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: opacity 0.15s; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-add    { background: #e94560; color: #fff; }
-.btn-remove { background: #3e1c0c; color: #ccc; }
+.btn-add     { background: #e94560; color: #fff; }
+.btn-remove  { background: #3e1c0c; color: #ccc; }
+.btn-dev-xp  { background: #1a2a0a; color: #88cc44; border: 1px dashed #3a5a10; font-size: 0.7rem; margin-right: auto; }
 .btn:not(:disabled):hover { opacity: 0.85; }
 
 /* Mobile: stack vertically */
