@@ -82,7 +82,7 @@
       <Transition name="coll-modal">
         <div class="coll-modal-wrap battle-modal-wrap" v-if="showBattle">
           <div class="coll-modal-backdrop" @click="showBattle = false" />
-          <div class="coll-modal-panel">
+          <div class="coll-modal-panel battle-modal-panel">
             <button class="coll-modal-close" @click="showBattle = false" title="Close">
               <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
             </button>
@@ -283,6 +283,7 @@ function startDungeonBattle(dungeon) {
   const team = collectionStore.buildTeam()
   const encounter = buildDungeonEncounter(dungeon)
   battleStore.initBattle(encounter, team)
+  if (!battleStore.autoplay) battleStore.toggleAutoplay()
   showBattle.value = true
 }
 </script>
@@ -501,6 +502,11 @@ body {
   border: 1px solid var(--border-gold);
   border-radius: 12px;
   box-shadow: 0 8px 48px rgba(0,0,0,0.85), 0 0 0 1px rgba(201,162,39,0.08);
+}
+.battle-modal-panel {
+  background:
+    linear-gradient(rgba(0,0,0,0.82), rgba(0,0,0,0.82)),
+    url('./assets/backgrounds/battle.png') center / cover no-repeat;
 }
 .coll-modal-close {
   position: absolute;

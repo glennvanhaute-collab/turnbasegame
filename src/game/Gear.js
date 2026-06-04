@@ -120,7 +120,6 @@ export function createItemInstance(baseItem) {
 // Adds a line to a Legendary item instance. Promotes to Mythical at 6 lines.
 // line: { type, label, bonus: {stat: value, ...}, source, earnedAt }
 export function addLineToItem(instance, line) {
-  if (instance.rarity !== 'Legendary' && instance.rarity !== 'Mythical') return
   instance.lines.push(line)
   if (instance.rarity === 'Legendary' && instance.lines.length >= 6) {
     instance.rarity = 'Mythical'

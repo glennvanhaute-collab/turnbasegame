@@ -5,8 +5,8 @@ import { SKILLS } from '../game/data/skills.js'
 
 const STORAGE_KEY = 'player-hero'
 
-// XP needed per level (flat — easy to tune)
-const XP_PER_LEVEL = 300
+// XP needed to gain the next level — scales so high levels take real effort
+function xpForLevel(lv) { return 200 + lv * 100 }
 
 // XP awarded per battle difficulty
 const XP_BY_DIFFICULTY = {
@@ -81,7 +81,8 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
 
   const isCreated  = computed(() => heroName.value !== null)
   const rarity     = computed(() => rarityFromLevel(level.value))
-  const xpProgress = computed(() => xp.value % XP_PER_LEVEL)
+  const xpProgress   = computed(() => xp.value)
+  const xpToNextLevel = computed(() => xpForLevel(level.value))
 
   // Next rarity tier and the level required to unlock it (null when at max)
   const nextUnlock = computed(() => {
@@ -113,8 +114,8 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
     if (!isCreated.value) return 0
     let gained = 0
     xp.value += amount
-    while (xp.value >= XP_PER_LEVEL) {
-      xp.value -= XP_PER_LEVEL
+    while (xp.value >= xpForLevel(level.value)) {
+      xp.value -= xpForLevel(level.value)
       level.value++
       gained++
     }
@@ -152,7 +153,7 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
     // Extra fields for UI display (not part of Hero class formally)
     hero.level             = lv
     hero.xp                = xp.value
-    hero.xpToNext          = XP_PER_LEVEL
+    hero.xpToNext          = xpForLevel(lv)
     hero.isPlayerCharacter = true
     hero.avatarId          = heroAvatar.value
     return hero
@@ -160,8 +161,8 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
 
   return {
     heroName, heroFaction, heroAvatar, level, xp,
-    isCreated, rarity, xpProgress,
-    XP_PER_LEVEL,
+    isCreated, rarity, xpProgress, xpToNextLevel,
+    XP_PER_LEVEL: xpToNextLevel,
     PLAYER_FACTIONS: [Faction.ALDRIC, Faction.VALDRIS, Faction.CAELWYN, Faction.MORDAINE],
     HOUSE_META,
     create, addXp, xpForDifficulty, buildHeroInstance, levelMultiplier, nextUnlock,

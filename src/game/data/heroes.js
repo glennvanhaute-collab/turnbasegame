@@ -79,7 +79,7 @@ export const HERO_TEMPLATES = {
   // ── Normal Portal — House Aldric (Force · Warriors) ─────────────
   ALDRIC_KNIGHT: () => new Hero({
     id: 'aldric_knight', name: 'Aldric Knight',
-    faction: Faction.ALDRIC, rarity: Rarity.COMMON, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
     baseHp: 10500, baseAtk: 700, baseDef: 520, baseSpd: 80,
     skills: [SKILLS.HEAVY_STRIKE],
     artisanSkills: [ARTISAN.blacksmithing],
@@ -88,7 +88,7 @@ export const HERO_TEMPLATES = {
 
   ALDRIC_FOOTMAN: () => new Hero({
     id: 'aldric_footman', name: 'Aldric Footman',
-    faction: Faction.ALDRIC, rarity: Rarity.COMMON, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
     baseHp: 9500, baseAtk: 750, baseDef: 480, baseSpd: 78,
     skills: [SKILLS.SLASH],
     artisanSkills: [ARTISAN.blacksmithing],
@@ -97,7 +97,7 @@ export const HERO_TEMPLATES = {
 
   ALDRIC_CONSCRIPT: () => new Hero({
     id: 'aldric_conscript', name: 'Aldric Conscript',
-    faction: Faction.ALDRIC, rarity: Rarity.COMMON, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
     baseHp: 9000, baseAtk: 680, baseDef: 460, baseSpd: 76,
     skills: [SKILLS.SLASH],
     artisanSkills: [ARTISAN.leatherworking],
@@ -106,7 +106,7 @@ export const HERO_TEMPLATES = {
 
   ALDRIC_MARKSMAN: () => new Hero({
     id: 'aldric_marksman', name: 'Aldric Marksman',
-    faction: Faction.ALDRIC, rarity: Rarity.UNCOMMON, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
     baseHp: 11000, baseAtk: 1050, baseDef: 500, baseSpd: 90,
     critRate: 0.18, critDmg: 0.55,
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
@@ -116,7 +116,7 @@ export const HERO_TEMPLATES = {
 
   ALDRIC_SQUIRE: () => new Hero({
     id: 'aldric_squire', name: 'Aldric Squire',
-    faction: Faction.ALDRIC, rarity: Rarity.UNCOMMON, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
     baseHp: 13000, baseAtk: 950, baseDef: 650, baseSpd: 84,
     critRate: 0.12, critDmg: 0.50,
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.SLASH],
@@ -126,7 +126,7 @@ export const HERO_TEMPLATES = {
 
   ALDRIC_PALADIN: () => new Hero({
     id: 'aldric_paladin', name: 'Aldric Paladin',
-    faction: Faction.ALDRIC, rarity: Rarity.UNCOMMON, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
     baseHp: 13500, baseAtk: 900, baseDef: 700, baseSpd: 82,
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.MEND],
     artisanSkills: [ARTISAN.apothecary],
@@ -186,7 +186,7 @@ export const HERO_TEMPLATES = {
   // ── Normal Portal — House Valdris (Magic · Arcane) ───────────────
   VALDRIS_SCRIBE: () => new Hero({
     id: 'valdris_scribe', name: 'Valdris Scribe',
-    faction: Faction.VALDRIS, rarity: Rarity.COMMON, affinity: Affinity.MAGIC,
+    faction: Faction.VALDRIS, rarity: Rarity.RARE, affinity: Affinity.MAGIC,
     baseHp: 8000, baseAtk: 750, baseDef: 380, baseSpd: 88,
     skills: [SKILLS.SLASH],
     artisanSkills: [ARTISAN.tailoring],
@@ -195,7 +195,7 @@ export const HERO_TEMPLATES = {
 
   VALDRIS_APPRENTICE: () => new Hero({
     id: 'valdris_apprentice', name: 'Valdris Apprentice',
-    faction: Faction.VALDRIS, rarity: Rarity.COMMON, affinity: Affinity.MAGIC,
+    faction: Faction.VALDRIS, rarity: Rarity.RARE, affinity: Affinity.MAGIC,
     baseHp: 8500, baseAtk: 820, baseDef: 400, baseSpd: 82,
     skills: [SKILLS.SLASH],
     artisanSkills: [ARTISAN.tailoring],
@@ -204,7 +204,7 @@ export const HERO_TEMPLATES = {
 
   VALDRIS_MAGISTER: () => new Hero({
     id: 'valdris_magister', name: 'Valdris Magister',
-    faction: Faction.VALDRIS, rarity: Rarity.UNCOMMON, affinity: Affinity.MAGIC,
+    faction: Faction.VALDRIS, rarity: Rarity.RARE, affinity: Affinity.MAGIC,
     baseHp: 11000, baseAtk: 1200, baseDef: 450, baseSpd: 96,
     critRate: 0.18, critDmg: 0.55,
     skills: [SKILLS.FIREBALL, SKILLS.SLASH],
@@ -214,7 +214,7 @@ export const HERO_TEMPLATES = {
 
   VALDRIS_RUNEWARD: () => new Hero({
     id: 'valdris_runeward', name: 'Valdris Runeward',
-    faction: Faction.VALDRIS, rarity: Rarity.UNCOMMON, affinity: Affinity.MAGIC,
+    faction: Faction.VALDRIS, rarity: Rarity.RARE, affinity: Affinity.MAGIC,
     baseHp: 12500, baseAtk: 900, baseDef: 580, baseSpd: 90,
     skills: [SKILLS.ARCANE_SHIELD, SKILLS.SLASH],
     artisanSkills: [ARTISAN.apothecary],
@@ -233,7 +233,7 @@ export const HERO_TEMPLATES = {
 
   VALDRIS_ENCHANTER: () => new Hero({
     id: 'valdris_enchanter', name: 'Valdris Enchanter',
-    faction: Faction.VALDRIS, rarity: Rarity.UNCOMMON, affinity: Affinity.MAGIC,
+    faction: Faction.VALDRIS, rarity: Rarity.RARE, affinity: Affinity.MAGIC,
     baseHp: 10000, baseAtk: 980, baseDef: 430, baseSpd: 94,
     critRate: 0.12, critDmg: 0.50,
     skills: [SKILLS.FIREBALL, SKILLS.ARCANE_SHIELD],
@@ -284,7 +284,7 @@ export const HERO_TEMPLATES = {
   // ── Normal Portal — House Caelwyn (Spirit · Rangers & Healers) ──
   CAELWYN_SCOUT: () => new Hero({
     id: 'caelwyn_scout', name: 'Caelwyn Scout',
-    faction: Faction.CAELWYN, rarity: Rarity.COMMON, affinity: Affinity.SPIRIT,
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
     baseHp: 9000, baseAtk: 820, baseDef: 400, baseSpd: 112,
     critRate: 0.15, critDmg: 0.50,
     skills: [SKILLS.BACKSTAB],
@@ -294,7 +294,7 @@ export const HERO_TEMPLATES = {
 
   CAELWYN_TRACKER: () => new Hero({
     id: 'caelwyn_tracker', name: 'Caelwyn Tracker',
-    faction: Faction.CAELWYN, rarity: Rarity.COMMON, affinity: Affinity.SPIRIT,
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
     baseHp: 9500, baseAtk: 780, baseDef: 410, baseSpd: 106,
     skills: [SKILLS.SLASH],
     artisanSkills: [ARTISAN.herbalism],
@@ -303,7 +303,7 @@ export const HERO_TEMPLATES = {
 
   CAELWYN_RANGER: () => new Hero({
     id: 'caelwyn_ranger', name: 'Caelwyn Ranger',
-    faction: Faction.CAELWYN, rarity: Rarity.UNCOMMON, affinity: Affinity.SPIRIT,
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
     baseHp: 11500, baseAtk: 1100, baseDef: 520, baseSpd: 102,
     critRate: 0.25, critDmg: 0.55,
     skills: [SKILLS.BACKSTAB, SKILLS.SLASH],
@@ -313,7 +313,7 @@ export const HERO_TEMPLATES = {
 
   CAELWYN_HERBALIST: () => new Hero({
     id: 'caelwyn_herbalist', name: 'Caelwyn Herbalist',
-    faction: Faction.CAELWYN, rarity: Rarity.UNCOMMON, affinity: Affinity.SPIRIT,
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
     baseHp: 12000, baseAtk: 700, baseDef: 600, baseSpd: 105,
     skills: [SKILLS.MEND, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.herbalism],
@@ -322,7 +322,7 @@ export const HERO_TEMPLATES = {
 
   CAELWYN_DRUID: () => new Hero({
     id: 'caelwyn_druid', name: 'Caelwyn Druid',
-    faction: Faction.CAELWYN, rarity: Rarity.UNCOMMON, affinity: Affinity.SPIRIT,
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
     baseHp: 11000, baseAtk: 800, baseDef: 550, baseSpd: 98,
     skills: [SKILLS.MEND, SKILLS.MASS_HEAL],
     artisanSkills: [ARTISAN.herbalism],
@@ -372,7 +372,7 @@ export const HERO_TEMPLATES = {
   // ── Void Portal — House Mordaine (Void · Shadow) ─────────────────
   MORDAINE_SHADE: () => new Hero({
     id: 'mordaine_shade', name: 'Mordaine Shade',
-    faction: Faction.MORDAINE, rarity: Rarity.COMMON, affinity: Affinity.VOID,
+    faction: Faction.MORDAINE, rarity: Rarity.RARE, affinity: Affinity.VOID,
     baseHp: 8000, baseAtk: 900, baseDef: 370, baseSpd: 122,
     critRate: 0.15, critDmg: 0.50,
     skills: [SKILLS.BACKSTAB],
@@ -382,7 +382,7 @@ export const HERO_TEMPLATES = {
 
   MORDAINE_LURKER: () => new Hero({
     id: 'mordaine_lurker', name: 'Mordaine Lurker',
-    faction: Faction.MORDAINE, rarity: Rarity.COMMON, affinity: Affinity.VOID,
+    faction: Faction.MORDAINE, rarity: Rarity.RARE, affinity: Affinity.VOID,
     baseHp: 9000, baseAtk: 850, baseDef: 400, baseSpd: 115,
     skills: [SKILLS.SLASH],
     artisanSkills: [ARTISAN.leatherworking],
@@ -391,7 +391,7 @@ export const HERO_TEMPLATES = {
 
   MORDAINE_HEXBLADE: () => new Hero({
     id: 'mordaine_hexblade', name: 'Mordaine Hexblade',
-    faction: Faction.MORDAINE, rarity: Rarity.UNCOMMON, affinity: Affinity.VOID,
+    faction: Faction.MORDAINE, rarity: Rarity.RARE, affinity: Affinity.VOID,
     baseHp: 10500, baseAtk: 1050, baseDef: 490, baseSpd: 108,
     critRate: 0.18, critDmg: 0.52,
     skills: [SKILLS.SLASH, SKILLS.DARK_WAVE],
@@ -401,7 +401,7 @@ export const HERO_TEMPLATES = {
 
   MORDAINE_INVOKER: () => new Hero({
     id: 'mordaine_invoker', name: 'Mordaine Invoker',
-    faction: Faction.MORDAINE, rarity: Rarity.UNCOMMON, affinity: Affinity.VOID,
+    faction: Faction.MORDAINE, rarity: Rarity.RARE, affinity: Affinity.VOID,
     baseHp: 10000, baseAtk: 1100, baseDef: 450, baseSpd: 104,
     skills: [SKILLS.DARK_WAVE, SKILLS.SLASH],
     artisanSkills: [ARTISAN.apothecary],
@@ -594,28 +594,27 @@ export const HEDGE_KNIGHT_CHOICES = ['HEDGE_BLADE', 'HEDGE_MAGE', 'HEDGE_WARDEN'
 
 // Single recruit pool — all champions, void-touched and otherwise
 export const RECRUIT_POOL = [
-  // ── Common ───────────────────────────────────────────────────────
-  { key: 'ALDRIC_CONSCRIPT',    rarity: 'Common' },
-  { key: 'ALDRIC_KNIGHT',       rarity: 'Common' },
-  { key: 'ALDRIC_FOOTMAN',      rarity: 'Common' },
-  { key: 'VALDRIS_SCRIBE',      rarity: 'Common' },
-  { key: 'VALDRIS_APPRENTICE',  rarity: 'Common' },
-  { key: 'CAELWYN_SCOUT',       rarity: 'Common' },
-  { key: 'CAELWYN_TRACKER',     rarity: 'Common' },
-  { key: 'MORDAINE_SHADE',      rarity: 'Common' },
-  { key: 'MORDAINE_LURKER',     rarity: 'Common' },
-  // ── Uncommon ─────────────────────────────────────────────────────
-  { key: 'ALDRIC_PALADIN',      rarity: 'Uncommon' },
-  { key: 'ALDRIC_MARKSMAN',     rarity: 'Uncommon' },
-  { key: 'ALDRIC_SQUIRE',       rarity: 'Uncommon' },
-  { key: 'VALDRIS_ENCHANTER',   rarity: 'Uncommon' },
-  { key: 'VALDRIS_MAGISTER',    rarity: 'Uncommon' },
-  { key: 'VALDRIS_RUNEWARD',    rarity: 'Uncommon' },
-  { key: 'CAELWYN_RANGER',      rarity: 'Uncommon' },
-  { key: 'CAELWYN_HERBALIST',   rarity: 'Uncommon' },
-  { key: 'CAELWYN_DRUID',       rarity: 'Uncommon' },
-  { key: 'MORDAINE_HEXBLADE',   rarity: 'Uncommon' },
-  { key: 'MORDAINE_INVOKER',    rarity: 'Uncommon' },
+  // ── Rare (base tier) ─────────────────────────────────────────────
+  { key: 'ALDRIC_CONSCRIPT',    rarity: 'Rare' },
+  { key: 'ALDRIC_KNIGHT',       rarity: 'Rare' },
+  { key: 'ALDRIC_FOOTMAN',      rarity: 'Rare' },
+  { key: 'VALDRIS_SCRIBE',      rarity: 'Rare' },
+  { key: 'VALDRIS_APPRENTICE',  rarity: 'Rare' },
+  { key: 'CAELWYN_SCOUT',       rarity: 'Rare' },
+  { key: 'CAELWYN_TRACKER',     rarity: 'Rare' },
+  { key: 'MORDAINE_SHADE',      rarity: 'Rare' },
+  { key: 'MORDAINE_LURKER',     rarity: 'Rare' },
+  { key: 'ALDRIC_PALADIN',      rarity: 'Rare' },
+  { key: 'ALDRIC_MARKSMAN',     rarity: 'Rare' },
+  { key: 'ALDRIC_SQUIRE',       rarity: 'Rare' },
+  { key: 'VALDRIS_ENCHANTER',   rarity: 'Rare' },
+  { key: 'VALDRIS_MAGISTER',    rarity: 'Rare' },
+  { key: 'VALDRIS_RUNEWARD',    rarity: 'Rare' },
+  { key: 'CAELWYN_RANGER',      rarity: 'Rare' },
+  { key: 'CAELWYN_HERBALIST',   rarity: 'Rare' },
+  { key: 'CAELWYN_DRUID',       rarity: 'Rare' },
+  { key: 'MORDAINE_HEXBLADE',   rarity: 'Rare' },
+  { key: 'MORDAINE_INVOKER',    rarity: 'Rare' },
   // ── Rare ─────────────────────────────────────────────────────────
   { key: 'DURWALD',             rarity: 'Rare' },
   { key: 'SIR_HADVAR',          rarity: 'Rare' },
