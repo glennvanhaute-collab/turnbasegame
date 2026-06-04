@@ -220,11 +220,14 @@ const energyStore = useEnergyStore()
 const inventoryStore = useInventoryStore()
 const forgeStore = useForgeStore()
 
+const isGameKey = (key) =>
+  key.startsWith('raid-') || key.startsWith('player-') || key.startsWith('battle-')
+
 function exportProgression() {
   const data = {}
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    data[key] = localStorage.getItem(key)
+    if (isGameKey(key)) data[key] = localStorage.getItem(key)
   }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url  = URL.createObjectURL(blob)
@@ -242,9 +245,13 @@ function importProgression(e) {
   reader.onload = (ev) => {
     try {
       const data = JSON.parse(ev.target.result)
-      localStorage.clear()
+      // Only wipe and restore game keys — leave unrelated localStorage untouched
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i)
+        if (isGameKey(key)) localStorage.removeItem(key)
+      }
       for (const [key, value] of Object.entries(data)) {
-        localStorage.setItem(key, value)
+        if (isGameKey(key)) localStorage.setItem(key, value)
       }
       location.reload()
     } catch {
