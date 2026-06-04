@@ -30,6 +30,9 @@
             {{ currencyStore.diamonds.toLocaleString() }}
           </span>
           <button class="icon-btn" @click="toggleMute" :title="muted ? 'Unmute' : 'Mute'">{{ muted ? '🔇' : '🔊' }}</button>
+          <button class="icon-btn" @click="exportProgression" title="Export save file">⬇</button>
+          <button class="icon-btn" @click="$refs.importInput.click()" title="Import save file">⬆</button>
+          <input ref="importInput" type="file" accept=".json" style="display:none" @change="importProgression" />
         </div>
       </div>
     </header>
@@ -216,6 +219,41 @@ const currencyStore = useCurrencyStore()
 const energyStore = useEnergyStore()
 const inventoryStore = useInventoryStore()
 const forgeStore = useForgeStore()
+
+function exportProgression() {
+  const data = {}
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    data[key] = localStorage.getItem(key)
+  }
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = `westrun-save.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function importProgression(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result)
+      localStorage.clear()
+      for (const [key, value] of Object.entries(data)) {
+        localStorage.setItem(key, value)
+      }
+      location.reload()
+    } catch {
+      alert('Invalid save file — could not import.')
+    }
+  }
+  reader.readAsText(file)
+  e.target.value = ''
+}
 
 function onHeroCreated() {
   view.value = 'collection'
