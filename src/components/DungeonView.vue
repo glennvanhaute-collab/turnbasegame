@@ -63,7 +63,7 @@
         <div class="modal-title">
           {{ pendingNode?.nodeType === 'forge' ? '🔨 Ancient Forge' : '✨ Blessed Area' }}
         </div>
-        <div class="modal-sub">Choose a Legendary item to receive a stat line.</div>
+        <div class="modal-sub">Choose an item to receive a permanent stat line.</div>
 
         <div v-if="equippedLegendaries.length" class="legend-list">
           <button
@@ -80,7 +80,7 @@
         </div>
 
         <div v-else class="no-legends">
-          No Legendary items are currently equipped on your team.
+          No items equipped on your team — equip gear first.
         </div>
 
         <button class="modal-cancel" @click="dungeonStore.closeNode()">Cancel</button>
@@ -127,14 +127,14 @@ const pendingNode = computed(() =>
     : null
 )
 
-// All Legendary/Mythical items currently equipped across the team
+// All equipped items across the team — any rarity can receive a node line
 const equippedLegendaries = computed(() => {
   const results = []
   for (const heroKey of collection.team) {
     const heroEntry = collection.roster.find(r => r.key === heroKey)
     for (const slot of Object.values(GearSlot)) {
       const item = inventory.getEquippedItem(heroKey, slot)
-      if (item && (item.rarity === 'Legendary' || item.rarity === 'Mythical')) {
+      if (item) {
         results.push({
           instance: item,
           heroName: heroEntry?.hero?.name ?? heroKey,
