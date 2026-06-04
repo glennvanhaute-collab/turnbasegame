@@ -76,7 +76,7 @@
 <script setup>
 import { computed } from 'vue'
 import { POOL_LABELS, LOOT_LABEL, NODE_FORGE_STATS, NODE_BLESSED_STATS } from '../game/data/dungeons.js'
-const _dungeonBgs = import.meta.glob('../assets/dungeon_*.png', { eager: true })
+const _dungeonBgs = import.meta.glob('../assets/dungeons/dungeon_*.png', { eager: true })
 
 const TIER_BG_PREFIX = { medium: 'intermediate' }
 function tierbgs(tier) {

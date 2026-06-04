@@ -234,8 +234,8 @@ import { ENCOUNTERS } from '../game/data/heroes.js'
 import { useCampStore } from '../stores/useCampStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { computeCP, formatCP } from '../game/cp.js'
-import trainingBg from '../assets/homepage_bg.png'
-import codexIcon  from '../assets/codex.png'
+import trainingBg from '../assets/backgrounds/homepage_bg.png'
+import codexIcon  from '../assets/ui/codex.png'
 
 const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-codex'])
 

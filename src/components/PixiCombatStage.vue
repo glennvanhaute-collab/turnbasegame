@@ -11,14 +11,14 @@ import { BattleState } from '../game/BattleEngine.js'
 
 // ── Portrait asset map (auto-discovered via portraits.js) ──────────
 import { PORTRAIT_MAP } from '../game/portraits.js'
-import borderAldricUrl   from '../assets/avatar_border_aldric.png'
-import borderValdrisUrl  from '../assets/avatar_border_valdris.png'
-import borderCaelwynUrl  from '../assets/avatar_border__caelwyn.png'
-import borderMordaineUrl from '../assets/avatar_border_mordaine.png'
-import borderAncientUrl  from '../assets/avatar_border__ancient.png'
-import borderDefaultUrl  from '../assets/avatar_border.png'
+import borderAldricUrl   from '../assets/ui/avatar_border_aldric.png'
+import borderValdrisUrl  from '../assets/ui/avatar_border_valdris.png'
+import borderCaelwynUrl  from '../assets/ui/avatar_border__caelwyn.png'
+import borderMordaineUrl from '../assets/ui/avatar_border_mordaine.png'
+import borderAncientUrl  from '../assets/ui/avatar_border__ancient.png'
+import borderDefaultUrl  from '../assets/ui/avatar_border.png'
 
-const _avatarModules = import.meta.glob('../assets/avatar_*.png', { eager: true })
+const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 const AVATAR_URLS = Object.fromEntries(
   Object.entries(_avatarModules)
     .map(([path, mod]) => { const id = path.match(/avatar_\d+/)?.[0]; return [id, mod.default] })
@@ -478,7 +478,7 @@ onUnmounted(() => {
   overflow: hidden;
   background:
     linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.35) 100%),
-    url('../assets/battleground_background.png') center / cover no-repeat;
+    url('../assets/backgrounds/battleground_background.png') center / cover no-repeat;
   border: 1px solid #3e1c0c;
   position: relative;
 }

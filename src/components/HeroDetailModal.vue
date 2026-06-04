@@ -194,10 +194,10 @@ import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { TargetType } from '../game/Skill.js'
 import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
 import HeroAvatar from './HeroAvatar.vue'
-import ValdrisBg  from '../assets/Valdris.png'
-import AldricBg   from '../assets/Aldric.png'
+import ValdrisBg  from '../assets/lore/Valdris.png'
+import AldricBg   from '../assets/lore/Aldric.png'
 import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
-const _avatarModules = import.meta.glob('../assets/avatar_*.png', { eager: true })
+const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 const PLAYER_AVATARS = Object.fromEntries(
   Object.entries(_avatarModules).map(([path, mod]) => {
     const id = path.match(/avatar_\d+/)?.[0]

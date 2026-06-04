@@ -106,6 +106,7 @@ export function createItemInstance(baseItem) {
     tier:        baseItem.tier   ?? null,
     slot:        baseItem.slot   ?? null,
     image:       baseItem.image  ?? null,
+    frame:       baseItem.frame  ?? null,
     stars:       0,
     craftedAt:   null,
     crafted:     false,

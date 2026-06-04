@@ -84,49 +84,49 @@ export const RECIPES = [
     slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD,
     desc: 'A blade of moonsilver that hums with elven enchantment. Strikes true even in darkness.',
     barCost: { moonsilver: 4 }, baseStats: { atk: 420, critRate: 0.06 },
-    rarity: 'Epic', image: 'elven/sword',
+    rarity: 'Epic', image: 'elven/sword', frame: 'elven',
   },
   {
     id: 'elven_spear', name: 'Elven Spear', tier: 'moonsilver',
     slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SPEAR,
     desc: 'Swift as moonlight, this spear finds every gap in armor before the eye can follow.',
     barCost: { moonsilver: 3 }, baseStats: { atk: 360, spd: 18 },
-    rarity: 'Epic', image: 'elven/spear',
+    rarity: 'Epic', image: 'elven/spear', frame: 'elven',
   },
   {
     id: 'elven_shield', name: 'Elven Shield', tier: 'moonsilver',
     slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD,
     desc: 'Woven from moonsilver vines by elven hands. Impossibly light, completely impenetrable.',
     barCost: { moonsilver: 4 }, baseStats: { def: 300, hp: 5000 },
-    rarity: 'Epic', image: 'elven/shield',
+    rarity: 'Epic', image: 'elven/shield', frame: 'elven',
   },
   {
     id: 'elven_helm', name: 'Elven Helm', tier: 'moonsilver',
     slot: GearSlot.HEAD, gearType: GearType.HELMET,
     desc: 'A crown of woven moonsilver that guards the mind and soul as much as the skull.',
     barCost: { moonsilver: 3 }, baseStats: { hp: 4800, def: 120 },
-    rarity: 'Epic', image: 'elven/helm',
+    rarity: 'Epic', image: 'elven/helm', frame: 'elven',
   },
   {
     id: 'elven_chest', name: 'Elven Chestplate', tier: 'moonsilver',
     slot: GearSlot.CHEST, gearType: GearType.ARMOR,
     desc: 'Elven armorers spent decades perfecting this form. It breathes like silk, endures like stone.',
     barCost: { moonsilver: 5 }, baseStats: { hp: 7200, def: 200 },
-    rarity: 'Epic', image: 'elven/chest',
+    rarity: 'Epic', image: 'elven/chest', frame: 'elven',
   },
   {
     id: 'elven_platelegs', name: 'Elven Platelegs', tier: 'moonsilver',
     slot: GearSlot.LEGS, gearType: GearType.LEGS,
     desc: 'Fluid as water, hard as starstone. No mortal forge could produce their like.',
     barCost: { moonsilver: 3 }, baseStats: { spd: 22, def: 150, hp: 2400 },
-    rarity: 'Epic', image: 'elven/platelegs',
+    rarity: 'Epic', image: 'elven/platelegs', frame: 'elven',
   },
   {
     id: 'elven_gloves', name: 'Elven Gloves', tier: 'moonsilver',
     slot: GearSlot.GLOVES, gearType: GearType.GLOVES,
     desc: 'The touch of these gloves makes every strike deliberate, every grip unbreakable.',
     barCost: { moonsilver: 2 }, baseStats: { atk: 200, atkPct: 0.08 },
-    rarity: 'Epic', image: 'elven/gloves',
+    rarity: 'Epic', image: 'elven/gloves', frame: 'elven',
   },
 ]
 
@@ -168,7 +168,7 @@ export function formatStatValue(key, val) {
   return `+${val.toLocaleString()}`
 }
 
-// Rarity thresholds by star count (future upgrade system)
+// Rarity thresholds — item rarity steps up when stars reach these values
 export const STAR_RARITY = [
   { stars: 0,  rarity: 'Common'    },
   { stars: 2,  rarity: 'Uncommon'  },
@@ -185,4 +185,20 @@ export function rarityForStars(stars) {
     else break
   }
   return result
+}
+
+// Bar cost to upgrade TO each star (index = target star, 1–10)
+export const STAR_BAR_COST = [0, 1, 2, 3, 4, 5, 7, 9, 12, 15, 20]
+
+// Stat multiplier at a given star count.
+// ★1–4: +5%/star  ★5–6: +8%/star (gate reward)  ★7–10: +6%/star
+// ★10 total: +60% over base
+export function starMultiplier(stars) {
+  let m = 1
+  for (let s = 1; s <= stars; s++) {
+    if (s <= 4)      m += 0.05
+    else if (s <= 6) m += 0.08
+    else             m += 0.06
+  }
+  return m
 }

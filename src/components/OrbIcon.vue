@@ -4,7 +4,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import orbSheet from '../assets/orbs_icons.png'
+import orbSheet from '../assets/ui/orbs_icons.png'
 
 const props = defineProps({
   orbId:  { type: String, required: true },   // 'cracked' | 'master' | 'dark'

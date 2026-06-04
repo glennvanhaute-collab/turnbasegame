@@ -123,8 +123,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
-import logoNav from './assets/logo-nav.png'
+import { ref, watch, onMounted } from 'vue'
+import { useMusic } from './composables/useMusic.js'
+import { useSmeltingTick } from './composables/useSmeltingTick.js'
+import logoNav from './assets/ui/logo-nav.png'
 import { useBattleStore } from './stores/useBattleStore.js'
 import { useCollectionStore } from './stores/useCollectionStore.js'
 import { useCurrencyStore } from './stores/useCurrencyStore.js'
@@ -154,53 +156,32 @@ import CampView from './components/CampView.vue'
 import CodexModal from './components/CodexModal.vue'
 import AdvisorMessage from './components/AdvisorMessage.vue'
 import DevMenu from './components/DevMenu.vue'
-import arsenalBg from './assets/arsenal.png'
-import navBg from './assets/bg_nav.png'
-import codexIcon from './assets/codex.png'
-import closeImg from './assets/close.png'
-import { playMain, playBattle, setMuted } from './game/music.js'
+import arsenalBg from './assets/backgrounds/arsenal.png'
+import navBg from './assets/backgrounds/bg_nav.png'
+import codexIcon from './assets/ui/codex.png'
+import closeImg from './assets/ui/close.png'
 import { useAdvisorStore } from './stores/useAdvisorStore.js'
-import { useSmeltingStore } from './stores/useSmeltingStore.js'
 import { buildDungeonEncounter } from './game/data/dungeons.js'
 
 const view       = ref('campaign')
 const gearTab    = ref('inventory')
 const expTab     = ref('dungeons')
 const inBattle   = ref(false)
-const muted      = ref(false)
 const showShop   = ref(false)
 const showCodex  = ref(false)
 const showCollection  = ref(false)
 const showBlacksmith  = ref(false)
 
-// Switch tracks when the view changes; close home modals when leaving
+const { muted, toggleMute, onViewChange, startOnFirstInteraction } = useMusic()
+useSmeltingTick()
+
 watch(view, (v) => {
   if (v !== 'campaign') showCollection.value = false
   if (v !== 'campaign') showBlacksmith.value = false
-  if (v === 'battle') playBattle()
-  else                playMain()
+  onViewChange(v)
 })
 
-const smeltingStore = useSmeltingStore()
-let _smeltInterval = null
-
-// Start main music on first user interaction (browser autoplay policy)
-onMounted(() => {
-  const start = (e) => {
-    if (e.target.closest('.icon-btn')) return
-    playMain()
-    document.removeEventListener('pointerdown', start)
-  }
-  document.addEventListener('pointerdown', start)
-  _smeltInterval = setInterval(() => smeltingStore.tick(), 1000)
-})
-
-onUnmounted(() => clearInterval(_smeltInterval))
-
-function toggleMute() {
-  muted.value = !muted.value
-  setMuted(muted.value)
-}
+onMounted(() => startOnFirstInteraction())
 
 const advisorStore = useAdvisorStore()
 const battleStore = useBattleStore()

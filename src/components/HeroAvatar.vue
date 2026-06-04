@@ -53,12 +53,12 @@
 <script setup>
 import { computed } from 'vue'
 import { getPortrait } from '../game/portraits.js'
-const _avatarModules = import.meta.glob('../assets/avatar_*.png', { eager: true })
-import borderAldric   from '../assets/avatar_border_aldric.png'
-import borderValdris  from '../assets/avatar_border_valdris.png'
-import borderCaelwyn  from '../assets/avatar_border__caelwyn.png'
-import borderMordaine from '../assets/avatar_border_mordaine.png'
-import borderAncient  from '../assets/avatar_border__ancient.png'
+const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
+import borderAldric   from '../assets/ui/avatar_border_aldric.png'
+import borderValdris  from '../assets/ui/avatar_border_valdris.png'
+import borderCaelwyn  from '../assets/ui/avatar_border__caelwyn.png'
+import borderMordaine from '../assets/ui/avatar_border_mordaine.png'
+import borderAncient  from '../assets/ui/avatar_border__ancient.png'
 
 const PLAYER_AVATARS = Object.fromEntries(
   Object.entries(_avatarModules).map(([path, mod]) => {

@@ -88,24 +88,6 @@
           </span>
         </button>
       </div>
-      <!-- Artisan section -->
-      <div class="recipe-section-head">⚙ Artisan</div>
-      <div class="artisan-item-list">
-        <div v-if="craftedItems.length === 0" class="artisan-empty">No crafted items yet</div>
-        <button
-          v-for="item in craftedItems"
-          :key="item.instanceId"
-          class="artisan-item-btn"
-          :class="{ active: selectedType === 'artisan' && artisanItemId === item.instanceId, maxed: item.stars >= 10 }"
-          :style="{ '--tier-color': tierColorForItem(item) }"
-          @click="selectArtisan(item)"
-        >
-          <span class="aib-icon">{{ SLOT_ICONS[item.slot] ?? '◆' }}</span>
-          <span class="aib-name">{{ item.name }}</span>
-          <span class="aib-stars" v-if="item.stars > 0 && item.stars < 10">{{ '★'.repeat(item.stars / 2) }}</span>
-          <span class="aib-maxed" v-else-if="item.stars >= 10">✦</span>
-        </button>
-      </div>
 
     </aside>
 
@@ -210,8 +192,8 @@
 
       </template>
 
-      <!-- ── ARTISAN MODE ── -->
-      <template v-else-if="selectedType === 'artisan'">
+      <!-- ── ARTISAN MODE moved to Arsenal → Forge → Upgrade tab ── -->
+      <template v-else-if="false">
         <div class="forge-idle" v-if="!artisanItem">
           <div class="forge-idle-icon">⚙</div>
           <div class="forge-idle-text">Select a crafted item to upgrade</div>
@@ -240,9 +222,9 @@
             <div v-else class="artisan-slot-icon">{{ SLOT_ICONS[artisanItem.slot] ?? '◆' }}</div>
             <div class="artisan-stars-row">
               <span
-                v-for="tier in STAR_RARITY.slice(1)" :key="tier.stars"
+                v-for="s in 10" :key="s"
                 class="artisan-star-pip"
-                :class="{ filled: artisanItem.stars >= tier.stars }"
+                :class="{ filled: artisanItem.stars >= s, gate: s === 5 || s === 6 }"
               >★</span>
             </div>
             <div class="artisan-rarity-name" :class="artisanItem.rarity?.toLowerCase()">{{ artisanItem.rarity }}</div>
@@ -265,18 +247,42 @@
 
           <!-- Upgrade panel -->
           <div class="artisan-upgrade-panel" v-if="artisanItem.stars < 10">
+
+            <!-- Bar cost row -->
             <div class="material-row" :style="{ '--ore-color': BARS[artisanBarId]?.color ?? '#888' }">
               <span class="mat-dot" />
               <span class="mat-name">{{ BARS[artisanBarId]?.name ?? artisanBarId }}</span>
               <span class="mat-tally">
-                <span class="mat-have" :class="{ ok: canUpgrade }">{{ resources.bars[artisanBarId] ?? 0 }}</span>
+                <span class="mat-have" :class="{ ok: hasEnoughBars }">{{ resources.bars[artisanBarId] ?? 0 }}</span>
                 <span class="mat-sep">/</span>
-                <span class="mat-need">{{ upgradeCost }}</span>
+                <span class="mat-need">{{ starBarCost }}</span>
               </span>
             </div>
+
+            <!-- Gate: rare component row -->
+            <div class="material-row gate-row" v-if="gateCompMeta" :style="{ '--ore-color': gateCompMeta.color }">
+              <span class="mat-dot gate-dot" />
+              <span class="mat-name">{{ gateCompMeta.name }}</span>
+              <span class="mat-tally">
+                <span class="mat-have" :class="{ ok: hasComponent }">{{ resources.upgradeComponents[gateCompId] ?? 0 }}</span>
+                <span class="mat-sep">/</span>
+                <span class="mat-need">{{ gateQty }}</span>
+              </span>
+              <span class="gate-drop-hint">dungeon drop</span>
+            </div>
+
+            <!-- Gate: smithing level row -->
+            <div class="skill-req-row" v-if="starGate?.smithingLevel">
+              <span class="skill-req-icon">⚒</span>
+              <span class="skill-req-label">Smithing</span>
+              <span class="skill-req-val" :class="{ ok: meetsSmithingLv }">
+                Lv.{{ resources.smithingLevel }} / Lv.{{ starGate.smithingLevel }} required
+              </span>
+            </div>
+
             <div class="artisan-btn-row">
               <button class="artisan-upgrade-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeItem">
-                ⚒ Upgrade · ★{{ artisanItem.stars }} → ★{{ artisanItem.stars + 2 }}
+                ⚒ ★{{ artisanItem.stars }} → ★{{ nextStar }}
               </button>
               <span class="artisan-next-rarity" v-if="nextRarity !== artisanItem.rarity">↑ {{ nextRarity }}</span>
             </div>
@@ -328,7 +334,7 @@
               <div class="gear-frame-inner">
                 <img :src="GEAR_IMAGES[selected.image]" class="gear-showcase-img" :alt="selected.name" />
               </div>
-              <img :src="itemFrameImg" class="gear-frame-img" alt="" aria-hidden="true" />
+              <img :src="GEAR_FRAMES[selected.frame] ?? itemFrameImg" class="gear-frame-img" alt="" aria-hidden="true" />
             </div>
           </div>
           <div v-else class="anvil-wrap" :class="{ ready: canAfford(selected) }">
@@ -477,17 +483,20 @@ import { useSmeltingStore } from '../stores/useSmeltingStore.js'
 import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { ORE_LIST, ORES } from '../game/data/ores.js'
 import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
-import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, STAR_RARITY, formatStatValue, rarityForStars } from '../game/data/recipes.js'
-import arsenalBg    from '../assets/arsenal.png'
-import anvilImg     from '../assets/anvil.png'
-import forge01Img   from '../assets/forge_01.png'
-import forge02Img   from '../assets/forge_02.png'
-import forge03Img   from '../assets/forge_03.png'
-import forge04Img   from '../assets/forge_04.png'
-import elvenForgeImg  from '../assets/elven_forge.png'
-import goblinForgeImg from '../assets/goblin_forge.png'
-import dwarfForgeImg  from '../assets/dwarven_forge.png'
-import itemFrameImg      from '../assets/item_frame.png'
+import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, STAR_RARITY, formatStatValue } from '../game/data/recipes.js'
+import arsenalBg    from '../assets/backgrounds/arsenal.png'
+import anvilImg     from '../assets/ui/anvil.png'
+import forge01Img   from '../assets/forges/forge_01.png'
+import forge02Img   from '../assets/forges/forge_02.png'
+import forge03Img   from '../assets/forges/forge_03.png'
+import forge04Img   from '../assets/forges/forge_04.png'
+import elvenForgeImg  from '../assets/forges/elven_forge.png'
+import goblinForgeImg from '../assets/forges/goblin_forge.png'
+import dwarfForgeImg  from '../assets/forges/dwarven_forge.png'
+import itemFrameImg      from '../assets/gear/frames/item_frame.png'
+import elvenBorderImg    from '../assets/gear/frames/elven_border.png'
+import dwarvenFrameImg   from '../assets/gear/frames/dwarven_frame.png'
+import goblinFrameImg    from '../assets/gear/frames/goblin_frame.png'
 import elvenSwordImg     from '../assets/gear/elven/sword.png'
 import elvenSpearImg     from '../assets/gear/elven/spear.png'
 import elvenShieldImg    from '../assets/gear/elven/shield.png'
@@ -495,41 +504,43 @@ import elvenHelmImg      from '../assets/gear/elven/helm.png'
 import elvenChestImg     from '../assets/gear/elven/chest.png'
 import elvenPlateImg     from '../assets/gear/elven/platelegs.png'
 import elvenGlovesImg    from '../assets/gear/elven/gloves.png'
-
 const FORGE_IMAGES = {
-  forge_01:    forge01Img,
-  forge_02:    forge02Img,
-  forge_03:    forge03Img,
-  forge_04:    forge04Img,
+  forge_01:     forge01Img,
+  forge_02:     forge02Img,
+  forge_03:     forge03Img,
+  forge_04:     forge04Img,
   elven_forge:  elvenForgeImg,
   goblin_forge: goblinForgeImg,
   dwarven_forge: dwarfForgeImg,
 }
 
 const GEAR_IMAGES = {
-  'elven/sword':      elvenSwordImg,
-  'elven/spear':      elvenSpearImg,
-  'elven/shield':     elvenShieldImg,
-  'elven/helm':       elvenHelmImg,
-  'elven/chest':      elvenChestImg,
-  'elven/platelegs':  elvenPlateImg,
-  'elven/gloves':     elvenGlovesImg,
+  'elven/sword':     elvenSwordImg,
+  'elven/spear':     elvenSpearImg,
+  'elven/shield':    elvenShieldImg,
+  'elven/helm':      elvenHelmImg,
+  'elven/chest':     elvenChestImg,
+  'elven/platelegs': elvenPlateImg,
+  'elven/gloves':    elvenGlovesImg,
 }
 
-const XP_PER_TIER    = { copper: 10, tin: 20, steel: 35, darksteel: 55, mithril: 80, moonsilver: 120 }
-const ARTISAN_XP     = { copper: 8,  tin: 12, steel: 20, darksteel: 32, mithril: 50, moonsilver: 80  }
-const TIER_TO_BAR    = { copper: 'copper', tin: 'tin', steel: 'steel', darksteel: 'darksteel', mithril: 'mithril', moonsilver: 'moonsilver' }
-const TIER_ORDER     = { copper: 0, tin: 1, steel: 2, darksteel: 3, mithril: 4, moonsilver: 5 }
+const GEAR_FRAMES = {
+  elven:   elvenBorderImg,
+  dwarven: dwarvenFrameImg,
+  goblin:  goblinFrameImg,
+}
+
+const XP_PER_TIER = { copper: 10, tin: 20, steel: 35, darksteel: 55, mithril: 80, moonsilver: 120 }
+const TIER_ORDER  = { copper: 0, tin: 1, steel: 2, darksteel: 3, mithril: 4, moonsilver: 5 }
 
 const resources = useResourceStore()
 const inventory = useInventoryStore()
 const smelting  = useSmeltingStore()
 
-const selectedType = ref(null)   // 'smelt' | 'forge' | 'artisan' | null
+const selectedType = ref(null)   // 'smelt' | 'forge' | null
 const selectedId   = ref(null)
 const forgeResult  = ref(null)
 const smeltQty     = ref(1)
-const artisanItemId = ref(null)
 let _flashTimer = null
 
 watch(selectedId, () => { smeltQty.value = 1 })
@@ -594,8 +605,6 @@ function isSpecialForgeUnlocked(level) {
 
 function selectSmelt(bar)    { selectedType.value = 'smelt';   selectedId.value = bar.id }
 function selectForge(recipe) { selectedType.value = 'forge';   selectedId.value = recipe.id }
-function selectArtisan(item) { selectedType.value = 'artisan'; artisanItemId.value = item.instanceId }
-
 function canAfford(recipe) {
   if (!recipe?.barCost) return false
   return Object.entries(recipe.barCost).every(([id, amt]) => (resources.bars[id] ?? 0) >= amt)
@@ -624,6 +633,7 @@ function forge() {
     tier:        recipe.tier,
     slot:        recipe.slot,
     image:       recipe.image ?? null,
+    frame:       recipe.frame ?? null,
   })
   instance.craftedAt = Date.now()
   instance.crafted   = true
@@ -634,52 +644,6 @@ function forge() {
   _flashTimer = setTimeout(() => { forgeResult.value = null }, 3000)
 }
 
-// ── Artisan ──────────────────────────────────────────────────────
-const craftedItems = computed(() =>
-  inventory.ownedItems
-    .filter(item => item.craftedAt && item.tier)
-    .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))
-)
-
-const artisanItem = computed(() =>
-  artisanItemId.value ? inventory.instanceById(artisanItemId.value) : null
-)
-const artisanTier      = computed(() => artisanItem.value?.tier ?? null)
-const artisanTierColor = computed(() => RECIPE_TIERS.find(t => t.id === artisanTier.value)?.color ?? '#888')
-const artisanBarId     = computed(() => TIER_TO_BAR[artisanTier.value] ?? null)
-const upgradeCost      = computed(() => artisanItem.value ? artisanItem.value.stars + 2 : 0)
-const canUpgrade       = computed(() => {
-  if (!artisanItem.value || !artisanBarId.value || artisanItem.value.stars >= 10) return false
-  return (resources.bars[artisanBarId.value] ?? 0) >= upgradeCost.value
-})
-const nextRarity = computed(() => artisanItem.value ? rarityForStars(artisanItem.value.stars + 2) : '')
-
-function nextStatValue(key, baseStat) {
-  if (!artisanItem.value) return baseStat
-  const mult = 1 + ((artisanItem.value.stars + 2) / 2) * 0.12
-  const pct = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','resistance','accuracy']
-  return pct.includes(key) ? Math.round(baseStat * mult * 1000) / 1000 : Math.round(baseStat * mult)
-}
-
-function tierColorForItem(item) {
-  return RECIPE_TIERS.find(t => t.id === item.tier)?.color ?? '#888'
-}
-
-function upgradeItem() {
-  const item = artisanItem.value
-  if (!item || !canUpgrade.value) return
-  resources.removeBar(artisanBarId.value, upgradeCost.value)
-  item.stars += 2
-  item.rarity = rarityForStars(item.stars)
-  const mult = 1 + (item.stars / 2) * 0.12
-  const pct  = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','resistance','accuracy']
-  Object.keys(item.baseStats).forEach(key => {
-    item.stats[key] = pct.includes(key)
-      ? Math.round(item.baseStats[key] * mult * 1000) / 1000
-      : Math.round(item.baseStats[key] * mult)
-  })
-  resources.addSmithingXp(ARTISAN_XP[artisanTier.value] ?? 10)
-}
 </script>
 
 <style scoped>
@@ -839,6 +803,7 @@ function upgradeItem() {
 .gear-showcase {
   position: relative; display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: visible;
+  margin: 0 auto;
 }
 .gear-showcase-glow {
   position: absolute; inset: -32px;
@@ -849,12 +814,11 @@ function upgradeItem() {
 .gear-frame-wrap {
   position: relative; width: 280px; height: 280px;
   z-index: 1;
-  animation: item-float 2.8s ease-in-out infinite;
+  animation: gear-float 2.8s ease-in-out infinite;
 }
 .gear-frame-inner {
-  position: absolute; inset: 17%;
+  position: absolute; inset: 14%;
   overflow: hidden;
-  background: rgba(4,2,10,0.92);
   display: flex; align-items: center; justify-content: center;
 }
 .gear-showcase-img {
@@ -935,6 +899,10 @@ function upgradeItem() {
 @keyframes item-float {
   0%, 100% { transform: translateX(-50%) translateY(0px); }
   50%       { transform: translateX(-50%) translateY(-6px); }
+}
+@keyframes gear-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
 }
 .item-appear-enter-active { transition: opacity 0.25s, transform 0.3s cubic-bezier(0.22,1,0.36,1); }
 .item-appear-leave-active { transition: opacity 0.15s; }
@@ -1254,129 +1222,6 @@ function upgradeItem() {
 .ore-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--ore-color); min-width: 20px; text-align: right; }
 .ore-row.empty .ore-count { color: var(--text-dim); }
 
-/* ── Artisan: left panel ─────────────────────────────────────────── */
-.artisan-item-list { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
-.artisan-empty { font-size: 0.6rem; color: var(--text-dim); font-style: italic; padding: 6px 8px; opacity: 0.6; }
-.artisan-item-btn {
-  width: 100%; display: flex; align-items: center; gap: 7px;
-  padding: 7px 8px; background: transparent; border: 1px solid transparent;
-  border-radius: 6px; cursor: pointer; text-align: left;
-  transition: background 0.12s, border-color 0.12s;
-}
-.artisan-item-btn:hover {
-  background: rgba(255,255,255,0.04);
-  border-color: color-mix(in srgb, var(--tier-color) 25%, transparent);
-}
-.artisan-item-btn.active {
-  background: color-mix(in srgb, var(--tier-color) 12%, rgba(0,0,0,0.4));
-  border-color: color-mix(in srgb, var(--tier-color) 50%, transparent);
-}
-.aib-icon { font-size: 0.8rem; flex-shrink: 0; width: 16px; text-align: center; }
-.aib-name { flex: 1; font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.aib-stars { font-size: 0.55rem; color: var(--tier-color); letter-spacing: 1px; }
-.aib-maxed { font-size: 0.65rem; color: #ff88ff; }
 
-/* ── Artisan: center content ─────────────────────────────────────── */
-.artisan-content { display: contents; }
 
-/* Item showcase */
-.artisan-showcase {
-  position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px;
-  padding: 36px 48px 28px;
-  background: color-mix(in srgb, var(--tier-color) 6%, rgba(0,0,0,0.45));
-  border: 1px solid color-mix(in srgb, var(--tier-color) 22%, transparent);
-  border-radius: 16px; width: 100%; max-width: 380px;
-  overflow: hidden;
-}
-.artisan-glow {
-  position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--tier-color) 14%, transparent) 0%, transparent 65%);
-  animation: artisan-breathe 3s ease-in-out infinite;
-}
-@keyframes artisan-breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-.artisan-frame-wrap {
-  position: relative; width: 140px; height: 140px;
-  z-index: 1;
-  animation: item-float 2.8s ease-in-out infinite;
-}
-.artisan-gear-img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  filter:
-    drop-shadow(0 0 10px var(--tier-color))
-    brightness(1.0);
-}
-.artisan-frame-img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: contain; pointer-events: none; z-index: 2;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7)) drop-shadow(0 0 8px color-mix(in srgb, var(--tier-color) 25%, transparent));
-}
-.artisan-slot-icon {
-  font-size: 4rem; line-height: 1; position: relative; z-index: 1;
-  filter: drop-shadow(0 0 18px var(--tier-color)) drop-shadow(0 4px 12px rgba(0,0,0,0.8));
-  animation: item-float 2.8s ease-in-out infinite;
-}
-.artisan-stars-row { display: flex; gap: 8px; position: relative; z-index: 1; }
-.artisan-star-pip {
-  font-size: 1.1rem; color: rgba(255,255,255,0.12); transition: color 0.3s, text-shadow 0.3s;
-}
-.artisan-star-pip.filled {
-  color: var(--tier-color);
-  text-shadow: 0 0 10px var(--tier-color), 0 0 20px color-mix(in srgb, var(--tier-color) 40%, transparent);
-}
-.artisan-rarity-name {
-  font-family: var(--font-head); font-size: 0.68rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 2.5px; position: relative; z-index: 1;
-}
-.artisan-rarity-name.common    { color: #888; }
-.artisan-rarity-name.uncommon  { color: #4dff88; }
-.artisan-rarity-name.rare      { color: #4fa8ff; }
-.artisan-rarity-name.epic      { color: #b44fff; text-shadow: 0 0 10px rgba(180,79,255,0.5); }
-.artisan-rarity-name.legendary { color: #ffd700; text-shadow: 0 0 14px rgba(255,215,0,0.55); }
-.artisan-rarity-name.mythical  { color: #ff88ff; text-shadow: 0 0 14px rgba(255,136,255,0.55); }
-.artisan-showcase.maxed { border-color: rgba(255,136,255,0.35); }
-
-/* Stats comparison */
-.artisan-stats-panel { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 8px; }
-.artisan-stat-rows   { display: flex; flex-direction: column; gap: 5px; }
-.artisan-stat-row    { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.04); }
-.asr-label   { flex: 1; font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
-.asr-current { font-family: var(--font-head); font-size: 0.85rem; font-weight: 700; color: var(--text-parchment); }
-.asr-arrow   { font-size: 0.75rem; color: rgba(255,200,100,0.35); }
-.asr-next    { font-family: var(--font-head); font-size: 0.85rem; font-weight: 700; color: var(--tier-color); text-shadow: 0 0 8px color-mix(in srgb, var(--tier-color) 40%, transparent); }
-
-/* Upgrade panel */
-.artisan-upgrade-panel { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
-.artisan-btn-row { display: flex; align-items: center; gap: 14px; }
-.artisan-upgrade-btn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 12px 32px; border-radius: 8px;
-  border: 1px solid var(--border-brown);
-  background: linear-gradient(135deg, #2a1408 0%, #160a04 100%);
-  color: var(--text-dim);
-  font-family: var(--font-head); font-size: 0.82rem; font-weight: 800;
-  letter-spacing: 2px; text-transform: uppercase; cursor: not-allowed; transition: all 0.2s;
-}
-.artisan-upgrade-btn.ready {
-  border-color: color-mix(in srgb, var(--tier-color) 55%, transparent);
-  background: color-mix(in srgb, var(--tier-color) 14%, rgba(5,3,1,0.9));
-  color: var(--tier-color); cursor: pointer;
-  box-shadow: 0 0 22px color-mix(in srgb, var(--tier-color) 18%, transparent);
-}
-.artisan-upgrade-btn.ready:hover {
-  background: color-mix(in srgb, var(--tier-color) 22%, rgba(5,3,1,0.85));
-  border-color: var(--tier-color);
-  box-shadow: 0 0 36px color-mix(in srgb, var(--tier-color) 32%, transparent);
-}
-.artisan-next-rarity { font-family: var(--font-head); font-size: 0.6rem; color: rgba(255,200,100,0.6); letter-spacing: 1.5px; }
-
-/* Maxed */
-.artisan-maxed-msg {
-  display: flex; align-items: center; gap: 14px; padding: 16px 24px;
-  border-radius: 12px; border: 1px solid rgba(255,136,255,0.22);
-  background: rgba(255,136,255,0.05);
-}
-.artisan-maxed-icon  { font-size: 1.6rem; color: #ff88ff; }
-.artisan-maxed-title { font-family: var(--font-head); font-size: 0.72rem; font-weight: 700; color: #ff88ff; text-transform: uppercase; letter-spacing: 2px; }
-.artisan-maxed-sub   { font-size: 0.6rem; color: var(--text-muted); margin-top: 3px; }
 </style>

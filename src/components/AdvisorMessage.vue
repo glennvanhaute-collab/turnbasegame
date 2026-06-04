@@ -33,10 +33,10 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { TextPlugin } from 'gsap/TextPlugin'
 import { useAdvisorStore } from '../stores/useAdvisorStore.js'
-import frameImg from '../assets/advisor_with_text_v2.png'
-import closeImg from '../assets/close.png'
-import nextImg  from '../assets/next_nobg.png'
-import prevImg  from '../assets/prev_nobg.png'
+import frameImg from '../assets/units/advisor_with_text_v2.png'
+import closeImg from '../assets/ui/close.png'
+import nextImg  from '../assets/ui/next_nobg.png'
+import prevImg  from '../assets/ui/prev_nobg.png'
 
 gsap.registerPlugin(TextPlugin)
 

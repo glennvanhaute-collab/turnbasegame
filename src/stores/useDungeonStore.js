@@ -64,12 +64,19 @@ export const useDungeonStore = defineStore('dungeons', () => {
     pinnedDungeons.value = pinnedDungeons.value.filter(d => d.id !== dungeonId)
     useForgeStore().awardMaterials(dungeon.tier)
 
+    // Upgrade component drops
+    const componentDrops = []
+    if (dungeon.tier === 'Easy') {
+      if (Math.random() < 0.20) { resources.addUpgradeComponent('copper_essence', 1); componentDrops.push('copper_essence') }
+      if (Math.random() < 0.08) { resources.addUpgradeComponent('tin_essence',    1); componentDrops.push('tin_essence') }
+    }
+
     if (dungeon.tier === 'Nightmare' && Math.random() < 0.04) {
       useInventoryStore().awardSoulVessel()
     }
 
     persist()
-    return { oreDrops }
+    return { oreDrops, componentDrops }
   }
 
   function findDungeon(id) {

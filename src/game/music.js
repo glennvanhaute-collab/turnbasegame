@@ -1,5 +1,5 @@
-import mainUrl   from '../assets/main.ost?url'
-import battleUrl from '../assets/battle.mp3?url'
+import mainUrl   from '../assets/audio/main.ost?url'
+import battleUrl from '../assets/audio/battle.mp3?url'
 
 const VOL = { main: 0.40, battle: 0.55 }
 const FADE_STEPS = 22

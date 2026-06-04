@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { ORES } from '../game/data/ores.js'
 import { BARS } from '../game/data/bars.js'
+import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 
 const STORAGE_KEY = 'raid-resources'
 
@@ -23,11 +24,15 @@ export const useResourceStore = defineStore('resources', () => {
   const goblinForgeUnlocked = ref(saved?.goblinForgeUnlocked ?? false)
   const dwarfForgeUnlocked  = ref(saved?.dwarfForgeUnlocked  ?? false)
 
+  const upgradeComponents = ref(
+    saved?.upgradeComponents ?? Object.fromEntries(Object.keys(UPGRADE_COMPONENTS).map(k => [k, 0]))
+  )
+
   const smithingLevel     = computed(() => Math.floor(smithingXp.value / XP_PER_LEVEL) + 1)
   const smithingProgress  = computed(() => (smithingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
   const smithingXpInLevel = computed(() => smithingXp.value % XP_PER_LEVEL)
 
-  watch([ores, bars, smithingXp, forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked], () => {
+  watch([ores, bars, smithingXp, forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ores:                ores.value,
       bars:                bars.value,
@@ -36,6 +41,7 @@ export const useResourceStore = defineStore('resources', () => {
       elvenForgeUnlocked:  elvenForgeUnlocked.value,
       goblinForgeUnlocked: goblinForgeUnlocked.value,
       dwarfForgeUnlocked:  dwarfForgeUnlocked.value,
+      upgradeComponents:   upgradeComponents.value,
     }))
   }, { deep: true })
 
@@ -43,7 +49,14 @@ export const useResourceStore = defineStore('resources', () => {
   function removeOre(oreId, amount) { if (oreId in ores.value) ores.value[oreId] = Math.max(0, ores.value[oreId] - amount) }
   function addBar(barId, amount)    { if (barId in bars.value) bars.value[barId] += amount }
   function removeBar(barId, amount) { if (barId in bars.value) bars.value[barId] = Math.max(0, bars.value[barId] - amount) }
-  function addSmithingXp(amount)    { smithingXp.value += amount }
+  function addSmithingXp(amount) { smithingXp.value += amount }
+
+  function addUpgradeComponent(id, amount = 1) {
+    if (id in upgradeComponents.value) upgradeComponents.value[id] += amount
+  }
+  function removeUpgradeComponent(id, amount = 1) {
+    if (id in upgradeComponents.value) upgradeComponents.value[id] = Math.max(0, upgradeComponents.value[id] - amount)
+  }
 
   return {
     ores, addOre, removeOre,
@@ -52,6 +65,8 @@ export const useResourceStore = defineStore('resources', () => {
     elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked,
     smithingXp, smithingLevel, smithingProgress, smithingXpInLevel,
     addSmithingXp,
+    upgradeComponents, addUpgradeComponent, removeUpgradeComponent,
+    UPGRADE_COMPONENTS,
     XP_PER_LEVEL,
   }
 })

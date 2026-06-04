@@ -20,19 +20,45 @@ const EMPTY_LOADOUT = () => ({
   [GearSlot.GLOVES]:    null,
 })
 
-const SOUL_KEY = 'raid-soul-vessels'
+const SOUL_KEY      = 'raid-soul-vessels'
+const INVENTORY_KEY = 'raid-inventory'
+
 function loadSoulData() {
   try { return JSON.parse(localStorage.getItem(SOUL_KEY) ?? 'null') } catch { return null }
 }
 
+function attachMethod(item) {
+  item.fitsSlot = function(slot) { return SLOT_ALLOWED_TYPES[slot]?.includes(this.gearType) ?? false }
+  return item
+}
+
+function loadInventoryData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(INVENTORY_KEY) ?? 'null')
+    if (!saved) return null
+    return {
+      instances:    (saved.instances   ?? []).map(attachMethod),
+      loadouts:     saved.loadouts     ?? {},
+      gearDisabled: saved.gearDisabled ?? {},
+    }
+  } catch { return null }
+}
+
+function saveInventoryData(instances, loadouts, gearDisabled) {
+  // fitsSlot is a method — JSON.stringify drops it automatically
+  localStorage.setItem(INVENTORY_KEY, JSON.stringify({ instances, loadouts, gearDisabled }))
+}
+
 export const useInventoryStore = defineStore('inventory', () => {
-  const _soul = loadSoulData()
-  const soulVessels        = ref(_soul?.count ?? 0)
+  const _soul      = loadSoulData()
+  const _inventory = loadInventoryData()
+
+  const soulVessels         = ref(_soul?.count          ?? 0)
   const progressiveHeroKeys = ref(_soul?.progressiveKeys ?? [])
 
   watch([soulVessels, progressiveHeroKeys], () => {
     localStorage.setItem(SOUL_KEY, JSON.stringify({
-      count:          soulVessels.value,
+      count:           soulVessels.value,
       progressiveKeys: progressiveHeroKeys.value,
     }))
   }, { deep: true })
@@ -53,18 +79,18 @@ export const useInventoryStore = defineStore('inventory', () => {
     return progressiveHeroKeys.value.includes(heroKey)
   }
 
-  // Each owned item is a unique instance object (not a raw ID string)
   const ownedInstances = ref(
-    STARTER_IDS.map(id => createItemInstance(GEAR_BY_ID[id])).filter(Boolean)
+    _inventory?.instances ?? STARTER_IDS.map(id => createItemInstance(GEAR_BY_ID[id])).filter(Boolean)
   )
+  const loadouts     = ref(_inventory?.loadouts     ?? {})
+  const gearDisabled = ref(_inventory?.gearDisabled ?? {})
 
-  // { [heroKey]: { main_hand: instanceId|null, ... } }
-  const loadouts = ref({})
+  watch([ownedInstances, loadouts, gearDisabled], () => {
+    saveInventoryData(ownedInstances.value, loadouts.value, gearDisabled.value)
+  }, { deep: true })
 
   const focusedHeroKey = ref(null)
   const pendingSlot    = ref(null)
-
-  const gearDisabled = ref({})
 
   // Alias for components that iterate owned items
   const ownedItems = computed(() => ownedInstances.value)

@@ -163,13 +163,13 @@
 <script setup>
 import { computed } from 'vue'
 const emit = defineEmits(['back'])
-import collectionBg from '../assets/collection_bg.png'
+import collectionBg from '../assets/backgrounds/collection_bg.png'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { formatCP } from '../game/cp.js'
 import HeroDetailModal from './HeroDetailModal.vue'
 import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
-const _avatarModules = import.meta.glob('../assets/avatar_*.png', { eager: true })
+const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 
 const PLAYER_AVATARS = Object.fromEntries(
   Object.entries(_avatarModules).map(([path, mod]) => {

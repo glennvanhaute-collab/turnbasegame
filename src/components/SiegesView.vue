@@ -78,10 +78,10 @@ const AFFINITY_COLOR = {
   Void:   '#b44fff',
 }
 
-import siegeAldric   from '../assets/siege_aldric.png'
-import siegeValdris  from '../assets/siege_Valdris.png'
-import siegeCaelwyn  from '../assets/siege_caelwyn.png'
-import siegeMordaine from '../assets/siege_mordaine.png'
+import siegeAldric   from '../assets/lore/siege_aldric.png'
+import siegeValdris  from '../assets/lore/siege_Valdris.png'
+import siegeCaelwyn  from '../assets/lore/siege_caelwyn.png'
+import siegeMordaine from '../assets/lore/siege_mordaine.png'
 
 const SIEGES = [
   {

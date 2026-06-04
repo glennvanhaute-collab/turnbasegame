@@ -35,7 +35,7 @@
 
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
-import campBg from '../assets/training_camp.png'
+import campBg from '../assets/backgrounds/training_camp.png'
 import { useCampStore } from '../stores/useCampStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 

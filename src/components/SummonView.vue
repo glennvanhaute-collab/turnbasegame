@@ -126,7 +126,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import recruitmentBg from '../assets/recruitment_bg.png'
+import recruitmentBg from '../assets/backgrounds/recruitment_bg.png'
 import { useSummonStore } from '../stores/useSummonStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useEnergyStore } from '../stores/useEnergyStore.js'

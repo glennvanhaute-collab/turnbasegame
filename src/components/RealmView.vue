@@ -223,7 +223,7 @@ import { useCollectionStore } from '../stores/useCollectionStore.js'
 import HeroAvatar from './HeroAvatar.vue'
 import { HERO_TEMPLATES, STARTER_KEYS, NORMAL_POOL, VOID_POOL } from '../game/data/heroes.js'
 import { getPortrait } from '../game/portraits.js'
-import mapImg from '../assets/map.png'
+import mapImg from '../assets/backgrounds/map.png'
 
 const collection = useCollectionStore()
 

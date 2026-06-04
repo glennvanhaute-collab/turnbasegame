@@ -98,13 +98,13 @@
 import { ref, computed } from 'vue'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
-import logoNav          from '../assets/logo-nav.png'
-import startupBg        from '../assets/startup_background.png'
-import houseAldricImg   from '../assets/house_aldric.png'
-import houseValdrisImg  from '../assets/house_valdris.png'
-import houseCaelwynImg  from '../assets/house_caelwyn.png'
-import houseMordaineImg from '../assets/house_mordaine.png'
-const _avatarModules = import.meta.glob('../assets/avatar_*.png', { eager: true })
+import logoNav          from '../assets/ui/logo-nav.png'
+import startupBg        from '../assets/backgrounds/startup_background.png'
+import houseAldricImg   from '../assets/lore/house_aldric.png'
+import houseValdrisImg  from '../assets/lore/house_valdris.png'
+import houseCaelwynImg  from '../assets/lore/house_caelwyn.png'
+import houseMordaineImg from '../assets/lore/house_mordaine.png'
+const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 
 const HOUSE_IMAGES = {
   'House Aldric':   houseAldricImg,
