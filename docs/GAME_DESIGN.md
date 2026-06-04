@@ -177,7 +177,7 @@ The player's created hedge knight is not just a character — it is the mechanic
 **Soul Bind — upgrading a recruited hero to progression unit:**
 If you become attached to a recruited hero's skillset and identity, you can soul bind them — they become your progression unit and level with you instead of the starting hedge knight. The `levelMultiplier` system (up to 2.5× base stats) is the mechanic behind this.
 
-*Implementation status: progression unit leveling ✅ fully wired. Recruitment ceiling ❌ defined but not yet enforced in the summon store. Soul bind upgrade 🔧 partially in place (levelMultiplier exists, full UI/transfer logic pending).*
+*Implementation status: progression unit leveling ✅ fully wired. Recruitment ceiling ✅ enforced in summon store + surfaced in UI (locked rarities shown with next unlock level). XP scales with level (200 + level × 100) so Mythical requires real effort to reach. Soul bind upgrade 🔧 partially in place (levelMultiplier exists, full UI/transfer logic pending).*
 
 ---
 
@@ -284,12 +284,26 @@ The design tension he solves: the game has deep, interlocking systems that rewar
 | System | Status |
 |---|---|
 | Battle engine (turn meter, skills, affinity, status effects) | ✅ Complete |
+| Battle as modal overlay (Escape to close) | ✅ Complete |
+| Battle log collapsible (default closed) | ✅ Complete |
+| Battle speed & auto-battle persisted across sessions | ✅ Complete |
+| Dungeon battles auto-play on entry | ✅ Complete |
 | Hero templates & faction data | ✅ Complete |
+| Portrait auto-discovery (drop PNG in rarity folder) | ✅ Complete |
 | Smelting (real-time, offline catch-up) | ✅ Complete |
 | Forge / Artisan upgrade / Orbing | ✅ Complete |
+| Ancient Forge node (works on any gear rarity) | ✅ Complete |
 | Forge tier discovery flags (elven/goblin/dwarf) | 🔧 Flags exist, not yet set by exploration |
 | Progression unit leveling & XP | ✅ Complete |
-| Recruitment ceiling enforcement | ❌ Logic defined, not enforced in summon store |
+| XP scaling (200 + level × 100 per level — not flat) | ✅ Complete |
+| Recruitment ceiling enforcement in summon store + UI | ✅ Complete |
+| Summon rates: Rare 88% / Epic 9% / Legendary 2.5% / Mythical 0.5% | ✅ Complete |
+| All recruitable heroes promoted to Rare base tier (no Common/Uncommon pulls) | ✅ Complete |
+| Currency (gold/diamonds) persistence across sessions | ✅ Complete |
+| Save file export / import (game keys only) | ✅ Complete |
+| GitHub Pages deployment (Actions workflow) | ✅ Complete |
+| Training Grounds redesign (tab bar + sidebar by difficulty) | ✅ Complete |
+| Dungeon component drops (Copper/Tin Essence) displayed on victory | ✅ Complete |
 | Soul Bind upgrade flow | 🔧 Multiplier exists, UI/transfer logic pending |
 | Artisan skills activating camp bonuses | ❌ Assigned to heroes, not yet mechanically active |
 | Codex lore structure | ✅ Structure complete, content being written offline |
