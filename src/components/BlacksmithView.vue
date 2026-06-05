@@ -12,24 +12,21 @@
       <div class="recipe-section-head">⊕ Smelt</div>
       <div class="smelt-group">
         <template v-for="bar in BAR_LIST" :key="bar.id">
-          <!-- Special encounter-unlocked forge (elven/goblin/dwarf) -->
-          <template v-if="FORGE_TIERS[bar.requiredForge]?.special">
+          <!-- Special encounter-unlocked forge (elven/goblin/dwarf) — hidden until unlocked -->
+          <template v-if="FORGE_TIERS[bar.requiredForge]?.special && isSpecialForgeUnlocked(bar.requiredForge)">
             <div class="smelt-forge-divider" :style="{ '--elven-color': FORGE_TIERS[bar.requiredForge].color }">
               <span class="sfd-dot" />
               <span class="sfd-name">{{ FORGE_TIERS[bar.requiredForge].name }}</span>
-              <span class="sfd-lock" v-if="!isSpecialForgeUnlocked(bar.requiredForge)">Encounter</span>
             </div>
             <button
               class="smelt-btn elven"
-              :class="{ active: selectedType === 'smelt' && selectedId === bar.id, locked: !isSpecialForgeUnlocked(bar.requiredForge) }"
+              :class="{ active: selectedType === 'smelt' && selectedId === bar.id }"
               :style="{ '--bar-color': bar.color }"
-              :disabled="!isSpecialForgeUnlocked(bar.requiredForge)"
               @click="selectSmelt(bar)"
             >
               <span class="smelt-btn-dot" />
               <span class="smelt-btn-name">{{ bar.name }}</span>
-              <span class="smelt-btn-cost" v-if="isSpecialForgeUnlocked(bar.requiredForge)">{{ bar.oreCost }}× ore</span>
-              <span class="smelt-btn-lock" v-else>Locked</span>
+              <span class="smelt-btn-cost">{{ bar.oreCost }}× ore</span>
             </button>
           </template>
           <!-- Standard codex-gated bars -->
@@ -56,7 +53,7 @@
 
       <!-- Forge section -->
       <div class="recipe-section-head">⚒ Forge</div>
-      <div class="tier-group" v-for="tier in RECIPE_TIERS" :key="tier.id">
+      <div class="tier-group" v-for="tier in visibleRecipeTiers" :key="tier.id">
         <div
           class="tier-header"
           :class="{ locked: !tier.recipes.length }"
@@ -602,6 +599,17 @@ function isSpecialForgeUnlocked(level) {
   if (level === 6) return resources.dwarfForgeUnlocked
   return false
 }
+
+// Tier IDs that require a special forge, keyed by forge level
+const TIER_REQUIRED_FORGE = { moonsilver: 4, vaultmetal: 5, runeite: 6 }
+
+const visibleRecipeTiers = computed(() =>
+  RECIPE_TIERS.filter(tier => {
+    const forgeLevel = TIER_REQUIRED_FORGE[tier.id]
+    if (forgeLevel === undefined) return true       // standard tier, always show
+    return isSpecialForgeUnlocked(forgeLevel)       // special tier, only show if unlocked
+  })
+)
 
 function selectSmelt(bar)    { selectedType.value = 'smelt';   selectedId.value = bar.id }
 function selectForge(recipe) { selectedType.value = 'forge';   selectedId.value = recipe.id }
