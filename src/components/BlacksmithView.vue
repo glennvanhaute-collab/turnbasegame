@@ -444,12 +444,18 @@
           v-for="ore in ORE_LIST"
           :key="ore.id"
           class="ore-row"
-          :class="{ empty: !resources.ores[ore.id] }"
+          :class="{
+            empty: !resources.ores[ore.id],
+            clickable: !!resources.ores[ore.id] && !!oreToBar[ore.id],
+            active: selectedType === 'smelt' && selectedId === oreToBar[ore.id]?.id,
+          }"
           :style="{ '--ore-color': ore.color }"
+          @click="resources.ores[ore.id] && oreToBar[ore.id] && selectSmelt(oreToBar[ore.id])"
         >
           <span class="ore-dot" />
           <span class="ore-name">{{ ore.name }}</span>
           <span class="ore-count">{{ resources.ores[ore.id] ?? 0 }}</span>
+          <span class="ore-smelt-arrow" v-if="resources.ores[ore.id] && oreToBar[ore.id]">→</span>
         </div>
       </div>
 
@@ -606,10 +612,24 @@ const TIER_REQUIRED_FORGE = { moonsilver: 4, vaultmetal: 5, runeite: 6 }
 const visibleRecipeTiers = computed(() =>
   RECIPE_TIERS.filter(tier => {
     const forgeLevel = TIER_REQUIRED_FORGE[tier.id]
-    if (forgeLevel === undefined) return true       // standard tier, always show
-    return isSpecialForgeUnlocked(forgeLevel)       // special tier, only show if unlocked
+    if (forgeLevel === undefined) return true
+    return isSpecialForgeUnlocked(forgeLevel)
   })
 )
+
+// Maps each oreId → the first accessible bar for that ore
+const oreToBar = computed(() => {
+  const map = {}
+  for (const ore of ORE_LIST) {
+    const bar = BAR_LIST.find(b => {
+      if (b.oreId !== ore.id) return false
+      if (FORGE_TIERS[b.requiredForge]?.special) return isSpecialForgeUnlocked(b.requiredForge)
+      return resources.forgeLevel >= b.requiredForge
+    }) ?? BAR_LIST.find(b => b.oreId === ore.id)
+    if (bar) map[ore.id] = bar
+  }
+  return map
+})
 
 function selectSmelt(bar)    { selectedType.value = 'smelt';   selectedId.value = bar.id }
 function selectForge(recipe) { selectedType.value = 'forge';   selectedId.value = recipe.id }
@@ -1229,7 +1249,10 @@ function forge() {
 .ore-name { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ore-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--ore-color); min-width: 20px; text-align: right; }
 .ore-row.empty .ore-count { color: var(--text-dim); }
-
+.ore-row.clickable { cursor: pointer; }
+.ore-row.clickable:hover { background: color-mix(in srgb, var(--ore-color) 12%, transparent); border-color: color-mix(in srgb, var(--ore-color) 40%, transparent); }
+.ore-row.active { background: color-mix(in srgb, var(--ore-color) 15%, transparent); border-color: color-mix(in srgb, var(--ore-color) 55%, transparent); }
+.ore-smelt-arrow { font-size: 0.65rem; color: var(--ore-color); opacity: 0.7; flex-shrink: 0; }
 
 
 </style>
