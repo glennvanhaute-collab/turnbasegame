@@ -55,7 +55,7 @@
             </div>
           </div>
           <div class="mc-price">
-            <span class="price-gold">🪙 {{ SELL_PRICES[item.rarity] ?? 0 }}</span>
+            <span class="price-gold">🪙 {{ calcSellPrice(item).toLocaleString() }}</span>
           </div>
         </div>
 
@@ -81,7 +81,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useInventoryStore, SELL_PRICES } from '../stores/useInventoryStore.js'
+import { useInventoryStore, calcSellPrice } from '../stores/useInventoryStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { GearType } from '../game/Gear.js'
 import { Rarity } from '../game/Hero.js'
@@ -139,7 +139,7 @@ const sellableInFilter = computed(() =>
 )
 
 const totalSellValue = computed(() =>
-  sellableInFilter.value.reduce((s, i) => s + (SELL_PRICES[i.rarity] ?? 0), 0)
+  sellableInFilter.value.reduce((s, i) => s + calcSellPrice(i), 0)
 )
 
 const unequippedItems = computed(() =>

@@ -6,14 +6,28 @@ import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
 import { useCurrencyStore } from './useCurrencyStore.js'
 import { computeCP } from '../game/cp.js'
+import { RECIPES, STAR_BAR_COST } from '../game/data/recipes.js'
 
-export const SELL_PRICES = {
-  Common:    50,
-  Uncommon:  150,
-  Rare:      500,
-  Epic:      1500,
-  Legendary: 5000,
-  Mythical:  15000,
+// Gold per bar by material tier — the main economy tuning knob
+const TIER_BAR_GOLD = {
+  copper:     50,
+  tin:       120,
+  steel:     250,
+  darksteel: 500,
+  mithril:   900,
+  moonsilver: 1500,
+  vaultmetal: 1200,
+  runeite:   1800,
+}
+
+export function calcSellPrice(item) {
+  const goldPerBar = TIER_BAR_GOLD[item.tier]
+  if (!goldPerBar) return 50
+  const recipe = RECIPES.find(r => r.id === item.id)
+  const craftBars = recipe ? Object.values(recipe.barCost).reduce((s, v) => s + v, 0) : 0
+  let upgradeBars = 0
+  for (let s = 1; s <= (item.stars ?? 0); s++) upgradeBars += (STAR_BAR_COST[s] ?? 0)
+  return (craftBars + upgradeBars) * goldPerBar
 }
 
 const STARTER_IDS = []
@@ -234,7 +248,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     if (idx === -1) return 0
     const item = ownedInstances.value[idx]
     if (getEquippedBy(instanceId)) return 0   // can't sell equipped gear
-    const gold = SELL_PRICES[item.rarity] ?? 0
+    const gold = calcSellPrice(item)
     ownedInstances.value.splice(idx, 1)
     // Remove from any loadout just in case
     for (const key of Object.keys(loadouts.value)) {
