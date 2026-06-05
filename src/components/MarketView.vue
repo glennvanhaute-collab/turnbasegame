@@ -43,7 +43,7 @@
         v-for="item in filtered"
         :key="item.instanceId"
         class="market-card"
-        :class="[item.rarity.toLowerCase(), { equipped: !!inventory.getEquippedBy(item.instanceId) }]"
+        :class="item.rarity.toLowerCase()"
       >
         <div class="mc-top">
           <span class="mc-icon">{{ GEAR_ICONS[item.gearType] ?? '▪' }}</span>
@@ -64,10 +64,7 @@
         </div>
 
         <div class="mc-footer">
-          <span class="equipped-note" v-if="inventory.getEquippedBy(item.instanceId)">
-            Equipped — unequip first
-          </span>
-          <button v-else class="btn-sell" @click="sell(item.instanceId)">Sell</button>
+          <button class="btn-sell" @click="sell(item.instanceId)">Sell</button>
         </div>
       </div>
     </div>
@@ -131,7 +128,10 @@ function statChips(item) {
 }
 
 const filtered = computed(() =>
-  inventory.ownedItems.filter(i => !filterRarity.value || i.rarity === filterRarity.value)
+  inventory.ownedItems.filter(i => {
+    if (inventory.getEquippedBy(i.instanceId)) return false
+    return !filterRarity.value || i.rarity === filterRarity.value
+  })
 )
 
 const sellableInFilter = computed(() =>
@@ -142,9 +142,13 @@ const totalSellValue = computed(() =>
   sellableInFilter.value.reduce((s, i) => s + (SELL_PRICES[i.rarity] ?? 0), 0)
 )
 
+const unequippedItems = computed(() =>
+  inventory.ownedItems.filter(i => !inventory.getEquippedBy(i.instanceId))
+)
+
 function countByRarity(r) {
-  if (!r) return inventory.ownedItems.length
-  return inventory.ownedItems.filter(i => i.rarity === r).length
+  if (!r) return unequippedItems.value.length
+  return unequippedItems.value.filter(i => i.rarity === r).length
 }
 
 function sell(instanceId) {
