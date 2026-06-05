@@ -277,4 +277,69 @@ export const SKILLS = {
       new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 0.5, statusDuration: 2 }),
     ],
   }),
+
+  // ── Kyver ───────────────────────────────────────────────────────
+  HONOUR_SLASH: new Skill({
+    id: 'honour_slash',
+    name: 'For Rice and Honour',
+    description: 'A mighty slash drawn from deep discipline — or possibly just hunger. Deals 280% ATK damage.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.8 })],
+  }),
+
+  THOUSAND_CUTS: new Skill({
+    id: 'thousand_cuts',
+    name: 'Thousand Cuts',
+    description: 'Kyver unleashes a flurry on all enemies. He has never stopped to count if it is actually a thousand. Hits all for 100% ATK 3 times.',
+    cooldown: 3,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.0, hits: 3 })],
+  }),
+
+  WARLORDS_RESOLVE: new Skill({
+    id: 'warlords_resolve',
+    name: "Warlord's Resolve",
+    description: 'He has faced death, dishonour, and a shortage of rice. Nothing stops him now. Raises own ATK by 35% and SPD by 25% for 3 turns.',
+    cooldown: 4,
+    targetType: TargetType.SELF,
+    effects: [
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_ATK, statusDuration: 3, buffValue: 0.35 }),
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_SPD, statusDuration: 3, buffValue: 0.25 }),
+    ],
+  }),
+
+  // ── Jade Dragonforge ────────────────────────────────────────────
+  DRAGON_LANCE: new Skill({
+    id: 'dragon_lance',
+    name: 'Dragon Lance',
+    description: 'A devastating spear thrust dealing 310% ATK damage.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 3.1 })],
+  }),
+
+  SEARING_DIVE: new Skill({
+    id: 'searing_dive',
+    name: 'Searing Dive',
+    description: 'Her dragon dives and breathes fire on all enemies for 165% ATK with 90% chance to Burn for 2 turns.',
+    cooldown: 3,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.65 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.BURN, statusChance: 0.90, statusDuration: 2 }),
+    ],
+  }),
+
+  FORGE_WRATH: new Skill({
+    id: 'forge_wrath',
+    name: 'Forge Wrath',
+    description: 'Channels dragonfire into her armour — raises own ATK by 40% and DEF by 30% for 3 turns.',
+    cooldown: 4,
+    targetType: TargetType.SELF,
+    effects: [
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_ATK, statusDuration: 3, buffValue: 0.40 }),
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_DEF, statusDuration: 3, buffValue: 0.30 }),
+    ],
+  }),
 }

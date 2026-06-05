@@ -468,6 +468,16 @@ export const HERO_TEMPLATES = {
     isPlayer: true,
   }),
 
+  KYVER: () => new Hero({
+    id: 'kyver', name: 'Kyver',
+    faction: Faction.ALDRIC, rarity: Rarity.LEGENDARY, affinity: Affinity.FORCE,
+    baseHp: 17500, baseAtk: 1850, baseDef: 750, baseSpd: 112,
+    critRate: 0.28, critDmg: 0.75,
+    skills: [SKILLS.HONOUR_SLASH, SKILLS.THOUSAND_CUTS, SKILLS.WARLORDS_RESOLVE],
+    artisanSkills: [ARTISAN.blacksmithing],
+    isPlayer: true,
+  }),
+
   VORATH: () => new Hero({
     id: 'vorath', name: 'Vorath the Undying',
     faction: Faction.MORDAINE, rarity: Rarity.MYTHICAL, affinity: Affinity.VOID,
@@ -485,6 +495,16 @@ export const HERO_TEMPLATES = {
     critRate: 0.30, critDmg: 0.80,
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring],
+    isPlayer: true,
+  }),
+
+  JADE_DRAGONFORGE: () => new Hero({
+    id: 'jade_dragonforge', name: 'Jade Dragonforge',
+    faction: Faction.ALDRIC, rarity: Rarity.MYTHICAL, affinity: Affinity.FORCE,
+    baseHp: 20000, baseAtk: 2350, baseDef: 950, baseSpd: 96,
+    critRate: 0.32, critDmg: 0.85,
+    skills: [SKILLS.DRAGON_LANCE, SKILLS.SEARING_DIVE, SKILLS.FORGE_WRATH],
+    artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true,
   }),
 
@@ -653,9 +673,11 @@ export const RECRUIT_POOL = [
   { key: 'ARCHMAGE_KELVAR',     rarity: 'Legendary' },
   { key: 'THERON',              rarity: 'Legendary' },
   { key: 'SERAPHEL',            rarity: 'Legendary' },
+  { key: 'KYVER',               rarity: 'Legendary' },
   // ── Mythical ─────────────────────────────────────────────────────
   { key: 'AURELAN',             rarity: 'Mythical' },
   { key: 'VORATH',              rarity: 'Mythical' },
+  { key: 'JADE_DRAGONFORGE',    rarity: 'Mythical' },
   // ── Ancient ──────────────────────────────────────────────────────
   { key: 'VAERIC',              rarity: 'Ancient' },
   { key: 'VALERIUS',            rarity: 'Ancient' },
