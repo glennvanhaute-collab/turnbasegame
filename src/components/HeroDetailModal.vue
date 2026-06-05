@@ -53,6 +53,12 @@
             <!-- Scrollable body -->
             <div class="info-body">
 
+              <!-- Lore -->
+              <section class="section" v-if="hero.lore">
+                <h3 class="section-title">Lore</h3>
+                <p class="hero-lore">{{ hero.lore }}</p>
+              </section>
+
               <!-- Level progression (player character only) -->
               <section class="section" v-if="hero.isPlayerCharacter">
                 <h3 class="section-title">Progression</h3>
@@ -412,6 +418,15 @@ const stats = computed(() => {
   line-height: 1.2;
   padding: 0 12px;
 }
+.hero-lore {
+  font-size: 0.72rem;
+  color: #8a7560;
+  line-height: 1.6;
+  font-style: italic;
+  border-left: 2px solid var(--border-brown);
+  padding-left: 10px;
+}
+
 .portrait-quote {
   position: relative; z-index: 1;
   font-size: 0.62rem; font-style: italic;

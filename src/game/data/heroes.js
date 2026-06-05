@@ -477,6 +477,7 @@ export const HERO_TEMPLATES = {
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true,
     quote: 'For rice and honer.',
+    lore: 'A wandering warlord whose wisdom arrives uninvited, usually mid-battle. Kyver has declined lordships, refused fortunes, and once ended a siege by inviting both sides to dinner. His blade is flawless. His spelling is not. Those who underestimate him tend to lose. Those who share a meal with him tend to follow him anywhere.',
   }),
 
   VORATH: () => new Hero({

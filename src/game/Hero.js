@@ -57,6 +57,7 @@ export class Hero {
     enemyType = null,
     canRevive = false,
     quote = null,
+    lore = null,
   }) {
     this.id = id
     this.name = name
@@ -65,6 +66,7 @@ export class Hero {
     this.affinity = affinity
     this.isPlayer = isPlayer
     this.quote = quote
+    this.lore = lore
 
     // Base stats
     this.baseHp = baseHp
