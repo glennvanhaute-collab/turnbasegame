@@ -30,34 +30,34 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { gsap } from 'gsap'
-import { TextPlugin } from 'gsap/TextPlugin'
 import { useAdvisorStore } from '../stores/useAdvisorStore.js'
 import frameImg from '../assets/units/advisor_with_text_v2.png'
 import closeImg from '../assets/ui/close.png'
 import nextImg  from '../assets/ui/next_nobg.png'
 import prevImg  from '../assets/ui/prev_nobg.png'
 
-gsap.registerPlugin(TextPlugin)
-
 const advisor = useAdvisorStore()
 const msgEl   = ref(null)
-let   tween   = null
+let   ticker  = null
+let   startTimer = null
 
 function typeText(text) {
-  if (tween) tween.kill()
+  clearInterval(ticker)
+  clearTimeout(startTimer)
   if (!msgEl.value) return
   msgEl.value.textContent = ''
-  tween = gsap.to(msgEl.value, {
-    duration: Math.max(1, text.length * 0.028),
-    text:     { value: text },
-    ease:     'none',
-    delay:    0.35,
-  })
+  let i = 0
+  const charDelay = Math.max(1000, text.length * 28) / Math.max(1, text.length)
+  startTimer = setTimeout(() => {
+    ticker = setInterval(() => {
+      if (!msgEl.value || i >= text.length) { clearInterval(ticker); return }
+      msgEl.value.textContent += text[i++]
+    }, charDelay)
+  }, 350)
 }
 
 onMounted(() => typeText(advisor.currentMessage))
-onUnmounted(() => { if (tween) tween.kill() })
+onUnmounted(() => { clearInterval(ticker); clearTimeout(startTimer) })
 
 watch(() => advisor.currentMessage, (msg) => typeText(msg), { flush: 'post' })
 </script>

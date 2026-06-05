@@ -76,17 +76,18 @@ const HOUSE_BORDERS = {
 }
 
 const props = defineProps({
-  hero: { type: Object, required: true },
-  size: { type: Number, default: 72 },
+  hero:      { type: Object,  required: true },
+  size:      { type: Number,  default: 72 },
+  noBorder:  { type: Boolean, default: false },
 })
 
-const portrait   = computed(() => {
+const portrait  = computed(() => {
   if (props.hero.id === 'player_character') {
     return PLAYER_AVATARS[props.hero.avatarId] ?? null
   }
   return getPortrait(props.hero)
 })
-const borderImg  = computed(() => HOUSE_BORDERS[props.hero.faction] ?? null)
+const borderImg = computed(() => props.noBorder ? null : (HOUSE_BORDERS[props.hero.faction] ?? null))
 const uid        = computed(() => props.hero.id)
 
 const SKIP_WORDS = new Set(['the', 'of', 'von', 'de', 'la', 'le'])

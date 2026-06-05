@@ -665,53 +665,55 @@ export const RECRUIT_POOL = [
 export const NORMAL_POOL = RECRUIT_POOL
 export const VOID_POOL   = RECRUIT_POOL
 
+// Training Grounds encounters — free to repeat, drop ores only (no gold/diamonds).
+// Gold is exclusively earned through energy-gated dungeon content.
 export const ENCOUNTERS = [
   {
     id: 'encounter_1',
     name: 'The Sparring Yard',
     difficulty: 'Easy',
-    energyCost: 4,
+    isTraining: true,
     enemies: [HERO_TEMPLATES.SPARRING_DUMMY],
-    rewards: { gold: 200, diamonds: 0 },
+    rewards: { gold: 0, diamonds: 0 },
   },
   {
     id: 'encounter_2',
     name: 'Conscript Skirmish',
     difficulty: 'Easy',
-    energyCost: 5,
+    isTraining: true,
     enemies: [HERO_TEMPLATES.MILITIA_CONSCRIPT, HERO_TEMPLATES.SPARRING_DUMMY],
-    rewards: { gold: 350, diamonds: 0 },
+    rewards: { gold: 0, diamonds: 0 },
   },
   {
     id: 'encounter_3',
     name: 'Border Skirmish',
     difficulty: 'Normal',
-    energyCost: 8,
+    isTraining: true,
     enemies: [HERO_TEMPLATES.BLOODTUSK_RAIDER, HERO_TEMPLATES.BLOODTUSK_RAIDER],
-    rewards: { gold: 600, diamonds: 3 },
+    rewards: { gold: 0, diamonds: 0 },
   },
   {
     id: 'encounter_4',
     name: "Karg's Ambush",
     difficulty: 'Hard',
-    energyCost: 14,
+    isTraining: true,
     enemies: [HERO_TEMPLATES.KARG, HERO_TEMPLATES.BLOODTUSK_RAIDER, HERO_TEMPLATES.BLOODTUSK_RAIDER],
-    rewards: { gold: 1000, diamonds: 8 },
+    rewards: { gold: 0, diamonds: 0 },
   },
   {
     id: 'encounter_5',
     name: "Ignar's Vanguard",
     difficulty: 'Hard',
-    energyCost: 14,
+    isTraining: true,
     enemies: [HERO_TEMPLATES.IGNAR_CULTIST, HERO_TEMPLATES.BLOODTUSK_RAIDER, HERO_TEMPLATES.KARG],
-    rewards: { gold: 1200, diamonds: 10 },
+    rewards: { gold: 0, diamonds: 0 },
   },
   {
     id: 'encounter_6',
     name: 'The Barrow King Rises',
     difficulty: 'Nightmare',
-    energyCost: 20,
+    isTraining: true,
     enemies: [HERO_TEMPLATES.LICH_SOVEREIGN, HERO_TEMPLATES.BARROW_KNIGHT, HERO_TEMPLATES.SKELETON_WARRIOR],
-    rewards: { gold: 2000, diamonds: 25 },
+    rewards: { gold: 0, diamonds: 0 },
   },
 ]
