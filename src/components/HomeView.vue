@@ -98,7 +98,8 @@
           <div class="detail-section">
             <div class="section-label">Rewards</div>
             <div class="rewards-row">
-              <span class="reward gold">🪙 {{ selectedEnc.rewards.gold.toLocaleString() }}</span>
+              <span class="reward gold" v-if="selectedEnc.rewards.gold > 0">🪙 {{ selectedEnc.rewards.gold.toLocaleString() }}</span>
+              <span class="reward ore"  v-if="selectedEnc.isTraining">⛏ Ore drops</span>
               <span class="reward diamonds" v-if="selectedEnc.rewards.diamonds > 0">💎 {{ selectedEnc.rewards.diamonds }}</span>
               <span class="reward xp">✦ XP</span>
             </div>
@@ -111,7 +112,7 @@
           :title="battleHint"
           @click="startBattle"
         >
-          {{ campaign.isCompleted(selectedEnc.id) ? '↺ Replay' : 'Battle →' }}
+          ⚔ Battle
         </button>
         <div class="battle-hint-text" v-if="!canBattle">{{ battleHint }}</div>
 
@@ -581,6 +582,7 @@ function formatElapsed(ms) {
 .rewards-row { display: flex; gap: 12px; }
 .reward      { font-size: 0.78rem; font-weight: 700; }
 .reward.gold     { color: var(--gold); }
+.reward.ore      { color: #b07840; }
 .reward.diamonds { color: #88ccff; }
 .reward.xp       { color: #aaffcc; }
 
