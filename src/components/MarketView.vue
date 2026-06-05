@@ -1,5 +1,6 @@
 <template>
   <div class="market-wrap">
+    <div class="market-bg" />
 
     <div class="market-header">
       <div>
@@ -87,6 +88,7 @@ import { useInventoryStore, SELL_PRICES } from '../stores/useInventoryStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { GearType } from '../game/Gear.js'
 import { Rarity } from '../game/Hero.js'
+import marketBg from '../assets/backgrounds/market-bg.png'
 
 const inventory = useInventoryStore()
 const currency  = useCurrencyStore()
@@ -162,12 +164,29 @@ function doSellAll() {
 
 <style scoped>
 .market-wrap {
+  position: relative;
   max-width: 1100px;
   margin: 0 auto;
   padding: 0 20px 40px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.market-bg {
+  position: fixed;
+  inset: 0;
+  background-image: v-bind("'url(' + marketBg + ')'");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.market-wrap > *:not(.market-bg) {
+  position: relative;
+  z-index: 1;
 }
 
 .market-header {
