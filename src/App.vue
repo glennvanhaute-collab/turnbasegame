@@ -7,14 +7,14 @@
     <header class="app-header">
       <div class="app-header-bg" :style="{ backgroundImage: `url(${navBg})` }" />
       <div class="header-inner">
-        <img :src="logoNav" class="logo-img" alt="" @click="view = 'campaign'" style="cursor:pointer" />
-        <h1 class="logo" @click="view = 'campaign'" style="cursor:pointer">Bannerlords of Westrun</h1>
+        <img :src="logoNav" class="logo-img" alt="" @click="navigate('campaign')" style="cursor:pointer" />
+        <h1 class="logo" @click="navigate('campaign')" style="cursor:pointer">Bannerlords of Westrun</h1>
         <nav class="nav">
-          <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="view = 'campaign'">Home</button>
-          <button class="nav-btn" :class="{ active: view === 'summon' }" @click="view = 'summon'">Recruit</button>
-          <button class="nav-btn" :class="{ active: view === 'gear' }" @click="view = 'gear'">Arsenal</button>
-          <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="view = 'dungeon'">Expeditions</button>
-          <button class="nav-btn" :class="{ active: view === 'realm' }" @click="view = 'realm'">Realm</button>
+          <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="navigate('campaign')">Home</button>
+          <button class="nav-btn" :class="{ active: view === 'summon' }" @click="navigate('summon')">Recruit</button>
+          <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
+          <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
+          <button class="nav-btn" :class="{ active: view === 'realm' }" @click="navigate('realm')">Realm</button>
         </nav>
         <div class="currency-display">
           <span class="currency energy" title="Energy (1 per 3 min)">
@@ -77,6 +77,21 @@
       </Transition>
     </Teleport>
 
+    <!-- Market modal — floats over the homepage map -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showMarket">
+          <div class="coll-modal-backdrop" @click="showMarket = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showMarket = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <MarketView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Battle modal — floats over whatever view is active -->
     <Teleport to="body">
       <Transition name="coll-modal">
@@ -98,6 +113,7 @@
         @start-battle="startBattle"
         @open-collection="showCollection = true"
         @open-blacksmith="showBlacksmith = true"
+        @open-market="showMarket = true"
         @open-codex="showCodex = true"
       />
       <SummonView v-else-if="view === 'summon'" />
@@ -154,6 +170,7 @@ import HeroCreationView from './components/HeroCreationView.vue'
 import HomeView from './components/HomeView.vue'
 import CollectionView from './components/CollectionView.vue'
 import BlacksmithView from './components/BlacksmithView.vue'
+import MarketView from './components/MarketView.vue'
 import InventoryView from './components/InventoryView.vue'
 import EquipmentView from './components/EquipmentView.vue'
 import SummonView from './components/SummonView.vue'
@@ -180,26 +197,38 @@ import { buildDungeonEncounter } from './game/data/dungeons.js'
 const view       = ref('campaign')
 const gearTab    = ref('inventory')
 const expTab     = ref('dungeons')
-const showShop   = ref(false)
-const showCodex  = ref(false)
+const showShop        = ref(false)
+const showCodex       = ref(false)
 const showCollection  = ref(false)
 const showBlacksmith  = ref(false)
+const showMarket      = ref(false)
 const showBattle      = ref(false)
+
+function closeAllPanels() {
+  showCollection.value = false
+  showBlacksmith.value = false
+  showMarket.value     = false
+  showBattle.value     = false
+  showShop.value       = false
+  showCodex.value      = false
+}
+
+function navigate(newView) {
+  closeAllPanels()
+  view.value = newView
+}
 
 const { muted, toggleMute, onViewChange, startOnFirstInteraction } = useMusic()
 useSmeltingTick()
 
-watch(view, (v) => {
-  if (v !== 'campaign') showCollection.value = false
-  if (v !== 'campaign') showBlacksmith.value = false
-  onViewChange(v)
-})
+watch(view, (v) => { onViewChange(v) })
 
 function handleEscape(e) {
   if (e.key !== 'Escape') return
   if (showBattle.value)     { showBattle.value = false; return }
   if (showCollection.value) { showCollection.value = false; return }
   if (showBlacksmith.value) { showBlacksmith.value = false; return }
+  if (showMarket.value)     { showMarket.value = false; return }
   if (showCodex.value)      { showCodex.value = false; return }
   if (showShop.value)       { showShop.value = false; return }
 }

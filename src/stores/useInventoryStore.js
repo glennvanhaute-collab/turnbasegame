@@ -4,7 +4,17 @@ import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIV
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
+import { useCurrencyStore } from './useCurrencyStore.js'
 import { computeCP } from '../game/cp.js'
+
+export const SELL_PRICES = {
+  Common:    50,
+  Uncommon:  150,
+  Rare:      500,
+  Epic:      1500,
+  Legendary: 5000,
+  Mythical:  15000,
+}
 
 const STARTER_IDS = []
 
@@ -219,6 +229,32 @@ export const useInventoryStore = defineStore('inventory', () => {
     if (instance) ownedInstances.value.push(instance)
   }
 
+  function sellItem(instanceId) {
+    const idx = ownedInstances.value.findIndex(i => i.instanceId === instanceId)
+    if (idx === -1) return 0
+    const item = ownedInstances.value[idx]
+    if (getEquippedBy(instanceId)) return 0   // can't sell equipped gear
+    const gold = SELL_PRICES[item.rarity] ?? 0
+    ownedInstances.value.splice(idx, 1)
+    // Remove from any loadout just in case
+    for (const key of Object.keys(loadouts.value)) {
+      for (const s of Object.values(GearSlot)) {
+        if (loadouts.value[key][s] === instanceId) loadouts.value[key][s] = null
+      }
+    }
+    useCurrencyStore().addGold(gold)
+    return gold
+  }
+
+  function sellAllByRarity(rarity) {
+    const toSell = ownedInstances.value
+      .filter(i => i.rarity === rarity && !getEquippedBy(i.instanceId))
+      .map(i => i.instanceId)
+    let total = 0
+    for (const id of toSell) total += sellItem(id)
+    return total
+  }
+
   function heroCP(heroKey) {
     let hero
     if (heroKey === 'PLAYER_CHARACTER') {
@@ -251,5 +287,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     addToInventory, addInstance, heroCP,
     soulVessels, progressiveHeroKeys,
     awardSoulVessel, useSoulVessel, isProgressive,
+    sellItem, sellAllByRarity,
   }
 })

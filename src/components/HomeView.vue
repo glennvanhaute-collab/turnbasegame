@@ -200,13 +200,12 @@
             </span>
           </button>
 
-          <button class="enc-option locked" disabled>
+          <button class="enc-option" @click="$emit('open-market')">
             <span class="enc-opt-icon">🪙</span>
             <span class="enc-opt-info">
               <span class="enc-opt-name">Market</span>
-              <span class="enc-opt-sub">Generate gold over time</span>
+              <span class="enc-opt-sub">Sell gear for gold</span>
             </span>
-            <span class="enc-opt-lock">Soon</span>
           </button>
 
           <button class="enc-option" @click="$emit('open-blacksmith')">
@@ -265,7 +264,7 @@ import { computeCP, formatCP } from '../game/cp.js'
 import trainingBg from '../assets/backgrounds/homepage_bg.png'
 import codexIcon  from '../assets/ui/codex.png'
 
-const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-codex'])
+const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex'])
 
 const camp     = useCampStore()
 const currency = useCurrencyStore()
