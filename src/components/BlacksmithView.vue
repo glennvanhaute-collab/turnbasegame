@@ -24,7 +24,7 @@
               :style="{ '--bar-color': bar.color }"
               @click="selectSmelt(bar)"
             >
-              <span class="smelt-btn-dot" />
+              <GameIcon :icon="barIcon(bar.id)" :size="18" class="smelt-btn-icon" />
               <span class="smelt-btn-name">{{ bar.name }}</span>
               <span class="smelt-btn-cost">{{ bar.oreCost }}× ore</span>
             </button>
@@ -41,7 +41,7 @@
             :disabled="resources.forgeLevel < bar.requiredForge"
             @click="selectSmelt(bar)"
           >
-            <span class="smelt-btn-dot" />
+            <GameIcon :icon="barIcon(bar.id)" :size="18" class="smelt-btn-icon" />
             <span class="smelt-btn-name">{{ bar.name }}</span>
             <span class="smelt-btn-cost" v-if="resources.forgeLevel >= bar.requiredForge">
               {{ bar.oreCost }}× ore
@@ -73,7 +73,7 @@
           :style="{ '--tier-color': tier.color }"
           @click="selectForge(recipe)"
         >
-          <span class="recipe-slot-icon">{{ SLOT_ICONS[recipe.slot] }}</span>
+          <GameIcon :icon="SLOT_TO_ICON[recipe.slot] ?? 'sword'" :size="16" class="recipe-slot-icon" />
           <span class="recipe-name">{{ recipe.name }}</span>
           <span class="recipe-cost">
             <span
@@ -114,7 +114,7 @@
             <!-- Conversion info row -->
             <div class="smelt-conv-row">
               <div class="sco-side">
-                <span class="sco-dot" :style="{ '--sco-color': ORES[selectedBar.oreId]?.color }" />
+                <GameIcon :icon="oreIcon(selectedBar.oreId)" :size="28" />
                 <div class="sco-info">
                   <span class="sco-name">{{ ORES[selectedBar.oreId]?.name }}</span>
                   <span class="sco-stock">{{ resources.ores[selectedBar.oreId] ?? 0 }} in stock</span>
@@ -130,7 +130,7 @@
                   <span class="sco-name">{{ selectedBar.name }}</span>
                   <span class="sco-stock" :class="{ 'sco-none': maxSmelt === 0 }">{{ maxSmelt }} can smelt</span>
                 </div>
-                <span class="sco-dot" :style="{ '--sco-color': selectedBar.color }" />
+                <GameIcon :icon="barIcon(selectedBar.id)" :size="28" />
               </div>
             </div>
 
@@ -452,7 +452,7 @@
           :style="{ '--ore-color': ore.color }"
           @click="resources.ores[ore.id] && oreToBar[ore.id] && selectSmelt(oreToBar[ore.id])"
         >
-          <span class="ore-dot" />
+          <GameIcon :icon="oreIcon(ore.id)" :size="18" class="ore-icon" />
           <span class="ore-name">{{ ore.name }}</span>
           <span class="ore-count">{{ resources.ores[ore.id] ?? 0 }}</span>
           <span class="ore-smelt-arrow" v-if="resources.ores[ore.id] && oreToBar[ore.id]">→</span>
@@ -468,7 +468,7 @@
           :class="{ empty: !resources.bars[bar.id] }"
           :style="{ '--ore-color': bar.color }"
         >
-          <span class="ore-dot" />
+          <GameIcon :icon="barIcon(bar.id)" :size="18" class="ore-icon" />
           <span class="ore-name">{{ bar.name }}</span>
           <span class="ore-count">{{ resources.bars[bar.id] ?? 0 }}</span>
         </div>
@@ -487,6 +487,8 @@ import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { ORE_LIST, ORES } from '../game/data/ores.js'
 import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
 import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, STAR_RARITY, formatStatValue } from '../game/data/recipes.js'
+import { barIcon, oreIcon, SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import GameIcon from './ui/GameIcon.vue'
 import arsenalBg    from '../assets/backgrounds/arsenal.png'
 import anvilImg     from '../assets/ui/anvil.png'
 import forge01Img   from '../assets/forges/forge_01.png'
@@ -660,8 +662,9 @@ function forge() {
     baseStats:   { ...recipe.baseStats },
     tier:        recipe.tier,
     slot:        recipe.slot,
-    image:       recipe.image ?? null,
-    frame:       recipe.frame ?? null,
+    image:       recipe.image     ?? null,
+    frame:       recipe.frame     ?? null,
+    armorType:   recipe.armorType ?? null,
   })
   instance.craftedAt = Date.now()
   instance.crafted   = true
@@ -741,11 +744,8 @@ function forge() {
   border-color: color-mix(in srgb, var(--bar-color) 50%, transparent);
 }
 .smelt-btn.locked { opacity: 0.3; cursor: not-allowed; }
-.smelt-btn-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--bar-color); flex-shrink: 0;
-}
-.smelt-btn.active .smelt-btn-dot { box-shadow: 0 0 5px var(--bar-color); }
+.smelt-btn-icon { flex-shrink: 0; }
+.smelt-btn.active .smelt-btn-icon { filter: drop-shadow(0 0 4px var(--bar-color)); }
 .smelt-btn-name { flex: 1; font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); }
 .smelt-btn-cost {
   font-size: 0.58rem; font-family: var(--font-head); color: var(--text-muted);
@@ -786,7 +786,7 @@ function forge() {
   border-color: color-mix(in srgb, var(--tier-color) 50%, transparent);
 }
 .recipe-btn.unaffordable { opacity: 0.42; }
-.recipe-slot-icon { font-size: 0.8rem; flex-shrink: 0; width: 16px; text-align: center; }
+.recipe-slot-icon { flex-shrink: 0; }
 .recipe-name { flex: 1; font-size: 0.68rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recipe-cost { display: flex; gap: 3px; flex-shrink: 0; }
 .cost-pill {
@@ -1103,11 +1103,6 @@ function forge() {
 }
 .sco-side { display: flex; align-items: center; gap: 12px; }
 .sco-right { flex-direction: row-reverse; }
-.sco-dot {
-  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
-  background: var(--sco-color);
-  box-shadow: 0 0 10px var(--sco-color), 0 0 20px color-mix(in srgb, var(--sco-color) 40%, transparent);
-}
 .sco-info { display: flex; flex-direction: column; gap: 2px; }
 .sco-info-right { text-align: right; }
 .sco-name { font-size: 0.78rem; font-weight: 700; color: rgba(255,230,180,0.95); font-family: var(--font-head); letter-spacing: 0.5px; }
@@ -1244,8 +1239,8 @@ function forge() {
   background: color-mix(in srgb, var(--ore-color) 5%, transparent);
 }
 .ore-row.empty { opacity: 0.28; filter: saturate(0.2); }
-.ore-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ore-color); flex-shrink: 0; }
-.ore-row:not(.empty) .ore-dot { box-shadow: 0 0 6px var(--ore-color); }
+.ore-icon { flex-shrink: 0; }
+.ore-row:not(.empty) .ore-icon { filter: drop-shadow(0 0 4px var(--ore-color)); }
 .ore-name { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ore-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--ore-color); min-width: 20px; text-align: right; }
 .ore-row.empty .ore-count { color: var(--text-dim); }

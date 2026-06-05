@@ -193,7 +193,7 @@
         <div class="enc-panel-body">
 
           <button class="enc-option" @click="$emit('open-collection')">
-            <span class="enc-opt-icon">⚔</span>
+            <GameIcon icon="collection" :size="28" class="enc-opt-icon" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Collection</span>
               <span class="enc-opt-sub">Manage your champions & team</span>
@@ -201,7 +201,7 @@
           </button>
 
           <button class="enc-option" @click="$emit('open-market')">
-            <span class="enc-opt-icon">🪙</span>
+            <GameIcon icon="market" :size="28" class="enc-opt-icon" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Market</span>
               <span class="enc-opt-sub">Sell gear for gold</span>
@@ -209,7 +209,7 @@
           </button>
 
           <button class="enc-option" @click="$emit('open-blacksmith')">
-            <span class="enc-opt-icon">🔨</span>
+            <GameIcon icon="blacksmith" :size="28" class="enc-opt-icon" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Blacksmith</span>
               <span class="enc-opt-sub">Smelt ore and forge gear</span>
@@ -263,6 +263,7 @@ import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { computeCP, formatCP } from '../game/cp.js'
 import trainingBg from '../assets/backgrounds/homepage_bg.png'
 import codexIcon  from '../assets/ui/codex.png'
+import GameIcon from './ui/GameIcon.vue'
 
 const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex'])
 
@@ -1076,7 +1077,6 @@ function formatElapsed(ms) {
 .enc-option.locked { opacity: 0.58; cursor: not-allowed; }
 
 .enc-opt-icon {
-  font-size: 1.2rem;
   flex-shrink: 0;
   width: 28px;
   text-align: center;

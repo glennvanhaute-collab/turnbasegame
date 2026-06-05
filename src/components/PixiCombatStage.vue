@@ -29,7 +29,7 @@
         <div class="anim-veil"  :class="{ on: hero.isDead }" />
       </div>
       <div class="anim-ring active-ring" :class="{ on: store.activeHero?.id === hero.id }" />
-      <div class="hero-name" :class="{ leader: i === 0 }">{{ i === 0 ? '★ ' : '' }}{{ hero.name }}</div>
+      <div class="hero-name" :class="[{ leader: i === 0 }, hero.rarity?.toLowerCase()]">{{ i === 0 ? '★ ' : '' }}{{ hero.name }}</div>
       <div class="hp-track"><div class="hp-fill" :class="hpCls(hero)" :style="{ width: hpPct(hero) + '%' }" /></div>
     </div>
 
@@ -50,7 +50,7 @@
       </div>
       <div class="anim-ring active-ring" :class="{ on: store.activeHero?.id === hero.id }" />
       <div class="anim-ring target-ring" :class="{ on: isSelectingTarget && !hero.isDead }" />
-      <div class="hero-name" :class="{ leader: i === 0 }">{{ i === 0 ? '★ ' : '' }}{{ hero.name }}</div>
+      <div class="hero-name" :class="[{ leader: i === 0 }, hero.rarity?.toLowerCase()]">{{ i === 0 ? '★ ' : '' }}{{ hero.name }}</div>
       <div class="hp-track"><div class="hp-fill" :class="hpCls(hero)" :style="{ width: hpPct(hero) + '%' }" /></div>
     </div>
 
@@ -316,7 +316,13 @@ watch(() => store.battleKey, () => {
   white-space: nowrap;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
-.hero-name.leader { color: #ffd700; font-weight: 700; }
+.hero-name.leader    { color: #ffd700; font-weight: 700; }
+.hero-name.mythical  { color: #ff6ef7; }
+.hero-name.legendary { color: #ffd700; }
+.hero-name.epic      { color: #b44fff; }
+.hero-name.rare      { color: #4fa8ff; }
+.hero-name.uncommon  { color: #4dff88; }
+.hero-name.common    { color: #aaa; }
 
 .hp-track {
   width: 80px;

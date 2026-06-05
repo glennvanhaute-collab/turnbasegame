@@ -42,7 +42,10 @@
               <div class="badges">
                 <span class="badge rarity" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
                 <span class="badge faction">{{ hero.faction }}</span>
-                <span class="badge affinity" :class="hero.affinity.toLowerCase()">{{ hero.affinity }}</span>
+                <span class="badge affinity" :class="hero.affinity.toLowerCase()">
+                  <GameIcon v-if="AFFINITY_ICON[hero.affinity]" :icon="AFFINITY_ICON[hero.affinity]" :size="14" />
+                  {{ hero.affinity }}
+                </span>
               </div>
             </div>
 
@@ -87,10 +90,13 @@
                     class="eq-row"
                     :class="equippedGear[slot] ? equippedGear[slot].rarity.toLowerCase() : 'empty'"
                   >
-                    <span class="eq-icon">{{ SLOT_ICONS[slot] }}</span>
+                    <GameIcon :icon="SLOT_TO_ICON[slot] ?? 'sword'" :size="20" class="eq-icon" />
                     <template v-if="equippedGear[slot]">
                       <div class="eq-details">
-                        <span class="eq-name">{{ equippedGear[slot].name }}</span>
+                        <div class="eq-name-row">
+                          <span class="eq-name">{{ equippedGear[slot].name }}</span>
+                          <span class="eq-stars" :class="equippedGear[slot].rarity.toLowerCase()">{{ '★'.repeat(equippedGear[slot].stars) || '☆' }}</span>
+                        </div>
                         <span class="eq-rarity" :class="equippedGear[slot].rarity.toLowerCase()">{{ equippedGear[slot].rarity }}</span>
                       </div>
                       <div class="eq-stats">
@@ -201,6 +207,8 @@ import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { TargetType } from '../game/Skill.js'
 import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
+import { SLOT_TO_ICON, AFFINITY_ICON } from '../game/data/spritesheet.js'
+import GameIcon from './ui/GameIcon.vue'
 import HeroAvatar from './HeroAvatar.vue'
 import ValdrisBg  from '../assets/lore/Valdris.png'
 import AldricBg   from '../assets/lore/Aldric.png'
@@ -244,13 +252,6 @@ const nextThreshold = computed(() =>
 )
 
 const SLOTS = Object.values(GearSlot)
-const SLOT_ICONS = {
-  [GearSlot.MAIN_HAND]: '⚔',
-  [GearSlot.OFF_HAND]:  '🛡',
-  [GearSlot.HEAD]:      '⛑',
-  [GearSlot.CHEST]:     '🥋',
-  [GearSlot.BOOTS]:     '👟',
-}
 
 const equippedGear = computed(() => {
   const key = entry.value?.key
@@ -499,9 +500,17 @@ const stats = computed(() => {
 .eq-row.common    { border-left-color: #555; }
 .eq-row.empty     { border-left-color: #2a1008; opacity: 0.5; }
 
-.eq-icon    { font-size: 1rem; flex-shrink: 0; width: 20px; text-align: center; }
-.eq-details { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
-.eq-name    { font-weight: 700; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eq-icon     { flex-shrink: 0; }
+.eq-details  { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.eq-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.eq-name     { font-weight: 700; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.eq-stars    { font-size: 0.6rem; letter-spacing: 0; white-space: nowrap; flex-shrink: 0; }
+.eq-stars.mythical  { color: #ff6ef7; }
+.eq-stars.legendary { color: #ffd700; }
+.eq-stars.epic      { color: #b44fff; }
+.eq-stars.rare      { color: #4fa8ff; }
+.eq-stars.uncommon  { color: #4dff88; }
+.eq-stars.common    { color: #888; }
 .eq-rarity  { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 .eq-rarity.mythical  { color: #ff6ef7; }
 .eq-rarity.legendary { color: #ffd700; }

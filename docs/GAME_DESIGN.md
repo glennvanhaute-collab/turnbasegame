@@ -123,6 +123,55 @@ Inspired by MapleStory cubing. Three orb types crafted from dungeon-dropped mate
 - **Magnificent Orb** (Ember Shards) — biased reroll, 40% chance each line rolls prime range
 - **Astral Orb** (Void Crystals + Ember Shard) — rolls new lines in secret, shows old vs new side by side, player chooses which to keep. Orb consumed either way.
 
+### Crafting Disciplines
+
+Four crafting disciplines, each producing a distinct armor type that feeds into the set bonus system:
+
+| Discipline | Armor Type | Produces |
+|---|---|---|
+| Blacksmithing | Plate | Plate armor (all 5 armor slots) + metal weapons (sword, axe, mace, spear) + shields |
+| Leatherworking | Leather | Leather armor (all 5 armor slots) + daggers |
+| Tailoring | Cloth | Cloth armor (all 5 armor slots) + off-hand tomes/focuses |
+| Woodworking | — | Bows (leather affinity), staves + wands (cloth affinity) |
+
+Woodworking is a production skill, not a set identity. A bow counts toward the leather set bonus; a staff/wand counts toward the cloth set bonus. This means a ranger with full leather armor + bow hits 6 leather pieces naturally.
+
+### Armor Type Set Bonuses
+
+Wearing X pieces of the same armor type grants escalating bonuses. Piece count includes all 7 gear slots — armor slots (head/chest/legs/boots/gloves) plus weapons and shields that match the armor type.
+
+Thresholds stack — hitting 4-piece also gives the 2-piece bonus.
+
+| Set | 2-piece | 4-piece | 6-piece (flat) | 6-piece (passive, future) |
+|---|---|---|---|---|
+| **Plate** | +8% DEF | +12% HP | +5% DEF, +8% HP | On being hit below 30% HP: gain a shield equal to 10% max HP (once per battle) |
+| **Leather** | +8% SPD | +10% Crit Rate | +8% ATK | First action each battle deals 25% bonus damage |
+| **Cloth** | +12% ATK | +10% Crit DMG | +8% HP | AOE skills deal 15% increased damage |
+
+The 6-piece passive effects are stubbed in `setBonus.js` (`SET_PASSIVE_6`). The combat store will check for them when battle hooks are implemented — flat stats apply now, passives fire later.
+
+**Set bonus is not a lock.** Players can mix armor types freely. If you want +8% SPD from 2 leather pieces alongside plate armor, that's valid. The system rewards commitment without punishing experimentation.
+
+### Hero Gear Affinity (future layer)
+
+Individual heroes can have `gearAffinity` bonuses that trigger from specific equipment — separate from set bonuses, defined on the hero template:
+
+```
+Lirien: +10% ATK when main hand is a bow
+Iron Blade: +8% DEF when wearing full plate (all 5 armor slots)
+Ember Sage: +15% skill damage when staff equipped
+```
+
+Design target: `computeGearStats` reads `gearAffinity` from the hero template and applies matching conditions. No hard locks — just bonus rewards for thematic builds.
+
+### Progression Balance Target
+
+| Milestone | What achieves it |
+|---|---|
+| Clear Easy Dungeon (first time) | ★2 weapon + 2-piece plate set bonus |
+| Farm Easy Dungeons reliably | ★4 + 4-piece set |
+| Enter Medium Dungeons | Full 6-piece set + star gates (★5/★6) |
+
 ### Economy Loop — nothing is wasted
 Unused resources can be sold for gold. Gold buys things across the game. The design intent: everything you farm, everything you hoard, will eventually have a use. No dead-end resources.
 
@@ -264,6 +313,89 @@ The design tension he solves: the game has deep, interlocking systems that rewar
 
 ---
 
+## Icon System
+
+Icons are served from PNG spritesheets in `src/assets/ui/`. Each sheet is numbered (`icons_1.png`, `icons_2.png`, ...) so additional sheets can be added without renaming.
+
+### Current sheets
+
+**icons_1.png** — 8 columns × 4 rows, source 1774×887px
+
+| Row | Contents |
+|---|---|
+| 0 | Navigation: collection, market, blacksmith (cols 0–2); cols 3–7 reserved |
+| 1 | Ores: copper → runite (8 tiers, left to right) |
+| 2 | Bars: copper → runite (same order as ores) |
+| 3 | Gear slots: sword, dagger, shield, helmet, chest, legs, boots, gloves |
+
+### How to use
+
+```vue
+import GameIcon from '@/components/ui/GameIcon.vue'
+
+<GameIcon icon="copper_bar" :size="20" />
+<GameIcon icon="helmet" :size="28" />
+```
+
+The component accepts any icon name from `ICONS` in `src/game/data/spritesheet.js`. The `:size` prop is the display size in px — the component scales the sheet automatically, so source resolution is irrelevant.
+
+Helper functions in `spritesheet.js`:
+- `barIcon(tierId)` → `"${tierId}_bar"` — use with resource tier IDs
+- `oreIcon(tierId)` → `"${tierId}_ore"` — same
+- `SLOT_TO_ICON[slotKey]` — maps GearSlot values to slot icon names
+
+### Currently wired
+- BlacksmithView: smelt buttons, ore/bar conversion row, forge recipe list slot icons, stockpile
+- GearSlotCard: filled and empty slot icons
+- HomeView encampment panel: Collection, Market, Blacksmith buttons
+- HeroDetailModal: equipped gear slot icons
+
+### Current sheets
+| File | Size | Grid | Contents |
+|---|---|---|---|
+| `icons_1.png` | 1774×887 | 8×4 | Nav, ores, bars, gear slots |
+| `icons_2.png` | 2048×768 | 8×3 | Currency/UI, affinities, artisan skills |
+
+### Adding a new sheet
+
+**Step 1 — Generate with ChatGPT using this exact prompt template:**
+
+```
+Create a pixel art RPG sprite sheet on a single black background.
+8 columns × [N] rows, each icon in a 64×64 pixel cell with a small
+dark border separating cells. Total image: 512×[N*64] pixels.
+
+Style: dark fantasy RPG item icons, Runescape / old-school MMORPG
+aesthetic, clean linework, warm highlights, muted earthy palette
+with strong accent colors. Match the style of icons_1.png exactly.
+
+Row 0: [icon name]: [description], [icon name]: [description], ...
+Row 1: ...
+[remaining rows, mark empty cells as "leave black/empty"]
+
+Do not add any labels or text. Icons must be visually distinct and
+readable at small size. Consistent lighting from top-left on all icons.
+```
+
+**Step 2 — Drop the file as `src/assets/ui/icons_[N].png`**
+
+**Step 3 — Add to `spritesheet.js`:**
+```js
+export const SHEET_[N]_ROWS = [rows]
+const ICONS_[N] = {
+  icon_name: pos(col, row, N),
+  ...
+}
+// Merge into ICONS: export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_N }
+```
+
+**Step 4 — Register in `GameIcon.vue`:**
+```js
+import sheetNUrl from '../../assets/ui/icons_N.png'
+const SHEET_ROWS = { 1: SHEET_1_ROWS, 2: SHEET_2_ROWS, N: SHEET_N_ROWS }
+const SHEET_URLS = { 1: sheet1Url, 2: sheet2Url, N: sheetNUrl }
+```
+
 ## Tech Stack
 
 | | |
@@ -312,6 +444,16 @@ The design tension he solves: the game has deep, interlocking systems that rewar
 | Exploration additive system (runes/shrines/blessings) | ❌ Designed, not yet built |
 | Herbalism bottling of blessings | ❌ Depends on exploration additives |
 | Additive rarity threshold (world route to Mythical) | ❌ Depends on exploration additives |
+| Armor type system (ArmorType, WEAPON_ARMOR_TYPE on all recipes) | ✅ Complete |
+| Set bonus data (plate/leather/cloth, 2/4/6 thresholds) | ✅ Complete |
+| Set bonus counting + flat stat application in computeGearStats | ✅ Complete |
+| Set passive 6-piece effects (steadfast / opener / aoe_amplify) | 🔧 Stubbed in setBonus.js, combat hooks pending |
+| Hero gear affinity bonuses (e.g. +ATK when bow equipped) | ❌ Designed, not yet built |
+| Leatherworking crafting discipline | ❌ Designed, not yet built |
+| Tailoring crafting discipline | ❌ Designed, not yet built |
+| Woodworking crafting discipline (bow, staff, wand) | ❌ Designed, not yet built |
+| Copper full set complete (sword, dagger, shield, helmet, chest, legplates, greaves, gauntlets) | ✅ Complete |
+| Elven set armorType tagged as plate | ✅ Complete |
 | Gear history / deed inscriptions / named weapons | ❌ Future work |
 | Reputation system | ❌ Future / DLC |
 | Lore-based recruitment | ❌ DLC |

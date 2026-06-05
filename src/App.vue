@@ -18,18 +18,20 @@
         </nav>
         <div class="currency-display">
           <span class="currency energy" title="Energy (1 per 3 min)">
-            <span class="currency-icon">⚡</span>
+            <GameIcon icon="energy" :size="16" class="currency-icon" />
             {{ energyStore.energy }}/{{ energyStore.maxEnergy }}
           </span>
           <span class="currency gold" title="Gold">
-            <span class="currency-icon">🪙</span>
+            <GameIcon icon="gold" :size="16" class="currency-icon" />
             {{ currencyStore.gold.toLocaleString() }}
           </span>
           <span class="currency diamonds" title="Buy items with Diamonds" style="cursor:pointer" @click="showShop = true">
-            <span class="currency-icon">💎</span>
+            <GameIcon icon="diamond" :size="16" class="currency-icon" />
             {{ currencyStore.diamonds.toLocaleString() }}
           </span>
-          <button class="icon-btn" @click="toggleMute" :title="muted ? 'Unmute' : 'Mute'">{{ muted ? '🔇' : '🔊' }}</button>
+          <button class="icon-btn" @click="toggleMute" :title="muted ? 'Unmute' : 'Mute'">
+            <GameIcon :icon="muted ? 'mute' : 'unmute'" :size="18" />
+          </button>
           <button class="icon-btn" @click="exportProgression" title="Export save file">⬇</button>
           <button class="icon-btn" @click="$refs.importInput.click()" title="Import save file">⬆</button>
           <input ref="importInput" type="file" accept=".json" style="display:none" @change="importProgression" />
@@ -191,6 +193,7 @@ import arsenalBg from './assets/backgrounds/arsenal.png'
 import navBg from './assets/backgrounds/bg_nav.png'
 import codexIcon from './assets/ui/codex.png'
 import closeImg from './assets/ui/close.png'
+import GameIcon from './components/ui/GameIcon.vue'
 import { useAdvisorStore } from './stores/useAdvisorStore.js'
 import { buildDungeonEncounter } from './game/data/dungeons.js'
 
@@ -461,7 +464,7 @@ body {
 .currency.energy   { color: #aaff44; border-color: #2a3a0055; }
 .currency.gold     { color: var(--gold); border-color: var(--gold-faint); }
 .currency.diamonds { color: #88ccff; border-color: #0a204055; }
-.currency-icon     { font-size: 0.82rem; }
+.currency-icon     { flex-shrink: 0; }
 
 .codex-fab {
   position: fixed;

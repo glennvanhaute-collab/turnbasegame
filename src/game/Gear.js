@@ -25,6 +25,26 @@ export const WeaponType = {
   STAFF:   'staff',
   MACE:    'mace',
   SPEAR:   'spear',
+  BOW:     'bow',
+  WAND:    'wand',
+}
+
+export const ArmorType = {
+  PLATE:   'plate',
+  LEATHER: 'leather',
+  CLOTH:   'cloth',
+}
+
+// Which armor type a weapon contributes toward for set bonus counting
+export const WEAPON_ARMOR_TYPE = {
+  sword:  'plate',
+  axe:    'plate',
+  mace:   'plate',
+  spear:  'plate',
+  dagger: 'leather',
+  bow:    'leather',
+  staff:  'cloth',
+  wand:   'cloth',
 }
 
 // Which gear types are allowed in each slot
@@ -103,10 +123,11 @@ export function createItemInstance(baseItem) {
     description: baseItem.description,
     stats:       { ...baseItem.stats },
     baseStats:   baseItem.baseStats ? { ...baseItem.baseStats } : { ...baseItem.stats },
-    tier:        baseItem.tier   ?? null,
-    slot:        baseItem.slot   ?? null,
-    image:       baseItem.image  ?? null,
-    frame:       baseItem.frame  ?? null,
+    tier:        baseItem.tier       ?? null,
+    slot:        baseItem.slot       ?? null,
+    image:       baseItem.image      ?? null,
+    frame:       baseItem.frame      ?? null,
+    armorType:   baseItem.armorType  ?? null,
     stars:       0,
     craftedAt:   null,
     crafted:     false,

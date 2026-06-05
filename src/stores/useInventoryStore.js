@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, createItemInstance, computeLineStats } from '../game/Gear.js'
+import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, createItemInstance, computeLineStats } from '../game/Gear.js'
+import { SET_BONUSES } from '../game/data/setBonus.js'
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
@@ -214,13 +215,33 @@ export const useInventoryStore = defineStore('inventory', () => {
       }
     }
 
+    // Set bonus counting — tally armorType per equipped item
+    const setPieces = { plate: 0, leather: 0, cloth: 0 }
+    for (const slot of Object.values(GearSlot)) {
+      const item = loadout[slot] ? instanceById(loadout[slot]) : null
+      if (!item) continue
+      const type = item.armorType ?? WEAPON_ARMOR_TYPE[item.weaponType]
+      if (type && type in setPieces) setPieces[type]++
+    }
+    for (const [armorType, count] of Object.entries(setPieces)) {
+      const bonusTiers = SET_BONUSES[armorType]
+      if (!bonusTiers) continue
+      for (const [threshold, stats] of Object.entries(bonusTiers)) {
+        if (count >= Number(threshold)) {
+          for (const [key, val] of Object.entries(stats)) {
+            if (key in totals) totals[key] += val
+          }
+        }
+      }
+    }
+
     if (isDualWielding(heroKey)) {
       totals.atkPct   += DUAL_WIELD_BONUS.atkPct
       totals.critRate += DUAL_WIELD_BONUS.critRate
     }
 
     const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
-    return { stats: totals, damageReduction: dr }
+    return { stats: totals, damageReduction: dr, setPieces }
   }
 
   function availableForSlot(heroKey, slot) {
@@ -285,6 +306,18 @@ export const useInventoryStore = defineStore('inventory', () => {
     return computeCP(hero)
   }
 
+  function getSetPieces(heroKey) {
+    const loadout  = getLoadout(heroKey)
+    const counts = { plate: 0, leather: 0, cloth: 0 }
+    for (const slot of Object.values(GearSlot)) {
+      const item = loadout[slot] ? instanceById(loadout[slot]) : null
+      if (!item) continue
+      const type = item.armorType ?? WEAPON_ARMOR_TYPE[item.weaponType]
+      if (type && type in counts) counts[type]++
+    }
+    return counts
+  }
+
   return {
     ownedInstances, ownedItems, loadouts,
     focusedHeroKey, pendingSlot,
@@ -302,5 +335,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     soulVessels, progressiveHeroKeys,
     awardSoulVessel, useSoulVessel, isProgressive,
     sellItem, sellAllByRarity,
+    getSetPieces,
   }
 })

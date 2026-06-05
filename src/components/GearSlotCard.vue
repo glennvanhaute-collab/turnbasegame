@@ -3,9 +3,14 @@
     <div class="slot-label">{{ SLOT_LABELS[slotId] }}</div>
 
     <div class="slot-content" v-if="item">
-      <div class="item-icon">{{ gearIcon }}</div>
+      <div class="item-icon">
+        <GameIcon :icon="slotIcon" :size="28" />
+      </div>
       <div class="item-info">
-        <span class="item-name" :class="item.rarity.toLowerCase()">{{ item.name }}</span>
+        <div class="item-name-row">
+          <span class="item-name" :class="item.rarity.toLowerCase()">{{ item.name }}</span>
+          <span class="item-stars" :class="item.rarity.toLowerCase()">{{ item.stars > 0 ? '★'.repeat(item.stars) : '☆' }}</span>
+        </div>
         <div class="item-stats">
           <span v-for="s in topStats" :key="s" class="stat-chip">{{ s }}</span>
         </div>
@@ -13,7 +18,7 @@
     </div>
 
     <div class="slot-empty" v-else>
-      <span class="empty-icon">{{ emptyIcon }}</span>
+      <GameIcon :icon="slotIcon" :size="24" class="empty-icon" />
       <span class="empty-label">Empty</span>
       <!-- Off-hand hint -->
       <span class="offhand-hint" v-if="slotId === 'off_hand'">weapon or shield</span>
@@ -23,7 +28,9 @@
 
 <script setup>
 import { computed } from 'vue'
-import { GearType, GearSlot, SLOT_LABELS } from '../game/Gear.js'
+import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
+import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import GameIcon from './ui/GameIcon.vue'
 
 const props = defineProps({
   slotId:  { type: String, required: true },
@@ -32,14 +39,7 @@ const props = defineProps({
 })
 defineEmits(['click'])
 
-const GEAR_ICONS  = { [GearType.WEAPON]: '⚔', [GearType.SHIELD]: '🛡', [GearType.HELMET]: '⛑', [GearType.ARMOR]: '🥋', [GearType.BOOTS]: '👟' }
-const EMPTY_ICONS = {
-  [GearSlot.MAIN_HAND]: '⚔', [GearSlot.OFF_HAND]: '⚔/🛡',
-  [GearSlot.HEAD]: '⛑', [GearSlot.CHEST]: '🥋', [GearSlot.BOOTS]: '👟',
-}
-
-const gearIcon  = computed(() => props.item ? (GEAR_ICONS[props.item.gearType] ?? '▪') : '')
-const emptyIcon = computed(() => EMPTY_ICONS[props.slotId] ?? '▪')
+const slotIcon = computed(() => SLOT_TO_ICON[props.slotId] ?? 'sword')
 
 const STAT_FMT = {
   hp: v => `+${v}HP`, hpPct: v => `+${Math.round(v*100)}%HP`,
@@ -79,20 +79,22 @@ const topStats = computed(() =>
 .slot-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: #444; }
 
 .slot-content { display: flex; align-items: flex-start; gap: 8px; flex: 1; }
-.item-icon    { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
-.item-info    { flex: 1; min-width: 0; }
-.item-name    { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 4px; }
-.item-name.mythical  { color: #ff6ef7; }
-.item-name.legendary { color: #ffd700; }
-.item-name.epic      { color: #b44fff; }
-.item-name.rare      { color: #4fa8ff; }
-.item-name.uncommon  { color: #4dff88; }
-.item-name.common    { color: #ccc; }
+.item-icon    { flex-shrink: 0; }
+.item-info     { flex: 1; min-width: 0; }
+.item-name-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 4px; min-width: 0; }
+.item-name     { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-stars    { font-size: 0.58rem; white-space: nowrap; flex-shrink: 0; letter-spacing: 0; }
+.item-name.mythical,  .item-stars.mythical  { color: #ff6ef7; }
+.item-name.legendary, .item-stars.legendary { color: #ffd700; }
+.item-name.epic,      .item-stars.epic      { color: #b44fff; }
+.item-name.rare,      .item-stars.rare      { color: #4fa8ff; }
+.item-name.uncommon,  .item-stars.uncommon  { color: #4dff88; }
+.item-name.common,    .item-stars.common    { color: #ccc; }
 .item-stats { display: flex; flex-wrap: wrap; gap: 3px; }
 .stat-chip  { font-size: 0.58rem; background: #221108; color: #888; padding: 1px 4px; border-radius: 3px; }
 
 .slot-empty  { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-.empty-icon  { font-size: 1.2rem; opacity: 0.2; }
+.empty-icon  { opacity: 0.2; }
 .empty-label { font-size: 0.68rem; color: #333; }
 .offhand-hint { font-size: 0.6rem; color: #3e1c0c; font-style: italic; }
 </style>

@@ -9,10 +9,13 @@
     }"
     @click="selectable && !hero.isDead && $emit('select', hero)"
   >
-    <div class="hero-name">{{ hero.name }}</div>
+    <div class="hero-name" :class="hero.rarity.toLowerCase()">{{ hero.name }}</div>
     <div class="hero-meta">
       <span class="rarity" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
-      <span class="affinity">{{ hero.affinity }}</span>
+      <span class="affinity" :title="hero.affinity">
+        <GameIcon v-if="AFFINITY_ICON[hero.affinity]" :icon="AFFINITY_ICON[hero.affinity]" :size="14" />
+        <template v-else>{{ hero.affinity }}</template>
+      </span>
     </div>
 
     <div class="hp-bar-wrap">
@@ -45,6 +48,8 @@
 <script setup>
 import { computed } from 'vue'
 import { StatusEffect } from '../game/Skill.js'
+import { AFFINITY_ICON } from '../game/data/spritesheet.js'
+import GameIcon from './ui/GameIcon.vue'
 
 const props = defineProps({
   hero: { type: Object, required: true },
@@ -103,7 +108,13 @@ const statusIcon = type => STATUS_ICONS[type] ?? '?'
 .hero-card.dead    { opacity: 0.35; filter: grayscale(1); }
 .hero-card.enemy   { border-color: #5a0000; }
 
-.hero-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: #eee; }
+.hero-name           { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: #eee; }
+.hero-name.mythical  { color: #ff6ef7; }
+.hero-name.legendary { color: #ffd700; }
+.hero-name.epic      { color: #b44fff; }
+.hero-name.rare      { color: #4fa8ff; }
+.hero-name.uncommon  { color: #4dff88; }
+.hero-name.common    { color: #ccc; }
 
 .hero-meta { display: flex; gap: 6px; margin-bottom: 6px; font-size: 0.7rem; }
 .rarity.legendary { color: #ffd700; }
