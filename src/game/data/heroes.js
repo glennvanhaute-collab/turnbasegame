@@ -468,6 +468,18 @@ export const HERO_TEMPLATES = {
     isPlayer: true,
   }),
 
+  ARRI: () => new Hero({
+    id: 'arri', name: 'Arri the Witch',
+    faction: Faction.CAELWYN, rarity: Rarity.LEGENDARY, affinity: Affinity.SPIRIT,
+    baseHp: 15500, baseAtk: 1600, baseDef: 750, baseSpd: 118,
+    critRate: 0.22, critDmg: 0.65,
+    skills: [SKILLS.VERDANT_HEX, SKILLS.FROM_THE_ARCHIVES, SKILLS.THE_LEDGER],
+    artisanSkills: [ARTISAN.herbalism, ARTISAN.apothecary],
+    isPlayer: true,
+    quote: 'I remember everything. Even the things you would rather I forgot.',
+    lore: 'Her library is the largest in Caelwyn. Visitors assume it is filled with ancient wisdom and forgotten spells — and they are not entirely wrong. But most of the shelves hold something more dangerous: meticulous records of every person she has ever met. What they promised. What they did instead. What they owe. Arri is generous, patient, and genuinely warm. She is also the only person in Westrun nobody has ever double-crossed twice.',
+  }),
+
   KYVER: () => new Hero({
     id: 'kyver', name: 'Kyver',
     faction: Faction.ALDRIC, rarity: Rarity.LEGENDARY, affinity: Affinity.FORCE,
@@ -678,6 +690,7 @@ export const RECRUIT_POOL = [
   { key: 'THERON',              rarity: 'Legendary' },
   { key: 'SERAPHEL',            rarity: 'Legendary' },
   { key: 'KYVER',               rarity: 'Legendary' },
+  { key: 'ARRI',                rarity: 'Legendary' },
   // ── Mythical ─────────────────────────────────────────────────────
   { key: 'AURELAN',             rarity: 'Mythical' },
   { key: 'VORATH',              rarity: 'Mythical' },

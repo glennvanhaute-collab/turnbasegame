@@ -278,6 +278,45 @@ export const SKILLS = {
     ],
   }),
 
+  // ── Arri the Witch ──────────────────────────────────────────────
+  VERDANT_HEX: new Skill({
+    id: 'verdant_hex',
+    name: 'Verdant Hex',
+    description: 'A quiet curse that finds the cracks. Deals 200% ATK with 80% chance to Poison for 2 turns.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.0 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.POISON, statusChance: 0.80, statusDuration: 2 }),
+    ],
+  }),
+
+  FROM_THE_ARCHIVES: new Skill({
+    id: 'from_the_archives',
+    name: 'From the Archives',
+    description: "She doesn't need to guess. She already knows. Deals 120% ATK and reduces target's ATK and DEF for 3 turns.",
+    cooldown: 3,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_ATK, statusChance: 1.0, statusDuration: 3 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_DEF, statusChance: 1.0, statusDuration: 3 }),
+    ],
+  }),
+
+  THE_LEDGER: new Skill({
+    id: 'the_ledger',
+    name: 'The Ledger',
+    description: 'Everyone owes her something. Hits all enemies for 100% ATK, reduces their SPD and Weakens them for 2 turns.',
+    cooldown: 4,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.0 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_SPD, statusChance: 1.0, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 1.0, statusDuration: 2 }),
+    ],
+  }),
+
   // ── Kyver ───────────────────────────────────────────────────────
   HONOUR_SLASH: new Skill({
     id: 'honour_slash',
