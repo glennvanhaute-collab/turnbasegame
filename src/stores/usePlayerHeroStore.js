@@ -5,8 +5,9 @@ import { SKILLS } from '../game/data/skills.js'
 
 const STORAGE_KEY = 'player-hero'
 
-// XP needed to gain the next level — scales so high levels take real effort
-function xpForLevel(lv) { return 200 + lv * 100 }
+// Exponential XP curve (RuneScape / MapleStory feel)
+// Each level costs ~6% more than the previous; Mythical takes ~1400 nightmare clears total
+function xpForLevel(lv) { return Math.floor(100 * Math.pow(1.06, lv - 1)) }
 
 // XP awarded per battle difficulty
 const XP_BY_DIFFICULTY = {

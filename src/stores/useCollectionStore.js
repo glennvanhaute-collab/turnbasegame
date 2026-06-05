@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { HERO_TEMPLATES, STARTER_KEYS } from '../game/data/heroes.js'
+import { applyBonds } from '../game/data/bonds.js'
 import { Rarity, Faction, Affinity } from '../game/Hero.js'
 import { useInventoryStore } from './useInventoryStore.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
@@ -168,6 +169,8 @@ export const useCollectionStore = defineStore('collection', () => {
       hero.applyGear(stats, damageReduction)
       return hero
     }).filter(Boolean)
+    applyBonds(heroes)
+    return heroes
   }
 
   return {

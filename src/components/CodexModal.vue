@@ -74,11 +74,30 @@
         </button>
       </div>
 
-      <!-- Lore tab — placeholder for codex fragment system -->
-      <div class="codex-body codex-coming" v-else-if="tab === 'lore'">
-        <div class="empty-icon">🗺</div>
-        <p>Lore fragments are gathered through exploration.</p>
-        <p class="empty-sub">Speak to travelers. Clear dungeons. Earn the right to know.</p>
+      <!-- Lore tab — discovered bonds -->
+      <div class="codex-body" v-else-if="tab === 'lore'">
+        <template v-if="bondStore.discoveredList.length">
+          <div v-for="bondId in bondStore.discoveredList" :key="bondId" class="lore-bond-entry">
+            <img
+              v-if="BOND_IMAGES[bondId]"
+              :src="BOND_IMAGES[bondId]"
+              class="lore-bond-image"
+              :alt="BOND_LORE[bondId]?.name"
+            />
+            <div class="lore-bond-body">
+              <div class="lore-bond-eyebrow">Companionship Bond</div>
+              <h3 class="lore-bond-title">{{ BOND_LORE[bondId]?.name }}</h3>
+              <p class="lore-bond-subtitle">{{ BOND_LORE[bondId]?.subtitle }}</p>
+              <blockquote class="lore-bond-quote" v-if="BOND_LORE[bondId]?.quote">{{ BOND_LORE[bondId].quote }}</blockquote>
+              <p class="lore-bond-text" v-if="BOND_LORE[bondId]?.body">{{ BOND_LORE[bondId].body }}</p>
+            </div>
+          </div>
+        </template>
+        <div class="codex-coming" v-else>
+          <div class="empty-icon">🗺</div>
+          <p>No bonds discovered yet.</p>
+          <p class="empty-sub">Some connections are only revealed when certain heroes stand side by side.</p>
+        </div>
       </div>
 
       <!-- Heroes tab — placeholder -->
@@ -95,11 +114,17 @@
 <script setup>
 import { ref } from 'vue'
 import { useJournalStore, ENTRY_TYPES } from '../stores/useJournalStore.js'
+import { useBondStore } from '../stores/useBondStore.js'
+import { BOND_LORE } from '../game/data/lore.js'
+import bondHelgaAldricImg from '../assets/lore/bond-unlocked-helga-aldric.png'
 
 defineEmits(['close'])
 
-const journal = useJournalStore()
-const tab     = ref('journal')
+const journal   = useJournalStore()
+const bondStore = useBondStore()
+const tab       = ref('journal')
+
+const BOND_IMAGES = { iron_vow: bondHelgaAldricImg }
 const writing = ref(false)
 const newTitle = ref('')
 const newBody  = ref('')
@@ -423,4 +448,63 @@ function cancelWrite() {
   text-transform: uppercase;
 }
 .btn-open-journal:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+/* Lore tab — bond entries */
+.lore-bond-entry {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #c8860a44;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0e0a04;
+}
+.lore-bond-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.lore-bond-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+}
+.lore-bond-eyebrow {
+  font-size: 0.58rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #c8860a;
+  font-family: var(--font-head);
+  font-weight: 700;
+}
+.lore-bond-title {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f5c842;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+.lore-bond-subtitle {
+  font-size: 0.66rem;
+  color: #8a7040;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+.lore-bond-quote {
+  border-left: 2px solid #c8860a44;
+  margin: 2px 0;
+  padding: 6px 12px;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: #9a7840;
+  line-height: 1.6;
+}
+.lore-bond-text {
+  font-size: 0.68rem;
+  color: #7a6650;
+  line-height: 1.85;
+  white-space: pre-line;
+  margin: 0;
+}
 </style>

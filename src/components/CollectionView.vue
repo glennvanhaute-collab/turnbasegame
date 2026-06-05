@@ -151,6 +151,17 @@
         </div>
       </div>
 
+      <!-- Bond indicators -->
+      <div v-if="activeBonds.length" class="bond-list">
+        <div v-for="bond in activeBonds" :key="bond.id" class="bond-badge">
+          <span class="bond-icon">⚔</span>
+          <div class="bond-text">
+            <span class="bond-name">{{ bond.name }}</span>
+            <span class="bond-desc">{{ bond.description }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="team-hint">
         {{ store.isReady ? 'Go to Campaign to start a battle.' : 'Select at least 1 hero to battle.' }}
       </div>
@@ -169,6 +180,7 @@ import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { formatCP } from '../game/cp.js'
 import HeroDetailModal from './HeroDetailModal.vue'
 import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
+import { BONDS } from '../game/data/bonds.js'
 const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 
 const PLAYER_AVATARS = Object.fromEntries(
@@ -194,6 +206,10 @@ const teamSlots = computed(() => {
   store.teamEntries.forEach((entry, i) => { slots[i] = entry })
   return slots
 })
+
+const activeBonds = computed(() =>
+  BONDS.filter(bond => bond.keys.every(k => store.team.includes(k)))
+)
 </script>
 
 <style scoped>
@@ -751,6 +767,24 @@ const teamSlots = computed(() => {
   font-family: var(--font-head);
   letter-spacing: 0.3px;
 }
+
+/* Companionship bonds */
+.bond-list  { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.bond-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: linear-gradient(135deg, #1a1000 0%, #2a1800 100%);
+  border: 1px solid #c8860a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  animation: bond-appear 0.4s ease-out;
+}
+@keyframes bond-appear { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.bond-icon { font-size: 1rem; color: #f5c842; flex-shrink: 0; margin-top: 1px; }
+.bond-text  { display: flex; flex-direction: column; gap: 2px; }
+.bond-name  { font-size: 0.72rem; font-weight: 700; color: #f5c842; font-family: var(--font-head); letter-spacing: 0.5px; }
+.bond-desc  { font-size: 0.62rem; color: #a08050; font-style: italic; line-height: 1.35; }
 
 /* Aurelan — divine gold light override */
 .roster-card.rarity-mythical.hero-aurelan {

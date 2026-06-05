@@ -1,0 +1,40 @@
+// Companionship bonds — passive stat bonuses when specific heroes fight together.
+// Heroes in a bond gain their bonus on top of full gear-applied stats.
+// Heroes receive hero.activeBonds = [...] so the UI can display bond indicators.
+
+export const BONDS = [
+  {
+    id:          'iron_vow',
+    name:        'The Iron Vow',
+    keys:        ['LORD_ALDRIC', 'HELGA'],   // template keys — used by UI to detect active bonds
+    heroes:      ['lord_aldric', 'helga'],   // hero IDs  — used by applyBonds at battle start
+    description: 'Aldric and Helga have stood together through war and silence. She steadies him; he sets her alight.',
+    bonuses: {
+      lord_aldric: { hpPct: 0.15, defPct: 0.20 },
+      helga:        { hpPct: 0.15, atkPct: 0.20 },
+    },
+  },
+]
+
+// Apply all active bonds to an already-geared hero array (mutates in place).
+export function applyBonds(heroes) {
+  const byId = Object.fromEntries(heroes.map(h => [h.id, h]))
+
+  for (const bond of BONDS) {
+    const allPresent = bond.heroes.every(id => byId[id])
+    if (!allPresent) continue
+
+    for (const [id, bonus] of Object.entries(bond.bonuses)) {
+      const hero = byId[id]
+      if (!hero) continue
+
+      if (bonus.hpPct)  { hero.baseHp  = Math.floor(hero.baseHp  * (1 + bonus.hpPct));  hero.maxHp = hero.baseHp; hero.hp = hero.baseHp }
+      if (bonus.atkPct) { hero.baseAtk = Math.floor(hero.baseAtk * (1 + bonus.atkPct)) }
+      if (bonus.defPct) { hero.baseDef = Math.floor(hero.baseDef * (1 + bonus.defPct)) }
+      if (bonus.spdPct) { hero.baseSpd = Math.floor(hero.baseSpd * (1 + bonus.spdPct)) }
+
+      hero.activeBonds = hero.activeBonds ?? []
+      hero.activeBonds.push({ id: bond.id, name: bond.name })
+    }
+  }
+}

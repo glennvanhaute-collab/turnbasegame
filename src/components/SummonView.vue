@@ -124,11 +124,52 @@
       </div>
     </div>
   </Teleport>
+
+  <!-- Bond unlock reveal — appears after the regular pull modal is dismissed -->
+  <Teleport to="body">
+    <div
+      class="bond-reveal-backdrop"
+      v-if="!store.lastResult && !store.lastResults.length && store.pendingBondReveal"
+      @click.self="store.dismissBondReveal()"
+    >
+      <div class="bond-reveal-card">
+        <div class="bond-reveal-eyebrow">Bond Forged</div>
+
+        <img class="bond-reveal-image" :src="bondImage" alt="Bond artwork" />
+
+        <div class="bond-reveal-body">
+          <h2 class="bond-reveal-title">{{ store.pendingBondReveal.name }}</h2>
+          <p class="bond-reveal-subtitle">{{ bondLore?.subtitle }}</p>
+
+          <blockquote class="bond-reveal-quote" v-if="bondLore?.quote">
+            {{ bondLore.quote }}
+          </blockquote>
+
+          <p class="bond-reveal-lore" v-if="bondLore?.body">{{ bondLore.body }}</p>
+
+          <div class="bond-reveal-bonuses">
+            <div class="bonus-row" v-for="(bonus, heroId) in store.pendingBondReveal.bonuses" :key="heroId">
+              <span class="bonus-hero">{{ heroDisplayName(heroId) }}</span>
+              <span class="bonus-stats">
+                <span v-if="bonus.hpPct">+{{ Math.round(bonus.hpPct * 100) }}% HP</span>
+                <span v-if="bonus.atkPct">+{{ Math.round(bonus.atkPct * 100) }}% ATK</span>
+                <span v-if="bonus.defPct">+{{ Math.round(bonus.defPct * 100) }}% DEF</span>
+              </span>
+            </div>
+          </div>
+
+          <button class="bond-reveal-close" @click="store.dismissBondReveal()">Seal in the Codex ✦</button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import recruitmentBg from '../assets/backgrounds/recruitment_bg.png'
+import bondUnlockImage from '../assets/lore/bond-unlocked-helga-aldric.png'
+import { BOND_LORE } from '../game/data/lore.js'
 import { useSummonStore } from '../stores/useSummonStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useEnergyStore } from '../stores/useEnergyStore.js'
@@ -152,6 +193,14 @@ function confirmReset() {
 const portalLabel = computed(() =>
   store.lastResult?.portal === 'void' ? 'Void' : 'Ancient'
 )
+
+// Bond reveal helpers
+const BOND_IMAGES = { iron_vow: bondUnlockImage }
+const bondImage = computed(() => BOND_IMAGES[store.pendingBondReveal?.id] ?? null)
+const bondLore  = computed(() => store.pendingBondReveal ? BOND_LORE[store.pendingBondReveal.id] : null)
+
+const HERO_DISPLAY_NAMES = { lord_aldric: 'Lord Aldric', helga: 'Helga' }
+function heroDisplayName(id) { return HERO_DISPLAY_NAMES[id] ?? id }
 </script>
 
 <style scoped>
@@ -476,5 +525,133 @@ const portalLabel = computed(() =>
 @keyframes glow-epic {
   0%, 100% { box-shadow: 0 0 18px rgba(180,79,255,0.25), inset 0 0 18px rgba(180,79,255,0.04); }
   50%       { box-shadow: 0 0 55px rgba(180,79,255,0.55), inset 0 0 30px rgba(180,79,255,0.10); }
+}
+
+/* ── Bond reveal modal ────────────────────────────────────────────── */
+.bond-reveal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  backdrop-filter: blur(6px);
+  animation: bond-fade-in 0.5s ease-out;
+}
+@keyframes bond-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.bond-reveal-card {
+  display: flex;
+  flex-direction: column;
+  width: min(700px, 95vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  border: 1px solid #c8860a;
+  border-radius: 6px;
+  background: #0a0703;
+  box-shadow: 0 0 80px rgba(200, 134, 10, 0.2), 0 30px 80px rgba(0,0,0,0.9);
+  animation: bond-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes bond-rise { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+.bond-reveal-eyebrow {
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #c8860a;
+  text-align: center;
+  padding: 16px 20px 0;
+  opacity: 0.8;
+}
+
+.bond-reveal-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.bond-reveal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 28px 24px;
+}
+
+.bond-reveal-title {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #f5c842;
+  letter-spacing: 1px;
+  text-align: center;
+  margin: 0;
+}
+
+.bond-reveal-subtitle {
+  font-size: 0.72rem;
+  color: #a08050;
+  text-align: center;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.bond-reveal-quote {
+  border-left: 3px solid #c8860a55;
+  margin: 4px 0;
+  padding: 8px 14px;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: #9a7840;
+  line-height: 1.6;
+}
+
+.bond-reveal-lore {
+  font-size: 0.71rem;
+  color: #8a7060;
+  line-height: 1.85;
+  white-space: pre-line;
+  margin: 0;
+}
+
+.bond-reveal-bonuses {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #120e06;
+  border: 1px solid #c8860a33;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+.bonus-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+}
+.bonus-hero  { color: var(--text-parchment); font-family: var(--font-head); font-weight: 600; }
+.bonus-stats { display: flex; gap: 10px; color: #f5c842; font-weight: 700; }
+
+.bond-reveal-close {
+  align-self: center;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #2a1800, #1a0e00);
+  border: 1px solid #c8860a;
+  border-radius: 6px;
+  color: #f5c842;
+  font-family: var(--font-head);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.bond-reveal-close:hover {
+  background: linear-gradient(135deg, #3a2200, #2a1400);
+  box-shadow: 0 0 16px rgba(200,134,10,0.3);
 }
 </style>

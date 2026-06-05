@@ -71,6 +71,31 @@ The ancient stone was never found again.`,
     ],
   },
 
+  helga: {
+    title:  'The Golden Vow',
+    quote:  '"Her armor catches the sun before the battle begins. Every soldier in the line sees it. Nobody runs." — House Aldric soldier, Second Campaign',
+    body: `Helga did not take Lord Aldric's name. This is one of those facts the histories note without comment, as if it were simply a detail, when in truth it is everything.
+
+She was already a warrior when she met him — not by title, but by the only measure that matters in Westrun: by the number of times she had bled and stood up anyway. Her armor had been in her family for three generations. The gold filigree was not decorative. It was added by her grandmother after surviving a siege where the only two people left standing at the wall were her grandmother and a blacksmith who loved her.
+
+The armor remembers. It has been in every battle since.
+
+When Aldric first saw her at the edge of a disputed valley, standing alone between two armed factions waiting for someone to do something stupid, he did not think "I will marry her." He thought "I understand now why neither side has moved."
+
+They did not marry for politics. They did not marry for alliances. She told him once, years later, that she agreed because he was the first man who hadn't tried to explain strategy to her.
+
+He has never forgotten that.
+
+Neither has anyone who has seen them fight side by side — two people who learned a long time ago that words before a battle are wasted breath. They already know where the other one is going. The soldiers say you can hear it in the silence between them.
+
+She does not fight in his shadow. She never has. When the line breaks and soldiers look for something to hold onto, they look for the gold that catches the light. They find her there, exactly where she said she would be.`,
+    fragments: [
+      { id: 'helga_f1', title: 'The Armor',         unlocked: false },
+      { id: 'helga_f2', title: 'The Disputed Valley', unlocked: false },
+      { id: 'helga_f3', title: 'What She Said',      unlocked: false },
+    ],
+  },
+
   hedge_blade: {
     title:   'The Unbroken',
     quote:   '"He doesn\'t fight like a man who wants to win. He fights like a man who has nothing left to lose — and found out that\'s not the same thing as being weak." — Unknown soldier',
@@ -129,4 +154,32 @@ He never went back to House Valdris. Not because he couldn't. Because he chose s
     ],
   },
 
+}
+
+// Bond lore — keyed by bond id. Shown in the bond reveal modal and Codex Lore tab.
+export const BOND_LORE = {
+  iron_vow: {
+    name:        'The Iron Vow',
+    subtitle:    'Lord Aldric · Helga',
+    quote:       '"They don\'t need signals. They don\'t need orders. You put them on the same line and the battle just... resolves." — House Aldric commander',
+    body: `Nobody witnessed the vow. That is the point.
+
+There was no ceremony, no witness, no record written in the hall. They were standing at the edge of a field after a skirmish that had gone longer than it should have, and Aldric said something nobody else heard, and Helga said something back, and that was the whole of it.
+
+What is known is what changed afterward. The camp noticed it before the soldiers did. The way they moved through it — separately, differently — but always with an awareness of where the other one was. Not looking. Not checking. Just knowing.
+
+In battle it is something else entirely.
+
+He takes the line that needs holding. She takes the line that needs breaking. They never discuss it beforehand. They have been doing this long enough that the conversation already happened, years ago, somewhere in all the fights they survived before they found each other.
+
+The soldiers say if you watch carefully, you can catch the moment before the charge when they glance at each other. Just once. Just long enough.
+
+Then they go.
+
+The armor she wears was her grandmother's. The fire in his gauntlets has no name. Between them, somehow, both of those things make more sense together than they ever did apart.
+
+They have never lost a battle they fought side by side.
+
+This may be coincidence. The soldiers do not believe it is.`,
+  },
 }

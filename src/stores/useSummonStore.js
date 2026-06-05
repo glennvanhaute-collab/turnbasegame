@@ -5,6 +5,8 @@ import { Rarity } from '../game/Hero.js'
 import { useCurrencyStore } from './useCurrencyStore.js'
 import { useCollectionStore } from './useCollectionStore.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
+import { useBondStore } from './useBondStore.js'
+import { BONDS } from '../game/data/bonds.js'
 
 // ── Portal definitions ──────────────────────────────────────────────────────
 export const PORTALS = {
@@ -62,6 +64,7 @@ export const useSummonStore = defineStore('summon', () => {
   const currency    = useCurrencyStore()
   const collection  = useCollectionStore()
   const playerHero  = usePlayerHeroStore()
+  const bondStore   = useBondStore()
 
   // Per-portal pity counters (pulls since last pity-threshold hit)
   const pityCounters = ref({ normal: 0 })
@@ -70,6 +73,22 @@ export const useSummonStore = defineStore('summon', () => {
   const lastResult  = ref(null)   // single pull
   const lastResults = ref([])     // 10x pull
   const pulling     = ref(false)
+
+  // Set when a pull completes a bond for the first time — cleared by dismissBondReveal()
+  const pendingBondReveal = ref(null)
+
+  function checkBondUnlocks(pulledKeys) {
+    for (const bond of BONDS) {
+      if (!bond.keys.some(k => pulledKeys.includes(k))) continue
+      if (!bond.keys.every(k => collection.ownsHero(k))) continue
+      if (bondStore.discover(bond.id)) {
+        pendingBondReveal.value = bond
+        break
+      }
+    }
+  }
+
+  function dismissBondReveal() { pendingBondReveal.value = null }
 
   function canAfford(portalId) {
     const p = PORTALS[portalId]
@@ -117,6 +136,7 @@ export const useSummonStore = defineStore('summon', () => {
       // Add to collection (or handle duplicate)
       const isDuplicate = collection.ownsHero(entry.key)
       collection.addToRoster(entry.key)
+      checkBondUnlocks([entry.key])
 
       // Duplicate compensation
       if (isDuplicate) {
@@ -192,6 +212,7 @@ export const useSummonStore = defineStore('summon', () => {
       // Sort best rarity first
       results.sort((a, b) => rarityIndex(b.rarity) - rarityIndex(a.rarity))
       lastResults.value = results
+      checkBondUnlocks(results.map(r => r.heroKey))
     } catch (e) {
       console.error('Summon ×10 error:', e)
     } finally {
@@ -209,7 +230,7 @@ export const useSummonStore = defineStore('summon', () => {
   }
 
   return {
-    PORTALS, pulling, lastResult, lastResults,
-    canAfford, canAfford10, summon, summon10, dismissResult, dismissResults, pityProgress,
+    PORTALS, pulling, lastResult, lastResults, pendingBondReveal,
+    canAfford, canAfford10, summon, summon10, dismissResult, dismissResults, dismissBondReveal, pityProgress,
   }
 })
