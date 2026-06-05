@@ -508,6 +508,8 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.DRAGON_LANCE, SKILLS.SEARING_DIVE, SKILLS.FORGE_WRATH],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true,
+    quote: 'I did not come here to hurt you. But I will not leave until this is done.',
+    lore: 'The dragon did not choose a conqueror. It chose her because she was the first person in three hundred years to offer it food before asking for anything in return. Jade Dragonforge has never started a war — but she has ended several. Her enemies remember the fire. Her allies remember that she learned every one of their names on the first day.',
   }),
 
   // ── Ancient tier ────────────────────────────────────────────────
