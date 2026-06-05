@@ -12,7 +12,7 @@ export const BattleState = {
 }
 
 export class BattleEngine {
-  constructor(playerTeam, enemyTeam) {
+  constructor(playerTeam, enemyTeam, options = {}) {
     this.playerTeam = playerTeam
     this.enemyTeam = enemyTeam
     this.state = BattleState.IDLE
@@ -21,6 +21,8 @@ export class BattleEngine {
     this.activeHero = null
     this.pendingSkill = null
     this._actionSeq = 0
+    this.mechanics  = options.mechanics ?? []
+    this.revivedIds = new Set()
   }
 
   get allHeroes() {
@@ -65,6 +67,13 @@ export class BattleEngine {
 
     this.turn++
     this.activeHero = hero
+
+    // Undead Regen: enemies recover 4% max HP each turn
+    if (!hero.isPlayer && this.mechanics.includes('undead_regen')) {
+      const regen = Math.floor(hero.maxHp * 0.04)
+      const actual = hero.heal(regen)
+      if (actual > 0) this.logMessage(`${hero.name} regenerates ${actual} HP.`)
+    }
 
     // Tick status effects at start of turn
     const { dotEffects } = hero.tickStatusEffects()
@@ -136,6 +145,13 @@ export class BattleEngine {
           }
           if (target.isDead) {
             this.logMessage(`${target.name} has been defeated!`)
+            // Revival mechanic: boss rises once at 30% HP
+            if (!target.isPlayer && target.canRevive && !this.revivedIds.has(target.id) && this.mechanics.includes('revival')) {
+              this.revivedIds.add(target.id)
+              target.isDead = false
+              target.hp = Math.floor(target.maxHp * 0.30)
+              this.logMessage(`☠ ${target.name} refuses to fall — rising at 30% HP! Burst now!`)
+            }
           }
 
           if (result.damage > 0 || result.heal > 0) {

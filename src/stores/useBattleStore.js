@@ -75,7 +75,7 @@ export const useBattleStore = defineStore('battle', () => {
       return hero
     })
 
-    engine.value = new BattleEngine(pTeam, eTeam)
+    engine.value = new BattleEngine(pTeam, eTeam, { mechanics: encounter.mechanics ?? [] })
     playerTeam.value = engine.value.playerTeam
     enemyTeam.value = engine.value.enemyTeam
     battleLog.value = engine.value.log

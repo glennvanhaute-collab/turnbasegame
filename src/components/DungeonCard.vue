@@ -67,6 +67,10 @@
       ◈ Lines gear guaranteed
     </div>
 
+    <div v-if="mechanicHints.length" class="mechanic-hints">
+      <div v-for="hint in mechanicHints" :key="hint" class="mechanic-hint">{{ hint }}</div>
+    </div>
+
     <button class="enter-btn" :style="{ borderColor: tierColor, color: tierColor }" @click="$emit('enter')">
       Enter →
     </button>
@@ -75,7 +79,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { POOL_LABELS, LOOT_LABEL, NODE_FORGE_STATS, NODE_BLESSED_STATS } from '../game/data/dungeons.js'
+import { POOL_LABELS, LOOT_LABEL, POOL_MECHANIC_HINTS, NODE_FORGE_STATS, NODE_BLESSED_STATS } from '../game/data/dungeons.js'
 const _dungeonBgs = import.meta.glob('../assets/dungeons/dungeon_*.png', { eager: true })
 
 const TIER_BG_PREFIX = { medium: 'intermediate' }
@@ -108,8 +112,9 @@ const TIER_COLORS = {
   Nightmare: '#cc44ff',
 }
 
-const tierColor = computed(() => TIER_COLORS[props.dungeon.tier] ?? '#888')
-const nodeColor = computed(() => props.dungeon.nodeType === 'forge' ? '#ff9944' : '#88ccff')
+const tierColor     = computed(() => TIER_COLORS[props.dungeon.tier] ?? '#888')
+const nodeColor     = computed(() => props.dungeon.nodeType === 'forge' ? '#ff9944' : '#88ccff')
+const mechanicHints = computed(() => POOL_MECHANIC_HINTS[props.dungeon.enemyPoolId] ?? [])
 const statPool  = computed(() => {
   const keys = props.dungeon.nodeType === 'forge' ? NODE_FORGE_STATS : NODE_BLESSED_STATS
   return keys.map(k => k.replace('Pct', '%').toUpperCase())
@@ -329,6 +334,15 @@ const statPool  = computed(() => {
   font-weight: 700;
   letter-spacing: 0.5px;
   margin-top: 2px;
+}
+
+.mechanic-hints { display: flex; flex-direction: column; gap: 3px; }
+.mechanic-hint {
+  font-size: 0.6rem;
+  color: #ff8844;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0.85;
 }
 
 .enter-btn {

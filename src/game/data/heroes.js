@@ -595,7 +595,7 @@ export const HERO_TEMPLATES = {
     baseHp: 60000, baseAtk: 3200, baseDef: 1200, baseSpd: 105,
     critRate: 0.30, critDmg: 0.85,
     skills: [SKILLS.DARK_WAVE, SKILLS.BLIZZARD, SKILLS.CRUSH],
-    isPlayer: false, enemyType: 'undead',
+    isPlayer: false, enemyType: 'undead', canRevive: true,
   }),
 }
 

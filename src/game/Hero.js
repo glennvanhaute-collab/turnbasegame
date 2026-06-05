@@ -55,6 +55,7 @@ export class Hero {
     artisanSkills = [],
     isPlayer = true,
     enemyType = null,
+    canRevive = false,
   }) {
     this.id = id
     this.name = name
@@ -81,6 +82,7 @@ export class Hero {
     this.skills = skills.map(s => s.clone())
     this.artisanSkills = artisanSkills
     this.isDead = false
+    this.canRevive = canRevive
     this.damageReduction = 0   // set by applyGear when wielding a shield
     this.enemyType = enemyType // e.g. 'undead' — used by slayer line bonuses
     this.slayerUndead = 0      // set by applyGear from line bonuses

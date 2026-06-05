@@ -42,6 +42,20 @@ export const POOL_LABELS = {
   nm_3:   'Barrow Knight + 2 Zombie Brutes',
 }
 
+// Dungeon mechanics per pool — passive rules that fire during battle
+const POOL_MECHANICS = {
+  nm_1: ['undead_regen'],
+  nm_2: ['revival', 'undead_regen'],
+  nm_3: ['undead_regen'],
+}
+
+// Short warning shown on the dungeon card
+export const POOL_MECHANIC_HINTS = {
+  nm_1: ['☠ Undead regenerate 4% HP per turn — bring DPS'],
+  nm_2: ['☠ Undead regenerate 4% HP per turn', '⚠ Lich Sovereign revives once at 30% HP — burst through it'],
+  nm_3: ['☠ Undead regenerate 4% HP per turn — bring DPS'],
+}
+
 const POOLS_BY_TIER = {
   Easy:      ['easy_1', 'easy_2', 'easy_3'],
   Medium:    ['med_1',  'med_2',  'med_3'],
@@ -233,8 +247,9 @@ export function buildDungeonEncounter(dungeon) {
     id: dungeon.id,
     name: dungeon.name,
     difficulty: dungeon.difficulty,
-    enemies: DUNGEON_ENEMY_POOLS[dungeon.enemyPoolId] ?? DUNGEON_ENEMY_POOLS.easy_1,
-    rewards: dungeon.rewards,
+    enemies:   DUNGEON_ENEMY_POOLS[dungeon.enemyPoolId] ?? DUNGEON_ENEMY_POOLS.easy_1,
+    mechanics: POOL_MECHANICS[dungeon.enemyPoolId] ?? [],
+    rewards:   dungeon.rewards,
     isDungeon: true,
     dungeonId: dungeon.id,
   }
