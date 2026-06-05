@@ -75,15 +75,33 @@
       <!-- Battle log -->
       <BattleLog />
 
-      <!-- Controls -->
-      <div class="controls-row" v-if="store.isOver">
-        <button
-          v-if="store.state === 'victory' && hasNextEncounter"
-          class="btn btn-primary"
-          @click="nextEncounter"
-        >Next →</button>
-        <button class="btn btn-retry"     @click="retryEncounter">↺ Retry</button>
-        <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
+      <!-- Batch progress (replaces controls while running) -->
+      <div class="batch-progress" v-if="store.isBatchRunning">
+        <div class="batch-label">⚡ Run {{ store.batchDone + 1 }} / {{ store.batchTotal }}</div>
+        <div class="batch-track">
+          <div class="batch-fill" :style="{ width: (store.batchDone / store.batchTotal * 100) + '%' }" />
+        </div>
+        <button class="btn btn-retry" @click="store.stopBatch()">■ Stop</button>
+      </div>
+
+      <!-- Controls after battle -->
+      <div class="controls-row" v-if="store.isOver && !store.isBatchRunning">
+        <!-- Victory -->
+        <template v-if="store.state === 'victory'">
+          <button
+            v-if="hasNextEncounter"
+            class="btn btn-primary"
+            @click="nextEncounter"
+          >Next →</button>
+          <button class="btn btn-retry"   @click="retryEncounter">▷ Run Once</button>
+          <button class="btn btn-batch"   @click="startBatch">⚡ Run 10×</button>
+          <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
+        </template>
+        <!-- Defeat -->
+        <template v-else>
+          <button class="btn btn-retry"     @click="retryEncounter">↺ Retry</button>
+          <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
+        </template>
       </div>
 
     </div>
@@ -128,6 +146,9 @@ function nextEncounter() {
 function retryEncounter() {
   const team = collection.buildTeam()
   store.initBattle(store.currentEncounterIndex, team)
+}
+function startBatch() {
+  store.startBatchRun(10)
 }
 </script>
 
@@ -284,4 +305,34 @@ function retryEncounter() {
 .btn-primary   { background: #e94560; color: #fff; }
 .btn-retry     { background: #5c2810; color: #d4a060; border: 1px solid #7a3a18; }
 .btn-secondary { background: #3e1c0c; color: #ccc; }
+.btn-batch     { background: #0a1a2a; color: #4fa8ff; border: 1px solid #1a3a5a; }
+
+/* ── Batch progress ──────────────────────────────────────────────── */
+.batch-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #080d14;
+  border: 1px solid #1a3050;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.batch-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4fa8ff;
+  letter-spacing: 0.5px;
+}
+.batch-track {
+  height: 3px;
+  background: #0e1a28;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.batch-fill {
+  height: 100%;
+  background: linear-gradient(to right, #4fa8ff, #88ccff);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
 </style>

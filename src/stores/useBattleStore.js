@@ -3,12 +3,13 @@ import { ref, computed, watch } from 'vue'
 import { BattleEngine, BattleState } from '../game/BattleEngine.js'
 import { runAI } from '../game/AI.js'
 import { HERO_TEMPLATES, ENCOUNTERS } from '../game/data/heroes.js'
-import { useCurrencyStore } from './useCurrencyStore.js'
-import { useCampaignStore } from './useCampaignStore.js'
-import { usePlayerHeroStore } from './usePlayerHeroStore.js'
-import { useDungeonStore } from './useDungeonStore.js'
-import { useResourceStore } from './useResourceStore.js'
-import { rollOreDrops } from '../game/data/ores.js'
+import { useCurrencyStore }    from './useCurrencyStore.js'
+import { useCampaignStore }    from './useCampaignStore.js'
+import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
+import { useDungeonStore }     from './useDungeonStore.js'
+import { useResourceStore }    from './useResourceStore.js'
+import { useCollectionStore }  from './useCollectionStore.js'
+import { rollOreDrops }        from '../game/data/ores.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -39,6 +40,12 @@ export const useBattleStore = defineStore('battle', () => {
   const isPlayerTurn = computed(() => state.value === BattleState.SELECTING_SKILL || state.value === BattleState.SELECTING_TARGET)
   const canAct = computed(() => state.value === BattleState.SELECTING_SKILL)
   const isOver = computed(() => state.value === BattleState.VICTORY || state.value === BattleState.DEFEAT)
+
+  // ── Batch run state ────────────────────────────────────────────────
+  const batchTotal   = ref(0)
+  const batchDone    = ref(0)
+  const batchRewards = ref(null)
+  const isBatchRunning = computed(() => batchTotal.value > 0 && batchDone.value < batchTotal.value)
 
   function toggleAutoplay() {
     autoplay.value = !autoplay.value
@@ -121,10 +128,35 @@ export const useBattleStore = defineStore('battle', () => {
         oreDrops.forEach(({ oreId, amount }) => resources.addOre(oreId, amount))
         let componentDrops = []
         if (enc.isDungeon) {
-          const result = useDungeonStore().onDungeonVictory(enc.dungeonId)
-          componentDrops = result?.componentDrops ?? []
+          const dungeonResult = useDungeonStore().onDungeonVictory(enc.dungeonId)
+          componentDrops = dungeonResult?.componentDrops ?? []
         }
-        lastReward.value = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops }
+
+        if (isBatchRunning.value) {
+          // Accumulate into batch totals; don't display until final run
+          const br = batchRewards.value
+          br.gold         += runReward.gold         ?? 0
+          br.diamonds     += runReward.diamonds     ?? 0
+          br.xp           += runReward.xp           ?? 0
+          br.levelsGained += runReward.levelsGained ?? 0
+          for (const drop of (runReward.oreDrops ?? [])) {
+            const ex = br.oreDrops.find(d => d.oreId === drop.oreId)
+            if (ex) ex.amount += drop.amount
+            else br.oreDrops.push({ ...drop })
+          }
+          br.componentDrops.push(...(runReward.componentDrops ?? []))
+          batchDone.value++
+          if (batchDone.value < batchTotal.value) {
+            setTimeout(() => _runBatchNext(), 250)
+            return
+          }
+          // Final run — show cumulative summary, end batch mode
+          lastReward.value = { ...batchRewards.value }
+          batchTotal.value = 0
+        } else {
+          lastReward.value = runReward
+        }
       }
     }
 
@@ -142,15 +174,35 @@ export const useBattleStore = defineStore('battle', () => {
     if (result) _applyResult(result)
   }
 
+  function startBatchRun(n) {
+    batchTotal.value   = n
+    batchDone.value    = 0
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], componentDrops: [] }
+    if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
+    _runBatchNext()
+  }
+
+  function stopBatch() {
+    batchTotal.value = 0
+    batchDone.value  = 0
+  }
+
+  function _runBatchNext() {
+    const team = useCollectionStore().buildTeam()
+    const enc  = currentEncounterIndex.value >= 0 ? currentEncounterIndex.value : currentEncounter.value
+    initBattle(enc, team)
+  }
+
   return {
     engine, state, activeHero, battleKey,
     playerTeam, enemyTeam, battleLog,
     selectedSkillIndex, currentEncounterIndex, currentEncounter,
     autoplay, battleSpeed, lastReward, lastAction,
+    batchTotal, batchDone, isBatchRunning,
     ENCOUNTERS,
     isPlayerTurn, canAct, isOver,
-    ENCOUNTERS,
     initBattle, selectSkill, selectTarget,
     toggleAutoplay, setSpeed,
+    startBatchRun, stopBatch,
   }
 })
