@@ -476,6 +476,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HONOUR_SLASH, SKILLS.THOUSAND_CUTS, SKILLS.WARLORDS_RESOLVE],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true,
+    quote: 'For rice and honer.',
   }),
 
   VORATH: () => new Hero({

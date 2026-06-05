@@ -24,6 +24,7 @@
               </svg>
             </button>
             <div class="portrait-name">{{ hero.name }}</div>
+            <div class="portrait-quote" v-if="hero.quote">"{{ hero.quote }}"</div>
           </div>
 
           <!-- Fullscreen artwork lightbox -->
@@ -410,6 +411,15 @@ const stats = computed(() => {
   text-shadow: 0 1px 6px rgba(0,0,0,0.9);
   line-height: 1.2;
   padding: 0 12px;
+}
+.portrait-quote {
+  position: relative; z-index: 1;
+  font-size: 0.62rem; font-style: italic;
+  color: rgba(196, 168, 130, 0.7);
+  text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+  padding: 0 14px;
+  line-height: 1.4;
 }
 
 /* ── Info panel ── */
