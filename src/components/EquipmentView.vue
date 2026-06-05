@@ -220,7 +220,12 @@ const pct = v => Math.round(v * 100) + '%'
   padding: 0 20px 40px;
   align-items: start;
 }
-@media (max-width: 700px) { .equip-layout { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  .equip-layout { grid-template-columns: 1fr; }
+  .hero-list { position: static; max-height: 220px; overflow-y: auto; }
+  .hero-entry { padding: 10px; }
+  .slots-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
 
 /* Hero list */
 .hero-list {

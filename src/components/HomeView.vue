@@ -1153,4 +1153,25 @@ function formatElapsed(ms) {
   padding-left: 10px;
   border-left: 1px solid #1a3a1a;
 }
+
+/* ── Mobile ── */
+@media (max-width: 520px) {
+  /* Narrow the encounter sidebar */
+  .tg-sidebar { width: 160px; }
+  .sidebar-enc-name { font-size: 0.62rem; }
+
+  /* Condense team bar */
+  .chip-name { display: none; }
+  .tg-team   { gap: 5px; }
+
+  /* Enc panel goes full-width */
+  .enc-panel { width: 100%; left: 0; border-left: none; border-top: 1px solid var(--border-gold); top: auto; bottom: 0; height: 55%; }
+
+  /* Map legend: hide labels, show dots only */
+  .map-legend { padding: 6px 12px; gap: 0; }
+  .legend-row { padding: 0 10px; font-size: 0.62rem; letter-spacing: 0.5px; }
+
+  /* Detail card stays centered */
+  .detail-card { padding: 16px; }
+}
 </style>

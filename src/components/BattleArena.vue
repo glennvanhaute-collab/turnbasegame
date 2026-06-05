@@ -164,6 +164,9 @@ function startBatch() {
   padding: 16px;
   align-items: start;
 }
+@media (max-width: 680px) {
+  .battle-arena { grid-template-columns: 1fr; padding: 10px; }
+}
 
 /* ── Left column ─────────────────────────────────────────────────── */
 .col-combat {

@@ -1249,5 +1249,20 @@ function forge() {
 .ore-row.active { background: color-mix(in srgb, var(--ore-color) 15%, transparent); border-color: color-mix(in srgb, var(--ore-color) 55%, transparent); }
 .ore-smelt-arrow { font-size: 0.65rem; color: var(--ore-color); opacity: 0.7; flex-shrink: 0; }
 
-
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .blacksmith { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+  .recipe-panel {
+    width: 100%; border-right: none; border-bottom: 1px solid var(--border-gold);
+    max-height: 220px; flex-shrink: 0;
+  }
+  .ore-panel {
+    width: 100%; border-left: none; border-top: 1px solid var(--border-gold);
+    flex-shrink: 0; max-height: 260px;
+  }
+  .forge-area { padding: 12px 10px; width: 100%; }
+  .forge-details { flex-direction: column; max-width: 100%; }
+  .forge-col { flex: none; }
+  .stars-track { max-width: 100%; }
+}
 </style>

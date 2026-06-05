@@ -507,6 +507,40 @@ body {
 }
 .icon-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
 
+@media (max-width: 620px) {
+  .header-inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 6px 10px 0;
+    gap: 6px;
+    align-items: center;
+  }
+  .logo-img {
+    position: static;
+    height: 40px;
+    left: auto;
+    top: auto;
+    margin: 0;
+  }
+  .logo { font-size: 0.6rem; letter-spacing: 1px; }
+  .nav {
+    order: 10;
+    width: calc(100% + 20px);
+    margin: 4px -10px 0;
+    padding: 4px 10px 6px;
+    border-top: 1px solid var(--border-brown);
+    justify-content: space-evenly;
+  }
+  .nav-btn { font-size: 0.6rem; padding: 6px 8px; letter-spacing: 1px; }
+  .currency-display { gap: 4px; margin-left: auto; }
+  .currency { padding: 3px 6px; font-size: 0.65rem; gap: 3px; }
+}
+
+@media (max-width: 420px) {
+  .logo { display: none; }
+  .currency .currency-label { display: none; }
+}
+
 /* ── Collection modal overlay ── */
 .coll-modal-wrap {
   position: fixed;
@@ -562,6 +596,12 @@ body {
 }
 .coll-modal-close:hover .coll-modal-close-icon {
   filter: drop-shadow(0 0 6px rgba(201,140,40,0.7)) drop-shadow(0 0 14px rgba(180,100,20,0.4));
+}
+
+@media (max-width: 500px) {
+  .coll-modal-panel { top: 8px; left: 8px; right: 8px; bottom: 8px; padding-top: 44px; }
+  .gear-tabs { padding: 10px 10px 0; gap: 2px; }
+  .gear-tab  { padding: 5px 10px; font-size: 0.6rem; letter-spacing: 1px; }
 }
 
 .coll-modal-enter-active { transition: opacity 0.25s ease, transform 0.28s cubic-bezier(0.22,1,0.36,1); }

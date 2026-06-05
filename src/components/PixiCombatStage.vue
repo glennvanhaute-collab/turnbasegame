@@ -58,12 +58,16 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { BattleState } from '../game/BattleEngine.js'
 import HeroAvatar from './HeroAvatar.vue'
 
-const SZ = 92    // avatar size in px — balanced for 5-hero formation
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 800)
+const onResize = () => { windowWidth.value = window.innerWidth }
+onMounted(() => window.addEventListener('resize', onResize))
+onUnmounted(() => window.removeEventListener('resize', onResize))
+const SZ = computed(() => windowWidth.value <= 500 ? 58 : 92)
 
 const store   = useBattleStore()
 const stageEl = ref(null)
@@ -339,6 +343,16 @@ watch(() => store.battleKey, () => {
 .hp-green  { background: #27ae60; }
 .hp-orange { background: #e67e22; }
 .hp-red    { background: #e74c3c; }
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+@media (max-width: 500px) {
+  .combat-stage    { min-height: 340px; }
+  .anim-ring       { width: 78px; height: 78px; top: -9px; }
+  .hero-unit       { width: 86px; gap: 3px; }
+  .hero-name       { font-size: 0.44rem; max-width: 84px; }
+  .hp-track        { width: 56px; }
+  .stage-label     { font-size: 0.42rem; }
+}
 
 /* ── Floating numbers ────────────────────────────────────────────── */
 @keyframes float-up {
