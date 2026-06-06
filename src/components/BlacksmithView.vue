@@ -90,7 +90,7 @@
             :style="{ '--tier-color': tier.color }"
             @click="selectForge(recipe)"
           >
-            <GameIcon :icon="SLOT_TO_ICON[recipe.slot] ?? 'sword'" :size="16" class="recipe-slot-icon" />
+            <GameIcon :icon="tierSlotIcon(recipe.tier, recipe.slot)" :size="16" class="recipe-slot-icon" />
             <span class="recipe-name">{{ recipe.name }}</span>
             <span class="recipe-cost">
               <span
@@ -248,7 +248,7 @@
               </div>
               <img :src="itemFrameImg" class="artisan-frame-img" alt="" aria-hidden="true" />
             </div>
-            <div v-else class="artisan-slot-icon">{{ SLOT_ICONS[artisanItem.slot] ?? '◆' }}</div>
+            <GameIcon v-else :icon="tierSlotIcon(artisanItem.tier, artisanItem.slot)" :size="72" class="artisan-slot-icon" />
             <div class="artisan-stars-row">
               <span
                 v-for="s in 10" :key="s"
@@ -371,7 +371,7 @@
             <img :src="anvilImg" class="anvil-img" alt="Forge" />
             <Transition name="item-appear">
               <div class="anvil-item-badge" :style="{ '--tier-color': selectedTierColor }">
-                <span class="anvil-item-icon">{{ SLOT_ICONS[selected.slot] }}</span>
+                <GameIcon :icon="tierSlotIcon(selected.tier, selected.slot)" :size="64" class="anvil-item-icon" />
               </div>
             </Transition>
           </div>
@@ -549,7 +549,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useAdvisorStore } from '../stores/useAdvisorStore.js'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useSmeltingStore } from '../stores/useSmeltingStore.js'
@@ -559,7 +560,7 @@ import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { ORE_LIST, ORES } from '../game/data/ores.js'
 import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
 import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
-import { barIcon, oreIcon, SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import { barIcon, oreIcon, SLOT_TO_ICON, tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 import arsenalBg    from '../assets/backgrounds/arsenal.png'
 import anvilImg     from '../assets/ui/anvil.png'
@@ -612,6 +613,7 @@ const TIER_ORDER  = { copper: 0, tin: 1, steel: 2, darksteel: 3, mithril: 4, moo
 
 const resources  = useResourceStore()
 const inventory  = useInventoryStore()
+const advisor    = useAdvisorStore()
 const smelting   = useSmeltingStore()
 const collection = useCollectionStore()
 const artisan    = useArtisanStore()
@@ -761,6 +763,17 @@ const oreToBar = computed(() => {
   return map
 })
 
+onMounted(() => {
+  if (!localStorage.getItem('bow-tip-blacksmith')) {
+    localStorage.setItem('bow-tip-blacksmith', '1')
+    setTimeout(() => advisor.say([
+      `Welcome to the Blacksmith. Gear here follows set bonuses — equip matching pieces to unlock them. Plate armour rewards defence and endurance: two pieces grants +8% DEF, four pieces grants +12% HP.`,
+      `A full six-piece plate set adds a further +5% DEF and +8% HP — and unlocks Steadfast, a passive that shields the wearer for 10% of their max HP the first time they fall below 30% health in battle.`,
+      `Leather and cloth sets follow the same principle, favouring speed and offence respectively. Mix sets if you must, but a hero committed to one set will always outperform a hero who hedges.`,
+    ]), 500)
+  }
+})
+
 function selectSmelt(bar)    { selectedType.value = 'smelt';   selectedId.value = bar.id }
 function selectForge(recipe) { selectedType.value = 'forge';   selectedId.value = recipe.id }
 function canAfford(recipe) {
@@ -806,6 +819,14 @@ function forge() {
   forgeResult.value = recipe.name
   clearTimeout(_flashTimer)
   _flashTimer = setTimeout(() => { forgeResult.value = null }, 3000)
+
+  if (!localStorage.getItem('bow-tip-first-craft')) {
+    localStorage.setItem('bow-tip-first-craft', '1')
+    setTimeout(() => advisor.say([
+      `A fine piece of work. That ${recipe.name} is now in your inventory — head to Arsenal → Forge to upgrade it with stars. Each star improves its stats, and enough stars will raise its rarity entirely.`,
+      `If you find yourself with gear you no longer need, the Inventory tab has a sell option. Gold is always useful. Do not let good metal gather dust.`,
+    ]), 600)
+  }
 }
 
 function forgeFullSet(tier) {
@@ -1094,13 +1115,13 @@ function forgeFullSet(tier) {
   50%       { opacity: 0.85; }
 }
 .anvil-item-badge {
-  position: absolute; top: 22%; left: 50%;
-  transform: translateX(-50%); z-index: 2;
-  width: 48px; height: 48px; border-radius: 50%;
-  background: color-mix(in srgb, var(--tier-color) 18%, rgba(8,4,2,0.85));
-  border: 2px solid var(--tier-color);
-  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
-  box-shadow: 0 0 16px var(--tier-color), 0 4px 12px rgba(0,0,0,0.8);
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -80%); z-index: 2;
+  width: 96px; height: 96px; border-radius: 14px;
+  background: color-mix(in srgb, var(--tier-color) 12%, rgba(6,3,1,0.88));
+  border: 1.5px solid color-mix(in srgb, var(--tier-color) 70%, transparent);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--tier-color) 55%, transparent), 0 0 40px color-mix(in srgb, var(--tier-color) 20%, transparent), inset 0 0 12px color-mix(in srgb, var(--tier-color) 10%, transparent);
+  display: flex; align-items: center; justify-content: center;
   animation: item-float 2.8s ease-in-out infinite;
 }
 @keyframes item-float {

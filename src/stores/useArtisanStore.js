@@ -12,11 +12,15 @@ export const useArtisanStore = defineStore('artisan', () => {
   // { [heroKey]: { [skillId]: { level: number, xp: number } } }
   const skillData             = ref(saved?.skillData ?? {})
   const assignedForgeSmithKey = ref(saved?.assignedForgeSmithKey ?? null)
+  const assignedTannerKey     = ref(saved?.assignedTannerKey     ?? null)
+  const assignedTailorKey     = ref(saved?.assignedTailorKey     ?? null)
 
   function _persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      skillData: skillData.value,
+      skillData:            skillData.value,
       assignedForgeSmithKey: assignedForgeSmithKey.value,
+      assignedTannerKey:    assignedTannerKey.value,
+      assignedTailorKey:    assignedTailorKey.value,
     }))
   }
 
@@ -44,26 +48,27 @@ export const useArtisanStore = defineStore('artisan', () => {
     _persist()
   }
 
-  function assignForgeSmith(heroKey) {
-    assignedForgeSmithKey.value = heroKey
-    _persist()
-  }
+  function assignForgeSmith(heroKey) { assignedForgeSmithKey.value = heroKey; _persist() }
+  function unassignForgeSmith()      { assignedForgeSmithKey.value = null;    _persist() }
 
-  function unassignForgeSmith() {
-    assignedForgeSmithKey.value = null
-    _persist()
-  }
+  function assignTanner(heroKey) { assignedTannerKey.value = heroKey; _persist() }
+  function unassignTanner()      { assignedTannerKey.value = null;    _persist() }
 
-  // Speed multiplier for a smith assigned to the forge: flat +5% base, +3% per Blacksmithing level
-  function smithSpeedMultiplier(heroKey) {
-    const level = getSkillLevel(heroKey, 'blacksmithing')
-    return 1 + 0.05 + level * 0.03
-  }
+  function assignTailor(heroKey) { assignedTailorKey.value = heroKey; _persist() }
+  function unassignTailor()      { assignedTailorKey.value = null;    _persist() }
+
+  // Speed multipliers: flat +5% base, +3% per relevant skill level
+  function smithSpeedMultiplier(heroKey)  { return 1 + 0.05 + getSkillLevel(heroKey, 'blacksmithing')  * 0.03 }
+  function tannerSpeedMultiplier(heroKey) { return 1 + 0.05 + getSkillLevel(heroKey, 'leatherworking') * 0.03 }
+  function tailorSpeedMultiplier(heroKey) { return 1 + 0.05 + getSkillLevel(heroKey, 'tailoring')      * 0.03 }
 
   return {
-    skillData, assignedForgeSmithKey,
-    xpForLevel, getSkillLevel, getSkillXp,
-    addSkillXp, assignForgeSmith, unassignForgeSmith,
-    smithSpeedMultiplier,
+    skillData,
+    assignedForgeSmithKey, assignedTannerKey, assignedTailorKey,
+    xpForLevel, getSkillLevel, getSkillXp, addSkillXp,
+    assignForgeSmith, unassignForgeSmith,
+    assignTanner, unassignTanner,
+    assignTailor, unassignTailor,
+    smithSpeedMultiplier, tannerSpeedMultiplier, tailorSpeedMultiplier,
   }
 })

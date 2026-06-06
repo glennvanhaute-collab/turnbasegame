@@ -3,6 +3,10 @@ import { ref, computed, watch } from 'vue'
 import { ORES } from '../game/data/ores.js'
 import { BARS } from '../game/data/bars.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
+import { HIDES } from '../game/data/hides.js'
+import { LEATHERS } from '../game/data/leathers.js'
+import { FIBERS } from '../game/data/fibers.js'
+import { CLOTHS } from '../game/data/cloths.js'
 
 const STORAGE_KEY = 'raid-resources'
 
@@ -16,7 +20,15 @@ export const useResourceStore = defineStore('resources', () => {
   const saved = loadSaved()
   const ores       = ref(saved?.ores       ?? Object.fromEntries(Object.keys(ORES).map(k => [k, 0])))
   const bars       = ref(saved?.bars       ?? Object.fromEntries(Object.keys(BARS).map(k => [k, 0])))
-  const smithingXp = ref(saved?.smithingXp ?? 0)
+  const smithingXp       = ref(saved?.smithingXp       ?? 0)
+  const leatherworkingXp = ref(saved?.leatherworkingXp ?? 0)
+  const tailoringXp      = ref(saved?.tailoringXp      ?? 0)
+
+  const hides   = ref(saved?.hides   ?? Object.fromEntries(Object.keys(HIDES).map(k => [k, 0])))
+  const leathers = ref(saved?.leathers ?? Object.fromEntries(Object.keys(LEATHERS).map(k => [k, 0])))
+  const fibers   = ref(saved?.fibers   ?? Object.fromEntries(Object.keys(FIBERS).map(k => [k, 0])))
+  const cloths   = ref(saved?.cloths   ?? Object.fromEntries(Object.keys(CLOTHS).map(k => [k, 0])))
+
   // Unlocked by Codex progression: 0=Basic, 1=Iron, 2=Darksteel, 3=Mythril
   const forgeLevel          = ref(saved?.forgeLevel          ?? 0)
   // Unlocked by rare encounter rewards — each forge is an independent discovery
@@ -28,15 +40,30 @@ export const useResourceStore = defineStore('resources', () => {
     saved?.upgradeComponents ?? Object.fromEntries(Object.keys(UPGRADE_COMPONENTS).map(k => [k, 0]))
   )
 
-  const smithingLevel     = computed(() => Math.floor(smithingXp.value / XP_PER_LEVEL) + 1)
-  const smithingProgress  = computed(() => (smithingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
-  const smithingXpInLevel = computed(() => smithingXp.value % XP_PER_LEVEL)
+  const smithingLevel          = computed(() => Math.floor(smithingXp.value / XP_PER_LEVEL) + 1)
+  const smithingProgress       = computed(() => (smithingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
+  const smithingXpInLevel      = computed(() => smithingXp.value % XP_PER_LEVEL)
 
-  watch([ores, bars, smithingXp, forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
+  const leatherworkingLevel    = computed(() => Math.floor(leatherworkingXp.value / XP_PER_LEVEL) + 1)
+  const leatherworkingProgress = computed(() => (leatherworkingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
+  const leatherworkingXpInLevel = computed(() => leatherworkingXp.value % XP_PER_LEVEL)
+
+  const tailoringLevel         = computed(() => Math.floor(tailoringXp.value / XP_PER_LEVEL) + 1)
+  const tailoringProgress      = computed(() => (tailoringXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
+  const tailoringXpInLevel     = computed(() => tailoringXp.value % XP_PER_LEVEL)
+
+  watch([ores, bars, smithingXp, leatherworkingXp, tailoringXp, hides, leathers, fibers, cloths,
+    forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ores:                ores.value,
       bars:                bars.value,
       smithingXp:          smithingXp.value,
+      leatherworkingXp:    leatherworkingXp.value,
+      tailoringXp:         tailoringXp.value,
+      hides:               hides.value,
+      leathers:            leathers.value,
+      fibers:              fibers.value,
+      cloths:              cloths.value,
       forgeLevel:          forgeLevel.value,
       elvenForgeUnlocked:  elvenForgeUnlocked.value,
       goblinForgeUnlocked: goblinForgeUnlocked.value,
@@ -49,7 +76,18 @@ export const useResourceStore = defineStore('resources', () => {
   function removeOre(oreId, amount) { if (oreId in ores.value) ores.value[oreId] = Math.max(0, ores.value[oreId] - amount) }
   function addBar(barId, amount)    { if (barId in bars.value) bars.value[barId] += amount }
   function removeBar(barId, amount) { if (barId in bars.value) bars.value[barId] = Math.max(0, bars.value[barId] - amount) }
-  function addSmithingXp(amount) { smithingXp.value += amount }
+  function addSmithingXp(amount)       { smithingXp.value += amount }
+  function addLeatherworkingXp(amount) { leatherworkingXp.value += amount }
+  function addTailoringXp(amount)      { tailoringXp.value += amount }
+
+  function addHide(id, amount)       { if (id in hides.value) hides.value[id] += amount }
+  function removeHide(id, amount)    { if (id in hides.value) hides.value[id] = Math.max(0, hides.value[id] - amount) }
+  function addLeather(id, amount)    { if (id in leathers.value) leathers.value[id] += amount }
+  function removeLeather(id, amount) { if (id in leathers.value) leathers.value[id] = Math.max(0, leathers.value[id] - amount) }
+  function addFiber(id, amount)      { if (id in fibers.value) fibers.value[id] += amount }
+  function removeFiber(id, amount)   { if (id in fibers.value) fibers.value[id] = Math.max(0, fibers.value[id] - amount) }
+  function addCloth(id, amount)      { if (id in cloths.value) cloths.value[id] += amount }
+  function removeCloth(id, amount)   { if (id in cloths.value) cloths.value[id] = Math.max(0, cloths.value[id] - amount) }
 
   function addUpgradeComponent(id, amount = 1) {
     if (id in upgradeComponents.value) upgradeComponents.value[id] += amount
@@ -65,6 +103,14 @@ export const useResourceStore = defineStore('resources', () => {
     elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked,
     smithingXp, smithingLevel, smithingProgress, smithingXpInLevel,
     addSmithingXp,
+    leatherworkingXp, leatherworkingLevel, leatherworkingProgress, leatherworkingXpInLevel,
+    addLeatherworkingXp,
+    tailoringXp, tailoringLevel, tailoringProgress, tailoringXpInLevel,
+    addTailoringXp,
+    hides, addHide, removeHide,
+    leathers, addLeather, removeLeather,
+    fibers, addFiber, removeFiber,
+    cloths, addCloth, removeCloth,
     upgradeComponents, addUpgradeComponent, removeUpgradeComponent,
     UPGRADE_COMPONENTS,
     XP_PER_LEVEL,

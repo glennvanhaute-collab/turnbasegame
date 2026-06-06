@@ -216,6 +216,22 @@
             </span>
           </button>
 
+          <button class="enc-option" @click="$emit('open-leatherworking')">
+            <span class="enc-opt-icon enc-opt-icon--emoji">✂</span>
+            <span class="enc-opt-info">
+              <span class="enc-opt-name">Leatherworking</span>
+              <span class="enc-opt-sub">Tan hides and craft leather armor</span>
+            </span>
+          </button>
+
+          <button class="enc-option" @click="$emit('open-tailoring')">
+            <span class="enc-opt-icon enc-opt-icon--emoji">🧵</span>
+            <span class="enc-opt-info">
+              <span class="enc-opt-name">Tailoring</span>
+              <span class="enc-opt-sub">Weave cloth and craft robes</span>
+            </span>
+          </button>
+
           <button class="enc-option locked" disabled>
             <span class="enc-opt-icon">🗼</span>
             <span class="enc-opt-info">
@@ -265,7 +281,7 @@ import trainingBg from '../assets/backgrounds/homepage_bg.png'
 import codexIcon  from '../assets/ui/codex.png'
 import GameIcon from './ui/GameIcon.vue'
 
-const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex'])
+const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring'])
 
 const camp     = useCampStore()
 const currency = useCurrencyStore()

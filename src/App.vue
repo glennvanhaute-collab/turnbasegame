@@ -80,6 +80,36 @@
       </Transition>
     </Teleport>
 
+    <!-- Leatherworking modal — floats over the homepage map -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showLeatherworking">
+          <div class="coll-modal-backdrop" @click="showLeatherworking = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showLeatherworking = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <LeatherworkingView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Tailoring modal — floats over the homepage map -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showTailoring">
+          <div class="coll-modal-backdrop" @click="showTailoring = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showTailoring = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <TailoringView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Market modal — floats over the homepage map -->
     <Teleport to="body">
       <Transition name="coll-modal">
@@ -127,6 +157,8 @@
         @start-battle="startBattle"
         @open-collection="showCollection = true"
         @open-blacksmith="showBlacksmith = true"
+        @open-leatherworking="showLeatherworking = true"
+        @open-tailoring="showTailoring = true"
         @open-market="showMarket = true"
         @open-codex="showCodex = true"
       />
@@ -155,10 +187,12 @@
           <button class="gear-tab" :class="{ active: expTab === 'exploration' }" @click="expTab = 'exploration'">Exploration</button>
           <button class="gear-tab" :class="{ active: expTab === 'raids' }" @click="expTab = 'raids'">Raids</button>
           <button class="gear-tab" :class="{ active: expTab === 'sieges' }" @click="expTab = 'sieges'">Sieges</button>
+          <button class="gear-tab" :class="{ active: expTab === 'hunts' }" @click="expTab = 'hunts'">Hunts</button>
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
         <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" />
         <SiegesView v-else-if="expTab === 'sieges'" />
+        <HuntsView v-else-if="expTab === 'hunts'" />
         <ExplorationView v-else />
       </div>
       <RealmView v-else-if="view === 'realm'" />
@@ -170,6 +204,8 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useMusic } from './composables/useMusic.js'
 import { useSmeltingTick } from './composables/useSmeltingTick.js'
+import { useTanningTick }  from './composables/useTanningTick.js'
+import { useWeavingTick }  from './composables/useWeavingTick.js'
 import logoNav from './assets/ui/logo-nav.png'
 import shieldAldric  from './assets/lore/house_aldric.png'
 import shieldValdris from './assets/lore/house_valdris.png'
@@ -188,6 +224,8 @@ import HeroCreationView from './components/HeroCreationView.vue'
 import HomeView from './components/HomeView.vue'
 import CollectionView from './components/CollectionView.vue'
 import BlacksmithView from './components/BlacksmithView.vue'
+import LeatherworkingView from './components/LeatherworkingView.vue'
+import TailoringView from './components/TailoringView.vue'
 import MarketView from './components/MarketView.vue'
 import InventoryView from './components/InventoryView.vue'
 import EquipmentView from './components/EquipmentView.vue'
@@ -198,6 +236,7 @@ import RaidsView from './components/RaidsView.vue'
 import RaidBattleArena from './components/RaidBattleArena.vue'
 import SiegesView from './components/SiegesView.vue'
 import ExplorationView from './components/ExplorationView.vue'
+import HuntsView from './components/HuntsView.vue'
 import RealmView from './components/RealmView.vue'
 import RelicsView from './components/RelicsView.vue'
 import ForgeView from './components/ForgeView.vue'
@@ -222,20 +261,24 @@ const expTab     = ref('dungeons')
 const showShop        = ref(false)
 const showCodex       = ref(false)
 const showCollection  = ref(false)
-const showBlacksmith  = ref(false)
-const showMarket      = ref(false)
+const showBlacksmith      = ref(false)
+const showLeatherworking  = ref(false)
+const showTailoring       = ref(false)
+const showMarket          = ref(false)
 const showBattle      = ref(false)
 const showRaidBattle  = ref(false)
 const activeRaidId    = ref(null)
 
 function closeAllPanels() {
-  showCollection.value  = false
-  showBlacksmith.value  = false
-  showMarket.value      = false
-  showBattle.value      = false
-  showRaidBattle.value  = false
-  showShop.value        = false
-  showCodex.value       = false
+  showCollection.value      = false
+  showBlacksmith.value      = false
+  showLeatherworking.value  = false
+  showTailoring.value       = false
+  showMarket.value          = false
+  showBattle.value          = false
+  showRaidBattle.value      = false
+  showShop.value            = false
+  showCodex.value           = false
 }
 
 function startRaidBattle(raidId) {
@@ -250,6 +293,8 @@ function navigate(newView) {
 
 const { muted, toggleMute, onViewChange, startOnFirstInteraction } = useMusic()
 useSmeltingTick()
+useTanningTick()
+useWeavingTick()
 const settings = useSettingsStore()
 
 const SHIELD_IMAGES = { aldric: shieldAldric, valdris: shieldValdris, caelwyn: shieldCaelwyn, mordaine: shieldMordaine }
@@ -262,8 +307,10 @@ function handleEscape(e) {
   if (showRaidBattle.value) { showRaidBattle.value = false; return }
   if (showBattle.value)     { showBattle.value = false; return }
   if (showCollection.value) { showCollection.value = false; return }
-  if (showBlacksmith.value) { showBlacksmith.value = false; return }
-  if (showMarket.value)     { showMarket.value = false; return }
+  if (showBlacksmith.value)     { showBlacksmith.value = false; return }
+  if (showLeatherworking.value) { showLeatherworking.value = false; return }
+  if (showTailoring.value)      { showTailoring.value = false; return }
+  if (showMarket.value)         { showMarket.value = false; return }
   if (showCodex.value)      { showCodex.value = false; return }
   if (showShop.value)       { showShop.value = false; return }
 }

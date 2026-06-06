@@ -53,15 +53,16 @@
                 v-for="item in craftedItems"
                 :key="item.instanceId"
                 class="item-list-btn"
-                :class="[item.rarity?.toLowerCase(), { active: artisanItemId === item.instanceId, maxed: item.stars >= 10 }]"
+                :class="[item.rarity?.toLowerCase(), { active: artisanItemId === item.instanceId, maxed: item.stars >= (TIER_MAX_STARS[item.tier] ?? 10) }]"
                 :style="{ '--tier-color': tierColorForItem(item) }"
                 @click="artisanItemId = item.instanceId"
               >
-                <GameIcon :icon="SLOT_TO_ICON[item.slot] ?? 'sword'" :size="14" class="ilb-icon" />
+                <GameIcon :icon="tierSlotIcon(item.tier, item.slot)" :size="14" class="ilb-icon" />
                 <span class="ilb-name">{{ item.name }}</span>
                 <span class="ilb-eq" v-if="inventory.getEquippedBy(item.instanceId)">●</span>
-                <span class="ilb-stars" v-if="item.stars > 0 && item.stars < 10">{{ '★'.repeat(item.stars) }}</span>
-                <span class="ilb-maxed" v-else-if="item.stars >= 10">✦</span>
+                <span class="ilb-legacy" v-if="item.stars > (TIER_MAX_STARS[item.tier] ?? 10)">Legacy</span>
+                <span class="ilb-stars" v-else-if="item.stars > 0 && item.stars < (TIER_MAX_STARS[item.tier] ?? 10)">{{ '★'.repeat(item.stars) }}</span>
+                <span class="ilb-maxed" v-else-if="item.stars >= (TIER_MAX_STARS[item.tier] ?? 10)" :style="{ color: tierCapColor(item.tier) }">✦</span>
               </button>
             </div>
           </div>
@@ -84,11 +85,12 @@
                 <span class="ibadge tier-badge" :style="{ '--tier-color': artisanTierColor }">{{ artisanTier }} Tier</span>
                 <span class="ibadge slot-badge">{{ SLOT_LABELS[artisanItem.slot] }}</span>
                 <span class="ibadge rarity-badge" :class="artisanItem.rarity?.toLowerCase()">{{ artisanItem.rarity }}</span>
+                <span class="ibadge legacy-badge" v-if="artisanItem.stars > (TIER_MAX_STARS[artisanItem.tier] ?? 10)">Legacy Item</span>
               </div>
             </div>
 
             <!-- Item showcase -->
-            <div class="item-showcase" :class="{ maxed: artisanItem.stars >= 10 }" :style="{ '--tier-color': artisanTierColor }">
+            <div class="item-showcase" :class="{ maxed: artisanItem.stars >= (TIER_MAX_STARS[artisanItem.tier] ?? 10) }" :style="{ '--tier-color': artisanTierColor, '--rarity-color': artisanCapColor }">
               <div class="showcase-glow" />
               <div v-if="artisanItem.image && GEAR_IMAGES[artisanItem.image]" class="showcase-frame-wrap">
                 <div class="showcase-frame-inner">
@@ -96,12 +98,12 @@
                 </div>
                 <img :src="GEAR_FRAMES[artisanFrame] ?? itemFrameImg" class="showcase-frame-img" alt="" aria-hidden="true" />
               </div>
-              <div v-else class="showcase-slot-icon">{{ SLOT_ICONS[artisanItem.slot] ?? '◆' }}</div>
+              <GameIcon v-else :icon="tierSlotIcon(artisanItem.tier, artisanItem.slot)" :size="64" class="showcase-slot-icon" />
               <div class="stars-row">
                 <span
-                  v-for="s in 10" :key="s"
+                  v-for="s in Math.max(artisanItem.stars, TIER_MAX_STARS[artisanItem.tier] ?? 10)" :key="s"
                   class="star-pip"
-                  :class="{ filled: artisanItem.stars >= s, gate: s === 5 || s === 6 }"
+                  :class="{ filled: artisanItem.stars >= s, gate: s === 5 || s === 6, overcap: s > (TIER_MAX_STARS[artisanItem.tier] ?? 10) }"
                 >★</span>
               </div>
               <div class="showcase-rarity" :class="artisanItem.rarity?.toLowerCase()">{{ artisanItem.rarity }}</div>
@@ -114,7 +116,7 @@
                 <div v-for="(baseStat, key) in artisanItem.baseStats" :key="key" class="stat-row">
                   <span class="sr-label">{{ STAT_LABELS[key] ?? key }}</span>
                   <span class="sr-current">{{ formatStatValue(key, artisanItem.stats[key]) }}</span>
-                  <template v-if="artisanItem.stars < 10">
+                  <template v-if="artisanItem.stars < (TIER_MAX_STARS[artisanItem.tier] ?? 10)">
                     <span class="sr-arrow">→</span>
                     <span class="sr-next">{{ formatStatValue(key, nextStatValue(key, baseStat)) }}</span>
                   </template>
@@ -123,13 +125,13 @@
             </div>
 
             <!-- Upgrade panel -->
-            <div class="upgrade-panel" v-if="artisanItem.stars < 10">
-              <!-- Bar cost -->
-              <div class="req-row" :style="{ '--req-color': BARS[artisanBarId]?.color ?? '#888' }">
+            <div class="upgrade-panel" v-if="artisanItem.stars < (TIER_MAX_STARS[artisanItem.tier] ?? 10)">
+              <!-- Material cost (bar, leather, or cloth depending on discipline) -->
+              <div class="req-row" :style="{ '--req-color': artisanMaterial?.color ?? '#888' }">
                 <span class="req-dot" />
-                <span class="req-name">{{ BARS[artisanBarId]?.name ?? artisanBarId }}</span>
+                <span class="req-name">{{ artisanMaterial?.name ?? artisanBarId }}</span>
                 <span class="req-tally">
-                  <span class="req-have" :class="{ ok: hasEnoughBars }">{{ resources.bars[artisanBarId] ?? 0 }}</span>
+                  <span class="req-have" :class="{ ok: hasEnoughBars }">{{ artisanMaterial?.stock ?? 0 }}</span>
                   <span class="req-sep">/</span>
                   <span class="req-need">{{ starBarCost }}</span>
                 </span>
@@ -157,15 +159,15 @@
                 <button class="upgrade-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeItem">
                   ⚒ ★{{ artisanItem.stars }} → ★{{ nextStar }}
                 </button>
-                <span class="next-rarity-hint" v-if="nextRarity !== artisanItem.rarity">↑ {{ nextRarity }}</span>
+                <span class="next-rarity-hint" v-if="nextRarity !== rarityForStars(artisanItem.stars)">↑ {{ nextRarity }}</span>
               </div>
             </div>
 
             <!-- Maxed -->
             <div class="maxed-msg" v-else>
-              <span class="maxed-icon">✦</span>
+              <span class="maxed-icon" :style="{ color: artisanCapColor }">✦</span>
               <div>
-                <div class="maxed-title">Mythical — Fully Upgraded</div>
+                <div class="maxed-title" :style="{ color: artisanCapColor }">{{ rarityForStars(TIER_MAX_STARS[artisanItem.tier] ?? 10) }} — Fully Upgraded</div>
                 <div class="maxed-sub">This item has reached its maximum potential</div>
               </div>
             </div>
@@ -313,12 +315,14 @@ import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import OrbIcon from './OrbIcon.vue'
 import { STAR_GATES, UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
-import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue, rarityForStars, STAR_BAR_COST, starMultiplier } from '../game/data/recipes.js'
+import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue, rarityForStars, STAR_BAR_COST, starMultiplier, TIER_MAX_STARS } from '../game/data/recipes.js'
 import { SLOT_LABELS, GearSlot } from '../game/Gear.js'
-import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import { SLOT_TO_ICON, tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { BARS } from '../game/data/bars.js'
+import { LEATHERS, LEATHER_FOR_TIER } from '../game/data/leathers.js'
+import { CLOTHS, CLOTH_FOR_TIER } from '../game/data/cloths.js'
 import itemFrameImg      from '../assets/gear/frames/item_frame.png'
 import elvenBorderImg   from '../assets/gear/frames/elven_border.png'
 import dwarvenFrameImg  from '../assets/gear/frames/dwarven_frame.png'
@@ -399,16 +403,40 @@ const craftedItems = computed(() =>
   inventory.ownedItems
     .filter(item =>
       item.craftedAt && item.tier &&
-      (!hideMaxed.value || item.stars < 10) &&
+      (!hideMaxed.value || item.stars < (TIER_MAX_STARS[item.tier] ?? 10)) &&
       (!filterSlot.value || item.slot === filterSlot.value)
     )
     .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))
 )
 
+const RARITY_COLOR = { common: '#aaa', uncommon: '#4dff88', rare: '#4fa8ff', epic: '#b44fff', legendary: '#ffd700', mythical: '#ff88ff' }
+function tierCapColor(tier) { return RARITY_COLOR[rarityForStars(TIER_MAX_STARS[tier] ?? 10).toLowerCase()] ?? '#ff88ff' }
+
 const artisanItem      = computed(() => artisanItemId.value ? inventory.instanceById(artisanItemId.value) : null)
 const artisanTier      = computed(() => artisanItem.value?.tier ?? null)
+const artisanCapColor  = computed(() => RARITY_COLOR[rarityForStars(TIER_MAX_STARS[artisanItem.value?.tier] ?? 10).toLowerCase()] ?? '#ff88ff')
 const artisanTierColor = computed(() => RECIPE_TIERS.find(t => t.id === artisanTier.value)?.color ?? '#888')
-const artisanBarId     = computed(() => TIER_TO_BAR[artisanTier.value] ?? null)
+
+const artisanDiscipline = computed(() => artisanItem.value?.craftDiscipline ?? 'blacksmithing')
+
+// Resolve the upgrade material based on craft discipline
+const artisanMaterial = computed(() => {
+  const tier = artisanTier.value
+  if (!tier) return null
+  const discipline = artisanDiscipline.value
+  if (discipline === 'leatherworking') {
+    const id = LEATHER_FOR_TIER[tier]
+    return id ? { id, name: LEATHERS[id]?.name ?? id, color: LEATHERS[id]?.color ?? '#c8906e', stock: resources.leathers[id] ?? 0 } : null
+  }
+  if (discipline === 'tailoring') {
+    const id = CLOTH_FOR_TIER[tier]
+    return id ? { id, name: CLOTHS[id]?.name ?? id, color: CLOTHS[id]?.color ?? '#e8d8ff', stock: resources.cloths[id] ?? 0 } : null
+  }
+  const id = TIER_TO_BAR[tier]
+  return id ? { id, name: BARS[id]?.name ?? id, color: BARS[id]?.color ?? '#888', stock: resources.bars[id] ?? 0 } : null
+})
+
+const artisanBarId     = computed(() => artisanMaterial.value?.id ?? null)
 
 const nextStar     = computed(() => artisanItem.value ? artisanItem.value.stars + 1 : null)
 const starBarCost  = computed(() => nextStar.value != null ? (STAR_BAR_COST[nextStar.value] ?? 0) : 0)
@@ -417,12 +445,16 @@ const gateCompId   = computed(() => starGate.value && artisanTier.value ? starGa
 const gateCompMeta = computed(() => gateCompId.value ? (UPGRADE_COMPONENTS[gateCompId.value] ?? null) : null)
 const gateQty      = computed(() => starGate.value?.qty ?? 1)
 
-const hasEnoughBars   = computed(() => !artisanBarId.value ? false : (resources.bars[artisanBarId.value] ?? 0) >= starBarCost.value)
+const hasEnoughBars   = computed(() => !artisanMaterial.value ? false : artisanMaterial.value.stock >= starBarCost.value)
 const hasComponent    = computed(() => !gateCompId.value || (resources.upgradeComponents[gateCompId.value] ?? 0) >= gateQty.value)
-const meetsSmithingLv = computed(() => !starGate.value?.smithingLevel || resources.smithingLevel >= starGate.value.smithingLevel)
+const meetsSmithingLv = computed(() => {
+  if (!starGate.value?.smithingLevel) return true
+  if (artisanDiscipline.value !== 'blacksmithing') return true
+  return resources.smithingLevel >= starGate.value.smithingLevel
+})
 
 const canUpgrade = computed(() => {
-  if (!artisanItem.value || !artisanBarId.value || artisanItem.value.stars >= 10) return false
+  if (!artisanItem.value || !artisanMaterial.value || artisanItem.value.stars >= (TIER_MAX_STARS[artisanItem.value.tier] ?? 10)) return false
   return hasEnoughBars.value && hasComponent.value && meetsSmithingLv.value
 })
 
@@ -459,17 +491,34 @@ function upgradeItem() {
   const item = artisanItem.value
   if (!item || !canUpgrade.value) return
   const toStar = item.stars + 1
-  resources.removeBar(artisanBarId.value, STAR_BAR_COST[toStar])
+  // Deduct the correct material type
+  const discipline = artisanDiscipline.value
+  if (discipline === 'leatherworking') {
+    resources.removeLeather(artisanBarId.value, STAR_BAR_COST[toStar])
+  } else if (discipline === 'tailoring') {
+    resources.removeCloth(artisanBarId.value, STAR_BAR_COST[toStar])
+  } else {
+    resources.removeBar(artisanBarId.value, STAR_BAR_COST[toStar])
+  }
   if (gateCompId.value) resources.removeUpgradeComponent(gateCompId.value, gateQty.value)
-  item.stars  = toStar
-  item.rarity = rarityForStars(toStar)
+  const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythical: 5 }
+  item.stars = toStar
+  const starRarity = rarityForStars(toStar)
+  if ((RARITY_RANK[starRarity.toLowerCase()] ?? 0) > (RARITY_RANK[item.rarity?.toLowerCase()] ?? 0))
+    item.rarity = starRarity
   const mult  = starMultiplier(toStar)
   Object.keys(item.baseStats).forEach(key => {
     item.stats[key] = PCT_STATS.includes(key)
       ? Math.round(item.baseStats[key] * mult * 1000) / 1000
       : Math.round(item.baseStats[key] * mult)
   })
-  resources.addSmithingXp(ARTISAN_XP[artisanTier.value] ?? 10)
+  if (discipline === 'leatherworking') {
+    resources.addLeatherworkingXp(ARTISAN_XP[artisanTier.value] ?? 10)
+  } else if (discipline === 'tailoring') {
+    resources.addTailoringXp(ARTISAN_XP[artisanTier.value] ?? 10)
+  } else {
+    resources.addSmithingXp(ARTISAN_XP[artisanTier.value] ?? 10)
+  }
 }
 </script>
 
@@ -604,7 +653,8 @@ function upgradeItem() {
 .ilb-name  { font-size: 0.63rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
 .ilb-eq    { font-size: 0.5rem; color: #ffd700; opacity: 0.7; flex-shrink: 0; }
 .ilb-stars { font-size: 0.48rem; color: var(--tier-color); letter-spacing: 1px; flex-shrink: 0; }
-.ilb-maxed { font-size: 0.6rem; color: #ff88ff; flex-shrink: 0; }
+.ilb-maxed  { font-size: 0.6rem; flex-shrink: 0; }
+.ilb-legacy { font-size: 0.48rem; font-family: var(--font-head); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #887755; border: 1px solid #443322; border-radius: 3px; padding: 1px 4px; flex-shrink: 0; }
 
 /* Upgrade workspace */
 .upgrade-workspace {
@@ -642,6 +692,7 @@ function upgradeItem() {
 .rarity-badge.epic      { color: #b44fff; border-color: #3a1060; background: rgba(180,79,255,0.05); }
 .rarity-badge.legendary { color: #ffd700; border-color: #5a3a00; background: rgba(255,215,0,0.05); }
 .rarity-badge.mythical  { color: #ff88ff; border-color: #5a1050; background: rgba(255,136,255,0.05); }
+.legacy-badge { color: #887755; border-color: #443322; background: rgba(136,119,85,0.08); }
 
 /* Item showcase */
 .item-showcase {
@@ -670,6 +721,7 @@ function upgradeItem() {
 .star-pip.filled { color: var(--tier-color); text-shadow: 0 0 10px var(--tier-color); }
 .star-pip.gate:not(.filled) { color: rgba(255,255,255,0.2); }
 .star-pip.gate.filled { text-shadow: 0 0 14px var(--tier-color), 0 0 28px color-mix(in srgb, var(--tier-color) 60%, transparent); }
+.star-pip.overcap { color: rgba(255,255,255,0.15); font-size: 0.75rem; }
 
 .showcase-rarity {
   font-family: var(--font-head); font-size: 0.65rem; font-weight: 700;
@@ -681,7 +733,7 @@ function upgradeItem() {
 .showcase-rarity.epic      { color: #b44fff; text-shadow: 0 0 10px rgba(180,79,255,0.5); }
 .showcase-rarity.legendary { color: #ffd700; text-shadow: 0 0 14px rgba(255,215,0,0.55); }
 .showcase-rarity.mythical  { color: #ff88ff; text-shadow: 0 0 14px rgba(255,136,255,0.55); }
-.item-showcase.maxed { border-color: rgba(255,136,255,0.35); }
+.item-showcase.maxed { border-color: color-mix(in srgb, var(--rarity-color) 45%, transparent); }
 
 /* Stats panel */
 .stats-panel { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 8px; }
@@ -746,8 +798,8 @@ function upgradeItem() {
   border-radius: 12px; border: 1px solid rgba(255,136,255,0.22); background: rgba(255,136,255,0.05);
   width: 100%; max-width: 340px;
 }
-.maxed-icon  { font-size: 1.6rem; color: #ff88ff; }
-.maxed-title { font-family: var(--font-head); font-size: 0.72rem; font-weight: 700; color: #ff88ff; text-transform: uppercase; letter-spacing: 2px; }
+.maxed-icon  { font-size: 1.6rem; }
+.maxed-title { font-family: var(--font-head); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
 .maxed-sub   { font-size: 0.6rem; color: var(--text-muted); margin-top: 3px; }
 
 /* ── Orb tab ── */

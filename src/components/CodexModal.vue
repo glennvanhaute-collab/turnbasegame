@@ -15,6 +15,10 @@
           <button class="codex-tab" :class="{ active: tab === 'journal' }"    @click="tab = 'journal'">Adventure Log</button>
           <button class="codex-tab" :class="{ active: tab === 'lore' }"       @click="tab = 'lore'">Lore</button>
           <button class="codex-tab" :class="{ active: tab === 'heroes' }"     @click="tab = 'heroes'">Heroes</button>
+          <button class="codex-tab" :class="{ active: tab === 'tips' }"       @click="tab = 'tips'">
+            Tips
+            <span class="tips-count" v-if="unreadTips > 0">{{ unreadTips }}</span>
+          </button>
         </div>
         <button class="codex-close" @click="$emit('close')">✕</button>
       </div>
@@ -100,6 +104,27 @@
         </div>
       </div>
 
+      <!-- Tips tab -->
+      <div class="codex-body" v-else-if="tab === 'tips'">
+        <template v-if="seenTips.length">
+          <div v-for="tip in seenTips" :key="tip.id" class="tip-entry" :class="{ 'tip-unread': !tip.read }">
+            <div class="tip-header" @click="markRead(tip.id)">
+              <span class="tip-icon">{{ tip.icon }}</span>
+              <span class="tip-title">{{ tip.title }}</span>
+              <span class="tip-new" v-if="!tip.read">New</span>
+            </div>
+            <div class="tip-lines">
+              <p v-for="(line, i) in tip.lines" :key="i" class="tip-line">{{ line }}</p>
+            </div>
+          </div>
+        </template>
+        <div class="codex-coming" v-else>
+          <div class="empty-icon">💡</div>
+          <p>No tips recorded yet.</p>
+          <p class="empty-sub">Edwyn will leave notes here as you explore the world.</p>
+        </div>
+      </div>
+
       <!-- Heroes tab — placeholder -->
       <div class="codex-body codex-coming" v-else-if="tab === 'heroes'">
         <div class="empty-icon">⚔</div>
@@ -112,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useJournalStore, ENTRY_TYPES } from '../stores/useJournalStore.js'
 import { useBondStore } from '../stores/useBondStore.js'
 import { BOND_LORE } from '../game/data/lore.js'
@@ -128,6 +153,46 @@ const BOND_IMAGES = { iron_vow: bondHelgaAldricImg }
 const writing = ref(false)
 const newTitle = ref('')
 const newBody  = ref('')
+
+// All advisor tips — appear in the Tips tab once the player has seen them
+const ALL_TIPS = [
+  {
+    id: 'set_bonuses',
+    flag: 'bow-tip-blacksmith',
+    readFlag: 'bow-tip-read-set_bonuses',
+    icon: '🛡',
+    title: 'Gear Set Bonuses',
+    lines: [
+      'Equipping matching gear types unlocks set bonuses. Plate rewards endurance: 2 pieces grants +8% DEF, 4 pieces grants +12% HP.',
+      'A full 6-piece plate set adds a further +5% DEF and +8% HP, and unlocks Steadfast — a passive that shields the wearer for 10% of their max HP the first time they fall below 30% health in battle.',
+      'Leather favours speed and offence: 2pc +8% SPD, 4pc +10% Crit Rate, 6pc +8% ATK. Cloth amplifies damage: 2pc +12% ATK, 4pc +10% Crit DMG, 6pc +8% HP. A hero committed to one set outperforms one who hedges.',
+    ],
+  },
+  {
+    id: 'forge_upgrade',
+    flag: 'bow-tip-first-craft',
+    readFlag: 'bow-tip-read-forge_upgrade',
+    icon: '⚒',
+    title: 'Upgrading & Selling Gear',
+    lines: [
+      'Crafted gear can be upgraded with stars in Arsenal → Forge. Each star improves stats, and enough stars will raise the item\'s rarity — from Common up to its tier ceiling.',
+      'Gear surplus to requirements can be sold from the Inventory tab. Do not let good metal gather dust.',
+    ],
+  },
+]
+
+const seenTips = computed(() =>
+  ALL_TIPS
+    .filter(t => localStorage.getItem(t.flag))
+    .map(t => ({ ...t, read: !!localStorage.getItem(t.readFlag) }))
+)
+
+const unreadTips = computed(() => seenTips.value.filter(t => !t.read).length)
+
+function markRead(tipId) {
+  const tip = ALL_TIPS.find(t => t.id === tipId)
+  if (tip) localStorage.setItem(tip.readFlag, '1')
+}
 
 const TYPE_ICONS = {
   [ENTRY_TYPES.GEAR_DROP]:     '⚔',
@@ -448,6 +513,52 @@ function cancelWrite() {
   text-transform: uppercase;
 }
 .btn-open-journal:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+/* Tips tab */
+.tips-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--gold); color: #0a0602;
+  font-size: 0.48rem; font-weight: 800; border-radius: 8px;
+  padding: 1px 5px; margin-left: 4px; line-height: 1.4;
+  font-family: var(--font-head);
+}
+
+.tip-entry {
+  background: #0e0905;
+  border: 1px solid var(--border-brown);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 0 6px 6px 0;
+  overflow: hidden;
+}
+.tip-entry.tip-unread { border-left-color: var(--gold); }
+
+.tip-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(58,30,10,0.5);
+}
+.tip-icon  { font-size: 0.85rem; flex-shrink: 0; }
+.tip-title {
+  flex: 1;
+  font-family: var(--font-head); font-size: 0.74rem; font-weight: 700;
+  color: var(--text-parchment);
+}
+.tip-new {
+  font-family: var(--font-head); font-size: 0.5rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: #0a0602; background: var(--gold);
+  border-radius: 4px; padding: 2px 6px;
+}
+
+.tip-lines {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 10px 14px 12px;
+}
+.tip-line {
+  font-size: 0.68rem; color: var(--text-muted);
+  line-height: 1.75; margin: 0; font-style: italic;
+}
 
 /* Lore tab — bond entries */
 .lore-bond-entry {

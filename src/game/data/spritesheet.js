@@ -3,8 +3,9 @@
 // pos(col, row, sheet) — sheet defaults to 1.
 // GameIcon.vue picks the right image based on entry.sheet.
 //
-// icons_1.png — 8×4 grid (1774×887px) — nav, ores, bars, gear slots
-// icons_2.png — 8×3 grid (2048×768px) — currency/UI, affinities, artisan skills
+// icons_1.png        — 8×4 grid (1774×887px)  — nav, ores, bars, gear slots
+// icons_2.png        — 8×3 grid (2048×768px)  — currency/UI, affinities, artisan skills
+// sprites_blacksmith — 8×6 grid (1448×1086px) — tiered gear icons (copper→moonsilver)
 
 export const SHEET_COLS = 8
 
@@ -77,8 +78,24 @@ const ICONS_2 = {
   skill_apothecary:     pos(5, 2, 2),
 }
 
+// ── Sheet BS: sprites_blacksmith.png ─────────────────────────────────────
+// rows: 0=copper, 1=tin, 2=steel, 3=darksteel, 4=mithril, 5=moonsilver
+// cols: 0=sword, 1=dagger, 2=shield, 3=helmet, 4=chest, 5=legs, 6=boots, 7=gloves
+export const SHEET_BS_COLS = 8
+export const SHEET_BS_ROWS = 6
+
+const BS_TIERS = ['copper', 'tin', 'steel', 'darksteel', 'mithril', 'moonsilver']
+const BS_SLOTS = ['sword', 'dagger', 'shield', 'helmet', 'chest', 'legs', 'boots', 'gloves']
+
+const ICONS_BS = {}
+BS_TIERS.forEach((tier, row) => {
+  BS_SLOTS.forEach((slot, col) => {
+    ICONS_BS[`${tier}_${slot}`] = pos(col, row, 'bs')
+  })
+})
+
 // ── Merged lookup ─────────────────────────────────────────────────────────
-export const ICONS = { ...ICONS_1, ...ICONS_2 }
+export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS }
 
 // ── Convenience helpers ───────────────────────────────────────────────────
 export function oreIcon(tierId)  { return `${tierId}_ore` }
@@ -92,6 +109,23 @@ export const SLOT_TO_ICON = {
   legs:      'legs',
   boots:     'boots',
   gloves:    'gloves',
+}
+
+const SLOT_TO_BS_KEY = {
+  main_hand: 'sword',
+  off_hand:  'shield',
+  head:      'helmet',
+  chest:     'chest',
+  legs:      'legs',
+  boots:     'boots',
+  gloves:    'gloves',
+}
+
+// Returns a tier-specific icon key if available, falls back to generic slot icon
+export function tierSlotIcon(tier, slot) {
+  const slotKey = SLOT_TO_BS_KEY[slot]
+  if (tier && slotKey && BS_TIERS.includes(tier)) return `${tier}_${slotKey}`
+  return SLOT_TO_ICON[slot] ?? 'sword'
 }
 
 export const AFFINITY_ICON = {
