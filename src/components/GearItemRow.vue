@@ -23,7 +23,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { GearType, WeaponType } from '../game/Gear.js'
+import { GearType, WeaponType, computeLineStats } from '../game/Gear.js'
 
 const props = defineProps({
   item:           { type: Object,  required: true },
@@ -64,15 +64,22 @@ const STAT_COLORS = {
   resistance: 'teal', accuracy: 'yellow',
 }
 
-const statLines = computed(() =>
-  Object.entries(props.item.stats)
+const statLines = computed(() => {
+  const merged = { ...props.item.stats }
+  if (props.item.lines?.length) {
+    const lineStats = computeLineStats(props.item.lines)
+    for (const [key, val] of Object.entries(lineStats)) {
+      merged[key] = (merged[key] ?? 0) + val
+    }
+  }
+  return Object.entries(merged)
     .filter(([, v]) => v > 0)
     .map(([key, val]) => ({
       key,
       label: STAT_LABELS[key]?.(val) ?? `+${val} ${key}`,
       color: STAT_COLORS[key] ?? '',
     }))
-)
+})
 </script>
 
 <style scoped>

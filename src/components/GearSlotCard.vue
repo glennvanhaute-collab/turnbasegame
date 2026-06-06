@@ -28,7 +28,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
+import { GearSlot, SLOT_LABELS, computeLineStats } from '../game/Gear.js'
 import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 
@@ -49,14 +49,20 @@ const STAT_FMT = {
   critRate: v => `+${Math.round(v*100)}%CR`, critDmg: v => `+${Math.round(v*100)}%CD`,
 }
 
-const topStats = computed(() =>
-  props.item
-    ? Object.entries(props.item.stats)
-        .filter(([, v]) => v > 0)
-        .slice(0, 3)
-        .map(([k, v]) => STAT_FMT[k]?.(v) ?? `+${v}`)
-    : []
-)
+const topStats = computed(() => {
+  if (!props.item) return []
+  const merged = { ...props.item.stats }
+  if (props.item.lines?.length) {
+    const lineStats = computeLineStats(props.item.lines)
+    for (const [key, val] of Object.entries(lineStats)) {
+      merged[key] = (merged[key] ?? 0) + val
+    }
+  }
+  return Object.entries(merged)
+    .filter(([, v]) => v > 0)
+    .slice(0, 3)
+    .map(([k, v]) => STAT_FMT[k]?.(v) ?? `+${v}`)
+})
 </script>
 
 <style scoped>
