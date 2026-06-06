@@ -478,6 +478,7 @@ export const HERO_TEMPLATES = {
     isPlayer: true,
     quote: 'I fight the same way I dance. Enthusiastically and without warning.',
     lore: 'Zwierls of House Valdris has three passions: his rune-hammer, a cold ale, and anyone willing to dance until sunrise. He extends this warmth to everyone he meets, enemies included — right up until the moment he does not. Those who have fought alongside him say the strangest part is not the hammer. It is the fact that he is still grinning when he swings it.',
+    forgeAffinities: ['vaultmetal', 'runeite'],
   }),
 
   ARRI: () => new Hero({

@@ -240,8 +240,22 @@ export const useInventoryStore = defineStore('inventory', () => {
       totals.critRate += DUAL_WIELD_BONUS.critRate
     }
 
+    // Forge affinity bonus — +6% ATK and DEF per matching forge-tier piece
+    const forgeAffinities = HERO_TEMPLATES[heroKey]?.()?.forgeAffinities ?? []
+    let forgeAffinityCount = 0
+    if (forgeAffinities.length > 0) {
+      for (const slot of Object.values(GearSlot)) {
+        const item = loadout[slot] ? instanceById(loadout[slot]) : null
+        if (item && forgeAffinities.includes(item.tier)) forgeAffinityCount++
+      }
+      if (forgeAffinityCount > 0) {
+        totals.atkPct += forgeAffinityCount * 0.06
+        totals.defPct += forgeAffinityCount * 0.06
+      }
+    }
+
     const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
-    return { stats: totals, damageReduction: dr, setPieces }
+    return { stats: totals, damageReduction: dr, setPieces, forgeAffinityCount }
   }
 
   function availableForSlot(heroKey, slot) {

@@ -152,9 +152,25 @@ The 6-piece passive effects are stubbed in `setBonus.js` (`SET_PASSIVE_6`). The 
 
 **Set bonus is not a lock.** Players can mix armor types freely. If you want +8% SPD from 2 leather pieces alongside plate armor, that's valid. The system rewards commitment without punishing experimentation.
 
+### Forge Affinity (implemented)
+
+Heroes can have `forgeAffinities: ['vaultmetal', 'runeite']` on their template — a list of item tiers that grant them a bonus when equipped. Each matching piece gives **+6% ATK and +6% DEF**.
+
+```
+Zwierls: forgeAffinities: ['vaultmetal', 'runeite']
+→ Goblin Forge (vaultmetal) and Dwarf Forge (runeite) gear each grant +6% ATK/DEF
+→ Full 7-piece dwarven/goblin kit = +42% ATK and DEF on top of base stats
+```
+
+**How it works:** `computeGearStats` calls `HERO_TEMPLATES[heroKey]()` to read `forgeAffinities`, counts matching `item.tier` values in the loadout, and applies `count × 0.06` to `atkPct` and `defPct`. The equipment view shows the active count and bonus.
+
+**Adding forge affinity to a hero:** Add `forgeAffinities: ['tier_id']` to their template. Tier IDs: `copper`, `tin`, `steel`, `darksteel`, `mithril`, `moonsilver` (Elven), `vaultmetal` (Goblin), `runeite` (Dwarf).
+
+**Design intent:** Creates a progression loop — unlock the special forge encounter → craft that forge's gear → equip it on the hero with matching affinity → they get noticeably stronger. Rewards thematic builds without hard-locking.
+
 ### Hero Gear Affinity (future layer)
 
-Individual heroes can have `gearAffinity` bonuses that trigger from specific equipment — separate from set bonuses, defined on the hero template:
+Individual heroes can have `gearAffinity` bonuses that trigger from specific equipment — separate from set bonuses and forge affinity, defined on the hero template:
 
 ```
 Lirien: +10% ATK when main hand is a bow

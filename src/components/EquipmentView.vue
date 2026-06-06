@@ -100,6 +100,16 @@
         <div class="dw-note" v-if="inventory.isDualWielding(selectedKey)">
           ⚔ Passive: Dual Wield bonus applied to ATK and Crit Rate above
         </div>
+        <div class="forge-affinity-note" v-if="forgeAffinities.length > 0">
+          <span class="fa-label">⚒ Forge Affinity</span>
+          <span class="fa-count" :class="forgeAffinityCount > 0 ? 'active' : 'inactive'">
+            {{ forgeAffinityCount }} / 7 pieces
+          </span>
+          <span class="fa-bonus" v-if="forgeAffinityCount > 0">
+            +{{ forgeAffinityCount * 6 }}% ATK &amp; DEF
+          </span>
+          <span class="fa-hint" v-else>equip Goblin or Dwarf forge gear to activate</span>
+        </div>
       </div>
     </div>
 
@@ -188,6 +198,14 @@ function buildBaseHero(key) {
   if (key === 'PLAYER_CHARACTER') return playerHero.buildHeroInstance()
   return HERO_TEMPLATES[key]?.() ?? null
 }
+
+const forgeAffinityCount = computed(() =>
+  inventory.computeGearStats(selectedKey.value).forgeAffinityCount ?? 0
+)
+const forgeAffinities = computed(() => {
+  const hero = buildBaseHero(selectedKey.value)
+  return hero?.forgeAffinities ?? []
+})
 
 // Build stat comparison (base hero vs hero + gear)
 const statSummary = computed(() => {
@@ -326,6 +344,15 @@ const pct = v => Math.round(v * 100) + '%'
 .stat-final.improved { color: #4dff88; }
 .stat-delta { color: #4dff88; font-size: 0.65rem; }
 .dr-note, .dw-note { margin-top: 8px; font-size: 0.72rem; color: #888; }
+.forge-affinity-note {
+  margin-top: 8px; display: flex; align-items: center; gap: 8px;
+  font-size: 0.72rem; flex-wrap: wrap;
+}
+.fa-label  { color: #888; }
+.fa-count.active   { color: #e07828; font-weight: 700; }
+.fa-count.inactive { color: #444; }
+.fa-bonus  { color: #e07828; font-weight: 700; }
+.fa-hint   { color: #444; font-style: italic; }
 
 .equip-empty { display: flex; align-items: center; justify-content: center; color: #333; font-style: italic; min-height: 200px; }
 </style>
