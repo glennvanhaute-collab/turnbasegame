@@ -107,6 +107,7 @@
           <div class="dev-section-label">Reset</div>
           <div class="dev-reset-row">
             <button class="dev-reset-btn" @click="resetOres">Clear ores</button>
+            <button class="dev-reset-btn" @click="clearSummonedUnits">Clear units</button>
             <button class="dev-reset-btn danger" @click="resetAll">Full reset</button>
           </div>
         </section>
@@ -119,12 +120,19 @@
 import { ref } from 'vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
+import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 
-const open      = ref(false)
-const resources = useResourceStore()
-const currency  = useCurrencyStore()
+const open       = ref(false)
+const resources  = useResourceStore()
+const currency   = useCurrencyStore()
+const collection = useCollectionStore()
+
+function clearSummonedUnits() {
+  collection.ownedKeys = collection.ownedKeys.filter(k => k === 'PLAYER_CHARACTER')
+  collection.team = collection.team.filter(k => k === 'PLAYER_CHARACTER')
+}
 
 function resetOres() {
   ORE_LIST.forEach(ore => {
