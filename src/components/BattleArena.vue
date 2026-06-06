@@ -94,8 +94,8 @@
             @click="nextEncounter"
           >Next →</button>
           <button class="btn btn-retry"      @click="retryEncounter">▷ Run Once</button>
-          <button class="btn btn-batch"      @click="startBatch">⚡ Run 10×</button>
-          <button class="btn btn-batch100" v-if="canRun100" @click="startBatch100">⚡ Run 100×</button>
+          <button class="btn btn-batch"      v-if="!encounter?.isDungeon" @click="startBatch">⚡ Run 10×</button>
+          <button class="btn btn-batch100"   v-if="canRun100 && !encounter?.isDungeon" @click="startBatch100">⚡ Run 100×</button>
           <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
         </template>
         <!-- Defeat -->
