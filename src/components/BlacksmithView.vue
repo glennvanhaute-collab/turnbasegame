@@ -20,13 +20,15 @@
             </div>
             <button
               class="smelt-btn elven"
-              :class="{ active: selectedType === 'smelt' && selectedId === bar.id }"
+              :class="{ active: selectedType === 'smelt' && selectedId === bar.id, locked: !artisanMetForForge(bar.requiredForge) }"
               :style="{ '--bar-color': bar.color }"
+              :disabled="!artisanMetForForge(bar.requiredForge)"
               @click="selectSmelt(bar)"
             >
               <GameIcon :icon="barIcon(bar.id)" :size="18" class="smelt-btn-icon" />
               <span class="smelt-btn-name">{{ bar.name }}</span>
-              <span class="smelt-btn-cost">{{ bar.oreCost }}× ore</span>
+              <span class="smelt-btn-cost" v-if="artisanMetForForge(bar.requiredForge)">{{ bar.oreCost }}× ore</span>
+              <span class="smelt-btn-lock" v-else>No Blacksmith</span>
             </button>
           </template>
           <!-- Standard codex-gated bars -->
@@ -56,34 +58,39 @@
       <div class="tier-group" v-for="tier in visibleRecipeTiers" :key="tier.id">
         <div
           class="tier-header"
-          :class="{ locked: !tier.recipes.length }"
+          :class="{ locked: !tier.recipes.length || isTierArtisanLocked(tier.id) }"
           :style="{ '--tier-color': tier.color }"
         >
           <span class="tier-dot" />
           <span class="tier-name">{{ tier.name }}</span>
-          <span class="tier-count" v-if="tier.recipes.length">{{ tier.recipes.length }}</span>
+          <span class="tier-count" v-if="tier.recipes.length && !isTierArtisanLocked(tier.id)">{{ tier.recipes.length }}</span>
           <span class="tier-soon" v-else>—</span>
         </div>
 
-        <button
-          v-for="recipe in tier.recipes"
-          :key="recipe.id"
-          class="recipe-btn"
-          :class="{ active: selectedType === 'forge' && selectedId === recipe.id, unaffordable: !canAfford(recipe) }"
-          :style="{ '--tier-color': tier.color }"
-          @click="selectForge(recipe)"
-        >
-          <GameIcon :icon="SLOT_TO_ICON[recipe.slot] ?? 'sword'" :size="16" class="recipe-slot-icon" />
-          <span class="recipe-name">{{ recipe.name }}</span>
-          <span class="recipe-cost">
-            <span
-              v-for="(amt, barId) in recipe.barCost"
-              :key="barId"
-              class="cost-pill"
-              :class="{ short: (resources.bars[barId] ?? 0) < amt }"
-            >{{ amt }}</span>
-          </span>
-        </button>
+        <div class="tier-artisan-lock" v-if="isTierArtisanLocked(tier.id)">
+          ⚒ Recruit a Blacksmith to unlock
+        </div>
+        <template v-else>
+          <button
+            v-for="recipe in tier.recipes"
+            :key="recipe.id"
+            class="recipe-btn"
+            :class="{ active: selectedType === 'forge' && selectedId === recipe.id, unaffordable: !canAfford(recipe) }"
+            :style="{ '--tier-color': tier.color }"
+            @click="selectForge(recipe)"
+          >
+            <GameIcon :icon="SLOT_TO_ICON[recipe.slot] ?? 'sword'" :size="16" class="recipe-slot-icon" />
+            <span class="recipe-name">{{ recipe.name }}</span>
+            <span class="recipe-cost">
+              <span
+                v-for="(amt, barId) in recipe.barCost"
+                :key="barId"
+                class="cost-pill"
+                :class="{ short: (resources.bars[barId] ?? 0) < amt }"
+              >{{ amt }}</span>
+            </span>
+          </button>
+        </template>
       </div>
 
     </aside>
@@ -397,14 +404,15 @@
         <div class="forge-actions" v-if="selected">
           <button
             class="forge-btn"
-            :class="{ ready: canAfford(selected) }"
-            :disabled="!canAfford(selected)"
+            :class="{ ready: canAfford(selected) && !isTierArtisanLocked(selected.tier) }"
+            :disabled="!canAfford(selected) || isTierArtisanLocked(selected.tier)"
             @click="forge"
           >
             <span class="forge-btn-icon">⚒</span>
             Forge
           </button>
-          <span class="forge-hint" v-if="!canAfford(selected)">Need more bars</span>
+          <span class="forge-hint" v-if="isTierArtisanLocked(selected.tier)">Requires a Blacksmith in your roster</span>
+          <span class="forge-hint" v-else-if="!canAfford(selected)">Need more bars</span>
         </div>
 
         <!-- Success flash -->
@@ -483,6 +491,7 @@ import { ref, computed, watch } from 'vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useSmeltingStore } from '../stores/useSmeltingStore.js'
+import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { ORE_LIST, ORES } from '../game/data/ores.js'
 import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
@@ -538,9 +547,27 @@ const GEAR_FRAMES = {
 const XP_PER_TIER = { copper: 10, tin: 20, steel: 35, darksteel: 55, mithril: 80, moonsilver: 120 }
 const TIER_ORDER  = { copper: 0, tin: 1, steel: 2, darksteel: 3, mithril: 4, moonsilver: 5 }
 
-const resources = useResourceStore()
-const inventory = useInventoryStore()
-const smelting  = useSmeltingStore()
+const resources  = useResourceStore()
+const inventory  = useInventoryStore()
+const smelting   = useSmeltingStore()
+const collection = useCollectionStore()
+
+const hasBlacksmithInRoster = computed(() =>
+  collection.roster.some(({ hero }) =>
+    hero.artisanSkills?.some(s => s.id === 'blacksmithing')
+  )
+)
+
+function artisanMetForForge(level) {
+  if (level === 5 || level === 6) return hasBlacksmithInRoster.value
+  return true
+}
+
+function isTierArtisanLocked(tierId) {
+  const forgeLevel = TIER_REQUIRED_FORGE[tierId]
+  if (forgeLevel === undefined) return false
+  return isSpecialForgeUnlocked(forgeLevel) && !artisanMetForForge(forgeLevel)
+}
 
 const selectedType = ref(null)   // 'smelt' | 'forge' | null
 const selectedId   = ref(null)
@@ -642,6 +669,7 @@ function canAfford(recipe) {
 
 function startSmelt() {
   if (!selectedBar.value || maxSmelt.value <= 0) return
+  if (!artisanMetForForge(selectedBar.value.requiredForge)) return
   smelting.startSmelt(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value))
 }
 
@@ -770,6 +798,10 @@ function forge() {
 }
 .tier-count { font-size: 0.55rem; color: var(--text-dim); background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0 5px; line-height: 1.6; }
 .tier-soon  { font-size: 0.55rem; color: var(--text-dim); }
+.tier-artisan-lock {
+  font-size: 0.58rem; color: #664444; font-style: italic;
+  padding: 5px 8px 3px; letter-spacing: 0.3px;
+}
 
 .recipe-btn {
   width: 100%; display: flex; align-items: center; gap: 8px;

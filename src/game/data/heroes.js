@@ -474,7 +474,7 @@ export const HERO_TEMPLATES = {
     baseHp: 11500, baseAtk: 970, baseDef: 560, baseSpd: 102,
     critRate: 0.15, critDmg: 0.50,
     skills: [SKILLS.CRYSTAL_STRIKE, SKILLS.EMERGENCY_PATCH, SKILLS.SCRAP_SURGE],
-    artisanSkills: [ARTISAN.blacksmithing, ARTISAN.leatherworking],
+    artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true,
     forgeAffinities: ['vaultmetal', 'runeite'],
     quote: "If it's broken and glowing, that's just more power waiting to happen.",
