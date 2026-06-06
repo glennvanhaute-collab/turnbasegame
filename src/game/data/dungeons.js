@@ -246,6 +246,7 @@ export function buildDungeonEncounter(dungeon) {
   return {
     id: dungeon.id,
     name: dungeon.name,
+    tier: dungeon.tier,
     difficulty: dungeon.difficulty,
     enemies:   DUNGEON_ENEMY_POOLS[dungeon.enemyPoolId] ?? DUNGEON_ENEMY_POOLS.easy_1,
     mechanics: POOL_MECHANICS[dungeon.enemyPoolId] ?? [],
