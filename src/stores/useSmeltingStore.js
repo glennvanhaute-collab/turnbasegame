@@ -90,6 +90,16 @@ export const useSmeltingStore = defineStore('smelting', () => {
     _persist()
   }
 
+  function addToQueue(barId, qty) {
+    if (!job.value || job.value.barId !== barId || qty <= 0) return
+    const bar = BARS[barId]
+    if (!bar) return
+    const resources = useResourceStore()
+    resources.removeOre(bar.oreId, bar.oreCost * qty)
+    job.value.totalBars += qty
+    _persist()
+  }
+
   function cancelSmelt() {
     if (!job.value) return
     const resources = useResourceStore()
@@ -105,6 +115,6 @@ export const useSmeltingStore = defineStore('smelting', () => {
   return {
     job, isRunning,
     completedCount, remainingCount, currentBarProgress,
-    tick, startSmelt, cancelSmelt,
+    tick, startSmelt, addToQueue, cancelSmelt,
   }
 })

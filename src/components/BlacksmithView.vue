@@ -162,7 +162,7 @@
               >⊕ Smelt ×{{ smeltQty }}</button>
             </template>
 
-            <!-- RUNNING (this bar): progress + cancel -->
+            <!-- RUNNING (this bar): progress + queue + cancel -->
             <template v-else-if="isMyJob">
               <div class="smelt-run-header">
                 <span class="srh-title">Smelting in progress</span>
@@ -174,6 +174,20 @@
                 </div>
                 <span class="srp-eta">{{ formatSmeltTime(smeltEta) }}</span>
               </div>
+              <div class="smelt-qty-row" v-if="maxSmelt > 0">
+                <button class="sqr-adj" @click="adjustQty(-5)" :disabled="smeltQty <= 1">−5</button>
+                <button class="sqr-adj" @click="adjustQty(-1)" :disabled="smeltQty <= 1">−</button>
+                <span class="sqr-qty">{{ smeltQty }}</span>
+                <button class="sqr-adj" @click="adjustQty(1)"  :disabled="smeltQty >= maxSmelt">+</button>
+                <button class="sqr-adj" @click="adjustQty(5)"  :disabled="smeltQty >= maxSmelt">+5</button>
+                <button class="sqr-max" @click="smeltQty = maxSmelt" :disabled="smeltQty >= maxSmelt">Max</button>
+              </div>
+              <button
+                class="smelt-start-btn smelt-queue-btn"
+                :class="{ ready: maxSmelt > 0 }"
+                :disabled="maxSmelt <= 0"
+                @click="addToQueue"
+              >⊕ Add ×{{ smeltQty }}</button>
               <button class="smelt-cancel-btn" @click="cancelSmelt">Cancel &amp; Refund Ores</button>
             </template>
 
@@ -757,7 +771,11 @@ function startSmelt() {
   smelting.startSmelt(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value), forgeSpeedMultiplier.value)
 }
 
-function cancelSmelt() { smelting.cancelSmelt() }
+function cancelSmelt()  { smelting.cancelSmelt() }
+function addToQueue()   {
+  if (!selectedBar.value || maxSmelt.value <= 0) return
+  smelting.addToQueue(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value))
+}
 
 function forge() {
   if (!selected.value || !canAfford(selected.value)) return
@@ -1283,6 +1301,8 @@ function forge() {
 .srp-track { flex: 1; height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; border: 1px solid var(--border-brown); }
 .srp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 4px; transition: width 0.8s linear; }
 .srp-eta { font-family: var(--font-head); font-size: 0.68rem; color: rgba(255,200,100,0.7); flex-shrink: 0; min-width: 50px; text-align: right; }
+.smelt-queue-btn { padding: 9px 32px; font-size: 0.78rem; }
+
 .smelt-cancel-btn {
   padding: 8px 24px; border-radius: 6px;
   border: 1px solid #5a2020; background: rgba(90,20,20,0.25);
