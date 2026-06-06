@@ -93,8 +93,9 @@
             class="btn btn-primary"
             @click="nextEncounter"
           >Next →</button>
-          <button class="btn btn-retry"   @click="retryEncounter">▷ Run Once</button>
-          <button class="btn btn-batch"   @click="startBatch">⚡ Run 10×</button>
+          <button class="btn btn-retry"      @click="retryEncounter">▷ Run Once</button>
+          <button class="btn btn-batch"      @click="startBatch">⚡ Run 10×</button>
+          <button class="btn btn-batch100" v-if="canRun100" @click="startBatch100">⚡ Run 100×</button>
           <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
         </template>
         <!-- Defeat -->
@@ -130,6 +131,12 @@ const rarityChanged = computed(() =>
   store.lastReward?.levelsGained > 0 && playerHero.rarity !== rarityAtBattleStart.value
 )
 
+const EPIC_OR_HIGHER = new Set(['Epic', 'Legendary', 'Mythical', 'Ancient'])
+const canRun100 = computed(() =>
+  encounter.value?.difficulty === 'Easy' &&
+  EPIC_OR_HIGHER.has(playerHero.rarity)
+)
+
 const encounter = computed(() =>
   store.currentEncounter ?? store.ENCOUNTERS?.[store.currentEncounterIndex]
 )
@@ -149,6 +156,9 @@ function retryEncounter() {
 }
 function startBatch() {
   store.startBatchRun(10)
+}
+function startBatch100() {
+  store.startBatchRun(100)
 }
 </script>
 
@@ -310,6 +320,7 @@ function startBatch() {
 .btn-retry     { background: #5c2810; color: #d4a060; border: 1px solid #7a3a18; }
 .btn-secondary { background: #3e1c0c; color: #ccc; }
 .btn-batch     { background: #0a1a2a; color: #4fa8ff; border: 1px solid #1a3a5a; }
+.btn-batch100  { background: #180a2a; color: #b44fff; border: 1px solid #3a1a5a; }
 
 /* ── Batch progress ──────────────────────────────────────────────── */
 .batch-progress {
