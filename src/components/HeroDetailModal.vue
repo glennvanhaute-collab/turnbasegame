@@ -217,7 +217,7 @@ import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { TargetType } from '../game/Skill.js'
-import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
+import { GearSlot, SLOT_LABELS, computeLineStats } from '../game/Gear.js'
 import { SLOT_TO_ICON, AFFINITY_ICON } from '../game/data/spritesheet.js'
 import { RARITY_FLOOR_LEVEL } from '../stores/usePlayerHeroStore.js'
 import GameIcon from './ui/GameIcon.vue'
@@ -285,7 +285,14 @@ const STAT_CHIP_LABELS = {
   critDmg: v => `+${Math.round(v*100)}% CD`,
 }
 function itemStatChips(item) {
-  return Object.entries(item.stats)
+  const merged = { ...item.stats }
+  if (item.lines?.length) {
+    const lineStats = computeLineStats(item.lines)
+    for (const [key, val] of Object.entries(lineStats)) {
+      merged[key] = (merged[key] ?? 0) + val
+    }
+  }
+  return Object.entries(merged)
     .filter(([, v]) => v > 0)
     .map(([k, v]) => STAT_CHIP_LABELS[k]?.(v) ?? `+${v}`)
     .slice(0, 3)
