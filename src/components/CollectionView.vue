@@ -34,7 +34,7 @@
               <div class="portrait-fade" />
               <span class="rarity-tag" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
               <span class="affinity-tag" :class="hero.affinity.toLowerCase()">{{ hero.affinity }}</span>
-              <span class="level-tag" v-if="hero.isPlayerCharacter">Lv.{{ hero.level }}</span>
+              <span class="level-tag" v-if="hero.isPlayerCharacter || inventory.isProgressive(key)">Lv.{{ playerHero.level }}</span>
               <div class="selected-badge" v-if="store.isInTeam(key)">#{{ store.team.indexOf(key) + 1 }}</div>
             </div>
             <div class="card-info" @click="store.openDetail(key)">
@@ -76,7 +76,7 @@
             <div class="portrait-fade" />
             <span class="rarity-tag" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
             <span class="affinity-tag" :class="hero.affinity.toLowerCase()">{{ hero.affinity }}</span>
-            <span class="level-tag" v-if="hero.isPlayerCharacter">Lv.{{ hero.level }}</span>
+            <span class="level-tag" v-if="hero.isPlayerCharacter || inventory.isProgressive(key)">Lv.{{ playerHero.level }}</span>
             <div class="selected-badge" v-if="store.isInTeam(key)">#{{ store.team.indexOf(key) + 1 }}</div>
           </div>
 
@@ -177,6 +177,7 @@ const emit = defineEmits(['back'])
 import collectionBg from '../assets/backgrounds/collection_bg.png'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { formatCP } from '../game/cp.js'
 import HeroDetailModal from './HeroDetailModal.vue'
 import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
@@ -195,8 +196,9 @@ function getPortrait(hero) {
   return _getHeroPortrait(hero)
 }
 
-const store     = useCollectionStore()
-const inventory = useInventoryStore()
+const store      = useCollectionStore()
+const inventory  = useInventoryStore()
+const playerHero = usePlayerHeroStore()
 
 const progressionRoster = computed(() => store.filteredRoster.filter(({ key, hero }) => hero.isPlayerCharacter || inventory.isProgressive(key)))
 const regularRoster     = computed(() => store.filteredRoster.filter(({ key, hero }) => !hero.isPlayerCharacter && !inventory.isProgressive(key)))

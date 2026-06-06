@@ -59,8 +59,8 @@
                 <p class="hero-lore">{{ hero.lore }}</p>
               </section>
 
-              <!-- Level progression (player character only) -->
-              <section class="section" v-if="hero.isPlayerCharacter">
+              <!-- Level progression — player character or soul-bound units -->
+              <section class="section" v-if="hero.isPlayerCharacter || inventory.isProgressive(entry.key)">
                 <h3 class="section-title">Progression</h3>
                 <div class="prog-level">
                   <span class="prog-lv-label">Level</span>
