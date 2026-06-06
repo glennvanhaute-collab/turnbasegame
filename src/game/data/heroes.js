@@ -468,6 +468,32 @@ export const HERO_TEMPLATES = {
     isPlayer: true,
   }),
 
+  GRIBZAK: () => new Hero({
+    id: 'gribzak', name: 'Gribzak Gearvein',
+    faction: Faction.VALDRIS, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
+    baseHp: 11500, baseAtk: 970, baseDef: 560, baseSpd: 102,
+    critRate: 0.15, critDmg: 0.50,
+    skills: [SKILLS.CRYSTAL_STRIKE, SKILLS.EMERGENCY_PATCH, SKILLS.SCRAP_SURGE],
+    artisanSkills: [ARTISAN.blacksmithing, ARTISAN.leatherworking],
+    isPlayer: true,
+    forgeAffinities: ['vaultmetal', 'runeite'],
+    quote: "If it's broken and glowing, that's just more power waiting to happen.",
+    lore: "Gribzak Gearvein was not born into prestige. He began as a back-alley tinkerer beneath the floating citadels, collecting broken rune parts and cracked crystal cores that fancier artificers had thrown away. His green-crystal hammer started life as a damaged mining-core stabilizer. House Valdris scholars mocked his methods — until he repaired an overloaded crystal engine none of them dared touch. He is not the most polished artificer in Valdris. He is the one who can fix a war machine while it is exploding.",
+  }),
+
+  BORRIK: () => new Hero({
+    id: 'borrik', name: 'Borrik Stormcog',
+    faction: Faction.VALDRIS, rarity: Rarity.EPIC, affinity: Affinity.MAGIC,
+    baseHp: 18500, baseAtk: 1500, baseDef: 950, baseSpd: 88,
+    critRate: 0.20, critDmg: 0.65,
+    skills: [SKILLS.SKYBREAKER_STRIKE, SKILLS.ARC_DISCHARGE, SKILLS.ARTIFICERS_SHIELD],
+    artisanSkills: [ARTISAN.blacksmithing],
+    isPlayer: true,
+    forgeAffinities: ['vaultmetal', 'runeite'],
+    quote: "Skybreaker doesn't care how fancy your spell theory is.",
+    lore: "Borrik Stormcog is one of the most respected master smiths ever accepted into the upper forges of House Valdris. To him, a rune is just a gear made of light, and a crystal is simply a furnace that remembers spells. His great blue hextech warhammer, Skybreaker, was forged around a refined arc-core from the upper citadels. Despite his terrifying equipment, Borrik became beloved because he is unusually warm-hearted for someone of his status. He can flatten a siege construct — then spend the evening teaching a young apprentice how to balance a crystal housing correctly.",
+  }),
+
   ZWIERLS: () => new Hero({
     id: 'zwierls', name: 'Zwierls',
     faction: Faction.VALDRIS, rarity: Rarity.EPIC, affinity: Affinity.MAGIC,
@@ -687,6 +713,7 @@ export const RECRUIT_POOL = [
   { key: 'ZARETH',              rarity: 'Rare' },
   { key: 'SERIX',               rarity: 'Rare' },
   { key: 'NYXARA',              rarity: 'Rare' },
+  { key: 'GRIBZAK',             rarity: 'Rare' },
   // ── Epic ─────────────────────────────────────────────────────────
   { key: 'GWENDAL',             rarity: 'Epic' },
   { key: 'BRENNA',              rarity: 'Epic' },
@@ -696,6 +723,7 @@ export const RECRUIT_POOL = [
   { key: 'VELMORN',             rarity: 'Epic' },
   { key: 'MORD',                rarity: 'Epic' },
   { key: 'THALRIC',             rarity: 'Epic' },
+  { key: 'BORRIK',              rarity: 'Epic' },
   // ── Legendary ────────────────────────────────────────────────────
   { key: 'LORD_ALDRIC',         rarity: 'Legendary' },
   { key: 'HELGA',               rarity: 'Legendary' },

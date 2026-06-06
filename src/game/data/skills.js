@@ -312,6 +312,74 @@ export const SKILLS = {
     ],
   }),
 
+  // ── Gribzak Gearvein ────────────────────────────────────────────
+  CRYSTAL_STRIKE: new Skill({
+    id: 'crystal_strike',
+    name: 'Crystal Strike',
+    description: 'A direct blow with the green-crystal hammer. Deals 200% ATK damage.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.0 })],
+  }),
+
+  EMERGENCY_PATCH: new Skill({
+    id: 'emergency_patch',
+    name: 'Emergency Patch',
+    description: "Field repair — restores 15% max HP to one ally and raises their DEF for 2 turns. He's done this mid-battle. More than once.",
+    cooldown: 3,
+    targetType: TargetType.SINGLE_ALLY,
+    effects: [
+      new SkillEffect({ type: EffectType.HEAL, healPercent: 0.15 }),
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_DEF, statusDuration: 2, buffValue: 0.25 }),
+    ],
+  }),
+
+  SCRAP_SURGE: new Skill({
+    id: 'scrap_surge',
+    name: 'Scrap Surge',
+    description: 'Unleashes a burst of unstable crystal energy at all enemies, dealing 110% ATK with 60% chance to reduce their ATK for 2 turns.',
+    cooldown: 4,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.1 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_ATK, statusChance: 0.60, statusDuration: 2 }),
+    ],
+  }),
+
+  // ── Borrik Stormcog ─────────────────────────────────────────────
+  SKYBREAKER_STRIKE: new Skill({
+    id: 'skybreaker_strike',
+    name: 'Skybreaker',
+    description: "Skybreaker doesn't care how fancy your spell theory is. Deals 270% ATK damage.",
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.7 })],
+  }),
+
+  ARC_DISCHARGE: new Skill({
+    id: 'arc_discharge',
+    name: 'Arc Discharge',
+    description: 'Releases a shockwave from the arc-core. Hits all enemies for 150% ATK with 65% chance to Stun for 1 turn.',
+    cooldown: 3,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.5 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.STUN, statusChance: 0.65, statusDuration: 1 }),
+    ],
+  }),
+
+  ARTIFICERS_SHIELD: new Skill({
+    id: 'artificers_shield',
+    name: "Artificer's Shield",
+    description: 'Raises arcane barriers for all allies, granting a Shield and increasing DEF for 3 turns. Soldiers feel safer when he is near.',
+    cooldown: 4,
+    targetType: TargetType.ALL_ALLIES,
+    effects: [
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.SHIELD, statusDuration: 3 }),
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_DEF, statusDuration: 3, buffValue: 0.30 }),
+    ],
+  }),
+
   // ── Arri the Witch ──────────────────────────────────────────────
   VERDANT_HEX: new Skill({
     id: 'verdant_hex',
