@@ -46,37 +46,36 @@
       </div>
     </div>
 
-    <!-- ── Boss section ──────────────────────────────────────────── -->
-    <div class="boss-section">
+    <!-- ── Enemy section (1 or 2 enemies) ──────────────────────────── -->
+    <div class="enemy-section" :class="{ 'multi-enemy': store.enemyTeam.length > 1 }">
       <div
-        class="boss-portrait-wrap"
-        :class="{ 'boss-targetable': store.state === 'selecting_target', 'boss-hit': bossHitFlash }"
-        @click="onBossClick"
+        v-for="enemy in store.enemyTeam"
+        :key="enemy.id"
+        class="enemy-card"
+        :class="{
+          'enemy-targetable': canTargetEnemy(enemy),
+          'enemy-hit':        hitFlash[enemy.id],
+          'enemy-dead':       enemy.isDead,
+        }"
+        @click="onEnemyClick(enemy)"
       >
-        <img v-if="bossImg" :src="bossImg" class="boss-portrait" />
-        <div v-else class="boss-fallback">?</div>
-        <div class="boss-dead-veil" v-if="boss?.isDead" />
-      </div>
-
-      <div class="boss-info">
-        <div class="boss-name">{{ boss?.name }}</div>
-        <div class="boss-hp-track">
-          <div
-            class="boss-hp-fill"
-            :style="{ width: bossHpPct + '%', background: bossHpColor }"
-          />
-          <span class="boss-hp-label">
-            {{ boss?.hp?.toLocaleString() }} / {{ boss?.maxHp?.toLocaleString() }}
-          </span>
+        <div class="enemy-portrait-wrap">
+          <img v-if="enemyPortrait(enemy)" :src="enemyPortrait(enemy)" class="enemy-portrait" />
+          <div v-else class="enemy-fallback">{{ enemy.name[0] }}</div>
+          <div class="enemy-dead-veil" v-if="enemy.isDead">✟</div>
+          <div class="target-ring" v-if="canTargetEnemy(enemy)" />
         </div>
-        <!-- Status effects -->
-        <div class="boss-status-row" v-if="boss?.statusEffects?.length">
-          <span
-            v-for="se in boss.statusEffects"
-            :key="se.type"
-            class="status-pip"
-            :class="seClass(se.type)"
-          >{{ seLabel(se.type) }} {{ se.duration }}t</span>
+        <div class="enemy-info">
+          <div class="enemy-name">{{ enemy.name }}</div>
+          <div class="enemy-hp-track">
+            <div class="enemy-hp-fill" :style="{ width: enemyHpPct(enemy) + '%', background: enemyHpColor(enemy) }" />
+            <span class="enemy-hp-label">{{ enemy.hp?.toLocaleString() }} / {{ enemy.maxHp?.toLocaleString() }}</span>
+          </div>
+          <div class="enemy-status-row" v-if="enemy.statusEffects?.length">
+            <span v-for="se in enemy.statusEffects" :key="se.type" class="status-pip" :class="seClass(se.type)">
+              {{ seLabel(se.type) }} {{ se.duration }}t
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -157,9 +156,12 @@
       </div>
     </Transition>
 
-    <!-- Target hint when selecting_target for ally skills -->
+    <!-- Target hints -->
     <div class="target-hint" v-if="store.state === 'selecting_target' && needsAllyTarget">
       Click a hero to target them
+    </div>
+    <div class="target-hint enemy" v-else-if="store.state === 'selecting_target' && needsEnemyTarget && store.enemyTeam.filter(e => !e.isDead).length > 1">
+      Click an enemy to target them
     </div>
 
   </div>
@@ -169,10 +171,9 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useBattleStore }     from '../stores/useBattleStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
-import { getPortrait }        from '../game/portraits.js'
+import { getPortrait, PORTRAIT_MAP } from '../game/portraits.js'
 import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
-import bossImg  from '../assets/dungeons/Raid_fallen-king-batman.png'
 import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
 
 const props = defineProps({ raidId: { type: String, required: true } })
@@ -183,19 +184,51 @@ const collection = useCollectionStore()
 
 const encounter = RAID_ENCOUNTERS[props.raidId]
 
-// ── Arena background ─────────────────────────────────────────────
-const arenaStyle = { backgroundImage: `url(${arenaBg})` }
+// ── Arena background (per-raid) ──────────────────────────────────
+const _arenaImagesPng  = import.meta.glob('../assets/dungeons/*.png',  { eager: true })
+const _arenaImagesJpeg = import.meta.glob('../assets/dungeons/*.jpeg', { eager: true })
+const _arenaImages = { ..._arenaImagesPng, ..._arenaImagesJpeg }
+const ARENA_BG_MAP = {
+  throne_of_regret: 'raid_fallen_room',
+  void_heir:        'dungeon_battle_arena_Aurelian-Dragonforge',
+}
+const arenaStyle = computed(() => {
+  const key = ARENA_BG_MAP[props.raidId] ?? ''
+  const entry = Object.entries(_arenaImages).find(([p]) => p.includes(key))
+  const url = entry?.[1]?.default ?? arenaBg
+  return { backgroundImage: `url(${url})` }
+})
 
-// ── Boss ─────────────────────────────────────────────────────────
+// ── Enemy portraits ───────────────────────────────────────────────
+// Maps base enemy ID (strip trailing _0 index) → key in PORTRAIT_MAP
+// PORTRAIT_MAP keys = lowercased filename without extension
+const ENEMY_PORTRAIT_KEYS = {
+  batman_nightmare: 'raid_fallen-king-batman',   // units/mythical/Raid_fallen-king-batman.png
+  aurelian_eclipse: 'aurelian-dragonforge',      // units/mythical/Aurelian-Dragonforge.png
+  nytherax_wyrm:    null,                        // no portrait yet
+}
+function enemyPortrait(enemy) {
+  const baseId = enemy.id?.replace(/_\d+$/, '') ?? ''
+  const key = ENEMY_PORTRAIT_KEYS[baseId]
+  if (key && PORTRAIT_MAP[key]) return PORTRAIT_MAP[key]
+  return getPortrait(enemy)
+}
+
+// Phase tracking uses first enemy (main boss)
 const boss       = computed(() => store.enemyTeam[0] ?? null)
 const bossHpPct  = computed(() => boss.value ? Math.max(0, boss.value.hp / boss.value.maxHp * 100) : 100)
-const bossHpColor = computed(() => {
-  const pct = bossHpPct.value
-  if (pct > 70) return '#c9a227'
+
+// Per-enemy HP helpers
+function enemyHpPct(enemy) { return Math.max(0, enemy.hp / enemy.maxHp * 100) }
+function enemyHpColor(enemy) {
+  const pct = enemyHpPct(enemy)
+  if (pct > 60) return '#c9a227'
   if (pct > 30) return '#ff9944'
   return '#b44fff'
-})
-const bossHitFlash = ref(false)
+}
+
+// Hit flash — per enemy
+const hitFlash = ref({})
 
 // ── Phase detection ───────────────────────────────────────────────
 const currentPhase = computed(() => {
@@ -222,32 +255,41 @@ watch(currentPhase, (newPhase, oldPhase) => {
   }
 })
 
-// ── Auto-target boss for single-enemy skills ──────────────────────
-const needsAllyTarget = ref(false)
+// ── Targeting ─────────────────────────────────────────────────────
+const needsAllyTarget  = ref(false)
+const needsEnemyTarget = ref(false)
 
 watch(() => store.state, (newState) => {
-  if (newState !== 'selecting_target') { needsAllyTarget.value = false; return }
+  if (newState !== 'selecting_target') {
+    needsAllyTarget.value  = false
+    needsEnemyTarget.value = false
+    return
+  }
   const targetType = store.engine?.pendingSkill?.skill?.targetType
-  if (targetType === TargetType.SINGLE_ENEMY || !targetType) {
-    needsAllyTarget.value = false
-    nextTick(() => {
-      if (store.state === 'selecting_target' && boss.value && !boss.value.isDead) {
-        store.selectTarget(boss.value)
-      }
-    })
+  if (targetType === TargetType.SINGLE_ALLY) {
+    needsAllyTarget.value  = true
+    needsEnemyTarget.value = false
   } else {
-    needsAllyTarget.value = true
+    needsAllyTarget.value  = false
+    needsEnemyTarget.value = true
+    // Auto-target only if there is exactly one living enemy
+    const living = store.enemyTeam.filter(e => !e.isDead)
+    if (living.length === 1) {
+      nextTick(() => { if (store.state === 'selecting_target') store.selectTarget(living[0]) })
+    }
   }
 })
 
-function onBossClick() {
-  if (store.state === 'selecting_target' && !needsAllyTarget.value && boss.value) {
-    store.selectTarget(boss.value)
-  }
+function canTargetEnemy(enemy) {
+  return !enemy.isDead && store.state === 'selecting_target' && needsEnemyTarget.value
+}
+
+function onEnemyClick(enemy) {
+  if (canTargetEnemy(enemy)) store.selectTarget(enemy)
 }
 
 function onHeroSlotClick(hero) {
-  if (store.state === 'selecting_target' && needsAllyTarget.value) {
+  if (store.state === 'selecting_target' && needsAllyTarget.value && !hero.isDead) {
     store.selectTarget(hero)
   }
 }
@@ -259,13 +301,17 @@ const recentLog = computed(() => {
   return log.slice(start).map((text, i) => ({ id: start + i, text }))
 })
 
-// ── Boss hit flash (watches lastAction) ──────────────────────────
+// ── Hit flash per enemy ───────────────────────────────────────────
 watch(() => store.lastAction, (action) => {
   if (!action) return
-  const hitsBoss = action.hits?.some(h => h.targetId?.startsWith('batman'))
-  if (hitsBoss && !boss.value?.isDead) {
-    bossHitFlash.value = true
-    setTimeout(() => { bossHitFlash.value = false }, 300)
+  for (const hit of action.hits ?? []) {
+    const enemy = store.enemyTeam.find(e => e.id === hit.targetId)
+    if (enemy && hit.damage > 0) {
+      hitFlash.value = { ...hitFlash.value, [enemy.id]: true }
+      setTimeout(() => {
+        hitFlash.value = { ...hitFlash.value, [enemy.id]: false }
+      }, 280)
+    }
   }
 })
 
@@ -341,7 +387,7 @@ onMounted(() => {
 }
 
 /* All direct children sit above the overlay */
-.raid-header, .boss-section, .battle-log-feed,
+.raid-header, .enemy-section, .battle-log-feed,
 .party-row, .skill-bar, .target-hint,
 .phase-card-overlay, .end-overlay {
   position: relative;
@@ -400,112 +446,91 @@ onMounted(() => {
 .turn-label.victory { color: #ffd700; font-style: normal; font-weight: 700; }
 .turn-label.defeat  { color: #ff4444; font-style: normal; font-weight: 700; }
 
-/* ── Boss section ────────────────────────────────────────────── */
-.boss-section {
+/* ── Enemy section ───────────────────────────────────────────── */
+.enemy-section {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px 20px 8px;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 32px;
+  padding: 12px 20px 8px;
   flex-shrink: 0;
 }
 
-.boss-portrait-wrap {
+.enemy-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: filter 0.1s, transform 0.1s;
+}
+.enemy-card.enemy-targetable { cursor: crosshair; }
+.enemy-card.enemy-targetable:hover {
+  filter: brightness(1.15) drop-shadow(0 0 20px rgba(255, 80, 80, 0.6));
+  transform: translateY(-4px);
+}
+.enemy-card.enemy-hit { filter: brightness(2.5) saturate(0); }
+.enemy-card.enemy-dead { opacity: 0.35; filter: grayscale(1); }
+
+.enemy-portrait-wrap {
   position: relative;
-  height: 260px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  transition: filter 0.1s;
-  cursor: default;
 }
-.boss-portrait-wrap.boss-targetable {
-  cursor: crosshair;
-}
-.boss-portrait-wrap.boss-targetable:hover {
-  filter: brightness(1.15) drop-shadow(0 0 16px rgba(255, 80, 80, 0.6));
-}
-.boss-portrait-wrap.boss-hit {
-  filter: brightness(2) saturate(0.3);
-}
-
-.boss-portrait {
-  height: 260px;
+.enemy-portrait {
+  height: 240px;
   width: auto;
-  max-width: 420px;
+  max-width: 320px;
   object-fit: contain;
   filter: drop-shadow(0 4px 24px rgba(0,0,0,0.9));
 }
+/* Shrink second enemy (dragon) slightly */
+.multi-enemy .enemy-card:nth-child(2) .enemy-portrait { height: 180px; }
 
-.boss-fallback {
-  width: 200px;
-  height: 260px;
-  background: #1a0c06;
-  border: 1px solid #3a1e0a;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  color: #3a1e0a;
+.enemy-fallback {
+  width: 160px; height: 220px;
+  background: #1a0c06; border: 1px solid #3a1e0a; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: #3a1e0a;
+}
+.enemy-dead-veil {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.65);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; color: #666; border-radius: 8px;
+}
+.target-ring {
+  position: absolute; inset: -4px;
+  border: 2px solid rgba(255, 80, 80, 0.7);
+  border-radius: 8px; pointer-events: none;
+  animation: target-pulse 0.8s ease-in-out infinite;
+}
+@keyframes target-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba(255,80,80,0.4); }
+  50%       { opacity: 0.5; box-shadow: 0 0 20px rgba(255,80,80,0.7); }
 }
 
-.boss-dead-veil {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  border-radius: 8px;
+.enemy-info { width: 100%; text-align: center; }
+.enemy-name {
+  font-family: 'Cinzel', serif; font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: #c9a227; margin-bottom: 5px;
 }
-
-.boss-info {
-  width: 100%;
-  max-width: 500px;
-  margin-top: 10px;
+.enemy-hp-track {
+  position: relative; height: 8px; background: #120a04;
+  border: 1px solid #2a1208; border-radius: 4px; overflow: hidden; width: 100%;
 }
-
-.boss-name {
-  font-family: 'Cinzel', serif;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: #c9a227;
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.boss-hp-track {
-  position: relative;
-  height: 10px;
-  background: #120a04;
-  border: 1px solid #2a1208;
-  border-radius: 5px;
-  overflow: hidden;
-}
-.boss-hp-fill {
-  height: 100%;
-  border-radius: 5px;
+.enemy-hp-fill {
+  height: 100%; border-radius: 4px;
   transition: width 0.4s ease, background 0.6s ease;
-  box-shadow: 0 0 8px currentColor;
+  box-shadow: 0 0 6px currentColor;
 }
-.boss-hp-label {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.58rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.85);
-  letter-spacing: 0.5px;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+.enemy-hp-label {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.52rem; font-weight: 700;
+  color: rgba(255,255,255,0.9); text-shadow: 0 1px 3px rgba(0,0,0,0.9);
 }
-
-.boss-status-row {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-  justify-content: center;
+.enemy-status-row {
+  display: flex; gap: 3px; flex-wrap: wrap; margin-top: 4px; justify-content: center;
 }
 
 /* ── Battle log ──────────────────────────────────────────────── */

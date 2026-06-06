@@ -112,7 +112,7 @@ import { RAIDS } from '../game/data/raids.js'
 
 const emit = defineEmits(['enter-raid'])
 
-const _raidBgs = import.meta.glob('../assets/dungeons/Raid_*.png', { eager: true })
+const _raidBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
 const raidBgMap = {}
 for (const [path, mod] of Object.entries(_raidBgs)) {
   const key = path.split('/').pop().replace(/\.png$/i, '')
