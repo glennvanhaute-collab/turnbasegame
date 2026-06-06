@@ -19,7 +19,7 @@
           :style="{ '--mat-color': cloth.color }"
           @click="selectWeave(cloth)"
         >
-          <span class="tan-dot" />
+          <GameIcon :icon="clothIcon(cloth.id)" :size="16" class="mat-icon" />
           <span class="tan-name">{{ cloth.name }}</span>
           <span class="tan-cost">{{ cloth.fiberCost }}× fiber</span>
         </button>
@@ -56,7 +56,7 @@
             :style="{ '--tier-color': tier.color }"
             @click="selectCraft(recipe)"
           >
-            <GameIcon :icon="SLOT_TO_ICON[recipe.slot] ?? 'helmet'" :size="16" class="recipe-slot-icon" />
+            <GameIcon :icon="tierSlotIcon(recipe.tier, recipe.slot, 'tailoring')" :size="16" class="recipe-slot-icon" />
             <span class="recipe-name">{{ recipe.name }}</span>
             <span class="recipe-cost">
               <span
@@ -85,7 +85,7 @@
 
           <div class="tan-conv-row">
             <div class="tco-side">
-              <span class="tco-dot" :style="{ background: FIBERS[selectedCloth.fiberId]?.color ?? '#888' }" />
+              <GameIcon :icon="fiberIcon(selectedCloth.fiberId)" :size="20" class="mat-icon" />
               <div class="tco-info">
                 <span class="tco-name">{{ FIBERS[selectedCloth.fiberId]?.name }}</span>
                 <span class="tco-stock">{{ resources.fibers[selectedCloth.fiberId] ?? 0 }} in stock</span>
@@ -101,7 +101,7 @@
                 <span class="tco-name">{{ selectedCloth.name }}</span>
                 <span class="tco-stock" :class="{ 'tco-none': maxWeave === 0 }">{{ maxWeave }} can weave</span>
               </div>
-              <span class="tco-dot" :style="{ background: selectedCloth.color }" />
+              <GameIcon :icon="clothIcon(selectedCloth.id)" :size="20" class="mat-icon" />
             </div>
           </div>
 
@@ -187,7 +187,7 @@
         <template v-if="selected">
           <div class="item-showcase" :class="{ ready: canAfford(selected) }" :style="{ '--tier-color': selectedTierColor }">
             <div class="showcase-glow" />
-            <GameIcon :icon="SLOT_TO_ICON[selected.slot] ?? 'helmet'" :size="72" class="showcase-icon" />
+            <GameIcon :icon="tierSlotIcon(selected.tier, selected.slot, 'tailoring')" :size="72" class="showcase-icon" />
           </div>
 
           <p class="work-desc" v-if="selected.desc">{{ selected.desc }}</p>
@@ -211,7 +211,7 @@
                   :key="matId"
                   :style="{ '--ore-color': CLOTHS[matId]?.color ?? '#888' }"
                 >
-                  <span class="mat-dot" />
+                  <GameIcon :icon="clothIcon(matId)" :size="20" class="mat-icon" />
                   <span class="mat-name">{{ CLOTHS[matId]?.name ?? matId }}</span>
                   <span class="mat-tally">
                     <span class="mat-have" :class="{ ok: (resources.cloths[matId] ?? 0) >= amt }">{{ resources.cloths[matId] ?? 0 }}</span>
@@ -322,7 +322,7 @@
           :style="{ '--mat-color': fiber.color }"
           @click="resources.fibers[fiber.id] && fiberToCloth[fiber.id] && selectWeave(fiberToCloth[fiber.id])"
         >
-          <span class="stock-dot" />
+          <GameIcon :icon="fiberIcon(fiber.id)" :size="20" class="mat-icon" />
           <span class="stock-name">{{ fiber.name }}</span>
           <span class="stock-count">{{ resources.fibers[fiber.id] ?? 0 }}</span>
           <span class="stock-arrow" v-if="resources.fibers[fiber.id] && fiberToCloth[fiber.id]">→</span>
@@ -338,7 +338,7 @@
           :class="{ empty: !resources.cloths[cloth.id] }"
           :style="{ '--mat-color': cloth.color }"
         >
-          <span class="stock-dot" />
+          <GameIcon :icon="clothIcon(cloth.id)" :size="20" class="mat-icon" />
           <span class="stock-name">{{ cloth.name }}</span>
           <span class="stock-count">{{ resources.cloths[cloth.id] ?? 0 }}</span>
         </div>
@@ -360,11 +360,11 @@ import { FIBER_LIST, FIBERS } from '../game/data/fibers.js'
 import { CLOTH_LIST, CLOTHS } from '../game/data/cloths.js'
 import { TAILORING_RECIPES, TAILORING_RECIPE_TIERS, TAILORING_XP_PER_TIER } from '../game/data/tailoringRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
-import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import { SLOT_TO_ICON, tierSlotIcon, fiberIcon, clothIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
-import arsenalBg from '../assets/backgrounds/arsenal.png'
+import tailoringBg from '../assets/backgrounds/tailoring_bg.png'
 
-const bg = arsenalBg
+const bg = tailoringBg
 
 const resources  = useResourceStore()
 const inventory  = useInventoryStore()
@@ -571,7 +571,8 @@ function craftFullSet(tier) {
   background: color-mix(in srgb, var(--mat-color) 12%, rgba(0,0,0,0.4));
   border-color: color-mix(in srgb, var(--mat-color) 50%, transparent);
 }
-.tan-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mat-color); box-shadow: 0 0 5px var(--mat-color); flex-shrink: 0; }
+.tan-btn:not(.active) .mat-icon { opacity: 0.75; }
+.tan-btn .mat-icon { filter: drop-shadow(0 0 3px var(--mat-color)); }
 .tan-name { flex: 1; font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); }
 .tan-cost { font-size: 0.58rem; color: var(--text-muted); font-family: var(--font-head); background: rgba(255,255,255,0.04); border-radius: 6px; padding: 1px 5px; }
 
@@ -835,8 +836,7 @@ function craftFullSet(tier) {
 .stock-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; border: 1px solid transparent; transition: background 0.12s; }
 .stock-row:not(.empty) { border-color: color-mix(in srgb, var(--mat-color) 20%, transparent); background: color-mix(in srgb, var(--mat-color) 5%, transparent); }
 .stock-row.empty { opacity: 0.28; filter: saturate(0.2); }
-.stock-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mat-color); flex-shrink: 0; }
-.stock-row:not(.empty) .stock-dot { box-shadow: 0 0 5px var(--mat-color); }
+.stock-row:not(.empty) .mat-icon { filter: drop-shadow(0 0 4px var(--mat-color)); }
 .stock-name { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stock-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--mat-color); min-width: 20px; text-align: right; }
 .stock-row.empty .stock-count { color: var(--text-dim); }

@@ -2,11 +2,13 @@ import { ref } from 'vue'
 import { playMain, playBattle, setMuted } from '../game/music.js'
 
 export function useMusic(view) {
-  const muted = ref(false)
+  const muted = ref(localStorage.getItem('music_muted') === 'true')
+  setMuted(muted.value)
 
   function toggleMute() {
     muted.value = !muted.value
     setMuted(muted.value)
+    localStorage.setItem('music_muted', muted.value)
   }
 
   function onViewChange(v) {

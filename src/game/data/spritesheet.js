@@ -3,9 +3,12 @@
 // pos(col, row, sheet) — sheet defaults to 1.
 // GameIcon.vue picks the right image based on entry.sheet.
 //
-// icons_1.png        — 8×4 grid (1774×887px)  — nav, ores, bars, gear slots
-// icons_2.png        — 8×3 grid (2048×768px)  — currency/UI, affinities, artisan skills
-// sprites_blacksmith — 8×6 grid (1448×1086px) — tiered gear icons (copper→moonsilver)
+// icons_1.png              — 8×4 grid (1774×887px)   — nav, ores, bars, gear slots
+// icons_2.png              — 8×3 grid (2048×768px)   — currency/UI, affinities, artisan skills
+// sprites_blacksmith.png   — 8×6 grid (1448×1086px)  — tiered plate gear (copper→moonsilver)
+// sprites_leatherworking.png — 5×6 grid (1145×1374px) — tiered leather gear
+// sprites_tailoring.png    — 5×6 grid (1145×1374px)  — tiered cloth gear
+// sprites_materials.png    — 6×4 grid (1536×1024px)  — hides, leathers, fibers, cloths
 
 export const SHEET_COLS = 8
 
@@ -94,12 +97,61 @@ BS_TIERS.forEach((tier, row) => {
   })
 })
 
+// ── Sheet LW: sprites_leatherworking.png ─────────────────────────────────
+// rows: 0=copper, 1=tin, 2=steel, 3=darksteel, 4=mithril, 5=moonsilver
+// cols: 0=helmet, 1=chest, 2=legs, 3=boots, 4=gloves
+export const SHEET_LW_COLS = 5
+export const SHEET_LW_ROWS = 6
+
+const LW_SLOTS = ['helmet', 'chest', 'legs', 'boots', 'gloves']
+
+const ICONS_LW = {}
+BS_TIERS.forEach((tier, row) => {
+  LW_SLOTS.forEach((slot, col) => {
+    ICONS_LW[`lw_${tier}_${slot}`] = pos(col, row, 'lw')
+  })
+})
+
+// ── Sheet TW: sprites_tailoring.png ──────────────────────────────────────
+// rows: 0=copper, 1=tin, 2=steel, 3=darksteel, 4=mithril, 5=moonsilver
+// cols: 0=helmet, 1=chest, 2=legs, 3=boots, 4=gloves
+export const SHEET_TW_COLS = 5
+export const SHEET_TW_ROWS = 6
+
+const ICONS_TW = {}
+BS_TIERS.forEach((tier, row) => {
+  LW_SLOTS.forEach((slot, col) => {
+    ICONS_TW[`tw_${tier}_${slot}`] = pos(col, row, 'tw')
+  })
+})
+
+// ── Sheet MATS: sprites_materials.png ────────────────────────────────────
+// rows: 0=hides, 1=leathers, 2=fibers, 3=cloths
+// cols: 0=rough/cotton, 1=thick/wool, 2=hardened/silkweave, 3=shadow, 4=celestial/starweave, 5=moonscale/moonweave
+export const SHEET_MATS_COLS = 6
+export const SHEET_MATS_ROWS = 4
+
+const HIDE_IDS    = ['rough', 'thick', 'hardened', 'shadow', 'celestial', 'moonscale']
+const LEATHER_IDS = ['rough', 'thick', 'hardened', 'shadow', 'celestial', 'moonscale']
+const FIBER_IDS   = ['cotton', 'wool', 'silkthread', 'shadowthread', 'starthread', 'moonthread']
+const CLOTH_IDS   = ['cotton', 'wool', 'silkweave', 'shadowcloth', 'starweave', 'moonweave']
+
+const ICONS_MATS = {}
+HIDE_IDS.forEach((id, col)    => { ICONS_MATS[`hide_${id}`]    = pos(col, 0, 'mats') })
+LEATHER_IDS.forEach((id, col) => { ICONS_MATS[`leather_${id}`] = pos(col, 1, 'mats') })
+FIBER_IDS.forEach((id, col)   => { ICONS_MATS[`fiber_${id}`]   = pos(col, 2, 'mats') })
+CLOTH_IDS.forEach((id, col)   => { ICONS_MATS[`cloth_${id}`]   = pos(col, 3, 'mats') })
+
 // ── Merged lookup ─────────────────────────────────────────────────────────
-export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS }
+export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS }
 
 // ── Convenience helpers ───────────────────────────────────────────────────
-export function oreIcon(tierId)  { return `${tierId}_ore` }
-export function barIcon(tierId)  { return `${tierId}_bar` }
+export function oreIcon(tierId)     { return `${tierId}_ore` }
+export function barIcon(tierId)     { return `${tierId}_bar` }
+export function hideIcon(id)        { return `hide_${id}` }
+export function leatherIcon(id)     { return `leather_${id}` }
+export function fiberIcon(id)       { return `fiber_${id}` }
+export function clothIcon(id)       { return `cloth_${id}` }
 
 export const SLOT_TO_ICON = {
   main_hand: 'sword',
@@ -121,8 +173,26 @@ const SLOT_TO_BS_KEY = {
   gloves:    'gloves',
 }
 
-// Returns a tier-specific icon key if available, falls back to generic slot icon
-export function tierSlotIcon(tier, slot) {
+const SLOT_TO_LW_KEY = {
+  head:   'helmet',
+  chest:  'chest',
+  legs:   'legs',
+  boots:  'boots',
+  gloves: 'gloves',
+}
+
+// Returns a tier+slot icon key, routing to the correct sheet based on discipline
+export function tierSlotIcon(tier, slot, discipline = 'blacksmithing') {
+  if (discipline === 'leatherworking') {
+    const slotKey = SLOT_TO_LW_KEY[slot]
+    if (tier && slotKey && BS_TIERS.includes(tier)) return `lw_${tier}_${slotKey}`
+    return SLOT_TO_ICON[slot] ?? 'chest'
+  }
+  if (discipline === 'tailoring') {
+    const slotKey = SLOT_TO_LW_KEY[slot]
+    if (tier && slotKey && BS_TIERS.includes(tier)) return `tw_${tier}_${slotKey}`
+    return SLOT_TO_ICON[slot] ?? 'chest'
+  }
   const slotKey = SLOT_TO_BS_KEY[slot]
   if (tier && slotKey && BS_TIERS.includes(tier)) return `${tier}_${slotKey}`
   return SLOT_TO_ICON[slot] ?? 'sword'

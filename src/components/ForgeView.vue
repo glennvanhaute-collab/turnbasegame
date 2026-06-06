@@ -57,7 +57,7 @@
                 :style="{ '--tier-color': tierColorForItem(item) }"
                 @click="artisanItemId = item.instanceId"
               >
-                <GameIcon :icon="tierSlotIcon(item.tier, item.slot)" :size="14" class="ilb-icon" />
+                <GameIcon :icon="tierSlotIcon(item.tier, item.slot, item.craftDiscipline)" :size="14" class="ilb-icon" />
                 <span class="ilb-name">{{ item.name }}</span>
                 <span class="ilb-eq" v-if="inventory.getEquippedBy(item.instanceId)">●</span>
                 <span class="ilb-legacy" v-if="item.stars > (TIER_MAX_STARS[item.tier] ?? 10)">Legacy</span>
@@ -98,7 +98,7 @@
                 </div>
                 <img :src="GEAR_FRAMES[artisanFrame] ?? itemFrameImg" class="showcase-frame-img" alt="" aria-hidden="true" />
               </div>
-              <GameIcon v-else :icon="tierSlotIcon(artisanItem.tier, artisanItem.slot)" :size="64" class="showcase-slot-icon" />
+              <GameIcon v-else :icon="tierSlotIcon(artisanItem.tier, artisanItem.slot, artisanItem.craftDiscipline)" :size="64" class="showcase-slot-icon" />
               <div class="stars-row">
                 <span
                   v-for="s in Math.max(artisanItem.stars, TIER_MAX_STARS[artisanItem.tier] ?? 10)" :key="s"

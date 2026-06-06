@@ -217,7 +217,7 @@
           </button>
 
           <button class="enc-option" @click="$emit('open-leatherworking')">
-            <span class="enc-opt-icon enc-opt-icon--emoji">✂</span>
+            <img :src="leatherworkingIcon" class="enc-opt-icon" style="width:28px;height:28px;object-fit:contain;" alt="" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Leatherworking</span>
               <span class="enc-opt-sub">Tan hides and craft leather armor</span>
@@ -225,30 +225,13 @@
           </button>
 
           <button class="enc-option" @click="$emit('open-tailoring')">
-            <span class="enc-opt-icon enc-opt-icon--emoji">🧵</span>
+            <img :src="tailoringIcon" class="enc-opt-icon" style="width:28px;height:28px;object-fit:contain;" alt="" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Tailoring</span>
               <span class="enc-opt-sub">Weave cloth and craft robes</span>
             </span>
           </button>
 
-          <button class="enc-option locked" disabled>
-            <span class="enc-opt-icon">🗼</span>
-            <span class="enc-opt-info">
-              <span class="enc-opt-name">Watchtower</span>
-              <span class="enc-opt-sub">Scout lore & exploration</span>
-            </span>
-            <span class="enc-opt-lock">Soon</span>
-          </button>
-
-          <button class="enc-option locked" disabled>
-            <span class="enc-opt-icon">📜</span>
-            <span class="enc-opt-info">
-              <span class="enc-opt-name">Archive</span>
-              <span class="enc-opt-sub">Unlock lore fragments</span>
-            </span>
-            <span class="enc-opt-lock">Soon</span>
-          </button>
 
         </div>
 
@@ -278,7 +261,9 @@ import { useCampStore } from '../stores/useCampStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { computeCP, formatCP } from '../game/cp.js'
 import trainingBg from '../assets/backgrounds/homepage_bg.png'
-import codexIcon  from '../assets/ui/codex.png'
+import codexIcon          from '../assets/ui/codex.png'
+import leatherworkingIcon from '../assets/ui/leatherworking_icon.png'
+import tailoringIcon      from '../assets/ui/tailoring_icon.png'
 import GameIcon from './ui/GameIcon.vue'
 
 const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring'])

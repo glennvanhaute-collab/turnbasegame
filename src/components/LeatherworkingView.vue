@@ -19,7 +19,7 @@
           :style="{ '--mat-color': leather.color }"
           @click="selectTan(leather)"
         >
-          <span class="tan-dot" />
+          <GameIcon :icon="leatherIcon(leather.id)" :size="16" class="mat-icon" />
           <span class="tan-name">{{ leather.name }}</span>
           <span class="tan-cost">{{ leather.hideCost }}× hide</span>
         </button>
@@ -56,7 +56,7 @@
             :style="{ '--tier-color': tier.color }"
             @click="selectCraft(recipe)"
           >
-            <GameIcon :icon="SLOT_TO_ICON[recipe.slot] ?? 'helmet'" :size="16" class="recipe-slot-icon" />
+            <GameIcon :icon="tierSlotIcon(recipe.tier, recipe.slot, 'leatherworking')" :size="16" class="recipe-slot-icon" />
             <span class="recipe-name">{{ recipe.name }}</span>
             <span class="recipe-cost">
               <span
@@ -85,7 +85,7 @@
 
           <div class="tan-conv-row">
             <div class="tco-side">
-              <span class="tco-dot" :style="{ background: HIDES[selectedLeather.hideId]?.color ?? '#888' }" />
+              <GameIcon :icon="hideIcon(selectedLeather.hideId)" :size="20" class="mat-icon" />
               <div class="tco-info">
                 <span class="tco-name">{{ HIDES[selectedLeather.hideId]?.name }}</span>
                 <span class="tco-stock">{{ resources.hides[selectedLeather.hideId] ?? 0 }} in stock</span>
@@ -101,7 +101,7 @@
                 <span class="tco-name">{{ selectedLeather.name }}</span>
                 <span class="tco-stock" :class="{ 'tco-none': maxTan === 0 }">{{ maxTan }} can tan</span>
               </div>
-              <span class="tco-dot" :style="{ background: selectedLeather.color }" />
+              <GameIcon :icon="leatherIcon(selectedLeather.id)" :size="20" class="mat-icon" />
             </div>
           </div>
 
@@ -187,7 +187,7 @@
         <template v-if="selected">
           <div class="item-showcase" :class="{ ready: canAfford(selected) }" :style="{ '--tier-color': selectedTierColor }">
             <div class="showcase-glow" />
-            <GameIcon :icon="SLOT_TO_ICON[selected.slot] ?? 'helmet'" :size="72" class="showcase-icon" />
+            <GameIcon :icon="tierSlotIcon(selected.tier, selected.slot, 'leatherworking')" :size="72" class="showcase-icon" />
           </div>
 
           <p class="work-desc" v-if="selected.desc">{{ selected.desc }}</p>
@@ -211,7 +211,7 @@
                   :key="matId"
                   :style="{ '--ore-color': LEATHERS[matId]?.color ?? '#888' }"
                 >
-                  <span class="mat-dot" />
+                  <GameIcon :icon="leatherIcon(matId)" :size="20" class="mat-icon" />
                   <span class="mat-name">{{ LEATHERS[matId]?.name ?? matId }}</span>
                   <span class="mat-tally">
                     <span class="mat-have" :class="{ ok: (resources.leathers[matId] ?? 0) >= amt }">{{ resources.leathers[matId] ?? 0 }}</span>
@@ -322,7 +322,7 @@
           :style="{ '--mat-color': hide.color }"
           @click="resources.hides[hide.id] && hideToLeather[hide.id] && selectTan(hideToLeather[hide.id])"
         >
-          <span class="stock-dot" />
+          <GameIcon :icon="hideIcon(hide.id)" :size="20" class="mat-icon" />
           <span class="stock-name">{{ hide.name }}</span>
           <span class="stock-count">{{ resources.hides[hide.id] ?? 0 }}</span>
           <span class="stock-arrow" v-if="resources.hides[hide.id] && hideToLeather[hide.id]">→</span>
@@ -338,7 +338,7 @@
           :class="{ empty: !resources.leathers[leather.id] }"
           :style="{ '--mat-color': leather.color }"
         >
-          <span class="stock-dot" />
+          <GameIcon :icon="leatherIcon(leather.id)" :size="20" class="mat-icon" />
           <span class="stock-name">{{ leather.name }}</span>
           <span class="stock-count">{{ resources.leathers[leather.id] ?? 0 }}</span>
         </div>
@@ -360,11 +360,11 @@ import { HIDE_LIST, HIDES } from '../game/data/hides.js'
 import { LEATHER_LIST, LEATHERS } from '../game/data/leathers.js'
 import { LEATHER_RECIPES, LEATHER_RECIPE_TIERS, LEATHER_XP_PER_TIER } from '../game/data/leatherRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
-import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import { SLOT_TO_ICON, tierSlotIcon, hideIcon, leatherIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
-import arsenalBg from '../assets/backgrounds/arsenal.png'
+import leatherworkingBg from '../assets/backgrounds/leatherworking_bg.png'
 
-const bg = arsenalBg
+const bg = leatherworkingBg
 
 const resources  = useResourceStore()
 const inventory  = useInventoryStore()
@@ -572,7 +572,8 @@ function craftFullSet(tier) {
   background: color-mix(in srgb, var(--mat-color) 12%, rgba(0,0,0,0.4));
   border-color: color-mix(in srgb, var(--mat-color) 50%, transparent);
 }
-.tan-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mat-color); box-shadow: 0 0 5px var(--mat-color); flex-shrink: 0; }
+.tan-btn:not(.active) .mat-icon { opacity: 0.75; }
+.tan-btn .mat-icon { filter: drop-shadow(0 0 3px var(--mat-color)); }
 .tan-name { flex: 1; font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); }
 .tan-cost { font-size: 0.58rem; color: var(--text-muted); font-family: var(--font-head); background: rgba(255,255,255,0.04); border-radius: 6px; padding: 1px 5px; }
 
@@ -839,8 +840,7 @@ function craftFullSet(tier) {
 .stock-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; border: 1px solid transparent; transition: background 0.12s; }
 .stock-row:not(.empty) { border-color: color-mix(in srgb, var(--mat-color) 20%, transparent); background: color-mix(in srgb, var(--mat-color) 5%, transparent); }
 .stock-row.empty { opacity: 0.28; filter: saturate(0.2); }
-.stock-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mat-color); flex-shrink: 0; }
-.stock-row:not(.empty) .stock-dot { box-shadow: 0 0 5px var(--mat-color); }
+.stock-row:not(.empty) .mat-icon { filter: drop-shadow(0 0 4px var(--mat-color)); }
 .stock-name { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stock-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--mat-color); min-width: 20px; text-align: right; }
 .stock-row.empty .stock-count { color: var(--text-dim); }
