@@ -53,6 +53,7 @@ function loadSoulData() {
 }
 
 function attachMethod(item) {
+  item.lines    = item.lines ?? []
   item.fitsSlot = function(slot) { return SLOT_ALLOWED_TYPES[slot]?.includes(this.gearType) ?? false }
   return item
 }
