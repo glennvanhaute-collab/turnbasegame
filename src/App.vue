@@ -35,6 +35,7 @@
           <button class="icon-btn" @click="exportProgression" title="Export save file">⬇</button>
           <button class="icon-btn" @click="$refs.importInput.click()" title="Import save file">⬆</button>
           <input ref="importInput" type="file" accept=".json" style="display:none" @change="importProgression" />
+          <SettingsPanel />
         </div>
       </div>
     </header>
@@ -189,12 +190,14 @@ import CampView from './components/CampView.vue'
 import CodexModal from './components/CodexModal.vue'
 import AdvisorMessage from './components/AdvisorMessage.vue'
 import DevMenu from './components/DevMenu.vue'
+import SettingsPanel from './components/SettingsPanel.vue'
 import arsenalBg from './assets/backgrounds/arsenal.png'
 import navBg from './assets/backgrounds/bg_nav.png'
 import codexIcon from './assets/ui/codex.png'
 import closeImg from './assets/ui/close.png'
 import GameIcon from './components/ui/GameIcon.vue'
 import { useAdvisorStore } from './stores/useAdvisorStore.js'
+import { useSettingsStore } from './stores/useSettingsStore.js'
 import { buildDungeonEncounter } from './game/data/dungeons.js'
 
 const view       = ref('campaign')
@@ -223,6 +226,7 @@ function navigate(newView) {
 
 const { muted, toggleMute, onViewChange, startOnFirstInteraction } = useMusic()
 useSmeltingTick()
+useSettingsStore()
 
 watch(view, (v) => { onViewChange(v) })
 
