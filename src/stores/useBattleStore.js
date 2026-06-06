@@ -130,7 +130,7 @@ export const useBattleStore = defineStore('battle', () => {
         oreDrops.forEach(({ oreId, amount }) => resources.addOre(oreId, amount))
         let componentDrops = []
         if (enc.isDungeon) {
-          const dungeonResult = useDungeonStore().onDungeonVictory(enc.dungeonId)
+          const dungeonResult = useDungeonStore().onDungeonVictory(enc.dungeonId, enc.tier)
           componentDrops = dungeonResult?.componentDrops ?? []
         }
         const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops }
