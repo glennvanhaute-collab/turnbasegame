@@ -203,7 +203,12 @@
                 >
                   <span class="rdm-art-icon">{{ art.icon }}</span>
                   <span class="rdm-art-info">
-                    <span class="rdm-art-name">{{ art.name }}</span>
+                    <span class="rdm-art-name">
+                      {{ art.name }}
+                      <span class="rdm-art-level" v-if="collection.ownsHero(detailHero.key)">
+                        Lv.{{ artisan.getSkillLevel(detailHero.key, art.id) }}
+                      </span>
+                    </span>
                     <span class="rdm-art-desc">{{ art.desc }}</span>
                   </span>
                 </div>
@@ -220,12 +225,14 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { useArtisanStore } from '../stores/useArtisanStore.js'
 import HeroAvatar from './HeroAvatar.vue'
 import { HERO_TEMPLATES, STARTER_KEYS, NORMAL_POOL, VOID_POOL } from '../game/data/heroes.js'
 import { getPortrait } from '../game/portraits.js'
 import mapImg from '../assets/backgrounds/map.png'
 
 const collection = useCollectionStore()
+const artisan    = useArtisanStore()
 
 const showEnemies     = ref(false)
 const selectedFaction = ref(null)
@@ -682,7 +689,12 @@ async function selectFaction(faction) {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
-.rdm-art-desc { font-size: 0.62rem; color: var(--text-muted); line-height: 1.4; }
+.rdm-art-desc  { font-size: 0.62rem; color: var(--text-muted); line-height: 1.4; }
+.rdm-art-level {
+  font-size: 0.58rem; font-weight: 800; color: #cd7f32;
+  background: rgba(205,127,50,0.12); border: 1px solid rgba(205,127,50,0.25);
+  border-radius: 4px; padding: 0 5px; margin-left: 5px; letter-spacing: 0.5px;
+}
 
 /* Transition */
 .rdm-fade-enter-active { transition: opacity 0.2s, transform 0.2s; }

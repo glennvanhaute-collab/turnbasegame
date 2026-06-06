@@ -152,7 +152,7 @@
                 <button class="sqr-max" @click="smeltQty = maxSmelt" :disabled="smeltQty >= maxSmelt || maxSmelt === 0">Max</button>
               </div>
               <span class="smelt-eta-hint" v-if="maxSmelt > 0">
-                Est. {{ formatSmeltTime(smeltQty * selectedBar.smeltTime * 1000) }}
+                Est. {{ formatSmeltTime(smeltQty * selectedBar.smeltTime * 1000 / forgeSpeedMultiplier) }}
               </span>
               <button
                 class="smelt-start-btn"
@@ -428,6 +428,56 @@
 
       </template>
 
+      <!-- Forge smith assignment -->
+      <div class="forge-smith-bar">
+        <span class="fsb-label">⚒ Smith</span>
+
+        <!-- Assigned -->
+        <template v-if="assignedSmith">
+          <div class="fsb-hero">
+            <span class="fsb-name">{{ assignedSmith.hero.name }}</span>
+            <span class="fsb-skill">
+              Blacksmithing Lv.{{ artisan.getSkillLevel(artisan.assignedForgeSmithKey, 'blacksmithing') }}
+            </span>
+            <div class="fsb-xp-wrap">
+              <div class="fsb-xp-track">
+                <div class="fsb-xp-fill" :style="{ width: smithXpPct + '%' }" />
+              </div>
+              <span class="fsb-xp-text">
+                {{ artisan.getSkillXp(artisan.assignedForgeSmithKey, 'blacksmithing') }}
+                / {{ artisan.xpForLevel(artisan.getSkillLevel(artisan.assignedForgeSmithKey, 'blacksmithing')) }}
+              </span>
+            </div>
+          </div>
+          <span class="fsb-bonus">+{{ Math.round((forgeSpeedMultiplier - 1) * 100) }}% speed</span>
+          <button class="fsb-remove" @click="artisan.unassignForgeSmith()">×</button>
+        </template>
+
+        <!-- Unassigned -->
+        <template v-else>
+          <button
+            class="fsb-assign"
+            :disabled="eligibleSmiths.length === 0"
+            @click="showSmithPicker = !showSmithPicker"
+          >{{ eligibleSmiths.length > 0 ? 'Assign Smith' : 'No Blacksmiths owned' }}</button>
+
+          <Transition name="fsb-drop">
+            <div class="fsb-picker" v-if="showSmithPicker && eligibleSmiths.length > 0">
+              <button
+                v-for="{ key, hero } in eligibleSmiths"
+                :key="key"
+                class="fsb-pick-row"
+                @click="assignSmith(key)"
+              >
+                <span class="fsb-pick-name">{{ hero.name }}</span>
+                <span class="fsb-pick-level">Lv.{{ artisan.getSkillLevel(key, 'blacksmithing') }}</span>
+                <span class="fsb-pick-bonus">+{{ Math.round((artisan.smithSpeedMultiplier(key) - 1) * 100) }}%</span>
+              </button>
+            </div>
+          </Transition>
+        </template>
+      </div>
+
       <!-- Blacksmithing proficiency bar — always visible -->
       <div class="smith-xp-bar">
         <div class="smith-xp-header">
@@ -492,6 +542,7 @@ import { useResourceStore } from '../stores/useResourceStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useSmeltingStore } from '../stores/useSmeltingStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { useArtisanStore } from '../stores/useArtisanStore.js'
 import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { ORE_LIST, ORES } from '../game/data/ores.js'
 import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
@@ -551,6 +602,39 @@ const resources  = useResourceStore()
 const inventory  = useInventoryStore()
 const smelting   = useSmeltingStore()
 const collection = useCollectionStore()
+const artisan    = useArtisanStore()
+
+const showSmithPicker = ref(false)
+
+const eligibleSmiths = computed(() =>
+  collection.roster.filter(({ hero }) =>
+    hero.artisanSkills?.some(s => s.id === 'blacksmithing')
+  )
+)
+
+const assignedSmith = computed(() => {
+  const key = artisan.assignedForgeSmithKey
+  if (!key) return null
+  return eligibleSmiths.value.find(e => e.key === key) ?? null
+})
+
+const forgeSpeedMultiplier = computed(() => {
+  if (!assignedSmith.value) return 1.0
+  return artisan.smithSpeedMultiplier(artisan.assignedForgeSmithKey)
+})
+
+const smithXpPct = computed(() => {
+  const key = artisan.assignedForgeSmithKey
+  if (!key) return 0
+  const level = artisan.getSkillLevel(key, 'blacksmithing')
+  const xp    = artisan.getSkillXp(key, 'blacksmithing')
+  return Math.round((xp / artisan.xpForLevel(level)) * 100)
+})
+
+function assignSmith(key) {
+  artisan.assignForgeSmith(key)
+  showSmithPicker.value = false
+}
 
 const hasBlacksmithInRoster = computed(() =>
   collection.roster.some(({ hero }) =>
@@ -670,7 +754,7 @@ function canAfford(recipe) {
 function startSmelt() {
   if (!selectedBar.value || maxSmelt.value <= 0) return
   if (!artisanMetForForge(selectedBar.value.requiredForge)) return
-  smelting.startSmelt(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value))
+  smelting.startSmelt(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value), forgeSpeedMultiplier.value)
 }
 
 function cancelSmelt() { smelting.cancelSmelt() }
@@ -1240,8 +1324,70 @@ function forge() {
   to   { transform: translateY(0);   opacity: 1; }
 }
 
+/* Forge smith assignment bar */
+.forge-smith-bar {
+  width: 100%; max-width: 440px; position: relative;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 14px; border-radius: 8px;
+  border: 1px solid rgba(201,162,39,0.18);
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+  margin-top: auto;
+}
+.fsb-label {
+  font-family: var(--font-head); font-size: 0.6rem; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text-muted); font-weight: 700; flex-shrink: 0;
+}
+.fsb-hero { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; flex-wrap: wrap; }
+.fsb-name { font-size: 0.72rem; font-weight: 700; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fsb-skill { font-size: 0.6rem; color: #cd7f32; font-family: var(--font-head); font-weight: 700; white-space: nowrap; }
+.fsb-xp-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.fsb-xp-track { width: 72px; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+.fsb-xp-fill  { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 2px; transition: width 0.4s ease; }
+.fsb-xp-text  { font-size: 0.56rem; color: var(--text-dim); white-space: nowrap; }
+.fsb-bonus {
+  font-family: var(--font-head); font-size: 0.65rem; font-weight: 800;
+  color: #4dff88; background: rgba(77,255,136,0.08); border: 1px solid rgba(77,255,136,0.2);
+  border-radius: 6px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;
+}
+.fsb-remove {
+  width: 22px; height: 22px; border-radius: 50%; border: 1px solid #5a2020;
+  background: rgba(90,20,20,0.3); color: #c08080; font-size: 0.7rem; font-weight: 700;
+  cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.fsb-remove:hover { border-color: #cc4444; background: rgba(120,20,20,0.5); color: #ffaaaa; }
+.fsb-assign {
+  flex: 1; padding: 6px 12px; border-radius: 6px;
+  border: 1px dashed rgba(201,162,39,0.25); background: transparent;
+  color: var(--text-dim); font-size: 0.66rem; font-family: var(--font-head);
+  cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.fsb-assign:not(:disabled):hover { border-color: #8a5a18; color: var(--gold); }
+.fsb-assign:disabled { opacity: 0.3; cursor: not-allowed; }
+.fsb-picker {
+  position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; z-index: 10;
+  background: rgba(12,6,2,0.97); border: 1px solid var(--border-gold);
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.8);
+}
+.fsb-pick-row {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; background: transparent; border: none;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer; transition: background 0.1s; text-align: left;
+}
+.fsb-pick-row:last-child { border-bottom: none; }
+.fsb-pick-row:hover { background: rgba(255,255,255,0.05); }
+.fsb-pick-name  { flex: 1; font-size: 0.7rem; font-weight: 600; color: var(--text-parchment); }
+.fsb-pick-level { font-size: 0.6rem; color: #cd7f32; font-family: var(--font-head); }
+.fsb-pick-bonus { font-size: 0.6rem; color: #4dff88; font-family: var(--font-head); font-weight: 700; }
+.fsb-drop-enter-active { transition: opacity 0.15s, transform 0.15s; }
+.fsb-drop-leave-active { transition: opacity 0.1s; }
+.fsb-drop-enter-from   { opacity: 0; transform: translateY(4px); }
+.fsb-drop-leave-to     { opacity: 0; }
+
 /* Smithing XP bar */
-.smith-xp-bar { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+.smith-xp-bar { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 6px; }
 .smith-xp-header { display: flex; align-items: baseline; gap: 8px; }
 .smith-xp-label { font-family: var(--font-head); font-size: 0.62rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; flex: 1; }
 .smith-xp-level { font-family: var(--font-head); font-size: 0.75rem; font-weight: 800; color: #ffd700; }

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { BARS } from '../game/data/bars.js'
 import { useResourceStore } from './useResourceStore.js'
+import { useArtisanStore } from './useArtisanStore.js'
 
 const STORAGE_KEY = 'raid-smelting'
 function loadSaved() {
@@ -51,9 +52,13 @@ export const useSmeltingStore = defineStore('smelting', () => {
 
     if (newBars > 0) {
       const resources = useResourceStore()
+      const artisan   = useArtisanStore()
       const bar = BARS[job.value.barId]
       resources.addBar(job.value.barId, newBars)
       resources.addSmithingXp(Math.ceil(bar.xp * newBars * 0.5))
+      if (job.value.assignedSmithKey) {
+        artisan.addSkillXp(job.value.assignedSmithKey, 'blacksmithing', bar.xp * newBars)
+      }
     }
 
     job.value.lastTickAt = _now.value
@@ -65,19 +70,21 @@ export const useSmeltingStore = defineStore('smelting', () => {
     _persist()
   }
 
-  function startSmelt(barId, qty) {
+  function startSmelt(barId, qty, speedMultiplier = 1) {
     if (job.value || qty <= 0) return
     const bar = BARS[barId]
     if (!bar) return
     const resources = useResourceStore()
+    const artisan   = useArtisanStore()
     resources.removeOre(bar.oreId, bar.oreCost * qty)
     const now = Date.now()
     job.value = {
       barId,
-      startedAt:  now,
-      lastTickAt: now,
-      totalBars:  qty,
-      timePerBar: bar.smeltTime * 1000,
+      startedAt:        now,
+      lastTickAt:       now,
+      totalBars:        qty,
+      timePerBar:       Math.round(bar.smeltTime * 1000 / Math.max(1, speedMultiplier)),
+      assignedSmithKey: artisan.assignedForgeSmithKey ?? null,
     }
     _now.value = now
     _persist()
