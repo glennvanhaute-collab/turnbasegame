@@ -95,6 +95,8 @@ App.vue
 | `usePlayerHeroStore` | (auto) | Custom player hero, XP, level |
 | `useForgeStore` | (auto) | Orbs and forge materials (separate from blacksmith) |
 | `useSummonStore` | (auto) | Summon/gacha state |
+| `useArtisanStore` | `raid-artisan` | Artisan skill XP per hero + assigned forge smith |
+| `useSettingsStore` | `bow-theme` | House theme (CSS variable overrides) |
 
 ## Periodic Ticks (App.vue onMounted)
 
@@ -168,6 +170,25 @@ Each hero in `src/game/data/heroes.js` is a factory function `() => new Hero({..
 **Faction backgrounds** (`src/assets/lore/`): `Aldric.png`, `Valdris.png`, etc. — used as thematic backdrop in `HeroDetailModal` keyed by `hero.faction`.
 
 **Artisan skills** defined in `src/game/data/artisanSkills.js` → `ARTISAN` object. Each has `id`, `name`, `icon` (emoji), `color`, `desc`. `ARTISAN_SLOTS` defines how many skills a rarity tier can hold.
+
+## Theme System
+
+`useSettingsStore` (`bow-theme` localStorage key) — 7 faction themes defined in `THEMES` constant. `applyTheme(id)` writes CSS variables to `:root`:
+- `--gold`, `--gold-bright`, `--gold-dim`, `--gold-faint`, `--border-gold`
+
+Themes: `default` (Westrun), `aldric`, `valdris`, `caelwyn`, `mordaine`, `bloodtusk`, `ignar`
+
+Settings cog opens `SettingsPanel.vue` from `App.vue`.
+
+## Artisan Skill System
+
+`useArtisanStore` (`raid-artisan`) — tracks artisan skill XP/level per hero:
+- `skillData`: `{ [heroKey]: { [skillId]: { level, xp } } }`
+- `addSkillXp(heroKey, skillId, amount)` — levels up: XP cost = `level × 100`
+- `assignedForgeSmithKey` — which hero is assigned to the forge
+- `smithSpeedMultiplier(heroKey)` — `1 + 0.05 + level × 0.03` (flat +5%, +3% per blacksmithing level)
+
+Assigned forge smith speeds up smelting. Artisan XP awarded through use (smelting, crafting).
 
 ## Key Patterns
 

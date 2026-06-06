@@ -57,6 +57,11 @@ Reward shown in `BattleArena.vue` → `.reward-panel` (margin-top: 20px).
 
 `startBatchRun(n)` — runs the same encounter n times automatically, accumulates all rewards, shows summary on final run. Stopped by `stopBatch()`. Displayed via `batch-progress` in BattleArena.
 
+- Run 10× available for campaign encounters
+- Run 100× available for Easy dungeons only, requires Epic+ player hero
+- Batch buttons hidden for dungeon encounters (use the dungeon victory screen instead)
+- Easy dungeons award no XP once the player hero reaches Epic rarity
+
 ## Autoplay & Speed
 
 - `autoplay` ref — if true, enemy turns and player turns both run automatically via `runAI()`
