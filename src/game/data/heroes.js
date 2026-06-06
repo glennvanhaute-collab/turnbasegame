@@ -468,6 +468,18 @@ export const HERO_TEMPLATES = {
     isPlayer: true,
   }),
 
+  ZWIERLS: () => new Hero({
+    id: 'zwierls', name: 'Zwierls',
+    faction: Faction.VALDRIS, rarity: Rarity.EPIC, affinity: Affinity.MAGIC,
+    baseHp: 21000, baseAtk: 1400, baseDef: 1150, baseSpd: 82,
+    critRate: 0.18, critDmg: 0.60,
+    skills: [SKILLS.RUNIC_SMASH, SKILLS.HAMMER_ROUND, SKILLS.STONE_RESOLVE],
+    artisanSkills: [ARTISAN.blacksmithing],
+    isPlayer: true,
+    quote: 'I fight the same way I dance. Enthusiastically and without warning.',
+    lore: 'Zwierls of House Valdris has three passions: his rune-hammer, a cold ale, and anyone willing to dance until sunrise. He extends this warmth to everyone he meets, enemies included — right up until the moment he does not. Those who have fought alongside him say the strangest part is not the hammer. It is the fact that he is still grinning when he swings it.',
+  }),
+
   ARRI: () => new Hero({
     id: 'arri', name: 'Arri the Witch',
     faction: Faction.CAELWYN, rarity: Rarity.LEGENDARY, affinity: Affinity.SPIRIT,
@@ -691,6 +703,7 @@ export const RECRUIT_POOL = [
   { key: 'SERAPHEL',            rarity: 'Legendary' },
   { key: 'KYVER',               rarity: 'Legendary' },
   { key: 'ARRI',                rarity: 'Legendary' },
+  { key: 'ZWIERLS',             rarity: 'Epic' },
   // ── Mythical ─────────────────────────────────────────────────────
   { key: 'AURELAN',             rarity: 'Mythical' },
   { key: 'VORATH',              rarity: 'Mythical' },

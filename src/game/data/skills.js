@@ -278,6 +278,40 @@ export const SKILLS = {
     ],
   }),
 
+  // ── Zwierls ─────────────────────────────────────────────────────
+  RUNIC_SMASH: new Skill({
+    id: 'runic_smash',
+    name: 'Runic Smash',
+    description: 'He swings with the enthusiasm of a man celebrating something. It is always devastating. Deals 260% ATK.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.6 })],
+  }),
+
+  HAMMER_ROUND: new Skill({
+    id: 'hammer_round',
+    name: 'Hammer Round',
+    description: 'He hits everyone. This is not unlike his approach to buying drinks. Deals 140% ATK to all enemies with 65% chance to Stun.',
+    cooldown: 3,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.4 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.STUN, statusChance: 0.65, statusDuration: 1 }),
+    ],
+  }),
+
+  STONE_RESOLVE: new Skill({
+    id: 'stone_resolve',
+    name: 'Stone Resolve',
+    description: 'He has taken harder hits at the tavern and danced afterward. Raises own DEF by 40% and regenerates HP for 3 turns.',
+    cooldown: 4,
+    targetType: TargetType.SELF,
+    effects: [
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_DEF, statusDuration: 3, buffValue: 0.40 }),
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.CONTINUOUS_HEAL, statusDuration: 3 }),
+    ],
+  }),
+
   // ── Arri the Witch ──────────────────────────────────────────────
   VERDANT_HEX: new Skill({
     id: 'verdant_hex',
