@@ -66,13 +66,13 @@
           <span class="tier-name">{{ tier.name }}</span>
           <span class="tier-count" v-if="tier.recipes.length && !isTierArtisanLocked(tier.id)">{{ tier.recipes.length }}</span>
           <span class="tier-soon" v-else>—</span>
-          <span class="tier-chevron" v-if="tier.recipes.length">{{ collapsedTiers.has(tier.id) ? '›' : '⌄' }}</span>
+          <span class="tier-chevron" v-if="tier.recipes.length">{{ openTier === tier.id ? '⌄' : '›' }}</span>
         </div>
 
         <div class="tier-artisan-lock" v-if="isTierArtisanLocked(tier.id)">
           ⚒ Recruit a Blacksmith to unlock
         </div>
-        <template v-else-if="!collapsedTiers.has(tier.id)">
+        <template v-else-if="openTier === tier.id">
           <button
             v-for="recipe in tier.recipes"
             :key="recipe.id"
@@ -733,11 +733,9 @@ const visibleRecipeTiers = computed(() =>
   })
 )
 
-const collapsedTiers = ref(new Set(RECIPE_TIERS.map(t => t.id)))
+const openTier = ref(null)
 function toggleTier(id) {
-  const next = new Set(collapsedTiers.value)
-  next.has(id) ? next.delete(id) : next.add(id)
-  collapsedTiers.value = next
+  openTier.value = openTier.value === id ? null : id
 }
 
 // Maps each oreId → the first accessible bar for that ore
