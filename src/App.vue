@@ -7,7 +7,7 @@
     <header class="app-header">
       <div class="app-header-bg" :style="{ backgroundImage: `url(${navBg})` }" />
       <div class="header-inner">
-        <img :src="logoNav" class="logo-img" alt="" @click="navigate('campaign')" style="cursor:pointer" />
+        <img :src="navLogo" class="logo-img" alt="" @click="navigate('campaign')" style="cursor:pointer" />
         <h1 class="logo" @click="navigate('campaign')" style="cursor:pointer">Bannerlords of Westrun</h1>
         <nav class="nav">
           <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="navigate('campaign')">Home</button>
@@ -156,10 +156,14 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useMusic } from './composables/useMusic.js'
 import { useSmeltingTick } from './composables/useSmeltingTick.js'
 import logoNav from './assets/ui/logo-nav.png'
+import shieldAldric  from './assets/lore/house_aldric.png'
+import shieldValdris from './assets/lore/house_valdris.png'
+import shieldCaelwyn from './assets/lore/house_caelwyn.png'
+import shieldMordaine from './assets/lore/house_mordaine.png'
 import { useBattleStore } from './stores/useBattleStore.js'
 import { useCollectionStore } from './stores/useCollectionStore.js'
 import { useCurrencyStore } from './stores/useCurrencyStore.js'
@@ -226,7 +230,10 @@ function navigate(newView) {
 
 const { muted, toggleMute, onViewChange, startOnFirstInteraction } = useMusic()
 useSmeltingTick()
-useSettingsStore()
+const settings = useSettingsStore()
+
+const SHIELD_IMAGES = { aldric: shieldAldric, valdris: shieldValdris, caelwyn: shieldCaelwyn, mordaine: shieldMordaine }
+const navLogo = computed(() => SHIELD_IMAGES[settings.theme] ?? logoNav)
 
 watch(view, (v) => { onViewChange(v) })
 
