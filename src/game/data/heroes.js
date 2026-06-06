@@ -1,6 +1,16 @@
 import { Hero, Rarity, Faction, Affinity } from '../Hero.js'
+import { Skill, SkillEffect, EffectType, TargetType } from '../Skill.js'
 import { SKILLS } from './skills.js'
 import { ARTISAN } from './artisanSkills.js'
+
+const VOID_SMITE = new Skill({
+  id: 'void_smite',
+  name: 'Void Smite',
+  description: 'A basic void strike dealing 400% ATK damage.',
+  cooldown: 0,
+  targetType: TargetType.SINGLE_ENEMY,
+  effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 4.0 })],
+})
 
 export const HERO_TEMPLATES = {
 
@@ -674,23 +684,17 @@ export const HERO_TEMPLATES = {
   }),
 
   // ── Dev-only ────────────────────────────────────────────────────────────
-  ARCHITECT: () => {
-    const hero = new Hero({
-      id: 'architect', name: 'The Architect',
-      faction: Faction.ANCIENT_NOBLES, rarity: Rarity.MYTHICAL, affinity: Affinity.VOID,
-      baseHp: 99999, baseAtk: 9999, baseDef: 5000, baseSpd: 200,
-      critRate: 0.75, critDmg: 2.0, resistance: 0.90, accuracy: 0.50,
-      skills: [SKILLS.BLIZZARD, SKILLS.STELLAR_RIFT, SKILLS.ARCANE_SHIELD],
-      artisanSkills: [ARTISAN.blacksmithing, ARTISAN.herbalism],
-      isPlayer: true,
-      quote: 'I designed this world. Every encounter, every rule, every exploit you found — I put it there.',
-      lore: 'They say the world of Westrun was not discovered — it was built. The Architect exists outside the factions, outside the timeline, outside the rules that govern everyone else. No house claimed them. No dungeon was designed to stop them. When The Architect appears on the battlefield, the result is not a fight. It is a demonstration.',
-    })
-    // Pre-load cooldowns so only BLIZZARD is ready on Turn 1
-    hero.skills[1].currentCooldown = 2  // STELLAR_RIFT
-    hero.skills[2].currentCooldown = 3  // ARCANE_SHIELD
-    return hero
-  },
+  ARCHITECT: () => new Hero({
+    id: 'architect', name: 'The Architect',
+    faction: Faction.ANCIENT_NOBLES, rarity: Rarity.MYTHICAL, affinity: Affinity.VOID,
+    baseHp: 99999, baseAtk: 9999, baseDef: 5000, baseSpd: 200,
+    critRate: 0.75, critDmg: 2.0, resistance: 0.90, accuracy: 0.50,
+    skills: [VOID_SMITE, SKILLS.BLIZZARD, SKILLS.ARCANE_SHIELD],
+    artisanSkills: [ARTISAN.blacksmithing, ARTISAN.herbalism],
+    isPlayer: true,
+    quote: 'I designed this world. Every encounter, every rule, every exploit you found — I put it there.',
+    lore: 'They say the world of Westrun was not discovered — it was built. The Architect exists outside the factions, outside the timeline, outside the rules that govern everyone else. No house claimed them. No dungeon was designed to stop them. When The Architect appears on the battlefield, the result is not a fight. It is a demonstration.',
+  }),
 }
 
 export const STARTER_KEYS = ['SER_ROLAND', 'SERAPHEL', 'MIRA', 'VELMORN']
