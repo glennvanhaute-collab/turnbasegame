@@ -26,6 +26,26 @@
             </button>
           </div>
         </section>
+
+        <section class="sp-section sp-danger-section">
+          <div class="sp-label">Danger Zone</div>
+
+          <Transition name="confirm-swap" mode="out-in">
+            <div v-if="!confirmReset" key="reset-btn" class="reset-row">
+              <button class="reset-btn" @click="confirmReset = true">
+                ↺ Reset All Progress
+              </button>
+            </div>
+
+            <div v-else key="reset-confirm" class="confirm-row">
+              <div class="confirm-msg">This will wipe all heroes, gear, gold and progress. Cannot be undone.</div>
+              <div class="confirm-actions">
+                <button class="confirm-yes" @click="resetProgress">Yes, reset</button>
+                <button class="confirm-no"  @click="confirmReset = false">Cancel</button>
+              </div>
+            </div>
+          </Transition>
+        </section>
       </div>
     </Transition>
   </div>
@@ -35,8 +55,14 @@
 import { ref } from 'vue'
 import { useSettingsStore, THEMES } from '../stores/useSettingsStore.js'
 
-const settings = useSettingsStore()
-const open     = ref(false)
+const settings     = useSettingsStore()
+const open         = ref(false)
+const confirmReset = ref(false)
+
+function resetProgress() {
+  localStorage.clear()
+  location.reload()
+}
 
 const vClickOutside = {
   mounted(el, binding) {
@@ -127,6 +153,79 @@ const vClickOutside = {
 }
 .theme-row.active .tc-name { color: var(--tc); }
 .tc-check { font-size: 0.6rem; color: var(--tc); flex-shrink: 0; }
+
+/* Danger zone */
+.sp-danger-section {
+  border-top: 1px solid #2a1a1a;
+  padding-top: 10px;
+}
+
+.reset-row { display: flex; }
+.reset-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #5c1a1a;
+  border-radius: 6px;
+  color: #884444;
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.reset-btn:hover {
+  background: rgba(180, 40, 40, 0.12);
+  border-color: #aa3333;
+  color: #ff6666;
+}
+
+.confirm-row { display: flex; flex-direction: column; gap: 8px; }
+.confirm-msg {
+  font-size: 0.6rem;
+  color: #ff8866;
+  line-height: 1.5;
+}
+.confirm-actions { display: flex; gap: 6px; }
+.confirm-yes {
+  flex: 1;
+  background: rgba(180, 40, 40, 0.2);
+  border: 1px solid #aa3333;
+  border-radius: 6px;
+  color: #ff6666;
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.confirm-yes:hover { background: rgba(180, 40, 40, 0.35); }
+.confirm-no {
+  flex: 1;
+  background: transparent;
+  border: 1px solid #3a2a2a;
+  border-radius: 6px;
+  color: #665555;
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.confirm-no:hover { color: #aaa; border-color: #554444; }
+
+.confirm-swap-enter-active { transition: opacity 0.15s ease, transform 0.15s ease; }
+.confirm-swap-leave-active { transition: opacity 0.1s ease; }
+.confirm-swap-enter-from   { opacity: 0; transform: translateY(4px); }
+.confirm-swap-leave-to     { opacity: 0; }
 
 /* Transition */
 .sp-slide-enter-active { transition: opacity 0.15s ease, transform 0.18s cubic-bezier(0.22,1,0.36,1); }
