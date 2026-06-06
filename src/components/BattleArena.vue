@@ -1,5 +1,62 @@
 <template>
-  <div class="battle-arena">
+
+  <!-- ── Dungeon Victory Screen ──────────────────────────────────── -->
+  <div class="dungeon-victory" v-if="isDungeonVictory">
+
+    <!-- md-12: dungeon image with Victory overlay -->
+    <div
+      class="dv-scene"
+      :style="dungeonBg ? { backgroundImage: `url(${dungeonBg})` } : {}"
+    >
+      <div class="dv-gradient" />
+      <div class="dv-text">
+        <div class="dv-victory">Victory!</div>
+        <div class="dv-name">{{ encounter.name }}</div>
+      </div>
+    </div>
+
+    <!-- md-12: rewards + actions -->
+    <div class="dv-rewards">
+      <div class="dv-rewards-title">Rewards</div>
+
+      <div class="dv-chips">
+        <div class="chip gold" v-if="store.lastReward.gold > 0">
+          🪙 +{{ store.lastReward.gold.toLocaleString() }}
+        </div>
+        <div class="chip diamonds" v-if="store.lastReward.diamonds > 0">
+          💎 +{{ store.lastReward.diamonds }}
+        </div>
+        <div
+          v-for="drop in store.lastReward.oreDrops"
+          :key="drop.oreId"
+          class="drop-chip"
+          :style="{ '--c': ORES[drop.oreId]?.color ?? '#888' }"
+        >
+          <span class="dot" />{{ ORES[drop.oreId]?.name ?? drop.oreId }} ×{{ drop.amount }}
+        </div>
+        <div
+          v-for="key in store.lastReward.componentDrops"
+          :key="key"
+          class="drop-chip"
+          :style="{ '--c': UPGRADE_COMPONENTS[key]?.color ?? '#888' }"
+        >
+          <span class="dot" />{{ UPGRADE_COMPONENTS[key]?.name ?? key }}
+        </div>
+        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.componentDrops?.length">
+          No drops this run
+        </div>
+      </div>
+
+      <div class="dv-actions">
+        <button class="dv-btn dv-btn-retry" @click="retryEncounter">↺ Run Again</button>
+        <button class="dv-btn dv-btn-back"  @click="$emit('back')">← Dungeons</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Normal Battle Arena ─────────────────────────────────────── -->
+  <div class="battle-arena" v-else>
 
     <!-- ── Left: combat ──────────────────────────────────────────── -->
     <div class="col-combat">
@@ -107,6 +164,7 @@
 
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -121,6 +179,27 @@ import SkillPanel  from './SkillPanel.vue'
 import BattleLog   from './BattleLog.vue'
 
 defineEmits(['back'])
+
+// ── Dungeon victory background (same logic as DungeonCard) ─────────
+const _dungeonBgs = import.meta.glob('../assets/dungeons/dungeon_*.png', { eager: true })
+const DUNGEON_TIER_PREFIX = { medium: 'intermediate' }
+function dungeonTierBgs(tier) {
+  const prefix = `dungeon_${DUNGEON_TIER_PREFIX[tier.toLowerCase()] ?? tier.toLowerCase()}_`
+  return Object.entries(_dungeonBgs).filter(([p]) => p.includes(prefix)).map(([, m]) => m.default)
+}
+const dungeonBg = computed(() => {
+  const enc = encounter.value
+  if (!enc?.isDungeon) return null
+  const pool = dungeonTierBgs(enc.tier ?? 'easy')
+  if (!pool.length) return null
+  const seed = enc.id ?? enc.dungeonId ?? ''
+  const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
+  return pool[idx]
+})
+
+const isDungeonVictory = computed(() =>
+  store.state === 'victory' && !!encounter.value?.isDungeon && !!store.lastReward
+)
 
 const playerHero = usePlayerHeroStore()
 const store      = useBattleStore()
@@ -350,4 +429,112 @@ function startBatch100() {
   border-radius: 2px;
   transition: width 0.3s ease;
 }
+
+/* ── Dungeon Victory Screen ──────────────────────────────────────── */
+.dungeon-victory {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.8);
+}
+
+.dv-scene {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background-color: #080808;
+  background-size: cover;
+  background-position: center 20%;
+  flex-shrink: 0;
+}
+.dv-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.10) 0%,
+    rgba(0,0,0,0.20) 55%,
+    rgba(0,0,0,0.80) 100%
+  );
+}
+.dv-text {
+  position: absolute;
+  bottom: 28px;
+  left: 0; right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.dv-victory {
+  font-family: var(--font-head);
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: #4dff88;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 24px rgba(77,255,136,0.8),
+    0 0 48px rgba(77,255,136,0.4),
+    0 2px 8px rgba(0,0,0,0.9);
+  animation: dv-pulse 1.2s ease-out;
+}
+.dv-name {
+  font-family: var(--font-head);
+  font-size: 0.75rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255,230,180,0.7);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+}
+@keyframes dv-pulse {
+  from { opacity: 0; transform: scale(1.06); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.dv-rewards {
+  background: #0a0604;
+  border-top: 1px solid #2a1a08;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dv-rewards-title {
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #555;
+  font-weight: 700;
+}
+.dv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 32px;
+}
+.chip.dim { color: #444; border-color: #222; }
+
+.dv-actions {
+  display: flex;
+  gap: 10px;
+}
+.dv-btn {
+  padding: 11px 28px;
+  border-radius: 7px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  border: none;
+}
+.dv-btn:hover { opacity: 0.85; }
+.dv-btn-retry { background: #5c2810; color: #d4a060; border: 1px solid #7a3a18; }
+.dv-btn-back  { background: #3e1c0c; color: #ccc; }
 </style>
