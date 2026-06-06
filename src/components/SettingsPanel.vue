@@ -27,6 +27,18 @@
           </div>
         </section>
 
+        <section class="sp-section sp-dev-section">
+          <div class="sp-label">Developer</div>
+          <div class="dev-row">
+            <span class="dev-label">Dev Mode</span>
+            <button
+              class="dev-toggle"
+              :class="{ active: devMode }"
+              @click="toggleDevMode"
+            >{{ devMode ? 'ON' : 'OFF' }}</button>
+          </div>
+        </section>
+
         <section class="sp-section sp-danger-section">
           <div class="sp-label">Danger Zone</div>
 
@@ -58,6 +70,16 @@ import { useSettingsStore, THEMES } from '../stores/useSettingsStore.js'
 const settings     = useSettingsStore()
 const open         = ref(false)
 const confirmReset = ref(false)
+const devMode      = ref(localStorage.getItem('bow-dev') === '1')
+
+function toggleDevMode() {
+  if (devMode.value) {
+    localStorage.removeItem('bow-dev')
+  } else {
+    localStorage.setItem('bow-dev', '1')
+  }
+  location.reload()
+}
 
 function resetProgress() {
   localStorage.clear()
@@ -153,6 +175,46 @@ const vClickOutside = {
 }
 .theme-row.active .tc-name { color: var(--tc); }
 .tc-check { font-size: 0.6rem; color: var(--tc); flex-shrink: 0; }
+
+/* Dev section */
+.sp-dev-section {
+  border-top: 1px solid #1a1a2a;
+  padding-top: 10px;
+}
+.dev-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dev-label {
+  font-size: 0.65rem;
+  color: #776688;
+  font-family: var(--font-head);
+  letter-spacing: 0.5px;
+}
+.dev-toggle {
+  background: transparent;
+  border: 1px solid #332244;
+  border-radius: 4px;
+  color: #554466;
+  font-family: var(--font-head);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.dev-toggle:hover {
+  background: rgba(180, 80, 255, 0.08);
+  border-color: #6644aa;
+  color: #aa88cc;
+}
+.dev-toggle.active {
+  background: rgba(140, 60, 220, 0.15);
+  border-color: #8844cc;
+  color: #cc88ff;
+}
 
 /* Danger zone */
 .sp-danger-section {
