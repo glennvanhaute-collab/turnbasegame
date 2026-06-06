@@ -74,6 +74,15 @@
         </div>
         <template v-else-if="openTier === tier.id">
           <button
+            class="craft-set-btn"
+            :style="{ '--tier-color': tier.color }"
+            :disabled="tier.recipes.every(r => !canAfford(r))"
+            @click.stop="forgeFullSet(tier)"
+          >
+            ⚒ Craft Full Set
+            <span class="csb-count">{{ tier.recipes.filter(r => canAfford(r)).length }} / {{ tier.recipes.length }}</span>
+          </button>
+          <button
             v-for="recipe in tier.recipes"
             :key="recipe.id"
             class="recipe-btn"
@@ -799,6 +808,29 @@ function forge() {
   _flashTimer = setTimeout(() => { forgeResult.value = null }, 3000)
 }
 
+function forgeFullSet(tier) {
+  const affordable = tier.recipes.filter(r => canAfford(r))
+  if (!affordable.length) return
+  for (const recipe of affordable) {
+    Object.entries(recipe.barCost).forEach(([id, amt]) => resources.removeBar(id, amt))
+    const instance = createItemInstance({
+      id: recipe.id, name: recipe.name, gearType: recipe.gearType,
+      weaponType: recipe.weaponType ?? null, rarity: recipe.rarity,
+      description: recipe.desc, stats: { ...recipe.baseStats },
+      baseStats: { ...recipe.baseStats }, tier: recipe.tier,
+      slot: recipe.slot, image: recipe.image ?? null,
+      frame: recipe.frame ?? null, armorType: recipe.armorType ?? null,
+    })
+    instance.craftedAt = Date.now()
+    instance.crafted   = true
+    inventory.addInstance(instance)
+    resources.addSmithingXp(XP_PER_TIER[recipe.tier] ?? 10)
+  }
+  forgeResult.value = `${affordable.length} ${tier.name} items crafted`
+  clearTimeout(_flashTimer)
+  _flashTimer = setTimeout(() => { forgeResult.value = null }, 3000)
+}
+
 </script>
 
 <style scoped>
@@ -901,6 +933,22 @@ function forge() {
   font-size: 0.58rem; color: #664444; font-style: italic;
   padding: 5px 8px 3px; letter-spacing: 0.3px;
 }
+
+.craft-set-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 7px 10px; margin-bottom: 4px;
+  background: color-mix(in srgb, var(--tier-color) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tier-color) 35%, transparent);
+  border-radius: 6px; cursor: pointer;
+  font-size: 0.65rem; font-weight: 700; color: var(--tier-color);
+  letter-spacing: 0.5px; transition: background 0.12s, border-color 0.12s;
+}
+.craft-set-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--tier-color) 18%, transparent);
+  border-color: var(--tier-color);
+}
+.craft-set-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.csb-count { font-size: 0.58rem; opacity: 0.65; }
 
 .recipe-btn {
   width: 100%; display: flex; align-items: center; gap: 8px;
