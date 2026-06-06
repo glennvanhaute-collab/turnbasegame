@@ -41,6 +41,66 @@
           </div>
         </section>
 
+        <!-- Hides -->
+        <section class="dev-section">
+          <div class="dev-section-label">Hides</div>
+          <div class="dev-row" v-for="hide in HIDE_LIST" :key="hide.id" :style="{ '--ore-color': hide.color }">
+            <span class="dev-ore-dot" />
+            <span class="dev-row-name">{{ hide.name }}</span>
+            <span class="dev-row-count">{{ resources.hides[hide.id] ?? 0 }}</span>
+            <div class="dev-btns">
+              <button @click="resources.addHide(hide.id, 5)">+5</button>
+              <button @click="resources.addHide(hide.id, 25)">+25</button>
+              <button @click="resources.addHide(hide.id, 100)">+100</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Leathers -->
+        <section class="dev-section">
+          <div class="dev-section-label">Leathers</div>
+          <div class="dev-row" v-for="leather in LEATHER_LIST" :key="leather.id" :style="{ '--ore-color': leather.color }">
+            <span class="dev-ore-dot" />
+            <span class="dev-row-name">{{ leather.name }}</span>
+            <span class="dev-row-count">{{ resources.leathers[leather.id] ?? 0 }}</span>
+            <div class="dev-btns">
+              <button @click="resources.addLeather(leather.id, 5)">+5</button>
+              <button @click="resources.addLeather(leather.id, 25)">+25</button>
+              <button @click="resources.addLeather(leather.id, 100)">+100</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Fibers -->
+        <section class="dev-section">
+          <div class="dev-section-label">Fibers</div>
+          <div class="dev-row" v-for="fiber in FIBER_LIST" :key="fiber.id" :style="{ '--ore-color': fiber.color }">
+            <span class="dev-ore-dot" />
+            <span class="dev-row-name">{{ fiber.name }}</span>
+            <span class="dev-row-count">{{ resources.fibers[fiber.id] ?? 0 }}</span>
+            <div class="dev-btns">
+              <button @click="resources.addFiber(fiber.id, 5)">+5</button>
+              <button @click="resources.addFiber(fiber.id, 25)">+25</button>
+              <button @click="resources.addFiber(fiber.id, 100)">+100</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cloths -->
+        <section class="dev-section">
+          <div class="dev-section-label">Cloths</div>
+          <div class="dev-row" v-for="cloth in CLOTH_LIST" :key="cloth.id" :style="{ '--ore-color': cloth.color }">
+            <span class="dev-ore-dot" />
+            <span class="dev-row-name">{{ cloth.name }}</span>
+            <span class="dev-row-count">{{ resources.cloths[cloth.id] ?? 0 }}</span>
+            <div class="dev-btns">
+              <button @click="resources.addCloth(cloth.id, 5)">+5</button>
+              <button @click="resources.addCloth(cloth.id, 25)">+25</button>
+              <button @click="resources.addCloth(cloth.id, 100)">+100</button>
+            </div>
+          </div>
+        </section>
+
         <!-- Currency -->
         <section class="dev-section">
           <div class="dev-section-label">Currency</div>
@@ -123,6 +183,10 @@ import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
+import { HIDE_LIST } from '../game/data/hides.js'
+import { LEATHER_LIST } from '../game/data/leathers.js'
+import { FIBER_LIST } from '../game/data/fibers.js'
+import { CLOTH_LIST } from '../game/data/cloths.js'
 
 const open       = ref(false)
 const resources  = useResourceStore()

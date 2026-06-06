@@ -114,6 +114,66 @@
       </div>
     </template>
 
+    <!-- ── LEATHERWORKING TAB ──────────────────────────────────────── -->
+    <template v-else-if="activeTab === 'leatherworking'">
+      <div class="mat-sections">
+        <div class="mat-section">
+          <div class="mat-section-head">Hides</div>
+          <div class="mat-grid">
+            <div v-for="hide in HIDE_LIST" :key="hide.id" class="mat-row"
+                 :class="{ empty: !resources.hides[hide.id] }"
+                 :style="{ '--mc': hide.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ hide.name }}</span>
+              <span class="mat-qty">{{ resources.hides[hide.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="mat-section">
+          <div class="mat-section-head">Leather</div>
+          <div class="mat-grid">
+            <div v-for="leather in LEATHER_LIST" :key="leather.id" class="mat-row"
+                 :class="{ empty: !resources.leathers[leather.id] }"
+                 :style="{ '--mc': leather.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ leather.name }}</span>
+              <span class="mat-qty">{{ resources.leathers[leather.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ── TAILORING TAB ─────────────────────────────────────────────── -->
+    <template v-else-if="activeTab === 'tailoring'">
+      <div class="mat-sections">
+        <div class="mat-section">
+          <div class="mat-section-head">Fibers</div>
+          <div class="mat-grid">
+            <div v-for="fiber in FIBER_LIST" :key="fiber.id" class="mat-row"
+                 :class="{ empty: !resources.fibers[fiber.id] }"
+                 :style="{ '--mc': fiber.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ fiber.name }}</span>
+              <span class="mat-qty">{{ resources.fibers[fiber.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="mat-section">
+          <div class="mat-section-head">Cloth</div>
+          <div class="mat-grid">
+            <div v-for="cloth in CLOTH_LIST" :key="cloth.id" class="mat-row"
+                 :class="{ empty: !resources.cloths[cloth.id] }"
+                 :style="{ '--mc': cloth.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ cloth.name }}</span>
+              <span class="mat-qty">{{ resources.cloths[cloth.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
     <!-- ── OTHER ARTISAN TABS (stubs) ────────────────────────────── -->
     <template v-else>
       <div class="artisan-stub">
@@ -166,6 +226,10 @@ import { ARTISAN, ARTISAN_LIST } from '../game/data/artisanSkills.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
+import { HIDE_LIST } from '../game/data/hides.js'
+import { LEATHER_LIST } from '../game/data/leathers.js'
+import { FIBER_LIST } from '../game/data/fibers.js'
+import { CLOTH_LIST } from '../game/data/cloths.js'
 import { oreIcon, barIcon, SLOT_TO_ICON } from '../game/data/spritesheet.js'
 import InventoryCard from './InventoryCard.vue'
 import GameIcon from './ui/GameIcon.vue'
@@ -188,7 +252,9 @@ const typeFilters = [
   { value: GearType.SHIELD,  icon: 'shield',  label: 'Shields' },
   { value: GearType.HELMET,  icon: 'helmet',  label: 'Helmets' },
   { value: GearType.ARMOR,   icon: 'chest',   label: 'Armor' },
+  { value: GearType.LEGS,    icon: 'legs',    label: 'Legs' },
   { value: GearType.BOOTS,   icon: 'boots',   label: 'Boots' },
+  { value: GearType.GLOVES,  icon: 'gloves',  label: 'Gloves' },
 ]
 
 const filterType   = ref('')

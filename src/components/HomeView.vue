@@ -212,7 +212,7 @@
             <GameIcon icon="blacksmith" :size="28" class="enc-opt-icon" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Blacksmith</span>
-              <span class="enc-opt-sub">Smelt ore and forge gear</span>
+              <span class="enc-opt-sub">Smelt ore, forge gear, and upgrade all crafted equipment</span>
             </span>
           </button>
 
