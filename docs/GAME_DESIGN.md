@@ -4,6 +4,33 @@
 
 ---
 
+## Implementation Status *(updated 2026-06-06)*
+
+### Done
+- Turn-meter combat engine with affinities, crits, status effects, set bonus passives
+- Hero collection, roster building, gear equipping
+- Forge: copper gear only (recipes, smelting, star upgrades, orbing stub)
+- Dungeons (Easy → Nightmare), dungeon victory screen
+- Raids: lore browser + FF-style full-screen battle arena
+  - **The Throne of Regret** — Batman, Lord of Nightmares (solo, 3 phases)
+  - **The Void Heir** — Aurelian Dragonforge + Nytherax the Starless Wyrm (2 enemies, 3 phases)
+  - Raids are **intentionally overtuned** — require legendary gear + substats to clear
+- The Architect — dev-only god unit, auto-unlocked in DevMenu
+- Settings panel with house theme selector and reset progress button
+- Collab folder for lore contributions from non-technical friends
+
+### Next priority — Gear expansion
+Raids are the content goal but copper gear leaves players nowhere near raid-viable.
+The unlock path that needs building:
+
+1. **Gear recipes for all bar tiers** (tin → steel → darksteel → mithril → moonsilver/vaultmetal/runeite)
+2. **Substats / discovery lines on Legendary+ gear** — the orbing system
+3. **Re-tune raid difficulty** against real legendary gear stats once it exists
+
+Everything else (gear history, deed tracking, named weapons) layers on top of this foundation.
+
+---
+
 ## Vision
 
 You are a hedge knight. You start with nothing — no house, no banner, no name anyone recognises. You build a camp, forge connections in the world of Westrun, and grow your roster by earning the right to tell the stories of the people who join you.
