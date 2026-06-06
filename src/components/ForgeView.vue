@@ -475,8 +475,6 @@ function upgradeItem() {
 
 <style scoped>
 .forge-view {
-  max-width: 1100px;
-  margin: 0 auto;
   padding: 16px 24px 20px;
   display: flex;
   flex-direction: column;
@@ -525,7 +523,7 @@ function upgradeItem() {
 
 .upgrade-body {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 1fr 460px;
   gap: 16px;
   align-items: start;
 }
@@ -582,7 +580,7 @@ function upgradeItem() {
   flex-direction: column;
   gap: 2px;
   overflow-y: auto;
-  max-height: 520px;
+  max-height: calc(100vh - 220px);
 }
 .empty-hint { font-size: 0.62rem; color: var(--text-dim); font-style: italic; padding: 4px 2px; }
 
