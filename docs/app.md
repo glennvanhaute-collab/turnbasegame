@@ -119,9 +119,55 @@ src/assets/
 ├── backgrounds/    scene backgrounds (campaign map, blacksmith, market-bg, etc.)
 ├── forges/         forge images (forge_01–04, elven_forge, goblin_forge, dwarven_forge)
 ├── gear/           gear item images + frames (elven/, frames/)
-├── ui/             UI chrome (logo, nav bg, anvil, etc.)
-└── units/          hero portrait sprites (legendary/, etc.)
+├── ui/             UI chrome (logo, nav bg, anvil, icons_1.png, icons_2.png)
+└── units/          hero portrait sprites (legendary/, epic/, rare/, etc.)
 ```
+
+## Icon System
+
+Sprite sheet based. Two sheets in `src/assets/ui/`:
+- `icons_1.png` — 8×4 grid: nav icons (row 0), ores (row 1), bars (row 2), gear slots (row 3)
+- `icons_2.png` — 8×3 grid: currency/UI (row 0), affinities (row 1), artisan skills (row 2)
+
+Usage:
+```vue
+import GameIcon from '@/components/ui/GameIcon.vue'
+<GameIcon icon="copper_bar" :size="20" />
+<GameIcon icon="helmet" :size="28" />
+```
+
+All icon names defined in `src/game/data/spritesheet.js` → `ICONS`. Helpers: `barIcon(tierId)`, `oreIcon(tierId)`, `SLOT_TO_ICON`, `AFFINITY_ICON`, `ARTISAN_SKILL_ICON`.
+
+Adding a new sheet: add the PNG, add entries to `spritesheet.js`, register in `GameIcon.vue`. See `docs/GAME_DESIGN.md` § Icon System for the exact steps and ChatGPT prompt template.
+
+## Hero Template Anatomy
+
+Each hero in `src/game/data/heroes.js` is a factory function `() => new Hero({...})`. Fields:
+
+```js
+{
+  id, name,
+  faction,          // Faction.ALDRIC | VALDRIS | CAELWYN | MORDAINE | BLOODTUSK
+  rarity,           // Rarity enum
+  affinity,         // Affinity enum (Force/Magic/Spirit/Void/Blood/Astral)
+  baseHp, baseAtk, baseDef, baseSpd,
+  critRate, critDmg, resistance,
+  skills,           // array of SKILLS.* refs from skills.js
+  artisanSkills,    // array of ARTISAN.* from artisanSkills.js (1 slot for Rare/Epic, 2 for Legendary+)
+  isPlayer,         // true = can be the progression unit / soul-bound
+  forgeAffinities,  // optional — ['vaultmetal', 'runeite'] — see economy.md
+  quote,            // optional short quote shown on portrait card
+  lore,             // optional multi-sentence biography shown in HeroDetailModal
+}
+```
+
+`quote` and `lore` are displayed in `HeroDetailModal.vue`:
+- Quote: shown under the portrait with italics
+- Lore: shown in the Biography section tab
+
+**Faction backgrounds** (`src/assets/lore/`): `Aldric.png`, `Valdris.png`, etc. — used as thematic backdrop in `HeroDetailModal` keyed by `hero.faction`.
+
+**Artisan skills** defined in `src/game/data/artisanSkills.js` → `ARTISAN` object. Each has `id`, `name`, `icon` (emoji), `color`, `desc`. `ARTISAN_SLOTS` defines how many skills a rarity tier can hold.
 
 ## Key Patterns
 

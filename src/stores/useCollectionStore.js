@@ -168,8 +168,9 @@ export const useCollectionStore = defineStore('collection', () => {
         const effectiveMult   = Math.max(playerHero.levelMultiplier, floorMultiplier)
         hero.applyLevelScale(effectiveMult)
       }
-      const { stats, damageReduction } = inventory.computeGearStats(key)
+      const { stats, damageReduction, activePassives } = inventory.computeGearStats(key)
       hero.applyGear(stats, damageReduction)
+      hero.passives = activePassives ?? new Set()
       return hero
     }).filter(Boolean)
     applyBonds(heroes)

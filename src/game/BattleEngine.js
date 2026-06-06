@@ -22,7 +22,9 @@ export class BattleEngine {
     this.pendingSkill = null
     this._actionSeq = 0
     this.mechanics  = options.mechanics ?? []
-    this.revivedIds = new Set()
+    this.revivedIds        = new Set()
+    this._openerUsed       = new Set()  // hero IDs that have consumed their opener bonus
+    this._steadfastTriggered = new Set() // hero IDs that have triggered steadfast this battle
   }
 
   get allHeroes() {
@@ -124,6 +126,7 @@ export class BattleEngine {
 
   executeSkill(caster, skill, explicitTarget, skillIndex = 0) {
     const targets = this._resolveTargets(caster, skill, explicitTarget)
+    const isAoe = targets.length > 1
     const results = []
     const actionHits = []
 
@@ -131,7 +134,7 @@ export class BattleEngine {
       for (let hit = 0; hit < (effect.hits ?? 1); hit++) {
         for (const target of targets) {
           if (target.isDead) continue
-          const result = this._applyEffect(caster, target, effect)
+          const result = this._applyEffect(caster, target, effect, isAoe)
           results.push({ target, ...result })
 
           if (result.damage) {
@@ -176,6 +179,17 @@ export class BattleEngine {
       hits:           actionHits,
     }
 
+    // Steadfast: plate 6pc — shield triggers when a player hero drops below 30% HP (once per battle)
+    for (const hero of this.livingPlayers) {
+      if (hero.passives?.has('steadfast') && !this._steadfastTriggered.has(hero.id) && hero.hp < hero.maxHp * 0.30) {
+        this._steadfastTriggered.add(hero.id)
+        const shieldAmt = Math.floor(hero.maxHp * 0.10)
+        hero.applyStatus(StatusEffect.SHIELD, 999, shieldAmt)
+        this.logMessage(`🛡 ${hero.name}'s Steadfast triggers — absorbed ${shieldAmt} damage!`)
+        actionHits.push({ targetId: hero.id, damage: 0, heal: 0, crit: false, died: false, shield: shieldAmt })
+      }
+    }
+
     skill.use()
     this.pendingSkill = null
     this.state = BattleState.IDLE
@@ -187,7 +201,7 @@ export class BattleEngine {
     return next ? { ...next, action } : { action }
   }
 
-  _applyEffect(caster, target, effect) {
+  _applyEffect(caster, target, effect, isAoe = false) {
     const result = {}
 
     if (effect.type === EffectType.DAMAGE) {
@@ -196,8 +210,13 @@ export class BattleEngine {
       const critMult = isCrit ? (1 + caster.critDmg) : 1
       const slayerMult = (caster.slayerUndead > 0 && target.enemyType === 'undead')
         ? (1 + caster.slayerUndead) : 1
+      // Opener (leather 6pc): first action deals 25% bonus damage
+      const openerMult = (caster.passives?.has('opener') && !this._openerUsed.has(caster.id)) ? 1.25 : 1
+      if (openerMult > 1) this._openerUsed.add(caster.id)
+      // AOE Amplify (cloth 6pc): AOE skills deal 15% more damage
+      const aoeMult = (isAoe && caster.passives?.has('aoe_amplify')) ? 1.15 : 1
       // Damage formula: ATK * multiplier * affinity * slayer / (1 + DEF/1000)
-      const raw = caster.atk * effect.multiplier * affinityMult * critMult * slayerMult
+      const raw = caster.atk * effect.multiplier * affinityMult * critMult * slayerMult * openerMult * aoeMult
       const mitigated = raw / (1 + target.def / 1000)
       const damage = Math.floor(mitigated)
       const dealt = target.takeDamage(damage)

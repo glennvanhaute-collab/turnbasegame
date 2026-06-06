@@ -83,6 +83,28 @@ Example: 4★ copper sword (3 craft + 10 upgrade = 13 bars × 50) = **650g**
 
 Equipped items are hidden from the Market. Sell All works per rarity filter.
 
+## Armor Types & Set Bonuses
+
+Each recipe has an `armorType` field: `'plate'`, `'leather'`, or `'cloth'`.  
+Weapons also carry `WEAPON_ARMOR_TYPE` — bows count as leather, staves/wands as cloth.
+
+`SET_BONUSES` in `src/game/data/setBonus.js` — flat stat bonuses at 2/4/6 matching pieces:
+| Set | 2-piece | 4-piece | 6-piece |
+|---|---|---|---|
+| Plate | +8% DEF | +12% HP | +5% DEF, +8% HP |
+| Leather | +8% SPD | +10% Crit Rate | +8% ATK |
+| Cloth | +12% ATK | +10% Crit DMG | +8% HP |
+
+Thresholds stack (4-piece also gives 2-piece). Applied inside `computeGearStats` in `useInventoryStore`.
+
+6-piece passive effects (`SET_PASSIVE_6`) are stubbed — combat hooks not yet wired.
+
+## Forge Affinity
+
+Heroes can have `forgeAffinities: ['vaultmetal', 'runeite']` on their template. Each matching equipped item's tier gives **+6% ATK and +6% DEF**. Applied in `computeGearStats` via `HERO_TEMPLATES[heroKey]().forgeAffinities`.
+
+Example: Zwierls with 7 vaultmetal pieces = +42% ATK and DEF on top of base.
+
 ## Energy
 
 `useEnergyStore` — regenerates 1 energy per 3 minutes. Used by dungeon exploration (`EXPLORE_COST = 5`). Max energy tracked separately.

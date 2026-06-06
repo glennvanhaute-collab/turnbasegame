@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, createItemInstance, computeLineStats } from '../game/Gear.js'
-import { SET_BONUSES } from '../game/data/setBonus.js'
+import { SET_BONUSES, SET_PASSIVE_6 } from '../game/data/setBonus.js'
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
@@ -254,8 +254,13 @@ export const useInventoryStore = defineStore('inventory', () => {
       }
     }
 
+    const activePassives = new Set()
+    for (const [armorType, count] of Object.entries(setPieces)) {
+      if (count >= 6 && SET_PASSIVE_6[armorType]) activePassives.add(SET_PASSIVE_6[armorType].id)
+    }
+
     const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
-    return { stats: totals, damageReduction: dr, setPieces, forgeAffinityCount }
+    return { stats: totals, damageReduction: dr, setPieces, forgeAffinityCount, activePassives }
   }
 
   function availableForSlot(heroKey, slot) {
