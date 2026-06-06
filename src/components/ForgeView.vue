@@ -39,6 +39,9 @@
             <div class="ilb-info">
               <span class="ilb-name">{{ item.name }}</span>
               <span class="ilb-rarity" :class="item.rarity?.toLowerCase()">{{ item.rarity }}</span>
+              <span class="ilb-equipped" v-if="inventory.getEquippedBy(item.instanceId)">
+                ● {{ HERO_NAMES[inventory.getEquippedBy(item.instanceId).heroKey] }}
+              </span>
             </div>
             <span class="ilb-stars" v-if="item.stars > 0 && item.stars < 10">{{ '★'.repeat(item.stars) }}</span>
             <span class="ilb-maxed" v-else-if="item.stars >= 10">✦</span>
@@ -293,6 +296,7 @@ import OrbIcon from './OrbIcon.vue'
 import { STAR_GATES, UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue, rarityForStars, STAR_BAR_COST, starMultiplier } from '../game/data/recipes.js'
 import { SLOT_LABELS } from '../game/Gear.js'
+import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { BARS } from '../game/data/bars.js'
 import itemFrameImg      from '../assets/gear/frames/item_frame.png'
 import elvenBorderImg   from '../assets/gear/frames/elven_border.png'
@@ -330,6 +334,12 @@ const PCT_STATS   = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','re
 const forge     = useForgeStore()
 const inventory = useInventoryStore()
 const resources = useResourceStore()
+
+const HERO_NAMES = Object.fromEntries(
+  Object.entries(HERO_TEMPLATES)
+    .filter(([, f]) => f().isPlayer)
+    .map(([key, f]) => [key, f().name])
+)
 
 const tab = ref('upgrade')
 
@@ -516,6 +526,7 @@ function upgradeItem() {
 .ilb-rarity.epic      { color: #b44fff; }
 .ilb-rarity.legendary { color: #ffd700; }
 .ilb-rarity.mythical  { color: #ff88ff; }
+.ilb-equipped { font-size: 0.54rem; color: #ffd700; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ilb-stars { font-size: 0.5rem; color: var(--tier-color); letter-spacing: 1px; flex-shrink: 0; }
 .ilb-maxed { font-size: 0.65rem; color: #ff88ff; flex-shrink: 0; }
 
