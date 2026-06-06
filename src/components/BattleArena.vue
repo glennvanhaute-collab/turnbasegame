@@ -48,8 +48,7 @@
       </div>
 
       <div class="dv-actions">
-        <button class="dv-btn dv-btn-retry" @click="retryEncounter">↺ Run Again</button>
-        <button class="dv-btn dv-btn-back"  @click="$emit('back')">← Dungeons</button>
+        <button class="dv-btn dv-btn-back" @click="$emit('back')">← Dungeons</button>
       </div>
     </div>
 
