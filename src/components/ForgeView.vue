@@ -32,26 +32,39 @@
               Upgradeable only
             </label>
           </div>
-          <div v-if="craftedItems.length === 0" class="empty-hint">No crafted items yet —<br>forge gear in the Blacksmith first</div>
-          <button
-            v-for="item in craftedItems"
-            :key="item.instanceId"
-            class="item-list-btn"
-            :class="{ active: artisanItemId === item.instanceId, maxed: item.stars >= 10 }"
-            :style="{ '--tier-color': tierColorForItem(item) }"
-            @click="artisanItemId = item.instanceId"
-          >
-            <span class="ilb-icon">{{ SLOT_ICONS[item.slot] ?? '◆' }}</span>
-            <div class="ilb-info">
-              <span class="ilb-name">{{ item.name }}</span>
-              <span class="ilb-rarity" :class="item.rarity?.toLowerCase()">{{ item.rarity }}</span>
-              <span class="ilb-equipped" v-if="inventory.getEquippedBy(item.instanceId)">
-                ● {{ HERO_NAMES[inventory.getEquippedBy(item.instanceId).heroKey] }}
-              </span>
+          <div class="panel-body">
+            <!-- Filter strip (md-2) -->
+            <div class="type-filter-strip">
+              <button class="tfs-btn" :class="{ active: filterSlot === '' }" @click="filterSlot = ''" title="All">◈</button>
+              <button
+                v-for="f in SLOT_FILTERS" :key="f.slot"
+                class="tfs-btn"
+                :class="{ active: filterSlot === f.slot }"
+                :title="SLOT_LABELS[f.slot]"
+                @click="filterSlot = filterSlot === f.slot ? '' : f.slot"
+              >
+                <GameIcon :icon="f.icon" :size="14" />
+              </button>
             </div>
-            <span class="ilb-stars" v-if="item.stars > 0 && item.stars < 10">{{ '★'.repeat(item.stars) }}</span>
-            <span class="ilb-maxed" v-else-if="item.stars >= 10">✦</span>
-          </button>
+            <!-- Item list (md-10) -->
+            <div class="item-list-scroll">
+              <div v-if="craftedItems.length === 0" class="empty-hint">No items match.</div>
+              <button
+                v-for="item in craftedItems"
+                :key="item.instanceId"
+                class="item-list-btn"
+                :class="[item.rarity?.toLowerCase(), { active: artisanItemId === item.instanceId, maxed: item.stars >= 10 }]"
+                :style="{ '--tier-color': tierColorForItem(item) }"
+                @click="artisanItemId = item.instanceId"
+              >
+                <GameIcon :icon="SLOT_TO_ICON[item.slot] ?? 'sword'" :size="14" class="ilb-icon" />
+                <span class="ilb-name">{{ item.name }}</span>
+                <span class="ilb-eq" v-if="inventory.getEquippedBy(item.instanceId)">●</span>
+                <span class="ilb-stars" v-if="item.stars > 0 && item.stars < 10">{{ '★'.repeat(item.stars) }}</span>
+                <span class="ilb-maxed" v-else-if="item.stars >= 10">✦</span>
+              </button>
+            </div>
+          </div>
         </aside>
 
         <!-- Right: upgrade workspace -->
@@ -301,7 +314,9 @@ import { useResourceStore } from '../stores/useResourceStore.js'
 import OrbIcon from './OrbIcon.vue'
 import { STAR_GATES, UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue, rarityForStars, STAR_BAR_COST, starMultiplier } from '../game/data/recipes.js'
-import { SLOT_LABELS } from '../game/Gear.js'
+import { SLOT_LABELS, GearSlot } from '../game/Gear.js'
+import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import GameIcon from './ui/GameIcon.vue'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { BARS } from '../game/data/bars.js'
 import itemFrameImg      from '../assets/gear/frames/item_frame.png'
@@ -367,11 +382,26 @@ function applySelectedOrb() {
 // ── Upgrade tab state ─────────────────────────────────────────────
 const artisanItemId = ref(null)
 
-const hideMaxed = ref(true)
+const hideMaxed   = ref(true)
+const filterSlot  = ref('')
+
+const SLOT_FILTERS = [
+  { slot: GearSlot.MAIN_HAND, icon: SLOT_TO_ICON[GearSlot.MAIN_HAND] ?? 'sword'   },
+  { slot: GearSlot.OFF_HAND,  icon: SLOT_TO_ICON[GearSlot.OFF_HAND]  ?? 'shield'  },
+  { slot: GearSlot.HEAD,      icon: SLOT_TO_ICON[GearSlot.HEAD]      ?? 'helmet'  },
+  { slot: GearSlot.CHEST,     icon: SLOT_TO_ICON[GearSlot.CHEST]     ?? 'chest'   },
+  { slot: GearSlot.LEGS,      icon: SLOT_TO_ICON[GearSlot.LEGS]      ?? 'legs'    },
+  { slot: GearSlot.BOOTS,     icon: SLOT_TO_ICON[GearSlot.BOOTS]     ?? 'boots'   },
+  { slot: GearSlot.GLOVES,    icon: SLOT_TO_ICON[GearSlot.GLOVES]    ?? 'gloves'  },
+]
 
 const craftedItems = computed(() =>
   inventory.ownedItems
-    .filter(item => item.craftedAt && item.tier && (!hideMaxed.value || item.stars < 10))
+    .filter(item =>
+      item.craftedAt && item.tier &&
+      (!hideMaxed.value || item.stars < 10) &&
+      (!filterSlot.value || item.slot === filterSlot.value)
+    )
     .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))
 )
 
@@ -505,15 +535,15 @@ function upgradeItem() {
   background: #0e0805;
   border: 1px solid var(--border-brown);
   border-radius: 10px;
-  padding: 14px 12px;
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 .panel-label {
   font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase;
   letter-spacing: 2px; color: var(--text-muted); font-weight: 700;
-  padding-bottom: 8px; border-bottom: 1px solid var(--border-brown); margin-bottom: 4px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border-brown);
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;
 }
 .hide-maxed-toggle {
@@ -523,28 +553,59 @@ function upgradeItem() {
 }
 .hide-maxed-toggle input { accent-color: #ffd700; cursor: pointer; margin: 0; }
 .hide-maxed-toggle:has(input:checked) { color: #ffd700; }
-.empty-hint { font-size: 0.62rem; color: var(--text-dim); font-style: italic; line-height: 1.5; padding: 4px 2px; }
-.item-list-btn {
-  width: 100%; display: flex; align-items: center; gap: 8px;
-  padding: 8px 8px; background: transparent; border: 1px solid transparent;
-  border-radius: 6px; cursor: pointer; text-align: left;
-  transition: background 0.12s, border-color 0.12s;
+
+/* Two-column body */
+.panel-body {
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 6px;
+  min-height: 0;
 }
-.item-list-btn:hover { background: rgba(255,255,255,0.04); border-color: color-mix(in srgb, var(--tier-color) 25%, transparent); }
-.item-list-btn.active { background: color-mix(in srgb, var(--tier-color) 12%, rgba(0,0,0,0.4)); border-color: color-mix(in srgb, var(--tier-color) 50%, transparent); }
-.ilb-icon  { font-size: 0.9rem; flex-shrink: 0; width: 18px; text-align: center; }
-.ilb-info  { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
-.ilb-name  { font-size: 0.66rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ilb-rarity { font-size: 0.54rem; font-family: var(--font-head); text-transform: uppercase; letter-spacing: 1px; }
-.ilb-rarity.common    { color: #888; }
-.ilb-rarity.uncommon  { color: #4dff88; }
-.ilb-rarity.rare      { color: #4fa8ff; }
-.ilb-rarity.epic      { color: #b44fff; }
-.ilb-rarity.legendary { color: #ffd700; }
-.ilb-rarity.mythical  { color: #ff88ff; }
-.ilb-equipped { font-size: 0.54rem; color: #ffd700; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ilb-stars { font-size: 0.5rem; color: var(--tier-color); letter-spacing: 1px; flex-shrink: 0; }
-.ilb-maxed { font-size: 0.65rem; color: #ff88ff; flex-shrink: 0; }
+.type-filter-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+}
+.tfs-btn {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid transparent;
+  border-radius: 5px; cursor: pointer; color: #444;
+  font-size: 0.6rem; transition: all 0.1s; padding: 0;
+}
+.tfs-btn:hover { border-color: #3a1808; color: #999; }
+.tfs-btn.active { background: #1a0a06; border-color: #ffd700; color: #ffd700; }
+
+.item-list-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  max-height: 520px;
+}
+.empty-hint { font-size: 0.62rem; color: var(--text-dim); font-style: italic; padding: 4px 2px; }
+
+.item-list-btn {
+  width: 100%; display: flex; align-items: center; gap: 6px;
+  padding: 4px 6px; background: transparent;
+  border: 1px solid transparent; border-left: 2px solid #333;
+  border-radius: 4px; cursor: pointer; text-align: left;
+  transition: background 0.1s, border-color 0.1s;
+}
+.item-list-btn:hover    { background: rgba(255,255,255,0.04); }
+.item-list-btn.active   { background: color-mix(in srgb, var(--tier-color) 10%, transparent); border-color: color-mix(in srgb, var(--tier-color) 40%, transparent); border-left-color: var(--tier-color); }
+.item-list-btn.common    { border-left-color: #444; }
+.item-list-btn.uncommon  { border-left-color: #4dff88; }
+.item-list-btn.rare      { border-left-color: #4fa8ff; }
+.item-list-btn.epic      { border-left-color: #b44fff; }
+.item-list-btn.legendary { border-left-color: #ffd700; }
+.item-list-btn.mythical  { border-left-color: #ff88ff; }
+.ilb-icon  { flex-shrink: 0; opacity: 0.75; }
+.ilb-name  { font-size: 0.63rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+.ilb-eq    { font-size: 0.5rem; color: #ffd700; opacity: 0.7; flex-shrink: 0; }
+.ilb-stars { font-size: 0.48rem; color: var(--tier-color); letter-spacing: 1px; flex-shrink: 0; }
+.ilb-maxed { font-size: 0.6rem; color: #ff88ff; flex-shrink: 0; }
 
 /* Upgrade workspace */
 .upgrade-workspace {
