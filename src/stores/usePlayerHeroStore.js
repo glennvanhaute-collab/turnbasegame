@@ -26,6 +26,20 @@ const RARITY_THRESHOLDS = [
   [1,   Rarity.RARE],
 ]
 
+// Floor level for each rarity — soul-bound heroes scale from at least this level
+export const RARITY_FLOOR_LEVEL = {
+  [Rarity.COMMON]:    1,
+  [Rarity.UNCOMMON]:  1,
+  [Rarity.RARE]:      1,
+  [Rarity.EPIC]:      26,
+  [Rarity.LEGENDARY]: 61,
+  [Rarity.MYTHICAL]:  101,
+}
+
+export function multiplierForLevel(lv) {
+  return Math.min(2.5, 1 + (lv - 1) * 0.015)
+}
+
 export const HOUSE_AFFINITY = {
   [Faction.ALDRIC]:   Affinity.FORCE,
   [Faction.VALDRIS]:  Affinity.MAGIC,

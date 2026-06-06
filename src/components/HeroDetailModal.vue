@@ -64,7 +64,7 @@
                 <h3 class="section-title">Progression</h3>
                 <div class="prog-level">
                   <span class="prog-lv-label">Level</span>
-                  <span class="prog-lv-value">{{ playerHero.level }}</span>
+                  <span class="prog-lv-value">{{ effectiveLevel }}</span>
                   <span class="prog-rarity-badge" :class="playerHero.rarity.toLowerCase()">{{ playerHero.rarity }}</span>
                 </div>
                 <div class="prog-xp-label">
@@ -156,7 +156,11 @@
                 <h3 class="section-title">Soul Vessel</h3>
                 <div class="soul-bound-row" v-if="inventory.isProgressive(entry.key)">
                   <span class="soul-bound-badge">✦ Soul Bound</span>
-                  <span class="soul-bound-desc">Scales with player level (×{{ playerHero.levelMultiplier.toFixed(2) }})</span>
+                  <span class="soul-bound-desc">
+                    Effective level {{ effectiveLevel }}
+                    <template v-if="effectiveLevel > playerHero.level"> (floored at {{ hero.rarity }} tier)</template>
+                    · ×{{ playerHero.levelMultiplier.toFixed(2) }} multiplier
+                  </span>
                 </div>
                 <div class="soul-vessel-row" v-else>
                   <button
@@ -215,6 +219,7 @@ import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { TargetType } from '../game/Skill.js'
 import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
 import { SLOT_TO_ICON, AFFINITY_ICON } from '../game/data/spritesheet.js'
+import { RARITY_FLOOR_LEVEL } from '../stores/usePlayerHeroStore.js'
 import GameIcon from './ui/GameIcon.vue'
 import HeroAvatar from './HeroAvatar.vue'
 import ValdrisBg  from '../assets/lore/Valdris.png'
@@ -257,6 +262,12 @@ const rarityThresholds = [
 const nextThreshold = computed(() =>
   rarityThresholds.find(t => t.level > playerHero.level) ?? null
 )
+
+const effectiveLevel = computed(() => {
+  if (!hero.value) return playerHero.level
+  const floor = RARITY_FLOOR_LEVEL[hero.value.rarity] ?? 1
+  return Math.max(playerHero.level, floor)
+})
 
 const SLOTS = Object.values(GearSlot)
 

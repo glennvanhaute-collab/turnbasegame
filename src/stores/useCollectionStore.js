@@ -4,7 +4,7 @@ import { HERO_TEMPLATES, STARTER_KEYS } from '../game/data/heroes.js'
 import { applyBonds } from '../game/data/bonds.js'
 import { Rarity, Faction, Affinity } from '../game/Hero.js'
 import { useInventoryStore } from './useInventoryStore.js'
-import { usePlayerHeroStore } from './usePlayerHeroStore.js'
+import { usePlayerHeroStore, RARITY_FLOOR_LEVEL, multiplierForLevel } from './usePlayerHeroStore.js'
 
 const MAX_TEAM_SIZE = 5
 const STORAGE_KEY = 'raid-collection'
@@ -163,7 +163,10 @@ export const useCollectionStore = defineStore('collection', () => {
       if (!hero) return null
       // Soul Vessel: scale stats alongside player hero's level
       if (key !== 'PLAYER_CHARACTER' && inventory.isProgressive(key)) {
-        hero.applyLevelScale(playerHero.levelMultiplier)
+        const floorLevel      = RARITY_FLOOR_LEVEL[hero.rarity] ?? 1
+        const floorMultiplier = multiplierForLevel(floorLevel)
+        const effectiveMult   = Math.max(playerHero.levelMultiplier, floorMultiplier)
+        hero.applyLevelScale(effectiveMult)
       }
       const { stats, damageReduction } = inventory.computeGearStats(key)
       hero.applyGear(stats, damageReduction)
