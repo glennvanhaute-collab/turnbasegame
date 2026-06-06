@@ -58,19 +58,21 @@
       <div class="tier-group" v-for="tier in visibleRecipeTiers" :key="tier.id">
         <div
           class="tier-header"
-          :class="{ locked: !tier.recipes.length || isTierArtisanLocked(tier.id) }"
+          :class="{ locked: !tier.recipes.length || isTierArtisanLocked(tier.id), collapsible: tier.recipes.length > 0 }"
           :style="{ '--tier-color': tier.color }"
+          @click="tier.recipes.length && toggleTier(tier.id)"
         >
           <span class="tier-dot" />
           <span class="tier-name">{{ tier.name }}</span>
           <span class="tier-count" v-if="tier.recipes.length && !isTierArtisanLocked(tier.id)">{{ tier.recipes.length }}</span>
           <span class="tier-soon" v-else>—</span>
+          <span class="tier-chevron" v-if="tier.recipes.length">{{ collapsedTiers.has(tier.id) ? '›' : '⌄' }}</span>
         </div>
 
         <div class="tier-artisan-lock" v-if="isTierArtisanLocked(tier.id)">
           ⚒ Recruit a Blacksmith to unlock
         </div>
-        <template v-else>
+        <template v-else-if="!collapsedTiers.has(tier.id)">
           <button
             v-for="recipe in tier.recipes"
             :key="recipe.id"
@@ -744,6 +746,13 @@ const visibleRecipeTiers = computed(() =>
   })
 )
 
+const collapsedTiers = ref(new Set(RECIPE_TIERS.map(t => t.id)))
+function toggleTier(id) {
+  const next = new Set(collapsedTiers.value)
+  next.has(id) ? next.delete(id) : next.add(id)
+  collapsedTiers.value = next
+}
+
 // Maps each oreId → the first accessible bar for that ore
 const oreToBar = computed(() => {
   const map = {}
@@ -892,7 +901,10 @@ function forge() {
   display: flex; align-items: center; gap: 7px;
   padding: 6px 8px 5px; margin-bottom: 2px;
 }
+.tier-header.collapsible { cursor: pointer; }
+.tier-header.collapsible:hover .tier-name { color: #fff; }
 .tier-header.locked { opacity: 0.35; }
+.tier-chevron { font-size: 0.7rem; color: var(--text-dim); margin-left: auto; line-height: 1; }
 .tier-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tier-color); flex-shrink: 0; }
 .tier-name {
   font-family: var(--font-head); font-size: 0.62rem; font-weight: 700;
