@@ -576,16 +576,17 @@ function upgradeItem() {
 .tfs-btn.active { background: #1a0a06; border-color: #ffd700; color: #ffd700; }
 
 .item-list-scroll {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 2px;
   overflow-y: auto;
   max-height: calc(100vh - 220px);
+  align-content: start;
 }
 .empty-hint { font-size: 0.62rem; color: var(--text-dim); font-style: italic; padding: 4px 2px; }
 
 .item-list-btn {
-  width: 100%; display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; gap: 6px;
   padding: 4px 6px; background: transparent;
   border: 1px solid transparent; border-left: 2px solid #333;
   border-radius: 4px; cursor: pointer; text-align: left;
