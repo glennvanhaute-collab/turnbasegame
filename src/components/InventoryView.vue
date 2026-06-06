@@ -1,40 +1,129 @@
 <template>
   <div class="inventory-wrap">
 
-    <!-- Filter bar -->
-    <div class="filter-bar">
-      <div class="type-filters">
-        <button
-          v-for="t in typeFilters"
-          :key="t.value"
-          class="type-btn"
-          :class="{ active: filterType === t.value }"
-          @click="filterType = t.value"
-        >
-          {{ t.icon }} {{ t.label }}
-        </button>
-      </div>
-      <div class="right-filters">
-        <select v-model="filterRarity" class="filter-select">
-          <option value="">All Rarities</option>
-          <option v-for="r in RARITIES" :key="r" :value="r">{{ r }}</option>
-        </select>
-        <span class="item-count">{{ filtered.length }} / {{ inventory.ownedItems.length }} items</span>
-      </div>
+    <!-- Top tabs -->
+    <div class="inv-tabs">
+      <button class="inv-tab" :class="{ active: activeTab === 'gear' }" @click="activeTab = 'gear'">
+        ⚔ Gear
+      </button>
+      <button
+        v-for="art in ARTISAN_LIST"
+        :key="art.id"
+        class="inv-tab"
+        :class="{ active: activeTab === art.id }"
+        :style="activeTab === art.id ? { color: art.color, borderBottomColor: art.color } : {}"
+        @click="activeTab = art.id"
+      >
+        {{ art.icon }} {{ art.name }}
+      </button>
     </div>
 
-    <!-- Grid -->
-    <div class="item-grid" v-if="filtered.length">
-      <InventoryCard
-        v-for="item in filtered"
-        :key="item.instanceId"
-        :item="item"
-        :equipped-by="inventory.getEquippedBy(item.instanceId)"
-        @equip="openEquipMenu(item)"
-        @unequip="doUnequip(item)"
-      />
-    </div>
-    <div class="empty-state" v-else>No items match your filters.</div>
+    <!-- ── GEAR TAB ───────────────────────────────────────────────── -->
+    <template v-if="activeTab === 'gear'">
+      <div class="filter-bar">
+        <div class="type-filters">
+          <button
+            v-for="t in typeFilters"
+            :key="t.value"
+            class="type-btn"
+            :class="{ active: filterType === t.value }"
+            @click="filterType = t.value"
+          >
+            <GameIcon v-if="t.icon" :icon="t.icon" :size="14" />
+            <span v-else>▦</span>
+            {{ t.label }}
+          </button>
+        </div>
+        <div class="right-filters">
+          <select v-model="filterRarity" class="filter-select">
+            <option value="">All Rarities</option>
+            <option v-for="r in RARITIES" :key="r" :value="r">{{ r }}</option>
+          </select>
+          <span class="item-count">{{ filtered.length }} / {{ inventory.ownedItems.length }}</span>
+        </div>
+      </div>
+
+      <div class="item-list" v-if="filtered.length">
+        <InventoryCard
+          v-for="item in filtered"
+          :key="item.instanceId"
+          :item="item"
+          :equipped-by="inventory.getEquippedBy(item.instanceId)"
+          @equip="openEquipMenu(item)"
+          @unequip="doUnequip(item)"
+        />
+      </div>
+      <div class="empty-state" v-else>No items match your filters.</div>
+    </template>
+
+    <!-- ── BLACKSMITHING TAB ──────────────────────────────────────── -->
+    <template v-else-if="activeTab === 'blacksmithing'">
+      <div class="mat-sections">
+
+        <div class="mat-section">
+          <div class="mat-section-head">Ores</div>
+          <div class="mat-grid">
+            <div
+              v-for="ore in ORE_LIST"
+              :key="ore.id"
+              class="mat-row"
+              :class="{ empty: !resources.ores[ore.id] }"
+              :style="{ '--mc': ore.color }"
+            >
+              <GameIcon :icon="oreIcon(ore.id)" :size="20" class="mat-icon" />
+              <span class="mat-name">{{ ore.name }}</span>
+              <span class="mat-qty">{{ resources.ores[ore.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mat-section">
+          <div class="mat-section-head">Bars</div>
+          <div class="mat-grid">
+            <div
+              v-for="bar in BAR_LIST"
+              :key="bar.id"
+              class="mat-row"
+              :class="{ empty: !resources.bars[bar.id] }"
+              :style="{ '--mc': bar.color }"
+            >
+              <GameIcon :icon="barIcon(bar.id)" :size="20" class="mat-icon" />
+              <span class="mat-name">{{ bar.name }}</span>
+              <span class="mat-qty">{{ resources.bars[bar.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mat-section">
+          <div class="mat-section-head">Components</div>
+          <div class="mat-grid">
+            <div
+              v-for="(comp, key) in UPGRADE_COMPONENTS"
+              :key="key"
+              class="mat-row"
+              :class="{ empty: !resources.upgradeComponents[key] }"
+              :style="{ '--mc': comp.color }"
+            >
+              <span class="mat-dot" />
+              <span class="mat-name">{{ comp.name }}</span>
+              <span class="mat-qty">{{ resources.upgradeComponents[key] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </template>
+
+    <!-- ── OTHER ARTISAN TABS (stubs) ────────────────────────────── -->
+    <template v-else>
+      <div class="artisan-stub">
+        <span class="stub-icon">{{ ARTISAN[activeTab]?.icon }}</span>
+        <div class="stub-name">{{ ARTISAN[activeTab]?.name }}</div>
+        <div class="stub-desc">{{ ARTISAN[activeTab]?.desc }}</div>
+        <div class="stub-soon">Coming soon</div>
+      </div>
+    </template>
+
   </div>
 
   <!-- Equip-to picker -->
@@ -68,13 +157,23 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { useInventoryStore }  from '../stores/useInventoryStore.js'
+import { useResourceStore }   from '../stores/useResourceStore.js'
 import { GearType, GearSlot, SLOT_LABELS } from '../game/Gear.js'
 import { Rarity } from '../game/Hero.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
+import { ARTISAN, ARTISAN_LIST } from '../game/data/artisanSkills.js'
+import { ORE_LIST } from '../game/data/ores.js'
+import { BAR_LIST } from '../game/data/bars.js'
+import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
+import { oreIcon, barIcon, SLOT_TO_ICON } from '../game/data/spritesheet.js'
 import InventoryCard from './InventoryCard.vue'
+import GameIcon from './ui/GameIcon.vue'
 
-const inventory = useInventoryStore()
+const inventory  = useInventoryStore()
+const resources  = useResourceStore()
+
+const activeTab  = ref('gear')
 
 const RARITIES = Object.values(Rarity)
 const HERO_NAMES = Object.fromEntries(
@@ -84,12 +183,12 @@ const HERO_NAMES = Object.fromEntries(
 )
 
 const typeFilters = [
-  { value: '',                 icon: '▦',  label: 'All' },
-  { value: GearType.WEAPON,   icon: '⚔',  label: 'Weapons' },
-  { value: GearType.SHIELD,   icon: '🛡', label: 'Shields' },
-  { value: GearType.HELMET,   icon: '⛑',  label: 'Helmets' },
-  { value: GearType.ARMOR,    icon: '🥋', label: 'Armor' },
-  { value: GearType.BOOTS,    icon: '👟', label: 'Boots' },
+  { value: '',               icon: null,      label: 'All' },
+  { value: GearType.WEAPON,  icon: 'sword',   label: 'Weapons' },
+  { value: GearType.SHIELD,  icon: 'shield',  label: 'Shields' },
+  { value: GearType.HELMET,  icon: 'helmet',  label: 'Helmets' },
+  { value: GearType.ARMOR,   icon: 'chest',   label: 'Armor' },
+  { value: GearType.BOOTS,   icon: 'boots',   label: 'Boots' },
 ]
 
 const filterType   = ref('')
@@ -103,8 +202,7 @@ const filtered = computed(() =>
   })
 )
 
-// Equip flow
-const equipTarget = ref(null)   // the GearItem being equipped
+const equipTarget = ref(null)
 const targets     = computed(() =>
   equipTarget.value ? inventory.equipTargets(equipTarget.value.instanceId) : []
 )
@@ -129,50 +227,151 @@ function doUnequip(item) {
   padding: 0 20px 40px;
 }
 
-/* Filter bar */
+/* ── Tabs ──────────────────────────────────────────────────────── */
+.inv-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #2a1208;
+}
+.inv-tab {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #555;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.12s, border-bottom-color 0.12s;
+  white-space: nowrap;
+  margin-bottom: -1px;
+}
+.inv-tab:hover  { color: #aaa; }
+.inv-tab.active { color: #ffd700; border-bottom-color: #ffd700; }
+
+/* ── Gear: filter bar ──────────────────────────────────────────── */
 .filter-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
-.type-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.type-filters { display: flex; flex-wrap: wrap; gap: 5px; }
 .type-btn {
-  background: #221108;
-  border: 1px solid #3e1c0c;
-  border-radius: 20px;
-  color: #666;
-  font-size: 0.75rem;
-  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #1a0a06;
+  border: 1px solid #2a1208;
+  border-radius: 16px;
+  color: #555;
+  font-size: 0.7rem;
+  padding: 4px 10px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.12s;
 }
-.type-btn:hover  { color: #ccc; border-color: #555; }
-.type-btn.active { background: #351808; border-color: #ffd700; color: #ffd700; }
+.type-btn:hover  { color: #bbb; border-color: #4a2010; }
+.type-btn.active { background: #2a1408; border-color: #ffd700; color: #ffd700; }
 
 .right-filters { display: flex; align-items: center; gap: 10px; }
 .filter-select {
-  background: #221108;
-  border: 1px solid #5c2810;
+  background: #1a0a06;
+  border: 1px solid #3a1808;
   border-radius: 6px;
-  color: #ccc;
-  padding: 6px 10px;
-  font-size: 0.78rem;
+  color: #aaa;
+  padding: 5px 8px;
+  font-size: 0.72rem;
   outline: none;
 }
-.item-count { font-size: 0.72rem; color: #444; white-space: nowrap; }
+.item-count { font-size: 0.68rem; color: #444; white-space: nowrap; }
 
-/* Grid */
-.item-grid {
+/* ── Gear: item list ───────────────────────────────────────────── */
+.item-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 5px;
 }
 .empty-state { text-align: center; color: #444; padding: 60px 0; font-style: italic; }
 
-/* Equip picker overlay */
+/* ── Blacksmithing: materials ──────────────────────────────────── */
+.mat-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.mat-section-head {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #555;
+  font-weight: 700;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #1a0a04;
+}
+.mat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 4px;
+}
+.mat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--mc) 18%, transparent);
+  background: color-mix(in srgb, var(--mc) 5%, transparent);
+  transition: background 0.1s;
+}
+.mat-row.empty { opacity: 0.28; filter: saturate(0.15); }
+.mat-icon { flex-shrink: 0; }
+.mat-row:not(.empty) .mat-icon { filter: drop-shadow(0 0 4px var(--mc)); }
+.mat-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--mc); box-shadow: 0 0 5px var(--mc);
+  flex-shrink: 0;
+}
+.mat-name {
+  flex: 1;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ccc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mat-qty {
+  font-family: var(--font-head);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--mc);
+  min-width: 20px;
+  text-align: right;
+}
+.mat-row.empty .mat-qty { color: #444; }
+
+/* ── Artisan stubs ─────────────────────────────────────────────── */
+.artisan-stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 80px 20px;
+  text-align: center;
+  opacity: 0.5;
+}
+.stub-icon { font-size: 2.4rem; }
+.stub-name { font-family: var(--font-head); font-size: 1rem; color: #888; letter-spacing: 2px; text-transform: uppercase; }
+.stub-desc { font-size: 0.72rem; color: #555; font-style: italic; max-width: 320px; }
+.stub-soon { font-size: 0.6rem; color: #444; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 4px; }
+
+/* ── Equip picker overlay ──────────────────────────────────────── */
 .equip-backdrop {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.65);
