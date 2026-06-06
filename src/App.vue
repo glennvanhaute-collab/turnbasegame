@@ -110,6 +110,17 @@
       </Transition>
     </Teleport>
 
+    <!-- Raid battle — true full-screen, no modal chrome -->
+    <Teleport to="body">
+      <Transition name="raid-enter">
+        <RaidBattleArena
+          v-if="showRaidBattle && activeRaidId"
+          :raidId="activeRaidId"
+          @back="showRaidBattle = false"
+        />
+      </Transition>
+    </Teleport>
+
     <main>
       <HomeView
         v-if="view === 'campaign'"
@@ -146,7 +157,7 @@
           <button class="gear-tab" :class="{ active: expTab === 'sieges' }" @click="expTab = 'sieges'">Sieges</button>
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
-        <RaidsView v-else-if="expTab === 'raids'" />
+        <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" />
         <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
       </div>
@@ -184,6 +195,7 @@ import SummonView from './components/SummonView.vue'
 import BattleArena from './components/BattleArena.vue'
 import DungeonView from './components/DungeonView.vue'
 import RaidsView from './components/RaidsView.vue'
+import RaidBattleArena from './components/RaidBattleArena.vue'
 import SiegesView from './components/SiegesView.vue'
 import ExplorationView from './components/ExplorationView.vue'
 import RealmView from './components/RealmView.vue'
@@ -213,14 +225,22 @@ const showCollection  = ref(false)
 const showBlacksmith  = ref(false)
 const showMarket      = ref(false)
 const showBattle      = ref(false)
+const showRaidBattle  = ref(false)
+const activeRaidId    = ref(null)
 
 function closeAllPanels() {
-  showCollection.value = false
-  showBlacksmith.value = false
-  showMarket.value     = false
-  showBattle.value     = false
-  showShop.value       = false
-  showCodex.value      = false
+  showCollection.value  = false
+  showBlacksmith.value  = false
+  showMarket.value      = false
+  showBattle.value      = false
+  showRaidBattle.value  = false
+  showShop.value        = false
+  showCodex.value       = false
+}
+
+function startRaidBattle(raidId) {
+  activeRaidId.value   = raidId
+  showRaidBattle.value = true
 }
 
 function navigate(newView) {
@@ -239,6 +259,7 @@ watch(view, (v) => { onViewChange(v) })
 
 function handleEscape(e) {
   if (e.key !== 'Escape') return
+  if (showRaidBattle.value) { showRaidBattle.value = false; return }
   if (showBattle.value)     { showBattle.value = false; return }
   if (showCollection.value) { showCollection.value = false; return }
   if (showBlacksmith.value) { showBlacksmith.value = false; return }
@@ -619,6 +640,11 @@ body {
 .coll-modal-leave-active { transition: opacity 0.18s ease, transform 0.18s ease-in; }
 .coll-modal-enter-from   { opacity: 0; transform: translateY(24px); }
 .coll-modal-leave-to     { opacity: 0; transform: translateY(16px); }
+
+.raid-enter-enter-active { transition: opacity 0.4s ease; }
+.raid-enter-leave-active { transition: opacity 0.3s ease; }
+.raid-enter-enter-from   { opacity: 0; }
+.raid-enter-leave-to     { opacity: 0; }
 
 .gear-view { display: flex; flex-direction: column; }
 .arsenal-view {

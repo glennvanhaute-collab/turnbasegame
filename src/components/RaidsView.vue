@@ -89,9 +89,9 @@
 
       <!-- Enter button -->
       <div class="enter-row">
-        <button class="btn-enter" disabled>
+        <button class="btn-enter" @click="emit('enter-raid', selected.id)">
           Enter the Throne
-          <span class="enter-note">· Battle mechanics coming soon</span>
+          <span class="enter-note">· Nightmare difficulty</span>
         </button>
       </div>
 
@@ -109,6 +109,8 @@
 <script setup>
 import { ref } from 'vue'
 import { RAIDS } from '../game/data/raids.js'
+
+const emit = defineEmits(['enter-raid'])
 
 const _raidBgs = import.meta.glob('../assets/dungeons/Raid_*.png', { eager: true })
 const raidBgMap = {}
@@ -330,10 +332,11 @@ const selected = ref(RAIDS[0] ?? null)
   font-size: 0.8rem; font-weight: 800;
   letter-spacing: 1px; text-transform: uppercase;
   padding: 12px 28px;
-  cursor: not-allowed;
-  opacity: 0.6;
+  cursor: pointer;
   display: flex; align-items: center; gap: 10px;
+  transition: background 0.15s, border-color 0.15s;
 }
+.btn-enter:hover { background: #2a1200; border-color: var(--gold, #c9a227); }
 .enter-note { font-size: 0.58rem; font-weight: 400; color: #555; text-transform: none; letter-spacing: 0; }
 
 /* ── Empty state ────────────────────────── */
