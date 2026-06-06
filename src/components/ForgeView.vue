@@ -25,7 +25,13 @@
 
         <!-- Left: crafted item list -->
         <aside class="item-list-panel">
-          <div class="panel-label">Crafted Items</div>
+          <div class="panel-label">
+            Crafted Items
+            <label class="hide-maxed-toggle">
+              <input type="checkbox" v-model="hideMaxed" />
+              Upgradeable only
+            </label>
+          </div>
           <div v-if="craftedItems.length === 0" class="empty-hint">No crafted items yet —<br>forge gear in the Blacksmith first</div>
           <button
             v-for="item in craftedItems"
@@ -361,9 +367,11 @@ function applySelectedOrb() {
 // ── Upgrade tab state ─────────────────────────────────────────────
 const artisanItemId = ref(null)
 
+const hideMaxed = ref(true)
+
 const craftedItems = computed(() =>
   inventory.ownedItems
-    .filter(item => item.craftedAt && item.tier)
+    .filter(item => item.craftedAt && item.tier && (!hideMaxed.value || item.stars < 10))
     .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))
 )
 
@@ -506,7 +514,15 @@ function upgradeItem() {
   font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase;
   letter-spacing: 2px; color: var(--text-muted); font-weight: 700;
   padding-bottom: 8px; border-bottom: 1px solid var(--border-brown); margin-bottom: 4px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;
 }
+.hide-maxed-toggle {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.58rem; font-family: var(--font-head); text-transform: uppercase;
+  letter-spacing: 1px; color: #555; cursor: pointer; font-weight: 600;
+}
+.hide-maxed-toggle input { accent-color: #ffd700; cursor: pointer; margin: 0; }
+.hide-maxed-toggle:has(input:checked) { color: #ffd700; }
 .empty-hint { font-size: 0.62rem; color: var(--text-dim); font-style: italic; line-height: 1.5; padding: 4px 2px; }
 .item-list-btn {
   width: 100%; display: flex; align-items: center; gap: 8px;
