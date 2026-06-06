@@ -1,5 +1,7 @@
 # Bannerlords of Westrun — Lore Collaboration
 
+**[▶ Play the game](https://glennvanhaute-collab.github.io/turnbasegame/)**
+
 Thanks for helping build the world of Westrun. No coding knowledge needed. Your job is the writing — we handle turning it into the game.
 
 ---

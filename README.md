@@ -2,6 +2,8 @@
 
 A turn-based gacha RPG set in the medieval fantasy world of Westrun.
 
+**[▶ Play it here](https://glennvanhaute-collab.github.io/turnbasegame/)**
+
 ## Stack
 
 - **Vue 3** (Composition API, `<script setup>`)
