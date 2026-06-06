@@ -403,19 +403,6 @@
           </div>
         </div>
 
-        <!-- Upgrade path -->
-        <div class="stars-track" v-if="selected">
-          <div
-            v-for="tier in STAR_RARITY"
-            :key="tier.stars"
-            class="star-node"
-            :class="[tier.rarity.toLowerCase(), { current: tier.stars === 0 }]"
-          >
-            <span class="star-node-stars">{{ '★'.repeat(tier.stars) || '—' }}</span>
-            <span class="star-node-rarity">{{ tier.rarity }}</span>
-          </div>
-        </div>
-
         <!-- Forge button -->
         <div class="forge-actions" v-if="selected">
           <button
@@ -562,7 +549,7 @@ import { useArtisanStore } from '../stores/useArtisanStore.js'
 import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { ORE_LIST, ORES } from '../game/data/ores.js'
 import { BAR_LIST, BARS, FORGE_TIERS } from '../game/data/bars.js'
-import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, STAR_RARITY, formatStatValue } from '../game/data/recipes.js'
+import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
 import { barIcon, oreIcon, SLOT_TO_ICON } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 import arsenalBg    from '../assets/backgrounds/arsenal.png'
