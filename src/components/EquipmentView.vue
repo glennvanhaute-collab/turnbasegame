@@ -100,6 +100,28 @@
         <div class="dw-note" v-if="inventory.isDualWielding(selectedKey)">
           ⚔ Passive: Dual Wield bonus applied to ATK and Crit Rate above
         </div>
+        <div class="set-bonus-section" v-if="setBonusSummary.length > 0">
+          <div class="set-group" v-for="set in setBonusSummary" :key="set.type">
+            <div class="set-header">
+              <span class="set-name">{{ set.name }} Set</span>
+              <span class="set-count">{{ set.count }} / 6</span>
+            </div>
+            <div
+              v-for="tier in set.thresholds"
+              :key="tier.t"
+              class="set-tier"
+              :class="{ active: tier.active }"
+            >
+              <span class="set-tier-mark">{{ tier.active ? '✓' : '○' }}</span>
+              <span class="set-tier-label">{{ tier.t }}pc</span>
+              <span class="set-tier-desc">
+                <template v-if="tier.bonus">{{ formatSetBonus(tier.bonus) }}</template>
+                <template v-if="tier.passive"> — {{ tier.passive.desc }}</template>
+                <template v-if="!tier.bonus && !tier.passive">—</template>
+              </span>
+            </div>
+          </div>
+        </div>
         <div class="forge-affinity-note" v-if="forgeAffinities.length > 0">
           <span class="fa-label">⚒ Forge Affinity</span>
           <span class="fa-count" :class="forgeAffinityCount > 0 ? 'active' : 'inactive'">
@@ -129,6 +151,7 @@ import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
 import { Rarity, Faction } from '../game/Hero.js'
+import { SET_BONUSES, SET_PASSIVE_6, SET_NAMES } from '../game/data/setBonus.js'
 import GearSlotCard from './GearSlotCard.vue'
 import GearPickerModal from './GearPickerModal.vue'
 
@@ -205,6 +228,35 @@ const forgeAffinityCount = computed(() =>
 const forgeAffinities = computed(() => {
   const hero = buildBaseHero(selectedKey.value)
   return hero?.forgeAffinities ?? []
+})
+
+const BONUS_STAT_LABELS = {
+  hpPct: 'HP', defPct: 'DEF', atkPct: 'ATK', spdPct: 'SPD',
+  critRate: 'Crit Rate', critDmg: 'Crit DMG',
+}
+
+function formatSetBonus(bonus) {
+  return Object.entries(bonus)
+    .map(([k, v]) => `+${Math.round(v * 100)}% ${BONUS_STAT_LABELS[k] ?? k}`)
+    .join(', ')
+}
+
+const setBonusSummary = computed(() => {
+  const { setPieces } = inventory.computeGearStats(selectedKey.value)
+  if (!setPieces) return []
+  return Object.entries(setPieces)
+    .filter(([, count]) => count > 0)
+    .map(([armorType, count]) => ({
+      type: armorType,
+      name: SET_NAMES[armorType] ?? armorType,
+      count,
+      thresholds: [2, 4, 6].map(t => ({
+        t,
+        active: count >= t,
+        bonus:   SET_BONUSES[armorType]?.[t] ?? null,
+        passive: t === 6 ? (SET_PASSIVE_6[armorType] ?? null) : null,
+      })),
+    }))
 })
 
 // Build stat comparison (base hero vs hero + gear)
@@ -348,6 +400,23 @@ const pct = v => Math.round(v * 100) + '%'
   margin-top: 8px; display: flex; align-items: center; gap: 8px;
   font-size: 0.72rem; flex-wrap: wrap;
 }
+.set-bonus-section { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.set-group { display: flex; flex-direction: column; gap: 3px; }
+.set-header {
+  display: flex; align-items: baseline; gap: 8px;
+  padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.set-name  { font-size: 0.68rem; font-weight: 700; color: #c9a227; letter-spacing: 0.5px; }
+.set-count { font-size: 0.6rem; color: #555; margin-left: auto; }
+.set-tier  { display: flex; align-items: baseline; gap: 6px; font-size: 0.65rem; color: #444; padding-left: 2px; }
+.set-tier.active { color: #aaa; }
+.set-tier-mark  { font-size: 0.6rem; width: 10px; flex-shrink: 0; }
+.set-tier.active .set-tier-mark { color: #4dff88; }
+.set-tier-label { font-weight: 700; width: 24px; flex-shrink: 0; }
+.set-tier.active .set-tier-label { color: #c9a227; }
+.set-tier-desc  { flex: 1; line-height: 1.4; }
+.set-tier.active .set-tier-desc { color: #aaa; }
+
 .fa-label  { color: #888; }
 .fa-count.active   { color: #e07828; font-weight: 700; }
 .fa-count.inactive { color: #444; }
