@@ -117,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
@@ -128,6 +128,10 @@ const open       = ref(false)
 const resources  = useResourceStore()
 const currency   = useCurrencyStore()
 const collection = useCollectionStore()
+
+onMounted(() => {
+  collection.addToRoster('ARCHITECT')
+})
 
 function clearSummonedUnits() {
   collection.ownedKeys = collection.ownedKeys.filter(k => k === 'PLAYER_CHARACTER')
