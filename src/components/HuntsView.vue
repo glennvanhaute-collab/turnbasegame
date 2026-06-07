@@ -28,6 +28,25 @@
       </div>
 
       <div class="mission-group">
+        <div class="mg-head">🪵 Lumber</div>
+        <button
+          v-for="m in LUMBER_MISSIONS"
+          :key="m.id"
+          class="mission-btn"
+          :class="{ active: selectedId === m.id }"
+          :style="{ '--mc': m.color }"
+          @click="selectedId = m.id"
+        >
+          <span class="mb-dot" />
+          <span class="mb-info">
+            <span class="mb-name">{{ m.name }}</span>
+            <span class="mb-biome">{{ m.biome }}</span>
+          </span>
+          <span class="mb-dur">{{ formatTime(m.duration * 1000) }}</span>
+        </button>
+      </div>
+
+      <div class="mission-group">
         <div class="mg-head">🌿 Forage</div>
         <button
           v-for="m in FORAGE_MISSIONS"
@@ -211,9 +230,10 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import huntBg from '../assets/backgrounds/hunting_ground_bg.png'
 import { useHuntStore }       from '../stores/useHuntStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
-import { HUNTS_BY_ID, HUNT_MISSIONS, FORAGE_MISSIONS } from '../game/data/hunts.js'
+import { HUNTS_BY_ID, HUNT_MISSIONS, FORAGE_MISSIONS, LUMBER_MISSIONS } from '../game/data/hunts.js'
 import { HIDES } from '../game/data/hides.js'
 import { FIBERS } from '../game/data/fibers.js'
+import { WOODS } from '../game/data/woods.js'
 import { useArtisanStore } from '../stores/useArtisanStore.js'
 
 const hunts      = useHuntStore()
@@ -266,22 +286,29 @@ function heroName(key) {
 }
 
 // Material helpers
+function logColor(id) { return WOODS[id]?.color ?? '#888' }
+function logName(id)  { return WOODS[id]?.name ?? id }
+
 function matColor(drop) {
+  if (drop.materialType === 'log') return logColor(drop.id)
   if (!drop) return '#888'
   return drop.materialType === 'hide'
     ? (HIDES[drop.id]?.color ?? '#888')
     : (FIBERS[drop.id]?.color ?? '#888')
 }
 function matColorById(type, id) {
+  if (type === 'log')  return logColor(id)
   return type === 'hide' ? (HIDES[id]?.color ?? '#888') : (FIBERS[id]?.color ?? '#888')
 }
 function matName(drop) {
   if (!drop) return ''
+  if (drop.materialType === 'log') return logName(drop.id)
   return drop.materialType === 'hide'
     ? (HIDES[drop.id]?.name ?? drop.id)
     : (FIBERS[drop.id]?.name ?? drop.id)
 }
 function matNameById(type, id) {
+  if (type === 'log')  return logName(id)
   return type === 'hide' ? (HIDES[id]?.name ?? id) : (FIBERS[id]?.name ?? id)
 }
 

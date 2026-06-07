@@ -80,6 +80,8 @@ export const useHuntStore = defineStore('hunts', () => {
       const amt = rand(drop.min, drop.max)
       if (drop.materialType === 'hide') {
         resources.addHide(drop.id, amt)
+      } else if (drop.materialType === 'log') {
+        resources.addLog(drop.id, amt)
       } else {
         resources.addFiber(drop.id, amt)
       }
@@ -94,6 +96,8 @@ export const useHuntStore = defineStore('hunts', () => {
         const amt = rand(bonus.min, bonus.max)
         if (bonus.materialType === 'hide') {
           resources.addHide(bonus.id, amt)
+        } else if (bonus.materialType === 'log') {
+          resources.addLog(bonus.id, amt)
         } else {
           resources.addFiber(bonus.id, amt)
         }

@@ -117,7 +117,95 @@ export const HUNTS = [
   },
 ]
 
-export const HUNTS_BY_ID = Object.fromEntries(HUNTS.map(h => [h.id, h]))
+export const LUMBER_MISSIONS = [
+  {
+    id:       'pine_forest',
+    name:     'Pine Forest',
+    type:     'lumber',
+    biome:    'Lowland Forest',
+    desc:     'Fell pine from the sprawling lowland forests. Quick and plentiful — good timber for beginners.',
+    duration: 300,
+    color:    '#c8a87a',
+    drops: [
+      { materialType: 'log', id: 'pine', min: 2, max: 5 },
+      { materialType: 'log', id: 'oak',  min: 1, max: 1, chance: 0.30 },
+    ],
+    artisanBonus: { skill: 'woodworking', materialType: 'log', id: 'pine', min: 1, max: 3 },
+  },
+  {
+    id:       'oak_highlands',
+    name:     'Oak Highlands',
+    type:     'lumber',
+    biome:    'Heartwood Hills',
+    desc:     'Chop sturdy oak from the ancient highland groves. Takes patience but the timber holds an edge well.',
+    duration: 900,
+    color:    '#a0784a',
+    drops: [
+      { materialType: 'log', id: 'oak', min: 2, max: 4 },
+      { materialType: 'log', id: 'yew', min: 1, max: 2, chance: 0.28 },
+    ],
+    artisanBonus: { skill: 'woodworking', materialType: 'log', id: 'oak', min: 1, max: 2 },
+  },
+  {
+    id:       'yew_reaches',
+    name:     'Yew Reaches',
+    type:     'lumber',
+    biome:    'Highland Reaches',
+    desc:     'Harvest dense yew from the windswept ridges. Favoured by bowyers and weapon-crafters for its spring.',
+    duration: 1800,
+    color:    '#7a5a38',
+    drops: [
+      { materialType: 'log', id: 'yew',     min: 2, max: 3 },
+      { materialType: 'log', id: 'ashwood', min: 1, max: 1, chance: 0.22 },
+    ],
+    artisanBonus: { skill: 'woodworking', materialType: 'log', id: 'yew', min: 1, max: 2 },
+  },
+  {
+    id:       'pale_ashwood',
+    name:     'Pale Ashwood',
+    type:     'lumber',
+    biome:    'Ashen Plateau',
+    desc:     'Cut silver-grained ashwood from the high plateau. Prized for its hardness and pale lustre.',
+    duration: 3600,
+    color:    '#8ab4c8',
+    drops: [
+      { materialType: 'log', id: 'ashwood',  min: 1, max: 3 },
+      { materialType: 'log', id: 'ironwood', min: 1, max: 1, chance: 0.15 },
+    ],
+    artisanBonus: { skill: 'woodworking', materialType: 'log', id: 'ashwood', min: 1, max: 2 },
+  },
+  {
+    id:       'ironwood_depths',
+    name:     'Ironwood Depths',
+    type:     'lumber',
+    biome:    'Deep Ironwood',
+    desc:     "Venture into the dense ironwood where axes ring like hammers on steel. Few trees fall — those that do are worth the effort.",
+    duration: 7200,
+    color:    '#5a7080',
+    drops: [
+      { materialType: 'log', id: 'ironwood',   min: 1, max: 3 },
+      { materialType: 'log', id: 'dragonwood', min: 1, max: 1, chance: 0.10 },
+    ],
+    artisanBonus: { skill: 'woodworking', materialType: 'log', id: 'ironwood', min: 1, max: 2 },
+  },
+  {
+    id:       'dragons_scar',
+    name:     "Dragon's Scar",
+    type:     'lumber',
+    biome:    "Dragon's Scar",
+    desc:     'Harvest ancient dragonwood from forests scorched long ago. Still warm to the touch. Uncommonly dangerous — bring your best.',
+    duration: 14400,
+    color:    '#9a4444',
+    drops: [
+      { materialType: 'log', id: 'dragonwood', min: 1, max: 3 },
+    ],
+    artisanBonus: { skill: 'woodworking', materialType: 'log', id: 'dragonwood', min: 1, max: 2 },
+  },
+]
+
+const ALL_HUNTS = [...HUNTS, ...LUMBER_MISSIONS]
+
+export const HUNTS_BY_ID = Object.fromEntries(ALL_HUNTS.map(h => [h.id, h]))
 
 export const HUNT_MISSIONS  = HUNTS.filter(h => h.type === 'hunt')
 export const FORAGE_MISSIONS = HUNTS.filter(h => h.type === 'forage')
