@@ -36,8 +36,12 @@
   </div>
 
   <!-- Forge Discovery card -->
-  <div v-else-if="dungeon.isNode && dungeon.nodeType === 'forge_discovery'" class="dungeon-card node-card node-forge-discovery" :class="`forge-disc-${dungeon.forgeType}`">
-    <div class="node-icon">{{ forgeDiscInfo.icon }}</div>
+  <div
+    v-else-if="dungeon.isNode && dungeon.nodeType === 'forge_discovery'"
+    class="dungeon-card node-card node-forge-discovery"
+    :class="`forge-disc-${dungeon.forgeType}`"
+    :style="forgeBg ? { backgroundImage: `url(${forgeBg})` } : {}"
+  >
     <div class="node-type-badge" :style="{ color: forgeDiscInfo.color, borderColor: forgeDiscInfo.color + '44' }">
       Forge Discovery
     </div>
@@ -140,6 +144,15 @@ import { CITY_DATA } from '../game/data/cities.js'
 const _dungeonBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
 const _tavernBg   = Object.values(import.meta.glob('../assets/dungeons/tavern.png', { eager: true }))[0]?.default
 const _cityBgs    = import.meta.glob('../assets/cities/*.png', { eager: true })
+const _forgeBgs   = import.meta.glob('../assets/forges/*.png', { eager: true })
+
+const FORGE_BG_NAMES = { elven: 'elven_forge', goblin: 'goblin_forge', dwarf: 'dwarven_forge' }
+function forgeBgUrl(forgeType) {
+  const name = FORGE_BG_NAMES[forgeType]
+  if (!name) return null
+  const entry = Object.entries(_forgeBgs).find(([p]) => p.includes(`/${name}.png`))
+  return entry?.[1]?.default ?? null
+}
 
 const TIER_BG_PREFIX = { medium: 'intermediate' }
 function tierbgs(tier) {
@@ -181,6 +194,7 @@ function pickCityBg(faction, seed) {
 
 const cityData   = computed(() => CITY_DATA[props.dungeon.faction] ?? {})
 const cityBg     = computed(() => props.dungeon.nodeType === 'city' ? pickCityBg(props.dungeon.faction, props.dungeon.id) : null)
+const forgeBg    = computed(() => props.dungeon.nodeType === 'forge_discovery' ? forgeBgUrl(props.dungeon.forgeType) : null)
 const heroRarCol = computed(() => RARITY_COLORS[props.dungeon.heroRarity] ?? '#aaa')
 
 const FORGE_DISC_ICONS = { elven: '✦', goblin: '⚙', dwarf: '⛏' }
@@ -281,10 +295,25 @@ const statPool  = computed(() => {
   margin: 0;
   text-align: center;
 }
-.node-card.node-forge-discovery { background: #060e0a; }
-.forge-disc-elven  { border-color: #1a4a38; box-shadow: 0 0 18px rgba(136,255,204,0.08); }
-.forge-disc-goblin { border-color: #2a3a10; box-shadow: 0 0 18px rgba(170,255,68,0.08); }
-.forge-disc-dwarf  { border-color: #4a2a18; box-shadow: 0 0 18px rgba(255,153,102,0.08); }
+.node-card.node-forge-discovery {
+  background-color: #060e0a;
+  background-size: cover;
+  background-position: center top;
+  overflow: hidden;
+}
+.node-card.node-forge-discovery::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 10px;
+  background: linear-gradient(to bottom, rgba(4,10,6,0.40) 0%, rgba(4,10,6,0.65) 50%, rgba(4,10,6,0.90) 100%);
+}
+.node-card.node-forge-discovery > * { position: relative; z-index: 1; }
+.forge-disc-elven  { border-color: #1a4a38; box-shadow: 0 0 18px rgba(136,255,204,0.12); }
+.forge-disc-goblin { border-color: #2a3a10; box-shadow: 0 0 18px rgba(170,255,68,0.10); }
+.forge-disc-dwarf  { border-color: #4a2a18; box-shadow: 0 0 18px rgba(255,153,102,0.12); }
 .node-icon { font-size: 1.6rem; margin-bottom: 2px; }
 .node-type-badge {
   display: inline-flex; align-items: center;
