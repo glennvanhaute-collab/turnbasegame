@@ -20,6 +20,9 @@ export const useHuntStore = defineStore('hunts', () => {
   // Each slot: { missionId, heroKey, startedAt, duration } | null
   const slots = ref(saved?.slots ?? Array(MAX_SLOTS).fill(null))
 
+  // Last auto-collected cycle — watched by HuntsView for toast display
+  const lastAutoCollect = ref(null)
+
   function _persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ slots: slots.value }))
   }
@@ -65,11 +68,7 @@ export const useHuntStore = defineStore('hunts', () => {
     return true
   }
 
-  function collectHunt(i) {
-    const s = slots.value[i]
-    if (!s || !isComplete(i)) return null
-
-    const mission   = HUNTS_BY_ID[s.missionId]
+  function _applyDrops(mission, heroKey) {
     const resources = useResourceStore()
     const artisan   = useArtisanStore()
     const collected = []
@@ -78,39 +77,53 @@ export const useHuntStore = defineStore('hunts', () => {
       const hits = drop.chance == null ? true : Math.random() < drop.chance
       if (!hits) continue
       const amt = rand(drop.min, drop.max)
-      if (drop.materialType === 'hide') {
-        resources.addHide(drop.id, amt)
-      } else if (drop.materialType === 'log') {
-        resources.addLog(drop.id, amt)
-      } else {
-        resources.addFiber(drop.id, amt)
-      }
+      if (drop.materialType === 'hide')      resources.addHide(drop.id, amt)
+      else if (drop.materialType === 'log')  resources.addLog(drop.id, amt)
+      else                                   resources.addFiber(drop.id, amt)
       collected.push({ materialType: drop.materialType, id: drop.id, amount: amt })
     }
 
-    // Artisan skill bonus
-    if (s.heroKey && mission.artisanBonus) {
+    if (heroKey && mission.artisanBonus) {
       const bonus = mission.artisanBonus
-      const hasSkill = artisan.getSkillLevel(s.heroKey, bonus.skill) >= 1
-      if (hasSkill) {
+      if (artisan.getSkillLevel(heroKey, bonus.skill) >= 1) {
         const amt = rand(bonus.min, bonus.max)
-        if (bonus.materialType === 'hide') {
-          resources.addHide(bonus.id, amt)
-        } else if (bonus.materialType === 'log') {
-          resources.addLog(bonus.id, amt)
-        } else {
-          resources.addFiber(bonus.id, amt)
-        }
+        if (bonus.materialType === 'hide')      resources.addHide(bonus.id, amt)
+        else if (bonus.materialType === 'log')  resources.addLog(bonus.id, amt)
+        else                                    resources.addFiber(bonus.id, amt)
         const existing = collected.find(c => c.id === bonus.id && c.materialType === bonus.materialType)
         if (existing) existing.amount += amt
         else collected.push({ materialType: bonus.materialType, id: bonus.id, amount: amt, bonus: true })
       }
     }
 
-    slots.value[i] = null
+    return collected
+  }
+
+  // Collect current cycle and immediately restart the same mission (idle loop).
+  function collectHunt(i) {
+    const s = slots.value[i]
+    if (!s || !isComplete(i)) return null
+
+    const mission   = HUNTS_BY_ID[s.missionId]
+    const collected = _applyDrops(mission, s.heroKey)
+
+    // Restart from the moment this cycle ended (handles offline catch-up)
+    const cycleEnd = s.startedAt + s.duration * 1000
+    slots.value[i] = { missionId: s.missionId, heroKey: s.heroKey, startedAt: cycleEnd, duration: s.duration }
     _persist()
     return collected
   }
+
+  // Auto-tick: fires every 5s and collects any completed slots automatically
+  setInterval(() => {
+    slots.value.forEach((slot, i) => {
+      if (slot && isComplete(i)) {
+        const missionName = HUNTS_BY_ID[slot.missionId]?.name ?? 'Mission'
+        const drops = collectHunt(i)
+        if (drops) lastAutoCollect.value = { missionName, drops }
+      }
+    })
+  }, 5000)
 
   function cancelHunt(i) {
     if (!slots.value[i]) return
@@ -123,5 +136,6 @@ export const useHuntStore = defineStore('hunts', () => {
     firstFreeSlot, heroInSlot,
     isComplete, progress, eta,
     startHunt, collectHunt, cancelHunt,
+    lastAutoCollect,
   }
 })

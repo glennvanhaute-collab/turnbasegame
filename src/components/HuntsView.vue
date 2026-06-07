@@ -184,19 +184,13 @@
             <button class="slot-cancel" @click="hunts.cancelHunt(i)" title="Cancel mission">×</button>
           </div>
 
-          <template v-if="!hunts.isComplete(i)">
-            <div class="slot-progress-row">
-              <div class="slot-track">
-                <div class="slot-fill" :style="{ width: (slotProgress[i] * 100) + '%', background: missionColor(slot.missionId) }" />
-              </div>
-              <span class="slot-eta">{{ formatTime(slotEta[i]) }}</span>
+          <div class="slot-progress-row">
+            <div class="slot-track">
+              <div class="slot-fill" :style="{ width: (slotProgress[i] * 100) + '%', background: missionColor(slot.missionId) }" />
             </div>
-          </template>
-
-          <template v-else>
-            <div class="slot-complete-msg">Mission complete!</div>
-            <button class="collect-btn" @click="collect(i)">Collect</button>
-          </template>
+            <span class="slot-eta" v-if="!hunts.isComplete(i)">{{ formatTime(slotEta[i]) }}</span>
+            <span class="slot-eta looping" v-else>↺ collecting…</span>
+          </div>
         </template>
 
       </div>
@@ -226,7 +220,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import huntBg from '../assets/backgrounds/hunting_ground_bg.png'
 import { useHuntStore }       from '../stores/useHuntStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
@@ -336,12 +330,19 @@ function collect(i) {
   if (!slot) return
   const missionName = HUNTS_BY_ID[slot.missionId]?.name ?? 'Mission'
   const drops = hunts.collectHunt(i)
-  if (drops) {
-    collectResult.value = { mission: missionName, drops }
-    clearTimeout(_toastTimer)
-    _toastTimer = setTimeout(() => { collectResult.value = null }, 4000)
-  }
+  if (drops) showToast(missionName, drops)
 }
+
+function showToast(missionName, drops) {
+  collectResult.value = { mission: missionName, drops }
+  clearTimeout(_toastTimer)
+  _toastTimer = setTimeout(() => { collectResult.value = null }, 4000)
+}
+
+// Show toast when the store auto-collects a completed loop
+watch(() => hunts.lastAutoCollect, (val) => {
+  if (val) showToast(val.missionName, val.drops)
+})
 </script>
 
 <style scoped>
@@ -513,6 +514,8 @@ function collect(i) {
 .slot-track { flex: 1; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
 .slot-fill { height: 100%; border-radius: 3px; transition: width 0.9s linear; }
 .slot-eta { font-family: var(--font-head); font-size: 0.62rem; color: var(--text-muted); flex-shrink: 0; min-width: 42px; text-align: right; }
+.slot-eta.looping { color: #4dcc88; animation: loop-pulse 1.4s ease-in-out infinite; }
+@keyframes loop-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .slot-complete-msg { padding: 8px 12px 4px; font-size: 0.7rem; font-weight: 700; color: #4dff88; font-family: var(--font-head); text-align: center; }
 .collect-btn {
   display: block; width: calc(100% - 24px); margin: 0 12px 12px;
