@@ -29,7 +29,7 @@
 <script setup>
 import { computed } from 'vue'
 import { GearSlot, SLOT_LABELS, computeLineStats } from '../game/Gear.js'
-import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import { SLOT_TO_ICON, tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 
 const props = defineProps({
@@ -39,7 +39,11 @@ const props = defineProps({
 })
 defineEmits(['click'])
 
-const slotIcon = computed(() => SLOT_TO_ICON[props.slotId] ?? 'sword')
+const slotIcon = computed(() =>
+  props.item
+    ? tierSlotIcon(props.item.tier, props.slotId, props.item.craftDiscipline)
+    : (SLOT_TO_ICON[props.slotId] ?? 'sword')
+)
 
 const STAT_FMT = {
   hp: v => `+${v}HP`, hpPct: v => `+${Math.round(v*100)}%HP`,

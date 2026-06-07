@@ -6,9 +6,18 @@ import { useEnergyStore } from './useEnergyStore.js'
 import { useInventoryStore } from './useInventoryStore.js'
 import { useResourceStore } from './useResourceStore.js'
 import { useForgeStore } from './useForgeStore.js'
+import { useCodexStore } from './useCodexStore.js'
 
 export const EXPLORE_COST = 5
 const STORAGE_KEY = 'raid-dungeons'
+
+const FORGE_DISCOVERY_CHANCE = 0.05   // 5% per explore, sequential (elven → goblin → dwarf)
+
+export const FORGE_DISCOVERY_DATA = {
+  elven:  { name: 'Ruins of the Moonforge',       color: '#88ffcc', tier: 'Moonsilver',  desc: 'An ancient elven forge, still warm with residual magic. Moonsilver crafting is now unlocked.' },
+  goblin: { name: "Gearvein's Contraption Works", color: '#aaff44', tier: 'Vaultmetal',  desc: 'A chaotic goblin workshop humming with clever contraptions. Vaultmetal crafting is now unlocked.' },
+  dwarf:  { name: 'The Dwarven Ironhall',         color: '#ff9966', tier: 'Runeite',     desc: 'A legendary forge carved into living rock by dwarven hands. Runeite crafting is now unlocked.' },
+}
 
 function loadSaved() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') } catch { return null }
@@ -19,7 +28,9 @@ export const useDungeonStore = defineStore('dungeons', () => {
 
   const currentOptions  = ref(saved?.currentOptions ?? [])
   const pinnedDungeons  = ref(saved?.pinnedDungeons ?? [])
-  const pendingNodeId   = ref(null)   // node awaiting item pick
+  const pendingNodeId       = ref(null)   // node awaiting item pick
+  const pendingTavernId     = ref(null)   // tavern node awaiting claim
+  const pendingTavernFrag   = ref(null)   // { heroId, heroTitle, frag } pre-rolled for modal
 
   function persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -32,9 +43,44 @@ export const useDungeonStore = defineStore('dungeons', () => {
     const energy = useEnergyStore()
     if (!energy.canAfford(EXPLORE_COST)) return false
     energy.spend(EXPLORE_COST)
-    currentOptions.value = generateDungeonOptions()
+    const options = generateDungeonOptions()
+    const discovery = rollForgeDiscovery()
+    if (discovery) options[2] = discovery
+    currentOptions.value = options
     persist()
     return true
+  }
+
+  function rollForgeDiscovery() {
+    const resources = useResourceStore()
+    let forgeType = null
+    if (!resources.elvenForgeUnlocked)       forgeType = 'elven'
+    else if (!resources.goblinForgeUnlocked) forgeType = 'goblin'
+    else if (!resources.dwarfForgeUnlocked)  forgeType = 'dwarf'
+    if (!forgeType || Math.random() >= FORGE_DISCOVERY_CHANCE) return null
+    const data = FORGE_DISCOVERY_DATA[forgeType]
+    return {
+      id: `fd_${Date.now()}`,
+      name: data.name,
+      nodeType: 'forge_discovery',
+      forgeType,
+      isNode: true,
+      isDungeon: false,
+      pinned: false,
+    }
+  }
+
+  function claimForgeDiscovery(id) {
+    const node = findDungeon(id)
+    if (!node || node.nodeType !== 'forge_discovery') return null
+    const resources = useResourceStore()
+    if (node.forgeType === 'elven')       resources.elvenForgeUnlocked = true
+    else if (node.forgeType === 'goblin') resources.goblinForgeUnlocked = true
+    else if (node.forgeType === 'dwarf')  resources.dwarfForgeUnlocked = true
+    currentOptions.value = currentOptions.value.filter(d => d.id !== id)
+    pinnedDungeons.value  = pinnedDungeons.value.filter(d => d.id !== id)
+    persist()
+    return node.forgeType
   }
 
   function pin(id) {
@@ -96,6 +142,39 @@ export const useDungeonStore = defineStore('dungeons', () => {
     pendingNodeId.value = null
   }
 
+  // Tavern: pre-roll the fragment so the modal can display it before confirming
+  function openTavern(id) {
+    const codex = useCodexStore()
+    const fragment = codex.pickTavernFragment()
+    if (!fragment) {
+      // All fragments already found — just consume the node silently
+      currentOptions.value = currentOptions.value.filter(d => d.id !== id)
+      persist()
+      return null
+    }
+    pendingTavernId.value   = id
+    pendingTavernFrag.value = fragment
+    return fragment
+  }
+
+  function claimTavern() {
+    if (!pendingTavernFrag.value) return null
+    const codex = useCodexStore()
+    codex.unlock(pendingTavernFrag.value.frag.id)
+    currentOptions.value = currentOptions.value.filter(d => d.id !== pendingTavernId.value)
+    pinnedDungeons.value  = pinnedDungeons.value.filter(d => d.id !== pendingTavernId.value)
+    const result = pendingTavernFrag.value
+    pendingTavernId.value   = null
+    pendingTavernFrag.value = null
+    persist()
+    return result
+  }
+
+  function closeTavern() {
+    pendingTavernId.value   = null
+    pendingTavernFrag.value = null
+  }
+
   // Apply node line to a chosen instance; returns the line that was applied
   function applyNodeToItem(instanceId) {
     const node = findDungeon(pendingNodeId.value)
@@ -116,10 +195,22 @@ export const useDungeonStore = defineStore('dungeons', () => {
     return { line, itemName: instance.name }
   }
 
+  function claimCityNode(id) {
+    const node = findDungeon(id)
+    if (!node || node.nodeType !== 'city') return null
+    currentOptions.value = currentOptions.value.filter(d => d.id !== id)
+    pinnedDungeons.value  = pinnedDungeons.value.filter(d => d.id !== id)
+    persist()
+    return { heroKey: node.heroKey, heroName: node.heroName, heroRarity: node.heroRarity, faction: node.faction }
+  }
+
   return {
     currentOptions, pinnedDungeons, pendingNodeId,
+    pendingTavernId, pendingTavernFrag,
     EXPLORE_COST,
     explore, pin, unpin, onDungeonVictory, findDungeon,
     openNode, closeNode, applyNodeToItem,
+    openTavern, claimTavern, closeTavern,
+    claimForgeDiscovery, claimCityNode,
   }
 })

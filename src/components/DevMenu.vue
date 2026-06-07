@@ -162,6 +162,21 @@
           </div>
         </section>
 
+        <!-- Flags -->
+        <section class="dev-section">
+          <div class="dev-section-label">Flags</div>
+          <div class="dev-row">
+            <span class="dev-row-icon">⚡</span>
+            <span class="dev-row-name">Infinite Energy</span>
+            <span class="dev-row-count" :style="{ color: energy.infiniteEnergy ? '#aaff44' : '' }">
+              {{ energy.infiniteEnergy ? 'ON' : 'OFF' }}
+            </span>
+            <div class="dev-btns">
+              <button @click="energy.infiniteEnergy = !energy.infiniteEnergy">Toggle</button>
+            </div>
+          </div>
+        </section>
+
         <!-- Reset -->
         <section class="dev-section">
           <div class="dev-section-label">Reset</div>
@@ -181,6 +196,7 @@ import { ref, onMounted } from 'vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { useEnergyStore } from '../stores/useEnergyStore.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 import { HIDE_LIST } from '../game/data/hides.js'
@@ -192,6 +208,7 @@ const open       = ref(false)
 const resources  = useResourceStore()
 const currency   = useCurrencyStore()
 const collection = useCollectionStore()
+const energy     = useEnergyStore()
 
 onMounted(() => {
   collection.addToRoster('ARCHITECT')

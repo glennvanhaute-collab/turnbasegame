@@ -6,7 +6,7 @@
       <span class="ir-eq" v-if="equippedBy">● {{ HERO_NAMES[equippedBy.heroKey] }}</span>
     </div>
     <div class="ir-actions">
-      <button class="ir-equip" @click="$emit('equip')">Equip…</button>
+      <span class="ir-equipped-tag" v-if="equippedBy">Equipped</span>
       <button class="ir-remove" v-if="equippedBy" @click="$emit('unequip')">✕</button>
     </div>
   </div>
@@ -16,14 +16,14 @@
 import { computed } from 'vue'
 import { SLOT_LABELS } from '../game/Gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
-import { SLOT_TO_ICON } from '../game/data/spritesheet.js'
+import { tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 
 const props = defineProps({
   item:       { type: Object, required: true },
   equippedBy: { type: Object, default: null },
 })
-defineEmits(['equip', 'unequip'])
+defineEmits(['unequip'])
 
 const HERO_NAMES = Object.fromEntries(
   Object.entries(HERO_TEMPLATES)
@@ -31,7 +31,7 @@ const HERO_NAMES = Object.fromEntries(
     .map(([key, f]) => [key, f().name])
 )
 
-const slotIcon = computed(() => SLOT_TO_ICON[props.item.slot] ?? 'sword')
+const slotIcon = computed(() => tierSlotIcon(props.item.tier, props.item.slot, props.item.craftDiscipline))
 </script>
 
 <style scoped>
@@ -81,18 +81,14 @@ const slotIcon = computed(() => SLOT_TO_ICON[props.item.slot] ?? 'sword')
 }
 
 .ir-actions { display: flex; gap: 4px; flex-shrink: 0; }
-.ir-equip {
-  padding: 4px 8px;
-  border-radius: 4px;
-  border: none;
-  background: #e94560;
-  color: #fff;
-  font-size: 0.65rem;
+.ir-equipped-tag {
+  font-size: 0.58rem;
   font-weight: 700;
-  cursor: pointer;
-  transition: opacity 0.12s;
+  color: #4dff88;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.75;
 }
-.ir-equip:hover { opacity: 0.8; }
 .ir-remove {
   padding: 4px 7px;
   border-radius: 4px;

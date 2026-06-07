@@ -1,14 +1,13 @@
 <template>
   <div class="training-scene">
 
-    <div class="map-bg" :style="{ backgroundImage: `url(${trainingBg})` }" />
-
     <!-- Tab bar -->
     <div class="tg-tab-bar">
       <div class="tg-tabs">
-        <button class="tg-tab tg-tab--active">⚔ Training Grounds</button>
+        <button class="tg-tab" :class="{ 'tg-tab--active': activeHomeTab === 'training' }" @click="activeHomeTab = 'training'">⚔ Training Grounds</button>
+        <button class="tg-tab" :class="{ 'tg-tab--active': activeHomeTab === 'hunts' }" @click="activeHomeTab = 'hunts'">🏹 Hunting Zone</button>
       </div>
-      <div class="tg-team">
+      <div class="tg-team" v-if="activeHomeTab === 'training'">
         <span v-if="collection.team.length === 0" class="no-team">No team set — visit Collection</span>
         <template v-else>
           <div class="team-hero-chip" v-for="key in collection.team" :key="key">
@@ -23,6 +22,10 @@
         </span>
       </div>
     </div>
+
+    <template v-if="activeHomeTab === 'training'">
+
+    <div class="map-bg" :style="{ backgroundImage: `url(${trainingBg})` }" />
 
     <!-- Left sidebar — encounter list -->
     <div class="tg-sidebar">
@@ -246,6 +249,12 @@
         </div>
     </div>
 
+    </template>
+
+    <div v-else class="hunting-zone-view">
+      <HuntsView />
+    </div>
+
   </div>
 </template>
 
@@ -265,8 +274,11 @@ import codexIcon          from '../assets/ui/codex.png'
 import leatherworkingIcon from '../assets/ui/leatherworking_icon.png'
 import tailoringIcon      from '../assets/ui/tailoring_icon.png'
 import GameIcon from './ui/GameIcon.vue'
+import HuntsView from './HuntsView.vue'
 
 const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring'])
+
+const activeHomeTab = ref('training')
 
 const camp     = useCampStore()
 const currency = useCurrencyStore()
@@ -1153,6 +1165,15 @@ function formatElapsed(ms) {
   color: #4dff88;
   padding-left: 10px;
   border-left: 1px solid #1a3a1a;
+}
+
+.hunting-zone-view {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
 }
 
 /* ── Mobile ── */

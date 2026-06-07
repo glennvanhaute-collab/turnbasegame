@@ -125,11 +125,61 @@
         </div>
       </div>
 
-      <!-- Heroes tab — placeholder -->
-      <div class="codex-body codex-coming" v-else-if="tab === 'heroes'">
-        <div class="empty-icon">⚔</div>
-        <p>Hero codex entries unlock as you learn their stories.</p>
-        <p class="empty-sub">Some names are only revealed through the world itself.</p>
+      <!-- Heroes tab -->
+      <div class="codex-body" v-else-if="tab === 'heroes'">
+        <template v-if="visibleHeroes.length">
+          <div
+            v-for="(hero, idx) in visibleHeroes"
+            :key="hero.heroId"
+            class="hero-entry"
+            :class="{ 'hero-divider': idx > 0 }"
+          >
+            <div class="hero-header">
+              <img
+                v-if="HERO_AVATARS[hero.heroId]"
+                :src="HERO_AVATARS[hero.heroId]"
+                class="hero-avatar"
+                :alt="hero.title"
+              />
+              <div class="hero-header-text">
+                <div class="hero-title-row">
+                  <span class="hero-epithet">{{ hero.title }}</span>
+                  <span class="hero-frag-count" v-if="hero.totalCount">
+                    <span :class="hero.unlockedCount === hero.totalCount ? 'frag-complete' : 'frag-partial'">
+                      {{ hero.unlockedCount }} / {{ hero.totalCount }}
+                    </span>
+                    &nbsp;fragments
+                  </span>
+                </div>
+                <blockquote class="hero-quote">{{ hero.quote }}</blockquote>
+              </div>
+            </div>
+
+            <div v-if="hero.fragments.length" class="hero-frags">
+              <div class="frags-label">Fragments</div>
+              <div
+                v-for="frag in hero.fragments"
+                :key="frag.id"
+                class="frag-row"
+                :class="frag.isUnlocked ? 'frag-unlocked' : 'frag-locked'"
+              >
+                <span class="frag-icon">{{ frag.isUnlocked ? '✦' : '🔒' }}</span>
+                <div class="frag-body">
+                  <div class="frag-title">{{ frag.isUnlocked ? frag.title : '???' }}</div>
+                  <p v-if="frag.isUnlocked && frag.text" class="frag-text">{{ frag.text }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p v-if="hasHiddenHeroes" class="hidden-heroes-hint">... and others, not yet found.</p>
+        </template>
+
+        <div class="codex-coming" v-else>
+          <div class="empty-icon">⚔</div>
+          <p>Hero codex entries unlock as you learn their stories.</p>
+          <p class="empty-sub">Some names are only revealed through the world itself.</p>
+        </div>
       </div>
 
     </div>
@@ -140,16 +190,51 @@
 import { ref, computed } from 'vue'
 import { useJournalStore, ENTRY_TYPES } from '../stores/useJournalStore.js'
 import { useBondStore } from '../stores/useBondStore.js'
-import { BOND_LORE } from '../game/data/lore.js'
+import { useCodexStore } from '../stores/useCodexStore.js'
+import { LORE, BOND_LORE } from '../game/data/lore.js'
 import bondHelgaAldricImg from '../assets/lore/bond-unlocked-helga-aldric.png'
+import avatarAldric  from '../assets/units/legendary/lord-aldric.png'
+import avatarHelga   from '../assets/units/legendary/Helga.png'
+import avatarGarrett from '../assets/units/rare/garrett-the-unbroken.png'
 
 defineEmits(['close'])
 
 const journal   = useJournalStore()
 const bondStore = useBondStore()
+const codex     = useCodexStore()
 const tab       = ref('journal')
 
-const BOND_IMAGES = { iron_vow: bondHelgaAldricImg }
+// Heroes visible to the player — locked heroes (e.g. Edran) stay hidden until their unlock fragment is found
+const visibleHeroes = computed(() =>
+  Object.entries(LORE)
+    .filter(([, entry]) => {
+      if (!entry.locked) return true
+      return entry.unlockedBy && codex.isUnlocked(entry.unlockedBy)
+    })
+    .map(([heroId, entry]) => {
+      const frags = (entry.fragments ?? []).map(f => ({
+        ...f,
+        isUnlocked: codex.isUnlocked(f.id),
+      }))
+      return {
+        heroId,
+        title: entry.title,
+        quote: entry.quote,
+        fragments: frags,
+        unlockedCount: frags.filter(f => f.isUnlocked).length,
+        totalCount: frags.length,
+      }
+    })
+)
+
+const hasHiddenHeroes = computed(() =>
+  Object.values(LORE).some(entry =>
+    entry.locked && (!entry.unlockedBy || !codex.isUnlocked(entry.unlockedBy))
+  )
+)
+
+const BOND_IMAGES   = { iron_vow: bondHelgaAldricImg }
+const HERO_AVATARS  = { lord_aldric: avatarAldric, helga: avatarHelga, hedge_blade: avatarGarrett }
 const writing = ref(false)
 const newTitle = ref('')
 const newBody  = ref('')
@@ -558,6 +643,92 @@ function cancelWrite() {
 .tip-line {
   font-size: 0.68rem; color: var(--text-muted);
   line-height: 1.75; margin: 0; font-style: italic;
+}
+
+/* Heroes tab */
+.hero-entry { display: flex; flex-direction: column; gap: 10px; }
+.hero-divider { border-top: 1px solid var(--border-brown); padding-top: 22px; margin-top: 6px; }
+
+.hero-header { display: flex; align-items: flex-start; gap: 14px; }
+.hero-avatar {
+  width: 72px;
+  height: 88px;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 4px;
+  border: 1px solid #3a2c0a;
+  flex-shrink: 0;
+  filter: sepia(0.15);
+}
+.hero-header-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.hero-title-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.hero-epithet {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.hero-frag-count { font-size: 0.6rem; color: var(--text-dim); }
+.frag-complete { color: #4dff88; font-weight: 700; }
+.frag-partial  { color: var(--text-muted); font-weight: 700; }
+
+.hero-quote {
+  border-left: 2px solid #c9a22744;
+  margin: 0;
+  padding: 5px 12px;
+  font-size: 0.67rem;
+  font-style: italic;
+  color: #9a7840;
+  line-height: 1.65;
+}
+
+.hero-frags { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+.frags-label {
+  font-family: var(--font-head);
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.frag-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 7px 12px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+.frag-unlocked { background: #0e0b05; border-color: #3a2c0a; }
+.frag-locked   { background: #09080508; border-color: #1c1810; opacity: 0.5; }
+.frag-icon { font-size: 0.65rem; margin-top: 3px; flex-shrink: 0; color: var(--gold-dim); }
+.frag-locked .frag-icon { color: var(--text-dim); }
+.frag-body { display: flex; flex-direction: column; gap: 6px; }
+.frag-title {
+  font-family: var(--font-head);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-parchment);
+}
+.frag-locked .frag-title { color: var(--text-dim); font-style: italic; }
+.frag-text {
+  font-size: 0.64rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  white-space: pre-line;
+  margin: 0;
+  font-style: italic;
+  border-left: 2px solid #3a2c0a;
+  padding-left: 10px;
+}
+.hidden-heroes-hint {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  font-style: italic;
+  text-align: center;
+  padding: 12px 0 4px;
 }
 
 /* Lore tab — bond entries */

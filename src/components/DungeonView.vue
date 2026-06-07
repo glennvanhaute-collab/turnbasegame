@@ -57,6 +57,37 @@
       </div>
     </div>
 
+    <!-- Tavern modal -->
+    <div class="modal-backdrop" v-if="dungeonStore.pendingTavernId" @click.self="dungeonStore.closeTavern()">
+      <div class="node-modal tavern-modal">
+        <div class="modal-title">🍺 {{ tavernNode?.name }}</div>
+        <div class="tavern-scene">
+          You settle into a corner and listen to the murmur of the room...
+        </div>
+
+        <div v-if="dungeonStore.pendingTavernFrag" class="fragment-reveal">
+          <div class="fragment-title">"{{ dungeonStore.pendingTavernFrag.frag.title }}"</div>
+          <div class="fragment-hero">— A rumor about <em>{{ dungeonStore.pendingTavernFrag.heroTitle }}</em></div>
+          <div v-if="dungeonStore.pendingTavernFrag.frag.text" class="fragment-excerpt">
+            {{ dungeonStore.pendingTavernFrag.frag.text.slice(0, 220).trimEnd() }}...
+          </div>
+          <div class="fragment-hint">Full account available in the Codex.</div>
+        </div>
+        <div v-else class="no-legends">
+          Nothing of note tonight. The regulars are quiet.
+        </div>
+
+        <div class="modal-actions">
+          <button
+            class="enter-btn tavern-claim-btn"
+            :disabled="!dungeonStore.pendingTavernFrag"
+            @click="claimTavern"
+          >Remember This</button>
+          <button class="modal-cancel" @click="dungeonStore.closeTavern()">Leave</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Node picker modal -->
     <div class="modal-backdrop" v-if="dungeonStore.pendingNodeId" @click.self="dungeonStore.closeNode()">
       <div class="node-modal">
@@ -104,7 +135,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useDungeonStore } from '../stores/useDungeonStore.js'
+import { useDungeonStore }  from '../stores/useDungeonStore.js'
+import { useCityStore }     from '../stores/useCityStore.js'
+import { useAdvisorStore }  from '../stores/useAdvisorStore.js'
 import { useEnergyStore } from '../stores/useEnergyStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
@@ -114,6 +147,8 @@ import DungeonCard from './DungeonCard.vue'
 defineEmits(['enter-dungeon'])
 
 const dungeonStore = useDungeonStore()
+const cityStore    = useCityStore()
+const advisor      = useAdvisorStore()
 const energy       = useEnergyStore()
 const inventory    = useInventoryStore()
 const collection   = useCollectionStore()
@@ -124,6 +159,12 @@ let claimTimer = null
 const pendingNode = computed(() =>
   dungeonStore.pendingNodeId
     ? dungeonStore.findDungeon(dungeonStore.pendingNodeId)
+    : null
+)
+
+const tavernNode = computed(() =>
+  dungeonStore.pendingTavernId
+    ? dungeonStore.findDungeon(dungeonStore.pendingTavernId)
     : null
 )
 
@@ -151,8 +192,64 @@ function doExplore() {
   explored.value = true
 }
 
+const NODE_ADVISOR_FLAGS = {
+  forge:   'seen-node-forge',
+  blessed: 'seen-node-blessed',
+  tavern:  'seen-node-tavern',
+  city:    'seen-node-city',
+}
+const NODE_ADVISOR_LINES = {
+  forge: [
+    'A forge imbued with ancient power — rarer than anything you will find in camp.',
+    'You can use it to inscribe a physical stat line onto any Legendary item you carry. The enhancement is permanent.',
+    'Choose wisely. The forge will not wait.',
+  ],
+  blessed: [
+    'Sacred ground, still warm with old light. These places predate the houses.',
+    'A blessed area can inscribe a magical stat line onto a Legendary item. Critical rates, resistances, things the hammer cannot add.',
+    'Once chosen, the blessing is bound to that item forever. Think before you act.',
+  ],
+  tavern: [
+    'Sit long enough in any tavern and the world talks around you. People forget you are listening.',
+    'Some of what you overhear is useful. Some of it is history that was never meant to be recorded.',
+    'I keep notes. Visit the Codex — Heroes tab — when you want to read what we have gathered so far.',
+  ],
+  city: [
+    'Every great house has cities. And every city has names worth knowing.',
+    'When you pass through a city aligned with a house, you may hear of a notable warrior looking for a worthy banner to follow.',
+    'Hear enough of their name and they will answer when you call. Visit the summon portal — they will be waiting.',
+  ],
+}
+
+function maybeShowNodeAdvisor(nodeType) {
+  const flag = NODE_ADVISOR_FLAGS[nodeType]
+  if (!flag || localStorage.getItem(flag)) return
+  localStorage.setItem(flag, '1')
+  const lines = NODE_ADVISOR_LINES[nodeType]
+  if (lines) advisor.say(lines)
+}
+
 function openNodePicker(id) {
-  dungeonStore.openNode(id)
+  const node = dungeonStore.findDungeon(id)
+  if (node?.nodeType) maybeShowNodeAdvisor(node.nodeType)
+  if (node?.nodeType === 'tavern') {
+    const result = dungeonStore.openTavern(id)
+    if (!result) showToast('Nothing new in the tavern tonight.')
+  } else if (node?.nodeType === 'forge_discovery') {
+    const forgeType = dungeonStore.claimForgeDiscovery(id)
+    if (forgeType) {
+      const labels = { elven: 'Elven Moonforge', goblin: 'Goblin Contraption Works', dwarf: 'Dwarven Ironhall' }
+      showToast(`✦ ${labels[forgeType]} discovered — new crafting tier unlocked!`)
+    }
+  } else if (node?.nodeType === 'city') {
+    const result = dungeonStore.claimCityNode(id)
+    if (result) {
+      cityStore.addPending(result.heroKey)
+      showToast(`🏙 You heard of ${result.heroName} in ${node.cityName}. They will answer your next call.`)
+    }
+  } else {
+    dungeonStore.openNode(id)
+  }
 }
 
 function claimNode(instanceId) {
@@ -160,6 +257,11 @@ function claimNode(instanceId) {
   if (result) {
     showToast(`${result.itemName} received: ${result.line.label}`)
   }
+}
+
+function claimTavern() {
+  const result = dungeonStore.claimTavern()
+  if (result) showToast(`Fragment discovered: "${result.frag.title}"`)
 }
 
 function showToast(msg) {
@@ -171,9 +273,10 @@ function showToast(msg) {
 
 <style scoped>
 .dungeon-wrap {
-  max-width: 860px;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px 60px;
+  padding: 0 24px 60px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -244,8 +347,8 @@ function showToast(msg) {
 
 .dungeon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
 .empty-hint { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
@@ -289,6 +392,62 @@ function showToast(msg) {
   padding: 6px 16px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
 }
 .modal-cancel:hover { color: #ff6b6b; border-color: #ff6b6b66; }
+
+/* Tavern modal */
+.tavern-modal { border-color: #4a3208; }
+.tavern-scene {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  line-height: 1.6;
+}
+.fragment-reveal {
+  display: flex; flex-direction: column; gap: 8px;
+  background: #0a0804; border: 1px solid #3a2c0a;
+  border-radius: 8px; padding: 16px;
+}
+.fragment-title {
+  font-family: var(--font-head);
+  font-size: 0.95rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+.fragment-hero {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+.fragment-hero em { color: #c9a227; font-style: normal; }
+.fragment-excerpt {
+  font-size: 0.72rem;
+  color: #aaa;
+  line-height: 1.65;
+  border-left: 2px solid #3a2c0a;
+  padding-left: 10px;
+  margin-top: 4px;
+}
+.fragment-hint {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+.modal-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
+.tavern-claim-btn {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid #c9a227;
+  border-radius: 6px;
+  color: #c9a227;
+  font-family: var(--font-head);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.tavern-claim-btn:hover:not(:disabled) { background: rgba(201,162,39,0.1); box-shadow: 0 0 12px rgba(201,162,39,0.2); }
+.tavern-claim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* Toast */
 .claim-toast {

@@ -1,12 +1,13 @@
 import { GEAR_CATALOG } from './gear.js'
-import { HERO_TEMPLATES } from './heroes.js'
+import { HERO_TEMPLATES, RECRUIT_POOL } from './heroes.js'
+import { CITY_DATA, CITY_FACTIONS } from './cities.js'
 import { createItemInstance, addLineToItem, LineType } from '../Gear.js'
 import { Rarity } from '../Hero.js'
 
 const NAMES = {
-  Easy:      ['Crypt of Ash', 'Goblin Warrens', 'Rotted Cellar', 'Bandit Cave', 'Mossy Catacombs', 'The Hollow Den'],
-  Medium:    ['Ashveil Mine', 'Thornwood Depths', 'Ruins of Vel', 'The Sunken Fort', "Deserter's Hollow", 'The Old Watchtower'],
-  Hard:      ['Thornhaven Ruins', 'The Dread Spire', 'Ignar Outpost', "Warlord's Tomb", 'The Crimson Hold', 'Shattered Ramparts'],
+  Easy:      ['Crypt of Ash', 'Goblin Warrens', 'Rotted Cellar', 'Bandit Cave', 'Mossy Catacombs', 'The Hollow Den', 'The Undead Crypt', 'The Desolate Swamp'],
+  Medium:    ['Ashveil Mine', 'Thornwood Depths', 'Ruins of Vel', 'The Sunken Fort', "Deserter's Hollow", 'The Old Watchtower', 'The Forgotten Lair'],
+  Hard:      ['Thornhaven Ruins', 'The Dread Spire', 'Ignar Outpost', "Warlord's Tomb", 'The Crimson Hold', 'Shattered Ramparts', "The Vampire's Keep"],
   Nightmare: ["The Barrow King's Tomb", 'Siege of the Risen Dead', 'The Bonecrypt', 'Necropolis of Valdris', 'The Wailing Crypts', 'Citadel of the Forsaken'],
 }
 
@@ -180,10 +181,13 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
 const NIGHTMARE_CHANCE = 0.12
 const FORGE_CHANCE     = 0.01   // slot 3 only
 const BLESSED_CHANCE   = 0.01   // slot 3 only
+const TAVERN_CHANCE    = 0.08   // slot 3 only
+const CITY_CHANCE      = 0.06   // slot 3 only
 
 const NODE_NAMES = {
   forge:   ['Ancient Forge', 'The Ironbound Hearth', "Runesmith's Anvil", 'The Ember Forge', 'Ashen Smithy'],
   blessed: ['Well of Elune', 'Sacred Grove', 'Shrine of the Fallen', 'The Moonlit Pool', 'Hallowed Spring'],
+  tavern:  ["The Wanderer's Rest", 'The Rusty Flagon', 'The Crow & Crown', 'The Saltstone Inn', 'The Broken Compass', 'The Muddy Boot', "The Dead Man's Lantern"],
 }
 
 // Stat pools per node type
@@ -203,11 +207,31 @@ export function rollNodeLine(nodeType) {
   return { type: LineType.DISCOVERY, label, bonus: { [statKey]: val }, source: nodeType, earnedAt: Date.now() }
 }
 
+function pickCityHero(faction) {
+  const eligible = RECRUIT_POOL.filter(e => {
+    if (!['Rare', 'Epic', 'Legendary'].includes(e.rarity)) return false
+    const hero = HERO_TEMPLATES[e.key]?.()
+    return hero && hero.faction === faction && !hero.isPlayer
+  })
+  if (!eligible.length) return null
+  return eligible[Math.floor(Math.random() * eligible.length)]
+}
+
 function rollSlot3() {
   const r = Math.random()
-  if (r < FORGE_CHANCE)                          return { nodeType: 'forge' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE)         return { nodeType: 'blessed' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + NIGHTMARE_CHANCE) return { dungeon: 'Nightmare' }
+  if (r < FORGE_CHANCE)                                                                          return { nodeType: 'forge' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE)                                                        return { nodeType: 'blessed' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE)                                        return { nodeType: 'tavern' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + CITY_CHANCE) {
+    const faction  = CITY_FACTIONS[Math.floor(Math.random() * CITY_FACTIONS.length)]
+    const cityInfo = CITY_DATA[faction]
+    const cityName = cityInfo.cityNames[Math.floor(Math.random() * cityInfo.cityNames.length)]
+    const heroEntry = pickCityHero(faction)
+    if (!heroEntry) return { dungeon: 'Hard' }
+    const hero = HERO_TEMPLATES[heroEntry.key]()
+    return { nodeType: 'city', faction, cityName, heroKey: heroEntry.key, heroName: hero.name, heroRarity: heroEntry.rarity }
+  }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + CITY_CHANCE + NIGHTMARE_CHANCE)      return { dungeon: 'Nightmare' }
   return { dungeon: 'Hard' }
 }
 
@@ -216,6 +240,21 @@ export function generateDungeonOptions() {
 
   return ['Easy', 'Medium', 'Hard'].map((tier, i) => {
     if (i === 2 && slot3.nodeType) {
+      if (slot3.nodeType === 'city') {
+        return {
+          id:         uid(),
+          name:       slot3.cityName,
+          nodeType:   'city',
+          isNode:     true,
+          isDungeon:  false,
+          pinned:     false,
+          faction:    slot3.faction,
+          cityName:   slot3.cityName,
+          heroKey:    slot3.heroKey,
+          heroName:   slot3.heroName,
+          heroRarity: slot3.heroRarity,
+        }
+      }
       // Slot 3 is a discovery node
       return {
         id: uid(),

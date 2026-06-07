@@ -6,6 +6,7 @@ import { useCurrencyStore } from './useCurrencyStore.js'
 import { useCollectionStore } from './useCollectionStore.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
 import { useBondStore } from './useBondStore.js'
+import { useCityStore } from './useCityStore.js'
 import { BONDS } from '../game/data/bonds.js'
 
 // ── Portal definitions ──────────────────────────────────────────────────────
@@ -65,6 +66,7 @@ export const useSummonStore = defineStore('summon', () => {
   const collection  = useCollectionStore()
   const playerHero  = usePlayerHeroStore()
   const bondStore   = useBondStore()
+  const cityStore   = useCityStore()
 
   // Per-portal pity counters (pulls since last pity-threshold hit)
   const pityCounters = ref({ normal: 0 })
@@ -115,14 +117,22 @@ export const useSummonStore = defineStore('summon', () => {
       if (portal.cost.gold)     currency.spendGold(portal.cost.gold)
       if (portal.cost.diamonds) currency.spendDiamonds(portal.cost.diamonds)
 
-      // Pity check
-      const counter = pityCounters.value[portalId]
-      const triggerPity = counter >= portal.pity.every - 1
-      const guarantee   = triggerPity ? portal.pity.threshold : null
-
-      // Roll rarity then hero — capped at player's current recruitment ceiling
-      const rarity = rollRarity(portal.rates, guarantee, playerHero.rarity)
-      const entry  = pickFromPool(portal.pool, rarity)
+      // City guaranteed recruit overrides normal rarity roll
+      const cityKey = cityStore.popPending()
+      let entry, rarity, fromCity = false
+      if (cityKey && HERO_TEMPLATES[cityKey]) {
+        entry    = portal.pool.find(e => e.key === cityKey) ?? { key: cityKey, rarity: HERO_TEMPLATES[cityKey]().rarity }
+        rarity   = entry.rarity
+        fromCity = true
+      } else {
+        // Pity check
+        const counter = pityCounters.value[portalId]
+        const triggerPity = counter >= portal.pity.every - 1
+        const guarantee   = triggerPity ? portal.pity.threshold : null
+        // Roll rarity then hero — capped at player's current recruitment ceiling
+        rarity = rollRarity(portal.rates, guarantee, playerHero.rarity)
+        entry  = pickFromPool(portal.pool, rarity)
+      }
 
       if (!entry) return
 
@@ -150,6 +160,7 @@ export const useSummonStore = defineStore('summon', () => {
         rarity,
         isDuplicate,
         portal: portalId,
+        fromCity,
         compensation: isDuplicate
           ? (portal.cost.gold ? { gold: Math.floor(portal.cost.gold * 0.5) }
                               : { diamonds: Math.floor(portal.cost.diamonds * 0.25) })
@@ -173,7 +184,23 @@ export const useSummonStore = defineStore('summon', () => {
       if (portal.cost.diamonds) currency.spendDiamonds(portal.cost.diamonds * 10)
 
       const results = []
-      for (let i = 0; i < 10; i++) {
+      // Inject city recruit as first result if pending
+      const cityKey10 = cityStore.popPending()
+      if (cityKey10 && HERO_TEMPLATES[cityKey10]) {
+        const cityEntry    = portal.pool.find(e => e.key === cityKey10) ?? { key: cityKey10, rarity: HERO_TEMPLATES[cityKey10]().rarity }
+        const cityRarity   = cityEntry.rarity
+        const isDup        = collection.ownsHero(cityEntry.key)
+        collection.addToRoster(cityEntry.key)
+        if (isDup && portal.cost.gold) currency.addGold(Math.floor(portal.cost.gold * 0.5))
+        if (rarityIndex(cityRarity) >= rarityIndex(portal.pity.threshold)) pityCounters.value[portalId] = 0
+        else pityCounters.value[portalId]++
+        results.push({
+          heroKey: cityEntry.key, hero: HERO_TEMPLATES[cityEntry.key](), rarity: cityRarity,
+          isDuplicate: isDup, portal: portalId, fromCity: true,
+          compensation: isDup && portal.cost.gold ? { gold: Math.floor(portal.cost.gold * 0.5) } : null,
+        })
+      }
+      for (let i = 0; i < (cityKey10 ? 9 : 10); i++) {
         const counter     = pityCounters.value[portalId]
         const triggerPity = counter >= portal.pity.every - 1
         const guarantee   = triggerPity ? portal.pity.threshold : null

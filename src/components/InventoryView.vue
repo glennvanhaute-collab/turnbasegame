@@ -49,7 +49,6 @@
           :key="item.instanceId"
           :item="item"
           :equipped-by="inventory.getEquippedBy(item.instanceId)"
-          @equip="openEquipMenu(item)"
           @unequip="doUnequip(item)"
         />
       </div>
@@ -186,33 +185,6 @@
 
   </div>
 
-  <!-- Equip-to picker -->
-  <Teleport to="body">
-    <div class="equip-backdrop" v-if="equipTarget" @click.self="equipTarget = null">
-      <div class="equip-popover">
-        <div class="popover-title">
-          Equip <strong>{{ equipTarget.name }}</strong> to…
-        </div>
-        <div class="target-list">
-          <button
-            v-for="t in targets"
-            :key="t.heroKey + t.slot"
-            class="target-btn"
-            :class="{ occupied: !!inventory.getEquippedItem(t.heroKey, t.slot) }"
-            @click="doEquip(t.heroKey, t.slot)"
-          >
-            <span class="target-hero">{{ HERO_NAMES[t.heroKey] }}</span>
-            <span class="target-slot">{{ SLOT_LABELS[t.slot] }}</span>
-            <span class="target-current" v-if="inventory.getEquippedItem(t.heroKey, t.slot)">
-              replaces {{ inventory.getEquippedItem(t.heroKey, t.slot).name }}
-            </span>
-            <span class="target-current empty" v-else>empty</span>
-          </button>
-        </div>
-        <button class="cancel-btn" @click="equipTarget = null">Cancel</button>
-      </div>
-    </div>
-  </Teleport>
 </template>
 
 <script setup>
@@ -267,18 +239,6 @@ const filtered = computed(() =>
     return true
   })
 )
-
-const equipTarget = ref(null)
-const targets     = computed(() =>
-  equipTarget.value ? inventory.equipTargets(equipTarget.value.instanceId) : []
-)
-
-function openEquipMenu(item) { equipTarget.value = item }
-
-function doEquip(heroKey, slot) {
-  inventory.equip(heroKey, slot, equipTarget.value.instanceId)
-  equipTarget.value = null
-}
 
 function doUnequip(item) {
   const eq = inventory.getEquippedBy(item.instanceId)

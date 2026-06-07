@@ -19,8 +19,9 @@ export const useEnergyStore = defineStore('energy', () => {
     initial = Math.min(MAX_ENERGY, initial + gained)
   }
 
-  const energy    = ref(initial)
-  const maxEnergy = MAX_ENERGY
+  const energy          = ref(initial)
+  const maxEnergy       = MAX_ENERGY
+  const infiniteEnergy  = ref(false)
 
   const isFull = computed(() => energy.value >= maxEnergy)
 
@@ -31,9 +32,10 @@ export const useEnergyStore = defineStore('energy', () => {
     }))
   }
 
-  function canAfford(cost) { return energy.value >= cost }
+  function canAfford(cost) { return infiniteEnergy.value || energy.value >= cost }
 
   function spend(cost) {
+    if (infiniteEnergy.value) return
     energy.value = Math.max(0, energy.value - cost)
     persist()
   }
@@ -56,5 +58,5 @@ export const useEnergyStore = defineStore('energy', () => {
 
   persist()
 
-  return { energy, maxEnergy, isFull, canAfford, spend, add }
+  return { energy, maxEnergy, isFull, infiniteEnergy, canAfford, spend, add }
 })
