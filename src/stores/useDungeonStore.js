@@ -11,7 +11,12 @@ import { useCodexStore } from './useCodexStore.js'
 export const EXPLORE_COST = 5
 const STORAGE_KEY = 'raid-dungeons'
 
-const FORGE_DISCOVERY_CHANCE = 0.05   // 5% per explore, sequential (elven → goblin → dwarf)
+// Chance drops sharply after the first forge — specialise, don't collect
+const FORGE_DISCOVERY_CHANCE = {
+  elven:  0.05,   // first forge: 5%
+  goblin: 0.008,  // second: 0.8%
+  dwarf:  0.004,  // third: 0.4%
+}
 
 export const FORGE_DISCOVERY_DATA = {
   elven:  { name: 'Ruins of the Moonforge',       color: '#88ffcc', tier: 'Moonsilver',  desc: 'An ancient elven forge, still warm with residual magic. Moonsilver crafting is now unlocked.' },
@@ -57,7 +62,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     if (!resources.elvenForgeUnlocked)       forgeType = 'elven'
     else if (!resources.goblinForgeUnlocked) forgeType = 'goblin'
     else if (!resources.dwarfForgeUnlocked)  forgeType = 'dwarf'
-    if (!forgeType || Math.random() >= FORGE_DISCOVERY_CHANCE) return null
+    if (!forgeType || Math.random() >= FORGE_DISCOVERY_CHANCE[forgeType]) return null
     const data = FORGE_DISCOVERY_DATA[forgeType]
     return {
       id: `fd_${Date.now()}`,

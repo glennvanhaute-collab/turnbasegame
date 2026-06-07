@@ -200,12 +200,23 @@ const cityData   = computed(() => CITY_DATA[props.dungeon.faction] ?? {})
 const cityBg     = computed(() => props.dungeon.nodeType === 'city' ? pickCityBg(props.dungeon.faction, props.dungeon.id) : null)
 const forgeBg    = computed(() => props.dungeon.nodeType === 'forge_discovery' ? forgeBgUrl(props.dungeon.forgeType) : null)
 
-const NODE_BG_KEYS = { blessed: 'blessed_grove' }
+const BLESSED_BG_KEY = 'blessed_grove'
+const FORGE_NODE_BG_NAMES = {
+  'Ancient Forge':   'ancient_forge',
+  'Ashen Smithy':    'ashen_forge',
+}
 const nodeBg = computed(() => {
-  const key = NODE_BG_KEYS[props.dungeon.nodeType]
-  if (!key) return null
-  const entry = Object.entries(_dungeonBgs).find(([p]) => p.includes(`/${key}.`))
-  return entry?.[1]?.default ?? null
+  if (props.dungeon.nodeType === 'blessed') {
+    const entry = Object.entries(_dungeonBgs).find(([p]) => p.includes(`/${BLESSED_BG_KEY}.`))
+    return entry?.[1]?.default ?? null
+  }
+  if (props.dungeon.nodeType === 'forge') {
+    const bgName = FORGE_NODE_BG_NAMES[props.dungeon.name]
+    if (!bgName) return null
+    const entry = Object.entries(_dungeonBgs).find(([p]) => p.includes(`/${bgName}.`))
+    return entry?.[1]?.default ?? null
+  }
+  return null
 })
 const heroRarCol = computed(() => RARITY_COLORS[props.dungeon.heroRarity] ?? '#aaa')
 
@@ -253,7 +264,23 @@ const statPool  = computed(() => {
   text-align: center;
   align-items: center;
 }
-.node-card.node-forge          { border-color: #3a2208; background: #0d0a06; }
+.node-card.node-forge {
+  border-color: #3a2208;
+  background-color: #0d0a06;
+  background-size: cover;
+  background-position: center top;
+  overflow: hidden;
+}
+.node-card.node-forge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(13,8,2,0.30) 0%, rgba(13,8,2,0.70) 40%, rgba(13,8,2,0.88) 65%, rgba(13,8,2,0.96) 100%);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 10px;
+}
+.node-card.node-forge > * { position: relative; z-index: 1; }
 .node-card.node-blessed {
   border-color: #0a2a3a;
   background-color: #060a10;
@@ -272,6 +299,7 @@ const statPool  = computed(() => {
 }
 .node-card.node-blessed > * { position: relative; z-index: 1; }
 .node-card.node-blessed .node-desc,
+.node-card.node-forge .node-desc,
 .node-card.node-forge-discovery .node-desc {
   color: #c8c4bc;
 }
