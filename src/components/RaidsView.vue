@@ -239,6 +239,7 @@ const selected = ref(RAIDS[0] ?? null)
 .lore-section {
   padding: 20px 28px;
   border-bottom: 1px solid #1a0c06;
+  background: rgba(6, 3, 1, 0.72);
 }
 .lore-label {
   font-family: var(--font-head);
@@ -254,7 +255,7 @@ const selected = ref(RAIDS[0] ?? null)
 .phases { display: flex; flex-direction: column; gap: 16px; }
 
 .phase-block {
-  background: #0d0704;
+  background: rgba(13, 7, 4, 0.70);
   border: 1px solid #2a1208;
   border-radius: 8px;
   padding: 16px 18px;
@@ -303,6 +304,7 @@ const selected = ref(RAIDS[0] ?? null)
   padding: 28px 28px 24px;
   display: flex; flex-direction: column; gap: 12px;
   border-bottom: 1px solid #1a0c06;
+  background: rgba(6, 3, 1, 0.72);
 }
 .quote-bar {
   width: 40px; height: 2px;
@@ -322,7 +324,7 @@ const selected = ref(RAIDS[0] ?? null)
 }
 
 /* ── Enter button ───────────────────────── */
-.enter-row { padding: 20px 28px; }
+.enter-row { padding: 20px 28px; background: rgba(6, 3, 1, 0.72); }
 .btn-enter {
   background: #1a0a00;
   border: 1px solid var(--gold-dim, #7a5228);
