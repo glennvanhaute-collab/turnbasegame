@@ -181,7 +181,7 @@
         <ForgeView v-else-if="gearTab === 'forge'" />
         <RelicsView v-else />
       </div>
-      <div v-else-if="view === 'dungeon'" class="gear-view">
+      <div v-else-if="view === 'dungeon'" class="gear-view exploration-view" :style="{ '--exploration-bg': `url(${explorationBg})` }">
         <div class="gear-tabs">
           <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Exploration</button>
           <button class="gear-tab" :class="{ active: expTab === 'exploration' }" @click="expTab = 'exploration'">Inventory</button>
@@ -243,7 +243,8 @@ import CodexModal from './components/CodexModal.vue'
 import AdvisorMessage from './components/AdvisorMessage.vue'
 import DevMenu from './components/DevMenu.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
-import arsenalBg from './assets/backgrounds/arsenal.png'
+import arsenalBg     from './assets/backgrounds/arsenal.png'
+import explorationBg from './assets/backgrounds/exploration_bg.png'
 import navBg from './assets/backgrounds/bg_nav.png'
 import codexIcon from './assets/ui/codex.png'
 import closeImg from './assets/ui/close.png'
@@ -707,6 +708,23 @@ body {
   z-index: 0;
 }
 .arsenal-view > * { position: relative; z-index: 1; }
+
+.exploration-view {
+  position: relative;
+  min-height: calc(100vh - 92px);
+}
+.exploration-view::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: var(--exploration-bg);
+  background-size: cover;
+  background-position: center center;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+}
+.exploration-view > * { position: relative; z-index: 1; }
 
 .gear-tabs {
   display: flex;
