@@ -31,9 +31,9 @@
               <span class="smelt-btn-lock" v-else>No Blacksmith</span>
             </button>
           </template>
-          <!-- Standard codex-gated bars -->
+          <!-- Standard codex-gated bars — hidden if forge accessible but no ore available -->
           <button
-            v-else
+            v-else-if="resources.forgeLevel < bar.requiredForge || (resources.ores[bar.oreId] ?? 0) >= bar.oreCost"
             class="smelt-btn"
             :class="{
               active: selectedType === 'smelt' && selectedId === bar.id,
@@ -58,18 +58,25 @@
       <div class="tier-group" v-for="tier in visibleRecipeTiers" :key="tier.id">
         <div
           class="tier-header"
-          :class="{ locked: !tier.recipes.length || isTierArtisanLocked(tier.id), collapsible: tier.recipes.length > 0 }"
+          :class="{
+            locked: !tier.recipes.length || isTierArtisanLocked(tier.id) || isTierSmithingLocked(tier.id),
+            'no-stock': tier.recipes.length && !isTierArtisanLocked(tier.id) && !isTierSmithingLocked(tier.id) && tier.recipes.every(r => !canAfford(r)),
+            collapsible: tier.recipes.length > 0
+          }"
           :style="{ '--tier-color': tier.color }"
-          @click="tier.recipes.length && toggleTier(tier.id)"
+          @click="tier.recipes.length && !isTierArtisanLocked(tier.id) && !isTierSmithingLocked(tier.id) && toggleTier(tier.id)"
         >
           <span class="tier-dot" />
           <span class="tier-name">{{ tier.name }}</span>
-          <span class="tier-count" v-if="tier.recipes.length && !isTierArtisanLocked(tier.id)">{{ tier.recipes.length }}</span>
+          <span class="tier-count" v-if="tier.recipes.length && !isTierArtisanLocked(tier.id) && !isTierSmithingLocked(tier.id)">{{ tier.recipes.length }}</span>
           <span class="tier-soon" v-else>—</span>
-          <span class="tier-chevron" v-if="tier.recipes.length">{{ openTier === tier.id ? '⌄' : '›' }}</span>
+          <span class="tier-chevron" v-if="tier.recipes.length && !isTierArtisanLocked(tier.id) && !isTierSmithingLocked(tier.id)">{{ openTier === tier.id ? '⌄' : '›' }}</span>
         </div>
 
-        <div class="tier-artisan-lock" v-if="isTierArtisanLocked(tier.id)">
+        <div class="tier-smithing-lock" v-if="isTierSmithingLocked(tier.id)">
+          ⚒ Requires Blacksmithing Lv.{{ tier.smithingLevel }}
+        </div>
+        <div class="tier-artisan-lock" v-else-if="isTierArtisanLocked(tier.id)">
           ⚒ Recruit a Blacksmith to unlock
         </div>
         <template v-else-if="openTier === tier.id">
@@ -416,14 +423,15 @@
         <div class="forge-actions" v-if="selected">
           <button
             class="forge-btn"
-            :class="{ ready: canAfford(selected) && !isTierArtisanLocked(selected.tier) }"
-            :disabled="!canAfford(selected) || isTierArtisanLocked(selected.tier)"
+            :class="{ ready: canAfford(selected) && !isTierArtisanLocked(selected.tier) && !isTierSmithingLocked(selected.tier) }"
+            :disabled="!canAfford(selected) || isTierArtisanLocked(selected.tier) || isTierSmithingLocked(selected.tier)"
             @click="forge"
           >
             <span class="forge-btn-icon">⚒</span>
             Forge
           </button>
-          <span class="forge-hint" v-if="isTierArtisanLocked(selected.tier)">Requires a Blacksmith in your roster</span>
+          <span class="forge-hint" v-if="isTierSmithingLocked(selected.tier)">Requires Blacksmithing Lv.{{ selectedTier?.smithingLevel }}</span>
+          <span class="forge-hint" v-else-if="isTierArtisanLocked(selected.tier)">Requires a Blacksmith in your roster</span>
           <span class="forge-hint" v-else-if="!canAfford(selected)">Need more bars</span>
         </div>
 
@@ -667,6 +675,12 @@ function isTierArtisanLocked(tierId) {
   return isSpecialForgeUnlocked(forgeLevel) && !artisanMetForForge(forgeLevel)
 }
 
+function isTierSmithingLocked(tierId) {
+  const tier = RECIPE_TIERS.find(t => t.id === tierId)
+  if (!tier) return false
+  return resources.smithingLevel < (tier.smithingLevel ?? 1)
+}
+
 const selectedType = ref(null)   // 'smelt' | 'forge' | null
 const selectedId   = ref(null)
 const forgeResult  = ref(null)
@@ -795,6 +809,7 @@ function addToQueue()   {
 
 function forge() {
   if (!selected.value || !canAfford(selected.value)) return
+  if (isTierArtisanLocked(selected.value.tier) || isTierSmithingLocked(selected.value.tier)) return
   const recipe = selected.value
   Object.entries(recipe.barCost).forEach(([id, amt]) => resources.removeBar(id, amt))
   const instance = createItemInstance({
@@ -954,6 +969,11 @@ function forgeFullSet(tier) {
   font-size: 0.58rem; color: #664444; font-style: italic;
   padding: 5px 8px 3px; letter-spacing: 0.3px;
 }
+.tier-smithing-lock {
+  font-size: 0.58rem; color: #7a5828; font-style: italic;
+  padding: 5px 8px 3px; letter-spacing: 0.3px;
+}
+.tier-header.no-stock { opacity: 0.42; filter: saturate(0.25); }
 
 .craft-set-btn {
   width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -1305,13 +1325,13 @@ function forgeFullSet(tier) {
 .sco-right { flex-direction: row-reverse; }
 .sco-info { display: flex; flex-direction: column; gap: 2px; }
 .sco-info-right { text-align: right; }
-.sco-name { font-size: 0.78rem; font-weight: 700; color: rgba(255,230,180,0.95); font-family: var(--font-head); letter-spacing: 0.5px; }
-.sco-stock { font-size: 0.6rem; color: rgba(180,150,100,0.7); text-transform: uppercase; letter-spacing: 1px; }
+.sco-name { font-size: 0.9rem; font-weight: 700; color: rgba(255,230,180,0.95); font-family: var(--font-head); letter-spacing: 0.5px; }
+.sco-stock { font-size: 0.68rem; color: rgba(180,150,100,0.7); text-transform: uppercase; letter-spacing: 1px; }
 .sco-none { color: #884444 !important; }
 .sco-middle { display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; }
-.sco-cost-label { font-family: var(--font-head); font-size: 0.65rem; font-weight: 700; color: rgba(255,200,100,0.6); letter-spacing: 1px; }
-.sco-arrow { font-size: 1.4rem; color: rgba(255,200,100,0.35); line-height: 1; }
-.sco-yield { font-family: var(--font-head); font-size: 0.6rem; color: rgba(180,150,100,0.55); letter-spacing: 1px; }
+.sco-cost-label { font-family: var(--font-head); font-size: 0.75rem; font-weight: 700; color: rgba(255,200,100,0.6); letter-spacing: 1px; }
+.sco-arrow { font-size: 1.6rem; color: rgba(255,200,100,0.35); line-height: 1; }
+.sco-yield { font-family: var(--font-head); font-size: 0.68rem; color: rgba(180,150,100,0.55); letter-spacing: 1px; }
 
 /* Idle: qty row + start */
 .smelt-qty-row { display: flex; align-items: center; gap: 4px; }
@@ -1360,13 +1380,13 @@ function forgeFullSet(tier) {
 
 /* Running: progress */
 .smelt-running { gap: 8px; }
-.smelt-run-header { display: flex; align-items: baseline; gap: 10px; width: 100%; max-width: 360px; }
-.srh-title { flex: 1; font-family: var(--font-head); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
-.srh-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--gold); }
-.srp-wrap { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 360px; }
-.srp-track { flex: 1; height: 8px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; border: 1px solid var(--border-brown); }
-.srp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 4px; transition: width 0.8s linear; }
-.srp-eta { font-family: var(--font-head); font-size: 0.68rem; color: rgba(255,200,100,0.7); flex-shrink: 0; min-width: 50px; text-align: right; }
+.smelt-run-header { display: flex; align-items: baseline; gap: 10px; width: 100%; max-width: 400px; }
+.srh-title { flex: 1; font-family: var(--font-head); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+.srh-count { font-family: var(--font-head); font-size: 1rem; font-weight: 800; color: var(--gold); }
+.srp-wrap { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 400px; }
+.srp-track { flex: 1; height: 12px; background: rgba(255,255,255,0.07); border-radius: 6px; overflow: hidden; border: 1px solid var(--border-brown); }
+.srp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 6px; transition: width 0.8s linear; }
+.srp-eta { font-family: var(--font-head); font-size: 0.78rem; color: rgba(255,200,100,0.85); flex-shrink: 0; min-width: 54px; text-align: right; }
 .smelt-queue-btn { padding: 9px 32px; font-size: 0.78rem; }
 
 .smelt-cancel-btn {
@@ -1414,26 +1434,26 @@ function forgeFullSet(tier) {
 .forge-smith-bar {
   width: 100%; max-width: 440px; position: relative;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  padding: 10px 14px; border-radius: 8px;
+  padding: 12px 16px; border-radius: 8px;
   border: 1px solid rgba(201,162,39,0.18);
   background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
   margin-top: auto;
 }
 .fsb-label {
-  font-family: var(--font-head); font-size: 0.6rem; text-transform: uppercase;
+  font-family: var(--font-head); font-size: 0.65rem; text-transform: uppercase;
   letter-spacing: 2px; color: var(--text-muted); font-weight: 700; flex-shrink: 0;
 }
 .fsb-hero { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; flex-wrap: wrap; }
-.fsb-name { font-size: 0.72rem; font-weight: 700; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fsb-skill { font-size: 0.6rem; color: #cd7f32; font-family: var(--font-head); font-weight: 700; white-space: nowrap; }
+.fsb-name { font-size: 0.8rem; font-weight: 700; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fsb-skill { font-size: 0.68rem; color: #cd7f32; font-family: var(--font-head); font-weight: 700; white-space: nowrap; }
 .fsb-xp-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.fsb-xp-track { width: 72px; height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-.fsb-xp-fill  { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 2px; transition: width 0.4s ease; }
-.fsb-xp-text  { font-size: 0.56rem; color: var(--text-dim); white-space: nowrap; }
+.fsb-xp-track { width: 80px; height: 6px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.fsb-xp-fill  { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 3px; transition: width 0.4s ease; }
+.fsb-xp-text  { font-size: 0.62rem; color: var(--text-dim); white-space: nowrap; }
 .fsb-bonus {
-  font-family: var(--font-head); font-size: 0.65rem; font-weight: 800;
+  font-family: var(--font-head); font-size: 0.72rem; font-weight: 800;
   color: #4dff88; background: rgba(77,255,136,0.08); border: 1px solid rgba(77,255,136,0.2);
-  border-radius: 6px; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;
+  border-radius: 6px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0;
 }
 .fsb-remove {
   width: 22px; height: 22px; border-radius: 50%; border: 1px solid #5a2020;
@@ -1473,13 +1493,13 @@ function forgeFullSet(tier) {
 .fsb-drop-leave-to     { opacity: 0; }
 
 /* Smithing XP bar */
-.smith-xp-bar { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 6px; }
+.smith-xp-bar { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 7px; }
 .smith-xp-header { display: flex; align-items: baseline; gap: 8px; }
-.smith-xp-label { font-family: var(--font-head); font-size: 0.62rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; flex: 1; }
-.smith-xp-level { font-family: var(--font-head); font-size: 0.75rem; font-weight: 800; color: #ffd700; }
-.smith-xp-count { font-size: 0.6rem; color: var(--text-muted); }
-.smith-xp-track { height: 6px; background: #1a0e04; border-radius: 3px; overflow: hidden; border: 1px solid var(--border-brown); }
-.smith-xp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 3px; transition: width 0.6s ease; }
+.smith-xp-label { font-family: var(--font-head); font-size: 0.7rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1.5px; flex: 1; }
+.smith-xp-level { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: #ffd700; }
+.smith-xp-count { font-size: 0.68rem; color: var(--text-muted); }
+.smith-xp-track { height: 8px; background: #1a0e04; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-brown); }
+.smith-xp-fill { height: 100%; background: linear-gradient(to right, #cd7f32, #ffd700); border-radius: 4px; transition: width 0.6s ease; }
 
 /* ── Right: Stockpile ────────────────────────────────────────────── */
 .ore-panel {

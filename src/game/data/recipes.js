@@ -445,12 +445,12 @@ export const RECIPES = [
 
 // Tier metadata — controls left-panel grouping and appearance
 export const RECIPE_TIERS = [
-  { id: 'copper',     name: 'Copper',     color: ORES.copper.color,       recipes: RECIPES.filter(r => r.tier === 'copper')     },
-  { id: 'tin',        name: 'Tin',        color: ORES.tin.color,          recipes: RECIPES.filter(r => r.tier === 'tin')        },
-  { id: 'steel',      name: 'Steel',      color: ORES.steel.color,        recipes: RECIPES.filter(r => r.tier === 'steel')      },
-  { id: 'darksteel',  name: 'Darksteel',  color: ORES.darksteel.color,    recipes: RECIPES.filter(r => r.tier === 'darksteel')  },
-  { id: 'mithril',    name: 'Mithril',    color: ORES.mithril.color,      recipes: RECIPES.filter(r => r.tier === 'mithril')    },
-  { id: 'moonsilver', name: 'Moonsilver', color: BARS.moonsilver.color,   recipes: RECIPES.filter(r => r.tier === 'moonsilver') },
+  { id: 'copper',     name: 'Copper',     color: ORES.copper.color,       smithingLevel: 1,  recipes: RECIPES.filter(r => r.tier === 'copper')     },
+  { id: 'tin',        name: 'Tin',        color: ORES.tin.color,          smithingLevel: 3,  recipes: RECIPES.filter(r => r.tier === 'tin')        },
+  { id: 'steel',      name: 'Steel',      color: ORES.steel.color,        smithingLevel: 6,  recipes: RECIPES.filter(r => r.tier === 'steel')      },
+  { id: 'darksteel',  name: 'Darksteel',  color: ORES.darksteel.color,    smithingLevel: 10, recipes: RECIPES.filter(r => r.tier === 'darksteel')  },
+  { id: 'mithril',    name: 'Mithril',    color: ORES.mithril.color,      smithingLevel: 15, recipes: RECIPES.filter(r => r.tier === 'mithril')    },
+  { id: 'moonsilver', name: 'Moonsilver', color: BARS.moonsilver.color,   smithingLevel: 15, recipes: RECIPES.filter(r => r.tier === 'moonsilver') },
 ]
 
 // Slot display helpers
