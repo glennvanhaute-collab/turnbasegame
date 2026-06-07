@@ -2,93 +2,126 @@
   <div class="creation-wrap">
 
     <div class="creation-card">
+
+      <!-- Logo + title -->
       <div class="creation-top">
         <img :src="logoNav" class="creation-logo" alt="" />
-        <h1 class="creation-title">Welcome to Bannerlords of Westrun</h1>
+        <h1 class="creation-title">Bannerlords of Westrun</h1>
         <p class="creation-legend">Your Legend Begins</p>
-        <p class="creation-subtitle">You are a hedgeknight — a warrior without a banner, without a keep. Recruit a team, forge your name, and make yourself known across the realm.</p>
       </div>
 
-      <!-- Name input -->
-      <div class="field-group">
-        <label class="field-label">Your name</label>
-        <input
-          v-model="heroName"
-          class="name-input"
-          type="text"
-          placeholder="Enter your name…"
-          maxlength="24"
-          @keydown.enter="tryBegin"
-          autofocus
-        />
+      <!-- Step progress -->
+      <div class="step-track">
+        <template v-for="s in 3" :key="s">
+          <div class="step-pip" :class="{ active: step === s, done: step > s }">
+            {{ step > s ? '✓' : s }}
+          </div>
+          <div v-if="s < 3" class="step-line" :class="{ done: step > s }" />
+        </template>
       </div>
 
-      <!-- Avatar selection -->
-      <div class="field-group">
-        <label class="field-label">Choose your portrait</label>
-        <div class="avatar-grid">
-          <button
-            v-for="av in AVATAR_OPTIONS"
-            :key="av.id"
-            class="avatar-option"
-            :class="{ selected: selectedAvatar === av.id }"
-            @click="selectedAvatar = av.id"
-          >
-            <img :src="av.src" class="avatar-option-img" alt="" />
-            <div v-if="selectedAvatar === av.id" class="avatar-check">✓</div>
+      <!-- Step content -->
+      <transition name="step-slide" mode="out-in">
+
+        <!-- Step 1 — Name -->
+        <div v-if="step === 1" key="s1" class="step-block">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 1 of 3</div>
+            <div class="step-heading">Who are you?</div>
+            <p class="step-desc">You are a hedgeknight — a warrior without a banner, without a keep. Recruit a team, forge your name, and make yourself known across the realm.</p>
+          </div>
+          <input
+            v-model="heroName"
+            class="name-input"
+            type="text"
+            placeholder="Enter your name…"
+            maxlength="24"
+            @keydown.enter="goNext"
+            autofocus
+          />
+          <button class="primary-btn" :disabled="heroName.trim().length < 2" @click="goNext">
+            Continue →
           </button>
         </div>
-      </div>
 
-      <!-- House selection -->
-      <div class="field-group">
-        <label class="field-label">Choose your house</label>
-        <div class="house-grid">
-          <button
-            v-for="faction in playerHero.PLAYER_FACTIONS"
-            :key="faction"
-            class="house-card"
-            :class="{ selected: selectedFaction === faction }"
-            :style="selectedFaction === faction ? { borderColor: meta(faction).color, boxShadow: `0 0 18px ${meta(faction).color}33` } : {}"
-            @click="selectedFaction = faction"
-          >
-            <div class="house-banner-wrap">
-              <img :src="HOUSE_IMAGES[faction]" class="house-banner-img" alt="" />
-            </div>
-
-            <div class="house-info">
-              <div class="house-name">{{ faction }}</div>
-              <div class="house-tagline" :style="{ color: meta(faction).color }">{{ meta(faction).tagline }}</div>
-              <div class="house-flavor">{{ meta(faction).flavor }}</div>
-              <div class="house-affinity" :style="{ color: meta(faction).color }">{{ meta(faction).affinityLabel }} affinity</div>
-            </div>
-
-            <div class="house-check" v-if="selectedFaction === faction" :style="{ color: meta(faction).color }">✓</div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Starting skills preview -->
-      <div class="skills-preview" v-if="selectedFaction">
-        <div class="skills-label">Starting skills <span class="skills-note">(weak — grow stronger through adventure)</span></div>
-        <div class="skills-row">
-          <div class="skill-chip" v-for="s in STARTER_SKILLS" :key="s.name">
-            <span class="skill-chip-name">{{ s.name }}</span>
-            <span class="skill-chip-desc">{{ s.desc }}</span>
+        <!-- Step 2 — Avatar -->
+        <div v-else-if="step === 2" key="s2" class="step-block">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 2 of 3</div>
+            <div class="step-heading">Your portrait</div>
+            <p class="step-desc">Choose the face your allies and enemies will know.</p>
+          </div>
+          <div class="avatar-accordion">
+            <button
+              v-for="av in AVATAR_OPTIONS"
+              :key="av.id"
+              class="accord-item"
+              :class="{ active: selectedAvatar === av.id }"
+              @click="selectedAvatar = av.id"
+            >
+              <img :src="av.src" class="accord-img" alt="" />
+              <div v-if="selectedAvatar === av.id" class="accord-badge">✓</div>
+            </button>
+          </div>
+          <div class="nav-row">
+            <button class="ghost-btn" @click="step--">← Back</button>
+            <button class="primary-btn" :disabled="!selectedAvatar" @click="goNext">Continue →</button>
           </div>
         </div>
-      </div>
 
-      <!-- CTA -->
-      <button
-        class="begin-btn"
-        :disabled="!canBegin"
-        @click="tryBegin"
-      >
-        Enter the Realm →
-      </button>
-      <div class="begin-hint" v-if="heroName.length > 0 && !selectedFaction">Choose a house to continue</div>
-      <div class="begin-hint" v-else-if="!heroName.length">Enter your name to continue</div>
+        <!-- Step 3 — House + Artisan -->
+        <div v-else key="s3" class="step-block">
+          <div class="step-header">
+            <div class="step-eyebrow">Step 3 of 3</div>
+            <div class="step-heading">Your path</div>
+            <p class="step-desc">Choose your allegiance and the craft that will define your legacy.</p>
+          </div>
+
+          <div class="section-label">House</div>
+          <div class="house-grid">
+            <button
+              v-for="faction in playerHero.PLAYER_FACTIONS"
+              :key="faction"
+              class="house-card"
+              :class="{ selected: selectedFaction === faction }"
+              :style="selectedFaction === faction ? { borderColor: meta(faction).color, boxShadow: `0 0 14px ${meta(faction).color}33` } : {}"
+              @click="selectedFaction = faction"
+            >
+              <img :src="HOUSE_IMAGES[faction]" class="house-img" alt="" />
+              <div class="house-info">
+                <div class="house-name">{{ faction }}</div>
+                <div class="house-tagline" :style="{ color: meta(faction).color }">{{ meta(faction).tagline }}</div>
+                <div class="house-affinity" :style="{ color: meta(faction).color }">{{ meta(faction).affinityLabel }} affinity</div>
+              </div>
+              <div v-if="selectedFaction === faction" class="house-check" :style="{ color: meta(faction).color }">✓</div>
+            </button>
+          </div>
+
+          <div class="section-label">Starting Craft</div>
+          <div class="artisan-row">
+            <button
+              v-for="art in ARTISAN_OPTIONS"
+              :key="art.id"
+              class="artisan-card"
+              :class="{ selected: selectedArtisan === art.id }"
+              :style="selectedArtisan === art.id ? { borderColor: art.color, boxShadow: `0 0 14px ${art.color}33` } : {}"
+              @click="selectedArtisan = art.id"
+            >
+              <div class="artisan-accent" :style="{ background: art.color }" />
+              <div class="artisan-name">{{ art.name }}</div>
+              <div class="artisan-unlock" :style="{ color: art.color }">{{ art.unlock }}</div>
+              <div class="artisan-desc">{{ art.desc }}</div>
+              <div v-if="selectedArtisan === art.id" class="artisan-check" :style="{ color: art.color }">✓</div>
+            </button>
+          </div>
+
+          <div class="nav-row">
+            <button class="ghost-btn" @click="step--">← Back</button>
+            <button class="primary-btn flex-grow" :disabled="!canBegin" @click="tryBegin">Enter the Realm →</button>
+          </div>
+        </div>
+
+      </transition>
     </div>
 
   </div>
@@ -104,6 +137,7 @@ import houseAldricImg   from '../assets/lore/house_aldric.png'
 import houseValdrisImg  from '../assets/lore/house_valdris.png'
 import houseCaelwynImg  from '../assets/lore/house_caelwyn.png'
 import houseMordaineImg from '../assets/lore/house_mordaine.png'
+
 const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 
 const HOUSE_IMAGES = {
@@ -113,38 +147,62 @@ const HOUSE_IMAGES = {
   'House Mordaine': houseMordaineImg,
 }
 
+const ARTISAN_OPTIONS = [
+  {
+    id:     'blacksmithing',
+    name:   'Blacksmithing',
+    unlock: 'Unlocks: Forge',
+    desc:   'Assign yourself to the forge from day one. Craft plate armor and metal weapons from ore.',
+    color:  '#ff9944',
+  },
+  {
+    id:     'leatherworking',
+    name:   'Leatherworking',
+    unlock: 'Unlocks: Tannery',
+    desc:   'Head into the wild from day one. Hunt beasts and process hides into leather gear.',
+    color:  '#6bba4a',
+  },
+  {
+    id:     'tailoring',
+    name:   'Tailoring',
+    unlock: 'Unlocks: Loom',
+    desc:   'Begin weaving from day one. Craft cloth garments and enchanted robes for mages.',
+    color:  '#b44fff',
+  },
+]
+
 const emit = defineEmits(['done'])
 
 const playerHero = usePlayerHeroStore()
 const collection = useCollectionStore()
 
+const step            = ref(1)
 const heroName        = ref('')
-const selectedFaction = ref(null)
 const selectedAvatar  = ref(null)
+const selectedFaction = ref(null)
+const selectedArtisan = ref(null)
 
 const AVATAR_OPTIONS = Object.entries(_avatarModules)
-  .map(([path, mod]) => {
-    const id = path.match(/avatar_\d+/)?.[0]
-    return { id, src: mod.default }
-  })
+  .map(([path, mod]) => ({ id: path.match(/avatar_\d+/)?.[0], src: mod.default }))
   .filter(a => a.id)
   .sort((a, b) => a.id.localeCompare(b.id))
 
-const meta = (faction) => playerHero.HOUSE_META[faction] ?? {}
-
-const STARTER_SKILLS = [
-  { name: 'Crude Swing',  desc: '100% ATK — no cooldown' },
-  { name: 'Fortify',      desc: '+15% DEF for 2 turns — CD 4' },
-  { name: 'Patch Up',     desc: 'Heal 7% HP — CD 4' },
-]
-
+const meta     = (faction) => playerHero.HOUSE_META[faction] ?? {}
 const canBegin = computed(() =>
-  heroName.value.trim().length >= 2 && selectedFaction.value !== null && selectedAvatar.value !== null
+  heroName.value.trim().length >= 2 &&
+  selectedAvatar.value !== null &&
+  selectedFaction.value !== null &&
+  selectedArtisan.value !== null
 )
+
+function goNext() {
+  if (step.value === 1 && heroName.value.trim().length >= 2) { step.value = 2; return }
+  if (step.value === 2 && selectedAvatar.value)               { step.value = 3; return }
+}
 
 function tryBegin() {
   if (!canBegin.value) return
-  playerHero.create(heroName.value, selectedFaction.value, selectedAvatar.value)
+  playerHero.create(heroName.value, selectedFaction.value, selectedAvatar.value, selectedArtisan.value)
   collection.addPlayerCharacter()
   emit('done')
 }
@@ -154,16 +212,16 @@ function tryBegin() {
 .creation-wrap {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 16px 20px;
+  padding: 40px 20px 60px;
   background: v-bind("'url(' + startupBg + ')'") center / cover no-repeat fixed;
 }
 .creation-wrap::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: rgba(4, 2, 1, 0.72);
+  background: rgba(4, 2, 1, 0.74);
   pointer-events: none;
   z-index: 0;
 }
@@ -173,202 +231,253 @@ function tryBegin() {
   width: min(760px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
+/* ── Header ── */
 .creation-top { text-align: center; }
 .creation-logo {
-  height: 72px;
-  width: auto;
-  display: block;
-  margin: 0 auto 10px;
+  height: 72px; width: auto;
+  display: block; margin: 0 auto 10px;
   filter: drop-shadow(0 4px 16px rgba(0,0,0,0.9));
 }
 .creation-title {
   font-family: var(--font-head);
-  font-size: 1.5rem;
-  color: var(--gold);
-  font-weight: 700;
-  letter-spacing: 3px;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--gold); letter-spacing: 3px;
   text-transform: uppercase;
   text-shadow: 0 2px 18px rgba(0,0,0,0.9), 0 0 32px rgba(201,162,39,0.5);
   margin-bottom: 4px;
 }
 .creation-legend {
   font-family: var(--font-head);
-  font-size: 0.75rem;
-  color: var(--text-parchment);
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
-  margin-bottom: 6px;
-  opacity: 0.8;
-}
-.creation-subtitle {
-  font-size: 0.82rem;
-  color: #b09070;
-  line-height: 1.55;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.95);
-  max-width: 480px;
-  margin: 0 auto;
+  font-size: 0.75rem; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--text-parchment);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9); opacity: 0.8;
 }
 
-/* Field groups */
-.field-group { display: flex; flex-direction: column; gap: 10px; }
-.field-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); font-weight: 600; }
+/* ── Step progress ── */
+.step-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-pip {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid #3a1c0a;
+  background: #0d0806;
+  color: #3a1c0a;
+  font-family: var(--font-head);
+  font-size: 0.65rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.3s, background 0.3s, color 0.3s;
+  flex-shrink: 0;
+}
+.step-pip.active { border-color: var(--gold); color: var(--gold); background: rgba(201,162,39,0.1); }
+.step-pip.done   { border-color: #5c3a14; color: #5c3a14; background: #1a0c06; }
+.step-line {
+  width: 60px; height: 2px;
+  background: #2a1208;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+.step-line.done { background: #5c3a14; }
 
+/* ── Step blocks ── */
+.step-block {
+  background: rgba(10, 5, 2, 0.90);
+  border: 1px solid #2a1208;
+  border-radius: 12px;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.step-eyebrow {
+  font-size: 0.58rem;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--text-muted);
+  font-family: var(--font-head);
+  margin-bottom: 2px;
+}
+.step-heading {
+  font-family: var(--font-head);
+  font-size: 1.15rem; font-weight: 800;
+  color: var(--gold); letter-spacing: 1px;
+}
+.step-desc {
+  font-size: 0.78rem;
+  color: #b09070; line-height: 1.55;
+}
+
+/* ── Name input ── */
 .name-input {
   border: 1px solid var(--border-gold);
   border-radius: 8px;
   color: var(--text-parchment);
-  font-size: 1rem;
-  font-family: var(--font-head);
-  letter-spacing: 1px;
-  padding: 10px 16px;
-  outline: none;
+  font-size: 1rem; font-family: var(--font-head); letter-spacing: 1px;
+  padding: 10px 16px; outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: #120805;
-  width: 100%;
+  background: #120805; width: 100%; box-sizing: border-box;
 }
 .name-input:focus { border-color: var(--gold); box-shadow: 0 0 12px rgba(201,162,39,0.2); }
 .name-input::placeholder { color: #3a2a18; }
 
-/* Avatar picker */
-.avatar-grid {
+/* ── Avatar accordion ── */
+.avatar-accordion {
   display: flex;
-  gap: 12px;
-  justify-content: center;
+  gap: 8px;
+  height: 260px;
+  align-items: stretch;
 }
-.avatar-option {
-  position: relative;
-  background: none;
-  border: 2px solid var(--border-brown);
-  border-radius: 50%;
-  padding: 0;
+.accord-item {
+  flex: 0 0 58px;
+  transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s, box-shadow 0.2s;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #2a1208;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
-  overflow: visible;
+  position: relative;
+  padding: 0;
+  background: none;
 }
-.avatar-option:hover { border-color: #5c3a14; }
-.avatar-option.selected {
+.accord-item:hover { border-color: #5c3a14; }
+.accord-item.active {
+  flex: 1 1 auto;
   border-color: var(--gold);
-  box-shadow: 0 0 18px rgba(201,162,39,0.45);
+  box-shadow: 0 0 22px rgba(201, 162, 39, 0.35);
 }
-.avatar-option-img {
+.accord-img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center top;
   display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center top;
 }
-.avatar-check {
+.accord-badge {
   position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 22px;
-  height: 22px;
+  bottom: 8px; right: 8px;
+  width: 22px; height: 22px;
   border-radius: 50%;
-  background: var(--gold);
-  color: #0a0500;
-  font-size: 0.65rem;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  background: var(--gold); color: #0a0500;
+  font-size: 0.65rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
 }
 
-/* House grid */
+/* ── Nav row ── */
+.nav-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ── Buttons ── */
+.primary-btn {
+  padding: 10px 28px;
+  background: var(--gold); color: #0a0500;
+  font-family: var(--font-head);
+  font-size: 0.82rem; font-weight: 900;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border: none; border-radius: 8px; cursor: pointer;
+  transition: opacity 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.primary-btn.flex-grow { flex: 1; }
+.primary-btn:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 0 16px rgba(201,162,39,0.3); }
+.primary-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+.ghost-btn {
+  padding: 10px 20px;
+  background: none; color: #5c3a14;
+  font-family: var(--font-head);
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 1px;
+  border: 1px solid #2a1208; border-radius: 8px; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.ghost-btn:hover { color: #8c5a24; border-color: #5c3a14; }
+
+/* ── Section labels ── */
+.section-label {
+  font-size: 0.6rem;
+  text-transform: uppercase; letter-spacing: 2px;
+  color: var(--text-muted);
+  font-family: var(--font-head); font-weight: 700;
+  margin-bottom: -6px;
+}
+
+/* ── House grid ── */
 .house-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
-
 .house-card {
   background: #0e0804;
   border: 1px solid var(--border-brown);
   border-radius: 10px;
   padding: 10px 12px;
   cursor: pointer;
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  text-align: left;
+  display: flex; gap: 10px; align-items: flex-start;
+  text-align: left; position: relative;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-  position: relative;
 }
 .house-card:hover { background: #140a05; border-color: #5c3a14; }
 .house-card.selected { background: #120906; }
-
-/* House banner image */
-.house-banner-wrap { flex-shrink: 0; }
-.house-banner-img {
-  width: 52px;
-  height: auto;
-  display: block;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.8));
+.house-img {
+  width: 44px; height: auto;
+  display: block; object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+  flex-shrink: 0;
 }
-
 .house-info { flex: 1; min-width: 0; }
-.house-name    { font-family: var(--font-head); font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
-.house-tagline { font-size: 0.65rem; font-weight: 700; margin-bottom: 4px; }
-.house-flavor  { font-size: 0.62rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px; }
-.house-affinity { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+.house-name     { font-family: var(--font-head); font-size: 0.75rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.house-tagline  { font-size: 0.62rem; font-weight: 700; margin-bottom: 3px; }
+.house-affinity { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+.house-check    { position: absolute; top: 10px; right: 12px; font-size: 0.85rem; font-weight: 900; }
 
-.house-check {
-  position: absolute;
-  top: 10px; right: 12px;
-  font-size: 0.9rem;
-  font-weight: 900;
+/* ── Artisan row ── */
+.artisan-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
-
-/* Starter skills preview */
-.skills-preview { background: #0a0503; border: 1px solid #2a1508; border-radius: 8px; padding: 12px 14px; }
-.skills-label   { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.skills-note    { text-transform: none; font-style: italic; letter-spacing: 0; color: #3a2a18; }
-.skills-row     { display: flex; gap: 8px; flex-wrap: wrap; }
-.skill-chip {
-  background: #140a04;
-  border: 1px solid #3a1c0a;
-  border-radius: 6px;
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 140px;
-}
-.skill-chip-name { font-size: 0.72rem; font-weight: 700; color: #ccc; }
-.skill-chip-desc { font-size: 0.62rem; color: #555; }
-
-/* CTA */
-.begin-btn {
-  padding: 12px 32px;
-  background: var(--gold);
-  color: #0a0500;
-  font-family: var(--font-head);
-  font-size: 0.9rem;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  border: none;
-  border-radius: 8px;
+.artisan-card {
+  background: #0e0804;
+  border: 1px solid #2a1208;
+  border-radius: 10px;
+  padding: 14px 14px 12px;
   cursor: pointer;
-  transition: opacity 0.15s, box-shadow 0.15s;
-  width: 100%;
+  display: flex; flex-direction: column; gap: 5px;
+  text-align: left; position: relative;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  overflow: hidden;
 }
-.begin-btn:hover:not(:disabled) { opacity: 0.9; box-shadow: 0 0 20px rgba(201,162,39,0.3); }
-.begin-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-.begin-hint { text-align: center; font-size: 0.7rem; color: #3a2a18; font-style: italic; margin-top: -16px; }
+.artisan-card:hover { background: #140a05; }
+.artisan-card.selected { background: #120906; }
+.artisan-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 10px 10px 0 0;
+}
+.artisan-name   { font-family: var(--font-head); font-size: 0.78rem; font-weight: 800; color: #fff; margin-top: 4px; }
+.artisan-unlock { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.artisan-desc   { font-size: 0.62rem; color: var(--text-muted); line-height: 1.45; }
+.artisan-check  { position: absolute; top: 10px; right: 10px; font-size: 0.8rem; font-weight: 900; }
 
-/* Responsive */
+/* ── Step transition ── */
+.step-slide-enter-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.step-slide-leave-active { transition: opacity 0.15s ease; }
+.step-slide-enter-from   { opacity: 0; transform: translateY(8px); }
+.step-slide-leave-to     { opacity: 0; }
+
+/* ── Responsive ── */
 @media (max-width: 520px) {
-  .house-grid { grid-template-columns: 1fr; }
+  .house-grid   { grid-template-columns: 1fr; }
+  .artisan-row  { grid-template-columns: 1fr; }
+  .step-block   { padding: 20px 18px; }
+  .avatar-accordion { height: 200px; }
+  .accord-item  { flex-basis: 44px; }
 }
 </style>

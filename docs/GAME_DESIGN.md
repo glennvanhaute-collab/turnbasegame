@@ -108,9 +108,9 @@ Examples:
 
 **Placement is permanent and immediate.** When you find a shrine blessing, you decide which item receives it — right now. No removing it later. The item remembers.
 
-**Exception — Herbalism bottling:** A hero with the Herbalism artisan skill can craft special bottles (via the herbalism recipe system). A bottled blessing can be stored and applied later. This costs crafting resources and time. It rewards players who invested in a herbalist without punishing those who didn't — they just have to decide in the moment, which has its own drama.
+**Exception — Apothecary bottling:** A hero with the Apothecary artisan skill can craft special bottles (via the apothecary recipe system). A bottled blessing can be stored and applied later. This costs crafting resources and time. It rewards players who invested in an apothecary without punishing those who didn't — they just have to decide in the moment, which has its own drama.
 
-This is the **first mechanical activation of artisan skills** in camp. The herbalist isn't flavour — they change how you interact with the world.
+This is the **first mechanical activation of artisan skills** in camp. The apothecary isn't flavour — they change how you interact with the world.
 
 ### No cap on additives
 There is no limit to how many blessings, runes, or deeds an item can accumulate. Stacking enough of them is what triggers the rarity upgrade to Mythical — the world's contribution, not the artisan's.
@@ -231,10 +231,10 @@ Heroes carry `artisanSkills` — currently assigned but not yet mechanically act
 | Artisan Skill | Camp Role |
 |---|---|
 | Blacksmithing | Forge capability, recipe access, smithing speed |
-| Apothecary | Potion crafting, healing consumables |
-| Herbalism | Resource gathering, rare ingredient discovery |
 | Leatherworking | Leather gear, light armour recipes |
 | Tailoring | Cloth gear, robes, mage equipment |
+| Runesmithing | Rune inscription on weapons — buffs, elemental effects, special procs |
+| Apothecary | Potion crafting, healing consumables, bottled blessings |
 
 **The design intent:** having Ser Roland (blacksmithing) in your camp means your forge works better or unlocks things it otherwise can't do. The *who* in your roster matters outside of battle. Roster as camp infrastructure, not just battle team — consistent with the hedge knight camp-building premise.
 
@@ -245,6 +245,41 @@ A system for building standing with factions, settlements, or artisan guilds in 
 - Gate certain exploration events or story beats
 
 *This connects to the DLC lore-recruitment vision — reputation as another form of lore investment.*
+
+---
+
+## Character Creation
+
+New players create their hedge knight through a 3-step wizard before entering the realm.
+
+### Step 1 — Name
+Player enters a name (2–24 characters). No restrictions beyond length.
+
+### Step 2 — Portrait
+Horizontal accordion of portrait images (`avatar_01.png`, `avatar_02.png`, …). Each strip expands into the selected portrait when clicked. Avatar is stored as `heroAvatar` on the player hero store.
+
+### Step 3 — House + Starting Craft
+
+**House** (4 options, same as before):
+
+| House | Affinity | Tagline |
+|---|---|---|
+| House Aldric | Force | Warriors of the Iron Gate |
+| House Valdris | Magic | Scholars of the Arcane Tower |
+| House Caelwyn | Spirit | Wardens of the Ancient Grove |
+| House Mordaine | Void | Shadowblades of the Dark Spire |
+
+**Starting Craft** — the player chooses one artisan discipline. This auto-assigns them to the matching camp role from day one:
+
+| Discipline | Unlocks | What it does |
+|---|---|---|
+| Blacksmithing | Forge | Player is assigned as forge smith — craft plate armor and metal weapons immediately |
+| Leatherworking | Tannery | Player is assigned as tanner — hunt beasts and process hides into leather gear |
+| Tailoring | Loom | Player is assigned as tailor — weave cloth garments and enchanted robes |
+
+Runesmithing and Apothecary are future disciplines — not offered at creation yet.
+
+*Implementation: `heroArtisanSkill` stored on `usePlayerHeroStore`. On `create()`, the matching `useArtisanStore` assignment is called automatically with `'player_character'`.*
 
 ---
 
@@ -485,7 +520,7 @@ const SHEET_URLS = { 1: sheet1Url, 2: sheet2Url, N: sheetNUrl }
 | Edwyn advisor + typewriter effect | ✅ Complete |
 | Sell resources for gold | ❌ Do not build until rewards are balanced |
 | Exploration additive system (runes/shrines/blessings) | ❌ Designed, not yet built |
-| Herbalism bottling of blessings | ❌ Depends on exploration additives |
+| Apothecary bottling of blessings | ❌ Depends on exploration additives |
 | Additive rarity threshold (world route to Mythical) | ❌ Depends on exploration additives |
 | Armor type system (ArmorType, WEAPON_ARMOR_TYPE on all recipes) | ✅ Complete |
 | Set bonus data (plate/leather/cloth, 2/4/6 thresholds) | ✅ Complete |

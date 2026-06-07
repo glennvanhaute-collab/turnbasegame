@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { Hero, Rarity, Faction, Affinity } from '../game/Hero.js'
 import { SKILLS } from '../game/data/skills.js'
+import { useArtisanStore } from './useArtisanStore.js'
 
 const STORAGE_KEY = 'player-hero'
 
@@ -88,11 +89,12 @@ function loadSaved() {
 export const usePlayerHeroStore = defineStore('player-hero', () => {
   const saved = loadSaved()
 
-  const heroName    = ref(saved?.heroName    ?? null)
-  const heroFaction = ref(saved?.heroFaction ?? null)
-  const heroAvatar  = ref(saved?.heroAvatar  ?? null)
-  const level       = ref(saved?.level       ?? 1)
-  const xp          = ref(saved?.xp          ?? 0)
+  const heroName         = ref(saved?.heroName         ?? null)
+  const heroFaction      = ref(saved?.heroFaction      ?? null)
+  const heroAvatar       = ref(saved?.heroAvatar       ?? null)
+  const heroArtisanSkill = ref(saved?.heroArtisanSkill ?? null)
+  const level            = ref(saved?.level            ?? 1)
+  const xp               = ref(saved?.xp               ?? 0)
 
   const isCreated  = computed(() => heroName.value !== null)
   const rarity     = computed(() => rarityFromLevel(level.value))
@@ -107,21 +109,31 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
 
   function persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      heroName:    heroName.value,
-      heroFaction: heroFaction.value,
-      heroAvatar:  heroAvatar.value,
-      level:       level.value,
-      xp:          xp.value,
+      heroName:         heroName.value,
+      heroFaction:      heroFaction.value,
+      heroAvatar:       heroAvatar.value,
+      heroArtisanSkill: heroArtisanSkill.value,
+      level:            level.value,
+      xp:               xp.value,
     }))
   }
 
-  function create(name, faction, avatarId) {
-    heroName.value    = name.trim()
-    heroFaction.value = faction
-    heroAvatar.value  = avatarId
-    level.value       = 1
-    xp.value          = 0
+  function create(name, faction, avatarId, artisanSkill) {
+    heroName.value         = name.trim()
+    heroFaction.value      = faction
+    heroAvatar.value       = avatarId
+    heroArtisanSkill.value = artisanSkill ?? null
+    level.value            = 1
+    xp.value               = 0
     persist()
+
+    const artisan = useArtisanStore()
+    artisan.unassignForgeSmith()
+    artisan.unassignTanner()
+    artisan.unassignTailor()
+    if (artisanSkill === 'blacksmithing')       artisan.assignForgeSmith('player_character')
+    else if (artisanSkill === 'leatherworking') artisan.assignTanner('player_character')
+    else if (artisanSkill === 'tailoring')      artisan.assignTailor('player_character')
   }
 
   // Returns how many levels were gained
@@ -175,7 +187,7 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
   }
 
   return {
-    heroName, heroFaction, heroAvatar, level, xp,
+    heroName, heroFaction, heroAvatar, heroArtisanSkill, level, xp,
     isCreated, rarity, xpProgress, xpToNextLevel,
     XP_PER_LEVEL: xpToNextLevel,
     PLAYER_FACTIONS: [Faction.ALDRIC, Faction.VALDRIS, Faction.CAELWYN, Faction.MORDAINE],
