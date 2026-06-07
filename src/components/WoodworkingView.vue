@@ -250,7 +250,7 @@ import { createItemInstance } from '../game/Gear.js'
 import { WOODS, WOOD_LIST } from '../game/data/woods.js'
 import { WOOD_RECIPE_TIERS } from '../game/data/woodworkingRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
-import wwBg from '../assets/backgrounds/training_camp.png'
+import wwBg from '../assets/backgrounds/woodworking_bg.png'
 
 const resources  = useResourceStore()
 const inventory  = useInventoryStore()
