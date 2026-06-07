@@ -217,19 +217,30 @@ function pickCityHero(faction) {
   return eligible[Math.floor(Math.random() * eligible.length)]
 }
 
+function rollCityNode() {
+  if (Math.random() >= CITY_CHANCE) return null
+  const faction   = CITY_FACTIONS[Math.floor(Math.random() * CITY_FACTIONS.length)]
+  const cityInfo  = CITY_DATA[faction]
+  const cityName  = cityInfo.cityNames[Math.floor(Math.random() * cityInfo.cityNames.length)]
+  const heroEntry = pickCityHero(faction)
+  if (!heroEntry) return null
+  const hero = HERO_TEMPLATES[heroEntry.key]()
+  return { nodeType: 'city', faction, cityName, heroKey: heroEntry.key, heroName: hero.name, heroRarity: heroEntry.rarity }
+}
+
+function buildCityCard(city) {
+  return { id: uid(), name: city.cityName, nodeType: 'city', isNode: true, isDungeon: false, pinned: false,
+    faction: city.faction, cityName: city.cityName, heroKey: city.heroKey, heroName: city.heroName, heroRarity: city.heroRarity }
+}
+
 function rollSlot3() {
   const r = Math.random()
   if (r < FORGE_CHANCE)                                                                          return { nodeType: 'forge' }
   if (r < FORGE_CHANCE + BLESSED_CHANCE)                                                        return { nodeType: 'blessed' }
   if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE)                                        return { nodeType: 'tavern' }
   if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + CITY_CHANCE) {
-    const faction  = CITY_FACTIONS[Math.floor(Math.random() * CITY_FACTIONS.length)]
-    const cityInfo = CITY_DATA[faction]
-    const cityName = cityInfo.cityNames[Math.floor(Math.random() * cityInfo.cityNames.length)]
-    const heroEntry = pickCityHero(faction)
-    if (!heroEntry) return { dungeon: 'Hard' }
-    const hero = HERO_TEMPLATES[heroEntry.key]()
-    return { nodeType: 'city', faction, cityName, heroKey: heroEntry.key, heroName: hero.name, heroRarity: heroEntry.rarity }
+    const city = rollCityNode()
+    return city ?? { dungeon: 'Hard' }
   }
   if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + CITY_CHANCE + NIGHTMARE_CHANCE)      return { dungeon: 'Nightmare' }
   return { dungeon: 'Hard' }
@@ -239,21 +250,15 @@ export function generateDungeonOptions() {
   const slot3 = rollSlot3()
 
   return ['Easy', 'Medium', 'Hard'].map((tier, i) => {
+    // Easy and Medium slots can independently yield a city node
+    if (i < 2) {
+      const city = rollCityNode()
+      if (city) return buildCityCard(city)
+    }
+
     if (i === 2 && slot3.nodeType) {
       if (slot3.nodeType === 'city') {
-        return {
-          id:         uid(),
-          name:       slot3.cityName,
-          nodeType:   'city',
-          isNode:     true,
-          isDungeon:  false,
-          pinned:     false,
-          faction:    slot3.faction,
-          cityName:   slot3.cityName,
-          heroKey:    slot3.heroKey,
-          heroName:   slot3.heroName,
-          heroRarity: slot3.heroRarity,
-        }
+        return buildCityCard(slot3)
       }
       // Slot 3 is a discovery node
       return {
