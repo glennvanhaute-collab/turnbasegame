@@ -273,7 +273,7 @@ const statPool  = computed(() => {
 .node-card.node-blessed > * { position: relative; z-index: 1; }
 .node-card.node-blessed .node-desc,
 .node-card.node-forge-discovery .node-desc {
-  color: #fff;
+  color: #c8c4bc;
 }
 .node-card.node-tavern {
   border-color: #3a2c08;
