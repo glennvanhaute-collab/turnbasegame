@@ -5,7 +5,8 @@
     <div class="tg-tab-bar">
       <div class="tg-tabs">
         <button class="tg-tab" :class="{ 'tg-tab--active': activeHomeTab === 'training' }" @click="activeHomeTab = 'training'">⚔ Training Grounds</button>
-        <button class="tg-tab" :class="{ 'tg-tab--active': activeHomeTab === 'hunts' }" @click="activeHomeTab = 'hunts'">🏹 Hunting Zone</button>
+        <button class="tg-tab" :class="{ 'tg-tab--active': activeHomeTab === 'artisan' }" @click="activeHomeTab = 'artisan'">⚒ Artisan Zone</button>
+        <button class="tg-tab" :class="{ 'tg-tab--active': activeHomeTab === 'hunts' }" @click="activeHomeTab = 'hunts'">🌿 Gathering Zone</button>
       </div>
       <div class="tg-team" v-if="activeHomeTab === 'training'">
         <span v-if="collection.team.length === 0" class="no-team">No team set — visit Collection</span>
@@ -236,7 +237,7 @@
           </button>
 
           <button class="enc-option" @click="$emit('open-woodworking')">
-            <GameIcon icon="blacksmith" :size="28" class="enc-opt-icon" />
+            <img :src="woodworkingIcon" class="enc-opt-icon" style="width:28px;height:28px;object-fit:contain;" alt="" />
             <span class="enc-opt-info">
               <span class="enc-opt-name">Woodworking</span>
               <span class="enc-opt-sub">Carve bows and staves from raw timber</span>
@@ -258,8 +259,17 @@
 
     </template>
 
-    <div v-else class="hunting-zone-view">
+    <div v-else-if="activeHomeTab === 'hunts'" class="hunting-zone-view">
       <HuntsView />
+    </div>
+
+    <div v-else class="artisan-zone-view">
+      <ArtisanZoneView
+        @open-blacksmith="$emit('open-blacksmith')"
+        @open-leatherworking="$emit('open-leatherworking')"
+        @open-tailoring="$emit('open-tailoring')"
+        @open-woodworking="$emit('open-woodworking')"
+      />
     </div>
 
   </div>
@@ -280,8 +290,10 @@ import trainingBg from '../assets/backgrounds/homepage_bg.png'
 import codexIcon          from '../assets/ui/codex.png'
 import leatherworkingIcon from '../assets/ui/leatherworking_icon.png'
 import tailoringIcon      from '../assets/ui/tailoring_icon.png'
+import woodworkingIcon    from '../assets/ui/woodworking_icon.png'
 import GameIcon from './ui/GameIcon.vue'
 import HuntsView from './HuntsView.vue'
+import ArtisanZoneView from './ArtisanZoneView.vue'
 
 const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring', 'open-woodworking'])
 
@@ -1175,6 +1187,15 @@ function formatElapsed(ms) {
 }
 
 .hunting-zone-view {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.artisan-zone-view {
   position: absolute;
   top: 48px;
   left: 0;

@@ -125,6 +125,22 @@ BS_TIERS.forEach((tier, row) => {
   })
 })
 
+// ── Sheet WW: sprites_woodworking.png ────────────────────────────────────
+// rows: 0=pine, 1=oak, 2=yew, 3=ashwood, 4=ironwood, 5=dragonwood
+// cols: 0=bow, 1=staff, 2=logs
+export const SHEET_WW_COLS = 3
+export const SHEET_WW_ROWS = 6
+
+const WW_TIERS = ['pine', 'oak', 'yew', 'ashwood', 'ironwood', 'dragonwood']
+const WW_ITEMS = ['bow', 'staff', 'logs']
+
+const ICONS_WW = {}
+WW_TIERS.forEach((tier, row) => {
+  WW_ITEMS.forEach((item, col) => {
+    ICONS_WW[`ww_${tier}_${item}`] = pos(col, row, 'ww')
+  })
+})
+
 // ── Sheet MATS: sprites_materials.png ────────────────────────────────────
 // rows: 0=hides, 1=leathers, 2=fibers, 3=cloths
 // cols: 0=rough/cotton, 1=thick/wool, 2=hardened/silkweave, 3=shadow, 4=celestial/starweave, 5=moonscale/moonweave
@@ -143,7 +159,7 @@ FIBER_IDS.forEach((id, col)   => { ICONS_MATS[`fiber_${id}`]   = pos(col, 2, 'ma
 CLOTH_IDS.forEach((id, col)   => { ICONS_MATS[`cloth_${id}`]   = pos(col, 3, 'mats') })
 
 // ── Merged lookup ─────────────────────────────────────────────────────────
-export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS }
+export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS, ...ICONS_WW }
 
 // ── Convenience helpers ───────────────────────────────────────────────────
 export function oreIcon(tierId)     { return `${tierId}_ore` }
@@ -152,6 +168,9 @@ export function hideIcon(id)        { return `hide_${id}` }
 export function leatherIcon(id)     { return `leather_${id}` }
 export function fiberIcon(id)       { return `fiber_${id}` }
 export function clothIcon(id)       { return `cloth_${id}` }
+export function woodBowIcon(tier)   { return `ww_${tier}_bow` }
+export function woodStaffIcon(tier) { return `ww_${tier}_staff` }
+export function woodLogsIcon(tier)  { return `ww_${tier}_logs` }
 
 export const SLOT_TO_ICON = {
   main_hand: 'sword',

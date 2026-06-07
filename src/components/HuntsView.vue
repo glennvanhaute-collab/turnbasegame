@@ -1,6 +1,9 @@
 <template>
   <div class="hunts-wrap">
 
+    <div class="hunts-bg" :style="{ backgroundImage: `url(${huntBg})` }" />
+    <div class="hunts-overlay" />
+
     <!-- ── Left: Mission list ───────────────────────────────────── -->
     <aside class="mission-panel">
       <div class="mp-label">Hunt Missions</div>
@@ -205,6 +208,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import huntBg from '../assets/backgrounds/hunting_ground_bg.png'
 import { useHuntStore }       from '../stores/useHuntStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { HUNTS_BY_ID, HUNT_MISSIONS, FORAGE_MISSIONS } from '../game/data/hunts.js'
@@ -312,11 +316,30 @@ function collect(i) {
 
 <style scoped>
 .hunts-wrap {
+  position: relative;
   display: flex; height: 100%; min-height: calc(100vh - 130px); overflow: hidden;
+}
+
+.hunts-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.45; pointer-events: none; z-index: 0;
+}
+.hunts-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to right,
+    rgba(3,2,1,0.92) 0%,
+    rgba(3,2,1,0.55) 18%,
+    rgba(3,2,1,0.30) 50%,
+    rgba(3,2,1,0.55) 82%,
+    rgba(3,2,1,0.92) 100%
+  );
+  pointer-events: none; z-index: 1;
 }
 
 /* ── Left: Mission list ─────────────────────────────────────────── */
 .mission-panel {
+  position: relative; z-index: 2;
   width: 220px; flex-shrink: 0;
   border-right: 1px solid var(--border-brown);
   background: var(--bg-panel); padding: 16px 12px; overflow-y: auto;
@@ -348,6 +371,7 @@ function collect(i) {
 
 /* ── Center: Dispatch area ──────────────────────────────────────── */
 .dispatch-area {
+  position: relative; z-index: 2;
   flex: 1; padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px;
 }
 .da-idle { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; flex: 1; opacity: 0.3; }
@@ -418,7 +442,7 @@ function collect(i) {
 
 /* ── Right: Slots ───────────────────────────────────────────────── */
 .slots-panel {
-  width: 230px; flex-shrink: 0; position: relative;
+  width: 230px; flex-shrink: 0; position: relative; z-index: 2;
   border-left: 1px solid var(--border-brown);
   background: var(--bg-panel); padding: 16px 14px;
   overflow-y: auto; display: flex; flex-direction: column; gap: 10px;

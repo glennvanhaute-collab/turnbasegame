@@ -39,7 +39,7 @@
             :style="{ '--tier-color': tier.color }"
             @click="selectRecipe(recipe)"
           >
-            <span class="recipe-type-badge" :class="recipe.finishType">{{ recipe.weaponType === 'bow' ? '⌖' : '✦' }}</span>
+            <GameIcon :icon="`ww_${recipe.tier}_${recipe.weaponType}`" :size="20" class="recipe-type-badge" :class="recipe.finishType" />
             <span class="recipe-name">{{ recipe.name }}</span>
             <span class="recipe-cost">
               <span
@@ -88,7 +88,7 @@
         >
           <div class="showcase-glow" />
           <div class="showcase-icon-wrap">
-            <span class="showcase-weapon-icon">{{ selected.weaponType === 'bow' ? '⌖' : '✦' }}</span>
+            <GameIcon :icon="`ww_${selected.tier}_${selected.weaponType}`" :size="96" class="showcase-weapon-icon" />
           </div>
           <div class="unfinished-tag" :class="selected.finishType">
             {{ selected.finishType === 'string' ? 'Unstrung' : 'Unimbued' }}
@@ -229,7 +229,7 @@
           :class="{ empty: !resources.logs[wood.id] }"
           :style="{ '--wood-color': wood.color }"
         >
-          <span class="log-dot" />
+          <GameIcon :icon="`ww_${wood.id}_logs`" :size="20" class="log-icon" />
           <span class="log-name">{{ wood.name }}</span>
           <span class="log-count">{{ resources.logs[wood.id] ?? 0 }}</span>
         </div>
@@ -241,6 +241,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import GameIcon from './ui/GameIcon.vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useArtisanStore } from '../stores/useArtisanStore.js'
@@ -466,11 +467,11 @@ function carve() {
 }
 .recipe-btn.unaffordable { opacity: 0.42; }
 .recipe-type-badge {
-  font-size: 0.75rem; flex-shrink: 0; width: 18px; text-align: center;
-  color: var(--tier-color);
+  flex-shrink: 0;
+  image-rendering: pixelated;
 }
-.recipe-type-badge.string { color: #6bba4a; }
-.recipe-type-badge.imbue  { color: #b44fff; }
+.recipe-type-badge.string { filter: drop-shadow(0 0 3px #6bba4a); }
+.recipe-type-badge.imbue  { filter: drop-shadow(0 0 3px #b44fff); }
 .recipe-name { flex: 1; font-size: 0.68rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .recipe-cost { display: flex; gap: 3px; flex-shrink: 0; }
 .cost-pill {
@@ -545,8 +546,8 @@ function carve() {
   50%       { transform: translateY(-6px); }
 }
 .showcase-weapon-icon {
-  font-size: 4rem; line-height: 1; color: var(--tier-color);
   filter: drop-shadow(0 0 12px var(--tier-color));
+  image-rendering: pixelated;
 }
 .unfinished-tag {
   font-family: var(--font-head); font-size: 0.56rem; letter-spacing: 2px;
@@ -730,8 +731,7 @@ function carve() {
   background: color-mix(in srgb, var(--wood-color) 5%, transparent);
 }
 .log-row.empty { opacity: 0.28; filter: saturate(0.2); }
-.log-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--wood-color); flex-shrink: 0; }
-.log-row:not(.empty) .log-dot { box-shadow: 0 0 4px var(--wood-color); }
+.log-icon { flex-shrink: 0; filter: drop-shadow(0 0 3px var(--wood-color)); }
 .log-name  { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .log-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--wood-color); min-width: 20px; text-align: right; }
 .log-row.empty .log-count { color: var(--text-dim); }

@@ -622,6 +622,14 @@ export const HERO_TEMPLATES = {
     isPlayer: false,
   }),
 
+  BLOODRAIDER_TUSK: () => new Hero({
+    id: 'bloodraider_tusk', name: 'Bloodraider Tusk',
+    faction: Faction.BLOODTUSK, rarity: Rarity.UNCOMMON, affinity: Affinity.FORCE,
+    baseHp: 16000, baseAtk: 1200, baseDef: 750, baseSpd: 84,
+    skills: [SKILLS.SLASH, SKILLS.CRUSH],
+    isPlayer: false,
+  }),
+
   KARG: () => new Hero({
     id: 'karg', name: 'Karg the Warlord',
     faction: Faction.BLOODTUSK, rarity: Rarity.RARE, affinity: Affinity.FORCE,
