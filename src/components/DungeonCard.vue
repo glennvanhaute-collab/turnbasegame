@@ -59,8 +59,12 @@
   </div>
 
   <!-- Discovery Node card -->
-  <div v-else-if="dungeon.isNode" class="dungeon-card node-card" :class="`node-${dungeon.nodeType}`">
-    <div class="node-icon">{{ dungeon.nodeType === 'forge' ? '🔨' : '✨' }}</div>
+  <div
+    v-else-if="dungeon.isNode"
+    class="dungeon-card node-card"
+    :class="`node-${dungeon.nodeType}`"
+    :style="nodeBg ? { backgroundImage: `url(${nodeBg})` } : {}"
+  >
     <div class="node-type-badge" :style="{ color: nodeColor, borderColor: nodeColor + '44' }">
       {{ dungeon.nodeType === 'forge' ? 'Forge' : 'Blessed Area' }}
     </div>
@@ -195,6 +199,14 @@ function pickCityBg(faction, seed) {
 const cityData   = computed(() => CITY_DATA[props.dungeon.faction] ?? {})
 const cityBg     = computed(() => props.dungeon.nodeType === 'city' ? pickCityBg(props.dungeon.faction, props.dungeon.id) : null)
 const forgeBg    = computed(() => props.dungeon.nodeType === 'forge_discovery' ? forgeBgUrl(props.dungeon.forgeType) : null)
+
+const NODE_BG_KEYS = { blessed: 'blessed_grove' }
+const nodeBg = computed(() => {
+  const key = NODE_BG_KEYS[props.dungeon.nodeType]
+  if (!key) return null
+  const entry = Object.entries(_dungeonBgs).find(([p]) => p.includes(`/${key}.`))
+  return entry?.[1]?.default ?? null
+})
 const heroRarCol = computed(() => RARITY_COLORS[props.dungeon.heroRarity] ?? '#aaa')
 
 const FORGE_DISC_ICONS = { elven: '✦', goblin: '⚙', dwarf: '⛏' }
@@ -242,7 +254,23 @@ const statPool  = computed(() => {
   align-items: center;
 }
 .node-card.node-forge          { border-color: #3a2208; background: #0d0a06; }
-.node-card.node-blessed        { border-color: #0a1a2a; background: #060a10; }
+.node-card.node-blessed {
+  border-color: #0a2a3a;
+  background-color: #060a10;
+  background-size: cover;
+  background-position: center top;
+  overflow: hidden;
+}
+.node-card.node-blessed::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(4,8,18,0.40) 0%, rgba(4,8,18,0.65) 50%, rgba(4,8,18,0.90) 100%);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 10px;
+}
+.node-card.node-blessed > * { position: relative; z-index: 1; }
 .node-card.node-tavern {
   border-color: #3a2c08;
   background-color: #0d0b05;
