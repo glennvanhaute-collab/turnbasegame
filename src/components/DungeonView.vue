@@ -60,14 +60,24 @@
     <!-- Tavern modal -->
     <div class="modal-backdrop" v-if="dungeonStore.pendingTavernId" @click.self="dungeonStore.closeTavern()">
       <div class="node-modal tavern-modal">
-        <div class="modal-title">🍺 {{ tavernNode?.name }}</div>
+        <div class="modal-title">{{ tavernNode?.name }}</div>
         <div class="tavern-scene">
           You settle into a corner and listen to the murmur of the room...
         </div>
 
         <div v-if="dungeonStore.pendingTavernFrag" class="fragment-reveal">
-          <div class="fragment-title">"{{ dungeonStore.pendingTavernFrag.frag.title }}"</div>
-          <div class="fragment-hero">— A rumor about <em>{{ dungeonStore.pendingTavernFrag.heroTitle }}</em></div>
+          <div class="fragment-header">
+            <img
+              v-if="HERO_AVATARS[dungeonStore.pendingTavernFrag.heroId]"
+              :src="HERO_AVATARS[dungeonStore.pendingTavernFrag.heroId]"
+              class="fragment-avatar"
+              alt=""
+            />
+            <div class="fragment-header-text">
+              <div class="fragment-title">"{{ dungeonStore.pendingTavernFrag.frag.title }}"</div>
+              <div class="fragment-hero">— A rumor about <em>{{ dungeonStore.pendingTavernFrag.heroTitle }}</em></div>
+            </div>
+          </div>
           <div v-if="dungeonStore.pendingTavernFrag.frag.text" class="fragment-excerpt">
             {{ dungeonStore.pendingTavernFrag.frag.text.slice(0, 220).trimEnd() }}...
           </div>
@@ -143,6 +153,11 @@ import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
 import DungeonCard from './DungeonCard.vue'
+import avatarAldric  from '../assets/units/legendary/lord-aldric.png'
+import avatarHelga   from '../assets/units/legendary/Helga.png'
+import avatarGarrett from '../assets/units/rare/garrett-the-unbroken.png'
+
+const HERO_AVATARS = { lord_aldric: avatarAldric, helga: avatarHelga, hedge_blade: avatarGarrett }
 
 defineEmits(['enter-dungeon'])
 
@@ -402,9 +417,31 @@ function showToast(msg) {
   line-height: 1.6;
 }
 .fragment-reveal {
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 10px;
   background: #0a0804; border: 1px solid #3a2c0a;
   border-radius: 8px; padding: 16px;
+}
+.fragment-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.fragment-avatar {
+  width: 56px;
+  height: 68px;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 4px;
+  flex-shrink: 0;
+  filter: sepia(0.15);
+  border: 1px solid #3a2c0a;
+}
+.fragment-header-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
 }
 .fragment-title {
   font-family: var(--font-head);
