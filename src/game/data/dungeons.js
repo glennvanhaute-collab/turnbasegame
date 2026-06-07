@@ -217,7 +217,7 @@ function pickCityHero(faction, rarities) {
   const eligible = RECRUIT_POOL.filter(e => {
     if (!rarities.includes(e.rarity)) return false
     const hero = HERO_TEMPLATES[e.key]?.()
-    return hero && hero.faction === faction && !hero.isPlayer
+    return hero && hero.faction === faction
   })
   if (!eligible.length) return null
   return eligible[Math.floor(Math.random() * eligible.length)]
