@@ -24,7 +24,7 @@ export function rollOreDrops(difficulty) {
     if (Math.random() < 0.35) drops.push({ oreId: 'steel', amount: 1 })
   } else if (d === 'nightmare') {
     if (Math.random() < 0.80) drops.push({ oreId: 'steel', amount: rand(1, 2) })
-    if (Math.random() < 0.22) drops.push({ oreId: 'darksteel', amount: 1 })
+    if (Math.random() < 0.45) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
     if (Math.random() < 0.03) drops.push({ oreId: 'mithril', amount: 1 })
   }
 
