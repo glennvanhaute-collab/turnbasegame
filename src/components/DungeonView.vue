@@ -3,7 +3,7 @@
 
     <!-- Header -->
     <div class="dungeon-header">
-      <h2 class="dungeon-title">Dungeons</h2>
+      <h2 class="dungeon-title">Exploration</h2>
       <p class="dungeon-intro">Spend energy to discover what lurks nearby. Choose wisely — the hardest path may hold treasures with power beyond ordinary gear.</p>
     </div>
 

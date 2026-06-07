@@ -179,10 +179,16 @@ function uid()  { return `dng_${Date.now()}_${++_counter}` }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
 
 const NIGHTMARE_CHANCE = 0.12
-const FORGE_CHANCE     = 0.01   // slot 3 only
-const BLESSED_CHANCE   = 0.01   // slot 3 only
-const TAVERN_CHANCE    = 0.08   // slot 3 only
-const CITY_CHANCE      = 0.06   // slot 3 only
+const FORGE_CHANCE     = 0.01
+const BLESSED_CHANCE   = 0.01
+const TAVERN_CHANCE    = 0.08
+
+const CITY_CONFIG = {
+  Easy:      { chance: 0.12, rarities: ['Rare'] },
+  Medium:    { chance: 0.08, rarities: ['Epic'] },
+  Hard:      { chance: 0.06, rarities: ['Legendary'] },
+  Nightmare: { chance: 0.06, rarities: ['Legendary'] },
+}
 
 const NODE_NAMES = {
   forge:   ['Ancient Forge', 'The Ironbound Hearth', "Runesmith's Anvil", 'The Ember Forge', 'Ashen Smithy'],
@@ -207,9 +213,9 @@ export function rollNodeLine(nodeType) {
   return { type: LineType.DISCOVERY, label, bonus: { [statKey]: val }, source: nodeType, earnedAt: Date.now() }
 }
 
-function pickCityHero(faction) {
+function pickCityHero(faction, rarities) {
   const eligible = RECRUIT_POOL.filter(e => {
-    if (!['Rare', 'Epic', 'Legendary'].includes(e.rarity)) return false
+    if (!rarities.includes(e.rarity)) return false
     const hero = HERO_TEMPLATES[e.key]?.()
     return hero && hero.faction === faction && !hero.isPlayer
   })
@@ -217,12 +223,13 @@ function pickCityHero(faction) {
   return eligible[Math.floor(Math.random() * eligible.length)]
 }
 
-function rollCityNode() {
-  if (Math.random() >= CITY_CHANCE) return null
+function rollCityNode(tier = 'Hard') {
+  const cfg = CITY_CONFIG[tier] ?? CITY_CONFIG.Hard
+  if (Math.random() >= cfg.chance) return null
   const faction   = CITY_FACTIONS[Math.floor(Math.random() * CITY_FACTIONS.length)]
   const cityInfo  = CITY_DATA[faction]
   const cityName  = cityInfo.cityNames[Math.floor(Math.random() * cityInfo.cityNames.length)]
-  const heroEntry = pickCityHero(faction)
+  const heroEntry = pickCityHero(faction, cfg.rarities)
   if (!heroEntry) return null
   const hero = HERO_TEMPLATES[heroEntry.key]()
   return { nodeType: 'city', faction, cityName, heroKey: heroEntry.key, heroName: hero.name, heroRarity: heroEntry.rarity }
@@ -235,14 +242,10 @@ function buildCityCard(city) {
 
 function rollSlot3() {
   const r = Math.random()
-  if (r < FORGE_CHANCE)                                                                          return { nodeType: 'forge' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE)                                                        return { nodeType: 'blessed' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE)                                        return { nodeType: 'tavern' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + CITY_CHANCE) {
-    const city = rollCityNode()
-    return city ?? { dungeon: 'Hard' }
-  }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + CITY_CHANCE + NIGHTMARE_CHANCE)      return { dungeon: 'Nightmare' }
+  if (r < FORGE_CHANCE)                                                     return { nodeType: 'forge' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE)                                    return { nodeType: 'blessed' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE)                    return { nodeType: 'tavern' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + NIGHTMARE_CHANCE) return { dungeon: 'Nightmare' }
   return { dungeon: 'Hard' }
 }
 
@@ -250,17 +253,12 @@ export function generateDungeonOptions() {
   const slot3 = rollSlot3()
 
   return ['Easy', 'Medium', 'Hard'].map((tier, i) => {
-    // Easy and Medium slots can independently yield a city node
-    if (i < 2) {
-      const city = rollCityNode()
-      if (city) return buildCityCard(city)
-    }
+    // All slots can yield a city node — rarity and chance are gated by tier
+    const city = rollCityNode(tier)
+    if (city) return buildCityCard(city)
 
     if (i === 2 && slot3.nodeType) {
-      if (slot3.nodeType === 'city') {
-        return buildCityCard(slot3)
-      }
-      // Slot 3 is a discovery node
+      // Slot 3 is a discovery node (forge / blessed / tavern)
       return {
         id: uid(),
         name: pick(NODE_NAMES[slot3.nodeType]),
