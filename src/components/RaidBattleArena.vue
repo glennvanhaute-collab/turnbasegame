@@ -23,8 +23,21 @@
         <div class="end-sub" v-if="store.state === 'victory'">The Throne of Regret falls silent.</div>
         <div class="end-sub" v-else>The darkness was too great.</div>
         <div class="end-rewards" v-if="store.state === 'victory' && store.lastReward">
-          <span class="reward-pill gold">🪙 {{ store.lastReward.gold?.toLocaleString() }}</span>
-          <span class="reward-pill diamond">💎 {{ store.lastReward.diamonds }}</span>
+          <div class="reward-main-row">
+            <span class="reward-pill gold">🪙 {{ store.lastReward.gold?.toLocaleString() }}</span>
+            <span class="reward-pill diamond">💎 {{ store.lastReward.diamonds }}</span>
+          </div>
+          <template v-if="store.lastReward.raidDrops">
+            <div class="raid-drops-label">Rare Materials</div>
+            <div class="raid-drops">
+              <span v-for="d in store.lastReward.raidDrops.ores"     :key="'o'+d.id"  class="reward-pill ore">⛏ {{ d.amount }}× Mithril Ore</span>
+              <span v-for="d in store.lastReward.raidDrops.logs"     :key="'l'+d.id"  class="reward-pill wood">🪵 {{ d.amount }}× Dragonwood</span>
+              <span v-for="d in store.lastReward.raidDrops.hides"    :key="'h'+d.id"  class="reward-pill hide">🐉 {{ d.amount }}× Moonscale Hide</span>
+              <span v-for="d in store.lastReward.raidDrops.fibers"   :key="'f'+d.id"  class="reward-pill fiber">🌙 {{ d.amount }}× Moonthread</span>
+              <span v-for="d in store.lastReward.raidDrops.leathers" :key="'lt'+d.id" class="reward-pill leather">🧶 {{ d.amount }}× Moonscale Strip</span>
+              <span v-for="d in store.lastReward.raidDrops.cloths"   :key="'c'+d.id"  class="reward-pill cloth">✨ {{ d.amount }}× Moonweave</span>
+            </div>
+          </template>
         </div>
         <button class="end-btn" @click="$emit('back')">← Return to Raids</button>
       </div>
@@ -836,7 +849,9 @@ onMounted(() => {
 }
 .end-rewards {
   display: flex;
-  gap: 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 .reward-pill {
   font-family: 'Cinzel', serif;
@@ -847,6 +862,36 @@ onMounted(() => {
 }
 .reward-pill.gold    { background: rgba(201, 162, 39, 0.15); color: #ffd700; border: 1px solid rgba(201, 162, 39, 0.3); }
 .reward-pill.diamond { background: rgba(100, 180, 255, 0.1); color: #88ccff; border: 1px solid rgba(100, 180, 255, 0.2); }
+.reward-pill.ore     { background: rgba(91, 172, 212, 0.12); color: #5bacd4; border: 1px solid rgba(91, 172, 212, 0.3); }
+.reward-pill.wood    { background: rgba(154,  68,  68, 0.12); color: #c87070; border: 1px solid rgba(154, 68, 68, 0.3); }
+.reward-pill.hide    { background: rgba(126, 232, 255, 0.10); color: #7ee8ff; border: 1px solid rgba(126, 232, 255, 0.25); }
+.reward-pill.fiber   { background: rgba(187, 238, 255, 0.10); color: #bbeeff; border: 1px solid rgba(187, 238, 255, 0.25); }
+.reward-pill.leather { background: rgba(126, 232, 255, 0.08); color: #aaddf0; border: 1px solid rgba(126, 232, 255, 0.2); }
+.reward-pill.cloth   { background: rgba(136, 204, 255, 0.10); color: #88ccff; border: 1px solid rgba(136, 204, 255, 0.22); }
+
+.raid-drops-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #887799;
+  margin-top: 4px;
+}
+.raid-drops {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.raid-drops .reward-pill {
+  font-size: 0.78rem;
+  padding: 4px 14px;
+}
+.reward-main-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
 
 .end-btn {
   background: rgba(20, 10, 4, 0.9);

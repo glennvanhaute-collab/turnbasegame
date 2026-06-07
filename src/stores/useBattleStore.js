@@ -9,7 +9,8 @@ import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
 import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
-import { rollOreDrops }        from '../game/data/ores.js'
+import { rollOreDrops }           from '../game/data/ores.js'
+import { rollRaidResourceDrops }  from '../game/data/raidEncounters.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -133,7 +134,17 @@ export const useBattleStore = defineStore('battle', () => {
           const dungeonResult = useDungeonStore().onDungeonVictory(enc.dungeonId, enc.tier)
           componentDrops = dungeonResult?.componentDrops ?? []
         }
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops }
+        let raidDrops = null
+        if (enc.isRaid) {
+          raidDrops = rollRaidResourceDrops()
+          raidDrops.ores.forEach(({ id, amount })     => resources.addOre(id, amount))
+          raidDrops.logs.forEach(({ id, amount })     => resources.addLog(id, amount))
+          raidDrops.hides.forEach(({ id, amount })    => resources.addHide(id, amount))
+          raidDrops.fibers.forEach(({ id, amount })   => resources.addFiber(id, amount))
+          raidDrops.leathers.forEach(({ id, amount }) => resources.addLeather(id, amount))
+          raidDrops.cloths.forEach(({ id, amount })   => resources.addCloth(id, amount))
+        }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops, raidDrops }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run

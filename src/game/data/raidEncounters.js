@@ -177,6 +177,21 @@ export function buildNytherax() {
   })
 }
 
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min }
+
+// Guaranteed top-tier resource drop for every successful raid clear.
+// Returns arrays of { id, amount } keyed by resource type.
+export function rollRaidResourceDrops() {
+  return {
+    ores:     [{ id: 'mithril',    amount: rand(5, 10) }],
+    logs:     [{ id: 'dragonwood', amount: rand(3,  7) }],
+    hides:    [{ id: 'moonscale',  amount: rand(3,  7) }],
+    fibers:   [{ id: 'moonthread', amount: rand(3,  7) }],
+    leathers: [{ id: 'moonscale',  amount: rand(1,  3) }],
+    cloths:   [{ id: 'moonweave',  amount: rand(1,  3) }],
+  }
+}
+
 export const RAID_ENCOUNTERS = {
   throne_of_regret: {
     id: 'raid_throne_of_regret',
