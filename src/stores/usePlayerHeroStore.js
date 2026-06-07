@@ -131,9 +131,11 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
     artisan.unassignForgeSmith()
     artisan.unassignTanner()
     artisan.unassignTailor()
+    artisan.unassignCarpenter()
     if (artisanSkill === 'blacksmithing')       artisan.assignForgeSmith('player_character')
     else if (artisanSkill === 'leatherworking') artisan.assignTanner('player_character')
     else if (artisanSkill === 'tailoring')      artisan.assignTailor('player_character')
+    else if (artisanSkill === 'woodworking')    artisan.assignCarpenter('player_character')
   }
 
   // Returns how many levels were gained

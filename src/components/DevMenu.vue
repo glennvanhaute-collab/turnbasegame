@@ -101,6 +101,21 @@
           </div>
         </section>
 
+        <!-- Logs -->
+        <section class="dev-section">
+          <div class="dev-section-label">Logs</div>
+          <div class="dev-row" v-for="wood in WOOD_LIST" :key="wood.id" :style="{ '--ore-color': wood.color }">
+            <span class="dev-ore-dot" />
+            <span class="dev-row-name">{{ wood.name }}</span>
+            <span class="dev-row-count">{{ resources.logs[wood.id] ?? 0 }}</span>
+            <div class="dev-btns">
+              <button @click="resources.addLog(wood.id, 5)">+5</button>
+              <button @click="resources.addLog(wood.id, 25)">+25</button>
+              <button @click="resources.addLog(wood.id, 100)">+100</button>
+            </div>
+          </div>
+        </section>
+
         <!-- Currency -->
         <section class="dev-section">
           <div class="dev-section-label">Currency</div>
@@ -203,6 +218,7 @@ import { HIDE_LIST } from '../game/data/hides.js'
 import { LEATHER_LIST } from '../game/data/leathers.js'
 import { FIBER_LIST } from '../game/data/fibers.js'
 import { CLOTH_LIST } from '../game/data/cloths.js'
+import { WOOD_LIST } from '../game/data/woods.js'
 
 const open       = ref(false)
 const resources  = useResourceStore()

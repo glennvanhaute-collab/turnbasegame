@@ -7,6 +7,7 @@ import { HIDES } from '../game/data/hides.js'
 import { LEATHERS } from '../game/data/leathers.js'
 import { FIBERS } from '../game/data/fibers.js'
 import { CLOTHS } from '../game/data/cloths.js'
+import { WOODS } from '../game/data/woods.js'
 
 const STORAGE_KEY = 'raid-resources'
 
@@ -23,6 +24,9 @@ export const useResourceStore = defineStore('resources', () => {
   const smithingXp       = ref(saved?.smithingXp       ?? 0)
   const leatherworkingXp = ref(saved?.leatherworkingXp ?? 0)
   const tailoringXp      = ref(saved?.tailoringXp      ?? 0)
+  const woodworkingXp    = ref(saved?.woodworkingXp    ?? 0)
+
+  const logs = ref(saved?.logs ?? Object.fromEntries(Object.keys(WOODS).map(k => [k, 0])))
 
   const hides   = ref(saved?.hides   ?? Object.fromEntries(Object.keys(HIDES).map(k => [k, 0])))
   const leathers = ref(saved?.leathers ?? Object.fromEntries(Object.keys(LEATHERS).map(k => [k, 0])))
@@ -52,14 +56,21 @@ export const useResourceStore = defineStore('resources', () => {
   const tailoringProgress      = computed(() => (tailoringXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
   const tailoringXpInLevel     = computed(() => tailoringXp.value % XP_PER_LEVEL)
 
-  watch([ores, bars, smithingXp, leatherworkingXp, tailoringXp, hides, leathers, fibers, cloths,
-    forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
+  const woodworkingLevel       = computed(() => Math.floor(woodworkingXp.value / XP_PER_LEVEL) + 1)
+  const woodworkingProgress    = computed(() => (woodworkingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
+  const woodworkingXpInLevel   = computed(() => woodworkingXp.value % XP_PER_LEVEL)
+
+  watch([ores, bars, smithingXp, leatherworkingXp, tailoringXp, woodworkingXp, logs,
+         hides, leathers, fibers, cloths,
+         forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ores:                ores.value,
       bars:                bars.value,
       smithingXp:          smithingXp.value,
       leatherworkingXp:    leatherworkingXp.value,
       tailoringXp:         tailoringXp.value,
+      woodworkingXp:       woodworkingXp.value,
+      logs:                logs.value,
       hides:               hides.value,
       leathers:            leathers.value,
       fibers:              fibers.value,
@@ -79,6 +90,10 @@ export const useResourceStore = defineStore('resources', () => {
   function addSmithingXp(amount)       { smithingXp.value += amount }
   function addLeatherworkingXp(amount) { leatherworkingXp.value += amount }
   function addTailoringXp(amount)      { tailoringXp.value += amount }
+  function addWoodworkingXp(amount)    { woodworkingXp.value += amount }
+
+  function addLog(woodId, amount)    { if (woodId in logs.value) logs.value[woodId] += amount }
+  function removeLog(woodId, amount) { if (woodId in logs.value) logs.value[woodId] = Math.max(0, logs.value[woodId] - amount) }
 
   function addHide(id, amount)       { if (id in hides.value) hides.value[id] += amount }
   function removeHide(id, amount)    { if (id in hides.value) hides.value[id] = Math.max(0, hides.value[id] - amount) }
@@ -107,6 +122,9 @@ export const useResourceStore = defineStore('resources', () => {
     addLeatherworkingXp,
     tailoringXp, tailoringLevel, tailoringProgress, tailoringXpInLevel,
     addTailoringXp,
+    woodworkingXp, woodworkingLevel, woodworkingProgress, woodworkingXpInLevel,
+    addWoodworkingXp,
+    logs, addLog, removeLog,
     hides, addHide, removeHide,
     leathers, addLeather, removeLeather,
     fibers, addFiber, removeFiber,

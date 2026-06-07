@@ -235,6 +235,13 @@
             </span>
           </button>
 
+          <button class="enc-option" @click="$emit('open-woodworking')">
+            <GameIcon icon="blacksmith" :size="28" class="enc-opt-icon" />
+            <span class="enc-opt-info">
+              <span class="enc-opt-name">Woodworking</span>
+              <span class="enc-opt-sub">Carve bows and staves from raw timber</span>
+            </span>
+          </button>
 
         </div>
 
@@ -276,7 +283,7 @@ import tailoringIcon      from '../assets/ui/tailoring_icon.png'
 import GameIcon from './ui/GameIcon.vue'
 import HuntsView from './HuntsView.vue'
 
-const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring'])
+const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring', 'open-woodworking'])
 
 const activeHomeTab = ref('training')
 

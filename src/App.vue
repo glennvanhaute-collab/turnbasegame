@@ -110,6 +110,21 @@
       </Transition>
     </Teleport>
 
+    <!-- Woodworking modal — floats over the homepage map -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showWoodworking">
+          <div class="coll-modal-backdrop" @click="showWoodworking = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showWoodworking = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <WoodworkingView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Market modal — floats over the homepage map -->
     <Teleport to="body">
       <Transition name="coll-modal">
@@ -159,6 +174,7 @@
         @open-blacksmith="showBlacksmith = true"
         @open-leatherworking="showLeatherworking = true"
         @open-tailoring="showTailoring = true"
+        @open-woodworking="showWoodworking = true"
         @open-market="showMarket = true"
         @open-codex="showCodex = true"
       />
@@ -224,6 +240,7 @@ import CollectionView from './components/CollectionView.vue'
 import BlacksmithView from './components/BlacksmithView.vue'
 import LeatherworkingView from './components/LeatherworkingView.vue'
 import TailoringView from './components/TailoringView.vue'
+import WoodworkingView from './components/WoodworkingView.vue'
 import MarketView from './components/MarketView.vue'
 import InventoryView from './components/InventoryView.vue'
 import EquipmentView from './components/EquipmentView.vue'
@@ -262,6 +279,7 @@ const showCollection  = ref(false)
 const showBlacksmith      = ref(false)
 const showLeatherworking  = ref(false)
 const showTailoring       = ref(false)
+const showWoodworking     = ref(false)
 const showMarket          = ref(false)
 const showBattle      = ref(false)
 const showRaidBattle  = ref(false)
@@ -272,6 +290,7 @@ function closeAllPanels() {
   showBlacksmith.value      = false
   showLeatherworking.value  = false
   showTailoring.value       = false
+  showWoodworking.value     = false
   showMarket.value          = false
   showBattle.value          = false
   showRaidBattle.value      = false
@@ -308,6 +327,7 @@ function handleEscape(e) {
   if (showBlacksmith.value)     { showBlacksmith.value = false; return }
   if (showLeatherworking.value) { showLeatherworking.value = false; return }
   if (showTailoring.value)      { showTailoring.value = false; return }
+  if (showWoodworking.value)    { showWoodworking.value = false; return }
   if (showMarket.value)         { showMarket.value = false; return }
   if (showCodex.value)      { showCodex.value = false; return }
   if (showShop.value)       { showShop.value = false; return }
