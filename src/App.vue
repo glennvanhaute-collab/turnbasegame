@@ -372,7 +372,7 @@ function importProgression(e) {
 }
 
 function onHeroCreated() {
-  view.value = 'collection'
+  view.value = 'campaign'
   setTimeout(() => {
     advisorStore.say(
       `Welcome to Westrun, ${playerHeroStore.heroName}. I am Edwyn — chronicler, archivist, and apparently your keeper. ` +

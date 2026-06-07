@@ -329,11 +329,11 @@ function tryBegin() {
 .avatar-accordion {
   display: flex;
   gap: 8px;
-  height: 260px;
+  height: 360px;
   align-items: stretch;
 }
 .accord-item {
-  flex: 0 0 58px;
+  flex: 1;
   transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s, box-shadow 0.2s;
   border-radius: 10px;
   overflow: hidden;
@@ -342,10 +342,11 @@ function tryBegin() {
   position: relative;
   padding: 0;
   background: none;
+  min-width: 0;
 }
 .accord-item:hover { border-color: #5c3a14; }
 .accord-item.active {
-  flex: 1 1 auto;
+  flex: 4;
   border-color: var(--gold);
   box-shadow: 0 0 22px rgba(201, 162, 39, 0.35);
 }
@@ -477,7 +478,6 @@ function tryBegin() {
   .house-grid   { grid-template-columns: 1fr; }
   .artisan-row  { grid-template-columns: 1fr; }
   .step-block   { padding: 20px 18px; }
-  .avatar-accordion { height: 200px; }
-  .accord-item  { flex-basis: 44px; }
+  .avatar-accordion { height: 240px; }
 }
 </style>
