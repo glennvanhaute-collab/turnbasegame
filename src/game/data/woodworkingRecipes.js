@@ -8,19 +8,18 @@ import { WOODS } from './woods.js'
 export const WOODWORKING_RECIPES = [
   // ── Pine (Common) ────────────────────────────────────────────────
   {
-    id: 'pine_shortbow_unstrung',
+    id: 'pine_shortbow',
     name: 'Pine Shortbow',
     tier: 'pine',
     slot: GearSlot.MAIN_HAND,
     gearType: GearType.WEAPON,
     weaponType: WeaponType.BOW,
     armorType: 'leather',
-    desc: 'A simple shortbow whittled from pine. Needs a string before it can fly.',
-    logCost: { pine: 3 },
+    desc: 'A simple shortbow whittled from pine, strung with cotton. Light and quick.',
+    plankCost: { pine: 3 },
+    bowstringCost: 'cotton',
     baseStats: { atk: 100, spd: 6 },
     rarity: 'Common',
-    unfinished: true,
-    finishType: 'string',
   },
   {
     id: 'pine_staff_unimbued',
@@ -40,19 +39,18 @@ export const WOODWORKING_RECIPES = [
 
   // ── Oak (Uncommon) ───────────────────────────────────────────────
   {
-    id: 'oak_shortbow_unstrung',
+    id: 'oak_shortbow',
     name: 'Oak Shortbow',
     tier: 'oak',
     slot: GearSlot.MAIN_HAND,
     gearType: GearType.WEAPON,
     weaponType: WeaponType.BOW,
     armorType: 'leather',
-    desc: 'Hardwood body, reliable draw. An archer\'s trusted companion — once strung.',
-    logCost: { oak: 4 },
+    desc: 'Hardwood body, reliable draw. Wool string gives it a satisfying snap.',
+    plankCost: { oak: 4 },
+    bowstringCost: 'wool',
     baseStats: { atk: 135, spd: 8 },
     rarity: 'Uncommon',
-    unfinished: true,
-    finishType: 'string',
   },
   {
     id: 'oak_staff_unimbued',
@@ -72,19 +70,18 @@ export const WOODWORKING_RECIPES = [
 
   // ── Yew (Rare) ───────────────────────────────────────────────────
   {
-    id: 'yew_longbow_unstrung',
+    id: 'yew_longbow',
     name: 'Yew Longbow',
     tier: 'yew',
     slot: GearSlot.MAIN_HAND,
     gearType: GearType.WEAPON,
     weaponType: WeaponType.BOW,
     armorType: 'leather',
-    desc: 'Yew\'s natural flex makes it a war bow in waiting. It will punish those in its path.',
-    logCost: { yew: 5 },
+    desc: "Yew's natural flex paired with silk string. It punishes those in its path.",
+    plankCost: { yew: 5 },
+    bowstringCost: 'silkweave',
     baseStats: { atk: 182, spd: 10 },
     rarity: 'Rare',
-    unfinished: true,
-    finishType: 'string',
   },
   {
     id: 'yew_staff_unimbued',
@@ -104,19 +101,18 @@ export const WOODWORKING_RECIPES = [
 
   // ── Ashwood (Epic) ───────────────────────────────────────────────
   {
-    id: 'ashwood_longbow_unstrung',
+    id: 'ashwood_longbow',
     name: 'Ashwood Longbow',
     tier: 'ashwood',
     slot: GearSlot.MAIN_HAND,
     gearType: GearType.WEAPON,
     weaponType: WeaponType.BOW,
     armorType: 'leather',
-    desc: 'Highland ash — hard, light, and cold. Arrows leave this bow like bad news.',
-    logCost: { ashwood: 6 },
+    desc: 'Highland ash strung with shadow cloth. Arrows leave this bow like bad news.',
+    plankCost: { ashwood: 6 },
+    bowstringCost: 'shadowcloth',
     baseStats: { atk: 246, spd: 13 },
     rarity: 'Epic',
-    unfinished: true,
-    finishType: 'string',
   },
   {
     id: 'ashwood_staff_unimbued',
@@ -136,19 +132,18 @@ export const WOODWORKING_RECIPES = [
 
   // ── Ironwood (Legendary) ─────────────────────────────────────────
   {
-    id: 'ironwood_warbow_unstrung',
+    id: 'ironwood_warbow',
     name: 'Ironwood Warbow',
     tier: 'ironwood',
     slot: GearSlot.MAIN_HAND,
     gearType: GearType.WEAPON,
     weaponType: WeaponType.BOW,
     armorType: 'leather',
-    desc: 'It rings like metal when strung. Draw weight enough to punch through plate.',
-    logCost: { ironwood: 7 },
+    desc: 'Rings like metal. Starweave string draws the star-cold power out of every shot.',
+    plankCost: { ironwood: 7 },
+    bowstringCost: 'starweave',
     baseStats: { atk: 332, spd: 17 },
     rarity: 'Legendary',
-    unfinished: true,
-    finishType: 'string',
   },
   {
     id: 'ironwood_staff_unimbued',
@@ -168,19 +163,18 @@ export const WOODWORKING_RECIPES = [
 
   // ── Dragonwood (Legendary) ───────────────────────────────────────
   {
-    id: 'dragonwood_warbow_unstrung',
+    id: 'dragonwood_warbow',
     name: 'Dragonwood Warbow',
     tier: 'dragonwood',
     slot: GearSlot.MAIN_HAND,
     gearType: GearType.WEAPON,
     weaponType: WeaponType.BOW,
     armorType: 'leather',
-    desc: 'The wood still radiates faint heat. Arrows fired from this bow arrive before you hear the shot.',
-    logCost: { dragonwood: 8 },
+    desc: 'Still radiates faint heat. Moonweave string hums under tension. Arrows arrive before you hear the shot.',
+    plankCost: { dragonwood: 8 },
+    bowstringCost: 'moonweave',
     baseStats: { atk: 450, spd: 22 },
     rarity: 'Legendary',
-    unfinished: true,
-    finishType: 'string',
   },
   {
     id: 'dragonwood_staff_unimbued',

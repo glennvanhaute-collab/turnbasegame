@@ -8,6 +8,25 @@
     <aside class="recipe-panel">
       <div class="panel-label">Recipes</div>
 
+      <div class="recipe-section-head">🪵 Planks</div>
+      <div class="plank-group">
+        <button
+          v-for="plank in PLANK_LIST"
+          :key="plank.id"
+          class="plank-btn"
+          :style="{ '--pc': plank.color }"
+          :disabled="(resources.logs[plank.id] ?? 0) < plank.logCost"
+          @click="makePlanks(plank.id)"
+        >
+          <span class="pb-dot" />
+          <span class="pb-name">{{ plank.name }}</span>
+          <span class="pb-cost">{{ plank.logCost }} logs → 1</span>
+          <span class="pb-stock" :class="{ short: (resources.logs[plank.id] ?? 0) < plank.logCost }">
+            {{ resources.logs[plank.id] ?? 0 }}
+          </span>
+        </button>
+      </div>
+
       <div class="recipe-section-head">⚐ Carve</div>
       <div class="tier-group" v-for="tier in WOOD_RECIPE_TIERS" :key="tier.id">
         <div
@@ -42,12 +61,27 @@
             <GameIcon :icon="`ww_${recipe.tier}_${recipe.weaponType}`" :size="20" class="recipe-type-badge" :class="recipe.finishType" />
             <span class="recipe-name">{{ recipe.name }}</span>
             <span class="recipe-cost">
-              <span
-                v-for="(amt, woodId) in recipe.logCost"
-                :key="woodId"
-                class="cost-pill"
-                :class="{ short: (resources.logs[woodId] ?? 0) < amt }"
-              >{{ amt }}</span>
+              <template v-if="recipe.plankCost">
+                <span
+                  v-for="(amt, woodId) in recipe.plankCost"
+                  :key="woodId"
+                  class="cost-pill"
+                  :class="{ short: (resources.planks[woodId] ?? 0) < amt }"
+                >{{ amt }}p</span>
+                <span
+                  v-if="recipe.bowstringCost"
+                  class="cost-pill string-pill"
+                  :class="{ short: (resources.bowstrings[recipe.bowstringCost] ?? 0) < 1 }"
+                >🏹</span>
+              </template>
+              <template v-else>
+                <span
+                  v-for="(amt, woodId) in recipe.logCost"
+                  :key="woodId"
+                  class="cost-pill"
+                  :class="{ short: (resources.logs[woodId] ?? 0) < amt }"
+                >{{ amt }}</span>
+              </template>
             </span>
           </button>
         </template>
@@ -113,20 +147,47 @@
         <div class="craft-col">
           <div class="craft-col-label">Materials</div>
           <div class="craft-materials">
-            <div
-              class="material-row"
-              v-for="(amt, woodId) in selected.logCost"
-              :key="woodId"
-              :style="{ '--wood-color': WOODS[woodId]?.color ?? '#888' }"
-            >
-              <span class="mat-dot" />
-              <span class="mat-name">{{ WOODS[woodId]?.name ?? woodId }}</span>
-              <span class="mat-tally">
-                <span class="mat-have" :class="{ ok: (resources.logs[woodId] ?? 0) >= amt }">{{ resources.logs[woodId] ?? 0 }}</span>
-                <span class="mat-sep">/</span>
-                <span class="mat-need">{{ amt }}</span>
-              </span>
-            </div>
+            <template v-if="selected.plankCost">
+              <div
+                class="material-row"
+                v-for="(amt, woodId) in selected.plankCost"
+                :key="woodId"
+                :style="{ '--wood-color': WOODS[woodId]?.color ?? '#888' }"
+              >
+                <span class="mat-dot" />
+                <span class="mat-name">{{ WOODS[woodId]?.name ?? woodId }} Planks</span>
+                <span class="mat-tally">
+                  <span class="mat-have" :class="{ ok: (resources.planks[woodId] ?? 0) >= amt }">{{ resources.planks[woodId] ?? 0 }}</span>
+                  <span class="mat-sep">/</span>
+                  <span class="mat-need">{{ amt }}</span>
+                </span>
+              </div>
+              <div class="material-row" v-if="selected.bowstringCost" :style="{ '--wood-color': BOWSTRINGS[selected.bowstringCost]?.color ?? '#888' }">
+                <span class="mat-dot" />
+                <span class="mat-name">{{ BOWSTRINGS[selected.bowstringCost]?.name }}</span>
+                <span class="mat-tally">
+                  <span class="mat-have" :class="{ ok: (resources.bowstrings[selected.bowstringCost] ?? 0) >= 1 }">{{ resources.bowstrings[selected.bowstringCost] ?? 0 }}</span>
+                  <span class="mat-sep">/</span>
+                  <span class="mat-need">1</span>
+                </span>
+              </div>
+            </template>
+            <template v-else>
+              <div
+                class="material-row"
+                v-for="(amt, woodId) in selected.logCost"
+                :key="woodId"
+                :style="{ '--wood-color': WOODS[woodId]?.color ?? '#888' }"
+              >
+                <span class="mat-dot" />
+                <span class="mat-name">{{ WOODS[woodId]?.name ?? woodId }}</span>
+                <span class="mat-tally">
+                  <span class="mat-have" :class="{ ok: (resources.logs[woodId] ?? 0) >= amt }">{{ resources.logs[woodId] ?? 0 }}</span>
+                  <span class="mat-sep">/</span>
+                  <span class="mat-need">{{ amt }}</span>
+                </span>
+              </div>
+            </template>
           </div>
         </div>
       </div>
@@ -249,6 +310,8 @@ import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useAdvisorStore } from '../stores/useAdvisorStore.js'
 import { createItemInstance } from '../game/Gear.js'
 import { WOODS, WOOD_LIST } from '../game/data/woods.js'
+import { PLANK_LIST, PLANKS } from '../game/data/planks.js'
+import { BOWSTRINGS } from '../game/data/bowstrings.js'
 import { WOOD_RECIPE_TIERS } from '../game/data/woodworkingRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
 import wwBg from '../assets/backgrounds/woodworking_bg.png'
@@ -285,8 +348,24 @@ function isTierLocked(tierId) {
 }
 
 function canAfford(recipe) {
-  if (!recipe?.logCost) return false
-  return Object.entries(recipe.logCost).every(([id, amt]) => (resources.logs[id] ?? 0) >= amt)
+  if (recipe?.plankCost) {
+    const planksOk = Object.entries(recipe.plankCost).every(([id, amt]) => (resources.planks[id] ?? 0) >= amt)
+    const stringOk = !recipe.bowstringCost || (resources.bowstrings[recipe.bowstringCost] ?? 0) >= 1
+    return planksOk && stringOk
+  }
+  if (recipe?.logCost) {
+    return Object.entries(recipe.logCost).every(([id, amt]) => (resources.logs[id] ?? 0) >= amt)
+  }
+  return false
+}
+
+function makePlanks(woodId) {
+  const plank = PLANKS[woodId]
+  if (!plank) return
+  if ((resources.logs[woodId] ?? 0) < plank.logCost) return
+  resources.removeLog(woodId, plank.logCost)
+  resources.addPlank(woodId, 1)
+  resources.addWoodworkingXp(3)
 }
 
 function toggleTier(id) {
@@ -335,7 +414,12 @@ function carve() {
   if (isTierLocked(selected.value.tier)) return
   const recipe = selected.value
 
-  Object.entries(recipe.logCost).forEach(([id, amt]) => resources.removeLog(id, amt))
+  if (recipe.plankCost) {
+    Object.entries(recipe.plankCost).forEach(([id, amt]) => resources.removePlank(id, amt))
+    if (recipe.bowstringCost) resources.removeBowstring(recipe.bowstringCost, 1)
+  } else {
+    Object.entries(recipe.logCost).forEach(([id, amt]) => resources.removeLog(id, amt))
+  }
 
   const instance = createItemInstance({
     id:          recipe.id,
@@ -431,6 +515,22 @@ function carve() {
 
 /* Tier groups */
 .tier-group { margin-bottom: 6px; }
+
+.plank-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.plank-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 8px; border-radius: 6px;
+  background: transparent; border: 1px solid transparent;
+  cursor: pointer; text-align: left; width: 100%;
+  transition: background 0.1s, border-color 0.1s;
+}
+.plank-btn:hover:not(:disabled) { background: rgba(255,255,255,0.05); border-color: color-mix(in srgb, var(--pc) 30%, transparent); }
+.plank-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.pb-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; background: var(--pc); }
+.pb-name { flex: 1; font-size: 0.64rem; font-weight: 600; color: #887766; font-family: var(--font-head); }
+.pb-cost { font-size: 0.58rem; color: #554433; font-family: var(--font-head); }
+.pb-stock { font-size: 0.6rem; font-weight: 700; color: #666; min-width: 22px; text-align: right; }
+.pb-stock.short { color: #884444; }
 .tier-header {
   display: flex; align-items: center; gap: 7px;
   padding: 6px 8px 5px; margin-bottom: 2px; cursor: pointer;

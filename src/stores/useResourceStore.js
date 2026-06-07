@@ -8,6 +8,8 @@ import { LEATHERS } from '../game/data/leathers.js'
 import { FIBERS } from '../game/data/fibers.js'
 import { CLOTHS } from '../game/data/cloths.js'
 import { WOODS } from '../game/data/woods.js'
+import { PLANKS } from '../game/data/planks.js'
+import { BOWSTRINGS } from '../game/data/bowstrings.js'
 
 const STORAGE_KEY = 'raid-resources'
 
@@ -26,7 +28,9 @@ export const useResourceStore = defineStore('resources', () => {
   const tailoringXp      = ref(saved?.tailoringXp      ?? 0)
   const woodworkingXp    = ref(saved?.woodworkingXp    ?? 0)
 
-  const logs = ref(saved?.logs ?? Object.fromEntries(Object.keys(WOODS).map(k => [k, 0])))
+  const logs       = ref(saved?.logs       ?? Object.fromEntries(Object.keys(WOODS).map(k => [k, 0])))
+  const planks     = ref(saved?.planks     ?? Object.fromEntries(Object.keys(PLANKS).map(k => [k, 0])))
+  const bowstrings = ref(saved?.bowstrings ?? Object.fromEntries(Object.keys(BOWSTRINGS).map(k => [k, 0])))
 
   const hides   = ref(saved?.hides   ?? Object.fromEntries(Object.keys(HIDES).map(k => [k, 0])))
   const leathers = ref(saved?.leathers ?? Object.fromEntries(Object.keys(LEATHERS).map(k => [k, 0])))
@@ -60,7 +64,7 @@ export const useResourceStore = defineStore('resources', () => {
   const woodworkingProgress    = computed(() => (woodworkingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
   const woodworkingXpInLevel   = computed(() => woodworkingXp.value % XP_PER_LEVEL)
 
-  watch([ores, bars, smithingXp, leatherworkingXp, tailoringXp, woodworkingXp, logs,
+  watch([ores, bars, smithingXp, leatherworkingXp, tailoringXp, woodworkingXp, logs, planks, bowstrings,
          hides, leathers, fibers, cloths,
          forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -71,6 +75,8 @@ export const useResourceStore = defineStore('resources', () => {
       tailoringXp:         tailoringXp.value,
       woodworkingXp:       woodworkingXp.value,
       logs:                logs.value,
+      planks:              planks.value,
+      bowstrings:          bowstrings.value,
       hides:               hides.value,
       leathers:            leathers.value,
       fibers:              fibers.value,
@@ -94,6 +100,10 @@ export const useResourceStore = defineStore('resources', () => {
 
   function addLog(woodId, amount)    { if (woodId in logs.value) logs.value[woodId] += amount }
   function removeLog(woodId, amount) { if (woodId in logs.value) logs.value[woodId] = Math.max(0, logs.value[woodId] - amount) }
+  function addPlank(id, amount)       { if (id in planks.value) planks.value[id] += amount }
+  function removePlank(id, amount)    { if (id in planks.value) planks.value[id] = Math.max(0, planks.value[id] - amount) }
+  function addBowstring(id, amount)   { if (id in bowstrings.value) bowstrings.value[id] += amount }
+  function removeBowstring(id, amount){ if (id in bowstrings.value) bowstrings.value[id] = Math.max(0, bowstrings.value[id] - amount) }
 
   function addHide(id, amount)       { if (id in hides.value) hides.value[id] += amount }
   function removeHide(id, amount)    { if (id in hides.value) hides.value[id] = Math.max(0, hides.value[id] - amount) }
@@ -125,6 +135,8 @@ export const useResourceStore = defineStore('resources', () => {
     woodworkingXp, woodworkingLevel, woodworkingProgress, woodworkingXpInLevel,
     addWoodworkingXp,
     logs, addLog, removeLog,
+    planks, addPlank, removePlank,
+    bowstrings, addBowstring, removeBowstring,
     hides, addHide, removeHide,
     leathers, addLeather, removeLeather,
     fibers, addFiber, removeFiber,

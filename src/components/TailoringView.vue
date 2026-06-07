@@ -25,6 +25,24 @@
         </button>
       </div>
 
+      <!-- Bowstrings section -->
+      <div class="recipe-section-head">🏹 Bowstrings</div>
+      <div class="tan-group">
+        <button
+          v-for="bs in BOWSTRING_LIST"
+          :key="bs.id"
+          class="tan-btn"
+          :class="{ unaffordable: !canAffordBowstring(bs) }"
+          :style="{ '--mat-color': bs.color }"
+          @click="craftBowstring(bs)"
+        >
+          <span class="mat-dot-plain" :style="{ background: bs.color }" />
+          <span class="tan-name">{{ bs.name }}</span>
+          <span class="tan-cost">{{ bs.clothCost }}× {{ CLOTHS[bs.clothId]?.name }}</span>
+          <span class="bs-stock" :class="{ short: !canAffordBowstring(bs) }">{{ resources.cloths[bs.clothId] ?? 0 }}</span>
+        </button>
+      </div>
+
       <!-- Craft section -->
       <div class="recipe-section-head">✂ Craft</div>
       <div class="tier-group" v-for="tier in TAILORING_RECIPE_TIERS" :key="tier.id">
@@ -358,6 +376,7 @@ import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { FIBER_LIST, FIBERS } from '../game/data/fibers.js'
 import { CLOTH_LIST, CLOTHS } from '../game/data/cloths.js'
+import { BOWSTRING_LIST, BOWSTRINGS } from '../game/data/bowstrings.js'
 import { TAILORING_RECIPES, TAILORING_RECIPE_TIERS, TAILORING_XP_PER_TIER } from '../game/data/tailoringRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
 import { SLOT_TO_ICON, tierSlotIcon, fiberIcon, clothIcon } from '../game/data/spritesheet.js'
@@ -391,6 +410,20 @@ function toggleTier(id) { openTier.value = openTier.value === id ? null : id }
 
 function selectWeave(cloth)   { selectedType.value = 'weave'; selectedId.value = cloth.id  }
 function selectCraft(recipe)  { selectedType.value = 'craft'; selectedId.value = recipe.id }
+
+function canAffordBowstring(bs) {
+  return (resources.cloths[bs.clothId] ?? 0) >= bs.clothCost
+}
+
+function craftBowstring(bs) {
+  if (!canAffordBowstring(bs)) return
+  resources.removeCloth(bs.clothId, bs.clothCost)
+  resources.addBowstring(bs.id, 1)
+  resources.addTailoringXp(5)
+  craftResult.value = bs.name
+  clearTimeout(_flashTimer)
+  _flashTimer = setTimeout(() => { craftResult.value = null }, 3000)
+}
 
 function canAfford(recipe) {
   if (!recipe?.materialCost) return false
@@ -749,6 +782,10 @@ function craftFullSet(tier) {
 .work-materials { display: flex; flex-direction: column; gap: 5px; }
 .material-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--ore-color) 20%, transparent); background: color-mix(in srgb, var(--ore-color) 6%, rgba(0,0,0,0.3)); }
 .mat-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ore-color); box-shadow: 0 0 5px var(--ore-color); flex-shrink: 0; }
+.mat-dot-plain { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tan-btn.unaffordable { opacity: 0.38; }
+.bs-stock { font-size: 0.6rem; font-weight: 700; color: #666; min-width: 18px; text-align: right; }
+.bs-stock.short { color: #884444; }
 .mat-name { flex: 1; font-size: 0.68rem; font-weight: 600; color: var(--text-parchment); }
 .mat-tally { display: flex; align-items: baseline; gap: 2px; flex-shrink: 0; }
 .mat-have { font-family: var(--font-head); font-size: 0.78rem; font-weight: 700; color: #666; }
