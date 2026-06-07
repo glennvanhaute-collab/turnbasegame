@@ -279,7 +279,10 @@ const RARITY_COLORS = {
 function rarityColor(rarity) { return RARITY_COLORS[rarity] ?? '#9a9a9a' }
 
 function missionColor(missionId) { return HUNTS_BY_ID[missionId]?.color ?? '#888' }
-function slotTypeIcon(missionId) { return HUNTS_BY_ID[missionId]?.type === 'hunt' ? '🏹' : '🌿' }
+function slotTypeIcon(missionId) {
+  const t = HUNTS_BY_ID[missionId]?.type
+  return t === 'hunt' ? '🏹' : t === 'lumber' ? '🪵' : '🌿'
+}
 
 function heroName(key) {
   return collection.roster.find(r => r.key === key)?.hero?.name ?? key
