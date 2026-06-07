@@ -184,10 +184,10 @@ const BLESSED_CHANCE   = 0.01
 const TAVERN_CHANCE    = 0.08
 
 const CITY_CONFIG = {
-  Easy:      { chance: 0.60, rarities: ['Rare'] },
-  Medium:    { chance: 0.50, rarities: ['Epic'] },
-  Hard:      { chance: 0.40, rarities: ['Legendary'] },
-  Nightmare: { chance: 0.40, rarities: ['Legendary'] },
+  Easy:      { chance: 0.20, rarities: ['Rare'] },
+  Medium:    { chance: 0.12, rarities: ['Epic'] },
+  Hard:      { chance: 0.08, rarities: ['Legendary'] },
+  Nightmare: { chance: 0.08, rarities: ['Legendary'] },
 }
 
 const NODE_NAMES = {
