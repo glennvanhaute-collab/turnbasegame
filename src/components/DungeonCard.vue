@@ -265,12 +265,18 @@ const statPool  = computed(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(4,8,18,0.40) 0%, rgba(4,8,18,0.65) 50%, rgba(4,8,18,0.90) 100%);
+  background: linear-gradient(to bottom, rgba(4,8,18,0.30) 0%, rgba(4,8,18,0.72) 38%, rgba(4,8,18,0.82) 62%, rgba(4,8,18,0.95) 100%);
   pointer-events: none;
   z-index: 0;
   border-radius: 10px;
 }
 .node-card.node-blessed > * { position: relative; z-index: 1; }
+.node-card.node-blessed .card-name,
+.node-card.node-blessed .node-type-badge,
+.node-card.node-forge-discovery .card-name,
+.node-card.node-forge-discovery .node-type-badge {
+  text-shadow: 0 1px 8px rgba(0,0,0,1), 0 0 16px rgba(0,0,0,0.9);
+}
 .node-card.node-tavern {
   border-color: #3a2c08;
   background-color: #0d0b05;
@@ -349,7 +355,7 @@ const statPool  = computed(() => {
   letter-spacing: 1.5px; border: 1px solid; border-radius: 4px;
   padding: 2px 8px; width: fit-content;
 }
-.node-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.5; text-align: center; }
+.node-desc { font-size: 0.68rem; color: var(--text-muted); line-height: 1.5; text-align: center; text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.8); }
 .node-stat-pool { display: flex; flex-direction: column; gap: 4px; align-items: center; width: 100%; }
 .node-pool-tags { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
 .pool-tag {
