@@ -271,9 +271,7 @@ const statPool  = computed(() => {
   border-radius: 10px;
 }
 .node-card.node-blessed > * { position: relative; z-index: 1; }
-.node-card.node-blessed .card-name,
 .node-card.node-blessed .node-desc,
-.node-card.node-forge-discovery .card-name,
 .node-card.node-forge-discovery .node-desc {
   color: #fff;
 }
