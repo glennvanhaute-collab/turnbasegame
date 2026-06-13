@@ -218,7 +218,7 @@ const arenaStyle = computed(() => {
 const ENEMY_PORTRAIT_KEYS = {
   batman_nightmare: 'raid_fallen-king-batman',   // units/mythical/Raid_fallen-king-batman.png
   aurelian_eclipse: 'aurelian-dragonforge',      // units/mythical/Aurelian-Dragonforge.png
-  nytherax_wyrm:    null,                        // no portrait yet
+  nytherax_wyrm:    'nytherax-the-starless-wyrm', // units/enemy/nytherax-the-starless-wyrm.png
 }
 function enemyPortrait(enemy) {
   const baseId = enemy.id?.replace(/_\d+$/, '') ?? ''
