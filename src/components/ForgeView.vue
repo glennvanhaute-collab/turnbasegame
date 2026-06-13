@@ -870,4 +870,11 @@ function upgradeItem() {
 .btn-keep-new:hover { background: #0d2a1a; border-color: #226644; }
 .btn-keep-old { flex: 1; padding: 9px; border-radius: 7px; border: 1px solid #2a1a08; background: #0e0805; color: #887; font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: background 0.15s; }
 .btn-keep-old:hover { background: #1a0e06; color: #aaa; }
+
+/* ── Mobile ── */
+@media (max-width: 700px) {
+  .upgrade-body { grid-template-columns: 1fr; }
+  .item-list-panel { max-height: 220px; }
+  .orb-body { grid-template-columns: 1fr; }
+}
 </style>

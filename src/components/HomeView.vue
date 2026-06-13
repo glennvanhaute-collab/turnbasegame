@@ -1224,4 +1224,9 @@ function formatElapsed(ms) {
   /* Detail card stays centered */
   .detail-card { padding: 16px; }
 }
+
+@media (max-width: 440px) {
+  .tg-tab { padding: 0 10px; font-size: 0.6rem; letter-spacing: 0.5px; }
+  .tg-team { display: none; }
+}
 </style>

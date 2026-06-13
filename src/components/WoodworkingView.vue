@@ -835,4 +835,12 @@ function carve() {
 .log-name  { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .log-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--wood-color); min-width: 20px; text-align: right; }
 .log-row.empty .log-count { color: var(--text-dim); }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .woodworking { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+  .recipe-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border-gold); max-height: 200px; flex-shrink: 0; }
+  .log-panel { width: 100%; border-left: none; border-top: 1px solid rgba(107,186,74,0.3); flex-shrink: 0; max-height: 220px; }
+  .craft-area { padding: 12px 10px; }
+}
 </style>

@@ -848,4 +848,12 @@ function craftFullSet(tier) {
 .stock-row.clickable:hover { background: color-mix(in srgb, var(--mat-color) 12%, transparent); border-color: color-mix(in srgb, var(--mat-color) 40%, transparent); }
 .stock-row.active { background: color-mix(in srgb, var(--mat-color) 15%, transparent); border-color: color-mix(in srgb, var(--mat-color) 55%, transparent); }
 .stock-arrow { font-size: 0.65rem; color: var(--mat-color); opacity: 0.7; flex-shrink: 0; }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .tannery { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+  .recipe-panel { width: 100%; border-right: none; border-bottom: 1px solid rgba(200,144,110,0.3); max-height: 200px; flex-shrink: 0; }
+  .stock-panel { width: 100%; border-left: none; border-top: 1px solid rgba(200,144,110,0.3); flex-shrink: 0; max-height: 220px; }
+  .work-area { padding: 12px 10px; }
+}
 </style>

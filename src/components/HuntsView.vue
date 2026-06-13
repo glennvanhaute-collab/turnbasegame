@@ -542,4 +542,12 @@ watch(() => hunts.lastAutoCollect, (val) => {
 .collect-pop-leave-active { transition: opacity 0.4s; }
 .collect-pop-leave-to { opacity: 0; }
 @keyframes pop-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .hunts-wrap { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+  .mission-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border-brown); flex-shrink: 0; max-height: 220px; }
+  .dispatch-area { flex: none; padding: 14px 12px; }
+  .slots-panel { width: 100%; border-left: none; border-top: 1px solid var(--border-brown); flex-shrink: 0; }
+}
 </style>

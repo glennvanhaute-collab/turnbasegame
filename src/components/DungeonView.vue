@@ -505,4 +505,13 @@ function showToast(msg) {
 .empty-icon { font-size: 2rem; margin-bottom: 12px; opacity: 0.3; }
 .empty-text { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
 .empty-sub  { font-size: 0.75rem; font-style: italic; }
+
+/* ── Mobile ── */
+@media (max-width: 700px) {
+  .dungeon-grid { grid-template-columns: repeat(2, 1fr); }
+  .dungeon-wrap { padding: 0 14px 60px; }
+}
+@media (max-width: 460px) {
+  .dungeon-grid { grid-template-columns: 1fr; }
+}
 </style>
