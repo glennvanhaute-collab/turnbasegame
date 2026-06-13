@@ -6,6 +6,10 @@
       <button class="inv-tab" :class="{ active: activeTab === 'gear' }" @click="activeTab = 'gear'">
         ⚔ Gear
       </button>
+      <button class="inv-tab" :class="{ active: activeTab === 'resources' }" @click="activeTab = 'resources'"
+              :style="activeTab === 'resources' ? { color: '#c9a227', borderBottomColor: '#c9a227' } : {}">
+        🎒 Resources
+      </button>
       <button
         v-for="art in ARTISAN_LIST"
         :key="art.id"
@@ -53,6 +57,65 @@
         />
       </div>
       <div class="empty-state" v-else>No items match your filters.</div>
+    </template>
+
+    <!-- ── RESOURCES TAB ────────────────────────────────────────────── -->
+    <template v-else-if="activeTab === 'resources'">
+      <div class="mat-sections">
+
+        <div class="mat-section">
+          <div class="mat-section-head">⛏ Ores</div>
+          <div class="mat-grid">
+            <div v-for="ore in ORE_LIST" :key="ore.id" class="mat-row"
+                 :class="{ empty: !resources.ores[ore.id] }"
+                 :style="{ '--mc': ore.color }">
+              <GameIcon :icon="oreIcon(ore.id)" :size="20" class="mat-icon" />
+              <span class="mat-name">{{ ore.name }}</span>
+              <span class="mat-qty">{{ resources.ores[ore.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mat-section">
+          <div class="mat-section-head">🐾 Hides</div>
+          <div class="mat-grid">
+            <div v-for="hide in HIDE_LIST" :key="hide.id" class="mat-row"
+                 :class="{ empty: !resources.hides[hide.id] }"
+                 :style="{ '--mc': hide.color }">
+              <GameIcon :icon="hideIcon(hide.id)" :size="20" class="mat-icon" />
+              <span class="mat-name">{{ hide.name }}</span>
+              <span class="mat-qty">{{ resources.hides[hide.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mat-section">
+          <div class="mat-section-head">🌿 Fibers</div>
+          <div class="mat-grid">
+            <div v-for="fiber in FIBER_LIST" :key="fiber.id" class="mat-row"
+                 :class="{ empty: !resources.fibers[fiber.id] }"
+                 :style="{ '--mc': fiber.color }">
+              <GameIcon :icon="fiberIcon(fiber.id)" :size="20" class="mat-icon" />
+              <span class="mat-name">{{ fiber.name }}</span>
+              <span class="mat-qty">{{ resources.fibers[fiber.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mat-section">
+          <div class="mat-section-head">🪵 Logs</div>
+          <div class="mat-grid">
+            <div v-for="wood in WOOD_LIST" :key="wood.id" class="mat-row"
+                 :class="{ empty: !resources.logs[wood.id] }"
+                 :style="{ '--mc': wood.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ wood.name }}</span>
+              <span class="mat-qty">{{ resources.logs[wood.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </template>
 
     <!-- ── BLACKSMITHING TAB ──────────────────────────────────────── -->
