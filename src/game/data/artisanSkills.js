@@ -3,6 +3,7 @@ export const ARTISAN = {
   herbalism:      { id: 'herbalism',      name: 'Herbalism',      icon: '🌿', color: '#4dff88', desc: 'Gather and cultivate medicinal herbs' },
   tailoring:      { id: 'tailoring',      name: 'Tailoring',      icon: '🧵', color: '#88ccff', desc: 'Craft and enchant cloth garments and robes' },
   leatherworking: { id: 'leatherworking', name: 'Leatherworking', icon: '🐾', color: '#b87333', desc: 'Work hides and leather into armor and gear' },
+  woodworking:    { id: 'woodworking',    name: 'Woodworking',    icon: '🪵', color: '#6bba4a', desc: 'Carve bows and staves from timber' },
   apothecary:     { id: 'apothecary',     name: 'Apothecary',     icon: '⚗',  color: '#cc44ff', desc: 'Mix remedies, elixirs, and potions' },
 }
 

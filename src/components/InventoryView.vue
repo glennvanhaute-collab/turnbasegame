@@ -170,6 +170,48 @@
             </div>
           </div>
         </div>
+        <div class="mat-section">
+          <div class="mat-section-head">Bowstrings</div>
+          <div class="mat-grid">
+            <div v-for="bs in BOWSTRING_LIST" :key="bs.id" class="mat-row"
+                 :class="{ empty: !resources.bowstrings[bs.id] }"
+                 :style="{ '--mc': bs.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ bs.name }}</span>
+              <span class="mat-qty">{{ resources.bowstrings[bs.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ── WOODWORKING TAB ───────────────────────────────────────────── -->
+    <template v-else-if="activeTab === 'woodworking'">
+      <div class="mat-sections">
+        <div class="mat-section">
+          <div class="mat-section-head">Logs</div>
+          <div class="mat-grid">
+            <div v-for="wood in WOOD_LIST" :key="wood.id" class="mat-row"
+                 :class="{ empty: !resources.logs[wood.id] }"
+                 :style="{ '--mc': wood.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ wood.name }}</span>
+              <span class="mat-qty">{{ resources.logs[wood.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="mat-section">
+          <div class="mat-section-head">Planks</div>
+          <div class="mat-grid">
+            <div v-for="plank in PLANK_LIST" :key="plank.id" class="mat-row"
+                 :class="{ empty: !resources.planks[plank.id] }"
+                 :style="{ '--mc': plank.color }">
+              <span class="mat-dot" />
+              <span class="mat-name">{{ plank.name }}</span>
+              <span class="mat-qty">{{ resources.planks[plank.id] ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -202,6 +244,9 @@ import { HIDE_LIST } from '../game/data/hides.js'
 import { LEATHER_LIST } from '../game/data/leathers.js'
 import { FIBER_LIST } from '../game/data/fibers.js'
 import { CLOTH_LIST } from '../game/data/cloths.js'
+import { WOOD_LIST } from '../game/data/woods.js'
+import { PLANK_LIST } from '../game/data/planks.js'
+import { BOWSTRING_LIST } from '../game/data/bowstrings.js'
 import { oreIcon, barIcon, hideIcon, leatherIcon, fiberIcon, clothIcon, SLOT_TO_ICON } from '../game/data/spritesheet.js'
 import InventoryCard from './InventoryCard.vue'
 import GameIcon from './ui/GameIcon.vue'
