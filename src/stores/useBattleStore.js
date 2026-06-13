@@ -80,6 +80,8 @@ export const useBattleStore = defineStore('battle', () => {
     const eTeam = encounter.enemies.map((factory, i) => {
       const hero = factory()
       hero.id = `${hero.id}_${i}`
+      const scale = encounter.enemyScale ?? 1.0
+      if (scale > 1) hero.applyLevelScale(scale)
       return hero
     })
 

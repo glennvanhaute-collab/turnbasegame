@@ -284,15 +284,20 @@ export function generateDungeonOptions() {
   })
 }
 
+// Stat multipliers applied to enemy base stats per difficulty tier.
+// Easy = raw template stats. Each tier scales HP, ATK, DEF, SPD together.
+const ENEMY_SCALE = { Easy: 1.0, Medium: 1.35, Hard: 2.6, Nightmare: 4.0 }
+
 export function buildDungeonEncounter(dungeon) {
   return {
     id: dungeon.id,
     name: dungeon.name,
     tier: dungeon.tier,
     difficulty: dungeon.difficulty,
-    enemies:   DUNGEON_ENEMY_POOLS[dungeon.enemyPoolId] ?? DUNGEON_ENEMY_POOLS.easy_1,
-    mechanics: POOL_MECHANICS[dungeon.enemyPoolId] ?? [],
-    rewards:   dungeon.rewards,
+    enemies:    DUNGEON_ENEMY_POOLS[dungeon.enemyPoolId] ?? DUNGEON_ENEMY_POOLS.easy_1,
+    enemyScale: ENEMY_SCALE[dungeon.tier] ?? 1.0,
+    mechanics:  POOL_MECHANICS[dungeon.enemyPoolId] ?? [],
+    rewards:    dungeon.rewards,
     isDungeon: true,
     dungeonId: dungeon.id,
   }
