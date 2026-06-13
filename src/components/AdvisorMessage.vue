@@ -180,4 +180,10 @@ watch(() => advisor.currentMessage, (msg) => typeText(msg), { flush: 'post' })
 .advisor-slide-leave-active { transition: transform 0.25s ease-in, opacity 0.2s ease; }
 .advisor-slide-enter-from  { transform: translateX(-40px); opacity: 0; }
 .advisor-slide-leave-to    { transform: translateX(-20px); opacity: 0; }
+
+@media (max-width: 640px) {
+  .advisor-wrap  { bottom: 14px; left: 10px; }
+  .advisor-frame { width: min(340px, calc(100vw - 20px)); }
+  .advisor-message { font-size: 0.65rem; }
+}
 </style>
