@@ -137,7 +137,7 @@ export const useCollectionStore = defineStore('collection', () => {
   }, { deep: true })
 
   function unlockAll() {
-    const allKeys = Object.keys(HERO_TEMPLATES)
+    const allKeys = Object.keys(HERO_TEMPLATES).filter(k => HERO_TEMPLATES[k]().isPlayer)
     for (const key of allKeys) {
       if (!ownedKeys.value.includes(key)) ownedKeys.value = [...ownedKeys.value, key]
     }
