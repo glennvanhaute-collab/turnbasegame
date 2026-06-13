@@ -107,6 +107,16 @@ export const HERO_TEMPLATES = {
     isPlayer: true,
   }),
 
+  ALDRIC_MARKSMAN: () => new Hero({
+    id: 'aldric_marksman', name: 'Aldric Marksman',
+    faction: Faction.ALDRIC, rarity: Rarity.RARE, affinity: Affinity.FORCE,
+    baseHp: 15000, baseAtk: 1200, baseDef: 600, baseSpd: 96,
+    critRate: 0.22, critDmg: 0.58,
+    skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
+    artisanSkills: [ARTISAN.leatherworking],
+    isPlayer: true,
+  }),
+
   GWENDAL: () => new Hero({
     id: 'gwendal', name: 'Gwendal Ironvow',
     faction: Faction.ALDRIC, rarity: Rarity.EPIC, affinity: Affinity.FORCE,
@@ -215,6 +225,15 @@ export const HERO_TEMPLATES = {
     baseHp: 13000, baseAtk: 1250, baseDef: 600, baseSpd: 110,
     critRate: 0.28, critDmg: 0.60,
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
+    artisanSkills: [ARTISAN.herbalism],
+    isPlayer: true,
+  }),
+
+  CAELWYN_HERBALIST: () => new Hero({
+    id: 'caelwyn_herbalist', name: 'Caelwyn Herbalist',
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
+    baseHp: 16000, baseAtk: 850, baseDef: 750, baseSpd: 106,
+    skills: [SKILLS.MEND, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true,
   }),
@@ -525,11 +544,13 @@ export const RECRUIT_POOL = [
   // ── Rare ─────────────────────────────────────────────────────────
   { key: 'DURWALD',             rarity: 'Rare' },
   { key: 'SIR_HADVAR',          rarity: 'Rare' },
+  { key: 'ALDRIC_MARKSMAN',     rarity: 'Rare' },
   { key: 'DRAVEN_SPELLBLADE',   rarity: 'Rare' },
   { key: 'ELARA',               rarity: 'Rare' },
   { key: 'MIRENA',              rarity: 'Rare' },
   { key: 'CAELWYN_WARDEN',      rarity: 'Rare' },
   { key: 'LYRETH',              rarity: 'Rare' },
+  { key: 'CAELWYN_HERBALIST',   rarity: 'Rare' },
   { key: 'MIRA',                rarity: 'Rare' },
   { key: 'ZARETH',              rarity: 'Rare' },
   { key: 'SERIX',               rarity: 'Rare' },
