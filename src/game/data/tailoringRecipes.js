@@ -1,4 +1,4 @@
-import { GearType, GearSlot } from '../Gear.js'
+import { GearType, GearSlot, WeaponType } from '../Gear.js'
 
 // materialCost: { clothId: amount } — processed cloth bolts consumed per craft
 // armorType: 'cloth' makes these count toward the cloth set bonus
@@ -240,3 +240,64 @@ export const TAILORING_RECIPE_TIERS = [
 export const TAILORING_BY_ID = Object.fromEntries(TAILORING_RECIPES.map(r => [r.id, r]))
 
 export const TAILORING_XP_PER_TIER = { copper: 8, tin: 14, steel: 22, darksteel: 36, mithril: 55, moonsilver: 90 }
+
+// ── Stave recipes — crafted from dungeon essences, no woodworking required ──
+// essenceCost: { essenceId: amount } consumed from resources.upgradeComponents
+export const STAVE_RECIPES = [
+  {
+    id: 'copper_stave',      name: 'Copper Stave',
+    tier: 'copper',          slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON, weaponType: WeaponType.STAFF, armorType: 'cloth',
+    craftDiscipline: 'tailoring',
+    desc: 'Copper-threaded hardwood, coaxed into resonance by crushed essence. A mage\'s first real weapon.',
+    essenceCost: { copper_essence: 2 },
+    baseStats: { atk: 100, critRate: 0.03 }, rarity: 'Common',
+  },
+  {
+    id: 'tin_stave',         name: 'Tin Stave',
+    tier: 'tin',             slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON, weaponType: WeaponType.STAFF, armorType: 'cloth',
+    craftDiscipline: 'tailoring',
+    desc: 'Tin essence gives the wood a faint harmonic hum. Spells flow through it more willingly.',
+    essenceCost: { tin_essence: 2 },
+    baseStats: { atk: 135, critRate: 0.04 }, rarity: 'Uncommon',
+  },
+  {
+    id: 'steel_stave',       name: 'Steel Stave',
+    tier: 'steel',           slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON, weaponType: WeaponType.STAFF, armorType: 'cloth',
+    craftDiscipline: 'tailoring',
+    desc: 'Steel essence fused into the grain. The wood no longer bends — it commands.',
+    essenceCost: { steel_essence: 2 },
+    baseStats: { atk: 182, critRate: 0.05 }, rarity: 'Rare',
+  },
+  {
+    id: 'darksteel_stave',   name: 'Darksteel Stave',
+    tier: 'darksteel',       slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON, weaponType: WeaponType.STAFF, armorType: 'cloth',
+    craftDiscipline: 'tailoring',
+    desc: 'Void-tempered essence bleeds into every crack. It strikes before the spell is cast.',
+    essenceCost: { darksteel_essence: 2 },
+    baseStats: { atk: 246, critRate: 0.06 }, rarity: 'Epic',
+  },
+  {
+    id: 'mithril_stave',     name: 'Mithril Stave',
+    tier: 'mithril',         slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON, weaponType: WeaponType.STAFF, armorType: 'cloth',
+    craftDiscipline: 'tailoring',
+    desc: 'Mithril resonance crystallised into the core. Every crit feels inevitable.',
+    essenceCost: { mithril_essence: 3 },
+    baseStats: { atk: 332, critRate: 0.07 }, rarity: 'Legendary',
+  },
+  {
+    id: 'moonsilver_stave',  name: 'Moonsilver Stave',
+    tier: 'moonsilver',      slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON, weaponType: WeaponType.STAFF, armorType: 'cloth',
+    craftDiscipline: 'tailoring',
+    desc: 'Moonsilver essence cannot be contained — it chose this staff. You just hold it.',
+    essenceCost: { moonsilver_essence: 3 },
+    baseStats: { atk: 450, critRate: 0.08 }, rarity: 'Legendary',
+  },
+]
+
+export const STAVE_BY_ID = Object.fromEntries(STAVE_RECIPES.map(r => [r.id, r]))

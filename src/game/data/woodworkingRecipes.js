@@ -1,9 +1,8 @@
 import { GearSlot, GearType, WeaponType } from '../Gear.js'
 import { WOODS } from './woods.js'
 
-// Unstrung bows and unimbued staves per wood tier.
-// unfinished: true marks items that need a second crafting step to reach full power.
-// Bows need a Tailoring bowstring to complete; staves need Runesmithing to imbue.
+// Bows only — strung with a Tailoring bowstring to complete.
+// Staves moved to Tailoring and crafted from dungeon essences.
 
 export const WOODWORKING_RECIPES = [
   // ── Pine (Common) ────────────────────────────────────────────────
@@ -21,21 +20,6 @@ export const WOODWORKING_RECIPES = [
     baseStats: { atk: 100, spd: 6 },
     rarity: 'Common',
   },
-  {
-    id: 'pine_staff_unimbued',
-    name: 'Pine Staff',
-    tier: 'pine',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.STAFF,
-    armorType: 'cloth',
-    desc: 'A rough-carved wooden staff. Without rune inscription it is just a walking stick.',
-    logCost: { pine: 3 },
-    baseStats: { atk: 80, critRate: 0.03 },
-    rarity: 'Common',
-    unfinished: true,
-    finishType: 'imbue',
-  },
 
   // ── Oak (Uncommon) ───────────────────────────────────────────────
   {
@@ -51,21 +35,6 @@ export const WOODWORKING_RECIPES = [
     bowstringCost: 'wool',
     baseStats: { atk: 135, spd: 8 },
     rarity: 'Uncommon',
-  },
-  {
-    id: 'oak_staff_unimbued',
-    name: 'Oak Staff',
-    tier: 'oak',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.STAFF,
-    armorType: 'cloth',
-    desc: 'Carved from a gnarled oak root. The wood holds power well, waiting for a rune.',
-    logCost: { oak: 4 },
-    baseStats: { atk: 108, critRate: 0.04 },
-    rarity: 'Uncommon',
-    unfinished: true,
-    finishType: 'imbue',
   },
 
   // ── Yew (Rare) ───────────────────────────────────────────────────
@@ -83,21 +52,6 @@ export const WOODWORKING_RECIPES = [
     baseStats: { atk: 182, spd: 10 },
     rarity: 'Rare',
   },
-  {
-    id: 'yew_staff_unimbued',
-    name: 'Yew Staff',
-    tier: 'yew',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.STAFF,
-    armorType: 'cloth',
-    desc: 'Ancient yew carries old resonance. The rune inscription will find a willing host.',
-    logCost: { yew: 5 },
-    baseStats: { atk: 146, critRate: 0.05 },
-    rarity: 'Rare',
-    unfinished: true,
-    finishType: 'imbue',
-  },
 
   // ── Ashwood (Epic) ───────────────────────────────────────────────
   {
@@ -113,21 +67,6 @@ export const WOODWORKING_RECIPES = [
     bowstringCost: 'shadowcloth',
     baseStats: { atk: 246, spd: 13 },
     rarity: 'Epic',
-  },
-  {
-    id: 'ashwood_staff_unimbued',
-    name: 'Ashwood Staff',
-    tier: 'ashwood',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.STAFF,
-    armorType: 'cloth',
-    desc: 'Pale grey and almost luminous. The wood seems to gather light around the rune groove.',
-    logCost: { ashwood: 6 },
-    baseStats: { atk: 197, critRate: 0.06 },
-    rarity: 'Epic',
-    unfinished: true,
-    finishType: 'imbue',
   },
 
   // ── Ironwood (Legendary) ─────────────────────────────────────────
@@ -145,21 +84,6 @@ export const WOODWORKING_RECIPES = [
     baseStats: { atk: 332, spd: 17 },
     rarity: 'Legendary',
   },
-  {
-    id: 'ironwood_staff_unimbued',
-    name: 'Ironwood Staff',
-    tier: 'ironwood',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.STAFF,
-    armorType: 'cloth',
-    desc: 'Heavy with unspent potential. The right inscription will make it terrifying.',
-    logCost: { ironwood: 7 },
-    baseStats: { atk: 266, critRate: 0.07 },
-    rarity: 'Legendary',
-    unfinished: true,
-    finishType: 'imbue',
-  },
 
   // ── Dragonwood (Legendary) ───────────────────────────────────────
   {
@@ -175,21 +99,6 @@ export const WOODWORKING_RECIPES = [
     bowstringCost: 'moonweave',
     baseStats: { atk: 450, spd: 22 },
     rarity: 'Legendary',
-  },
-  {
-    id: 'dragonwood_staff_unimbued',
-    name: 'Dragonwood Staff',
-    tier: 'dragonwood',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.STAFF,
-    armorType: 'cloth',
-    desc: 'Searing to hold without protection. Whatever rune is carved here will be permanent.',
-    logCost: { dragonwood: 8 },
-    baseStats: { atk: 360, critRate: 0.08 },
-    rarity: 'Legendary',
-    unfinished: true,
-    finishType: 'imbue',
   },
 ]
 
