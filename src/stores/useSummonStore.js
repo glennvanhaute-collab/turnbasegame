@@ -28,7 +28,7 @@ export const PORTALS = {
 }
 
 const RARITY_ORDER = [
-  Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY, Rarity.MYTHICAL,
+  Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY, Rarity.MYTHICAL,
 ]
 
 function rarityIndex(r) { return RARITY_ORDER.indexOf(r) }

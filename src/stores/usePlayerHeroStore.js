@@ -29,8 +29,6 @@ const RARITY_THRESHOLDS = [
 
 // Floor level for each rarity — soul-bound heroes scale from at least this level
 export const RARITY_FLOOR_LEVEL = {
-  [Rarity.COMMON]:    1,
-  [Rarity.UNCOMMON]:  1,
   [Rarity.RARE]:      1,
   [Rarity.EPIC]:      26,
   [Rarity.LEGENDARY]: 61,

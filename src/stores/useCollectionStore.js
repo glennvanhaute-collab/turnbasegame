@@ -53,7 +53,7 @@ export const useCollectionStore = defineStore('collection', () => {
     }).filter(Boolean)
   )
 
-  const RARITY_RANK = { Ancient: -1, Mythical: 0, Legendary: 1, Epic: 2, Rare: 3, Uncommon: 4, Common: 5 }
+  const RARITY_RANK = { Ancient: -1, Mythical: 0, Legendary: 1, Epic: 2, Rare: 3 }
 
   const filteredRoster = computed(() => {
     const inventory = useInventoryStore()
@@ -183,7 +183,7 @@ export const useCollectionStore = defineStore('collection', () => {
     isFull, isReady, detailEntry,
     MAX_TEAM_SIZE,
     FACTIONS: Object.values(Faction),
-    RARITIES: Object.values(Rarity),
+    RARITIES: Object.values(Rarity).filter(r => r !== 'Common' && r !== 'Uncommon'),
     AFFINITIES: Object.values(Affinity),
     starterChosen, claimStarterHero,
     ownsHero, addToRoster, addPlayerCharacter, unlockAll,
