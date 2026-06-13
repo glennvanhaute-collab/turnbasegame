@@ -4,6 +4,10 @@
     <div class="smith-bg" :style="{ backgroundImage: `url(${arsenalBg})` }" />
     <div class="smith-overlay" />
 
+    <!-- ── Left drawer (recipe + stockpile) ── -->
+    <div class="mob-drawer-backdrop" v-if="drawerOpen" @click="drawerOpen = false" />
+    <div class="side-drawer" :class="{ open: drawerOpen }">
+
     <!-- ── Left: Recipe list ───────────────────────────────────────── -->
     <aside class="recipe-panel">
       <div class="panel-label">Recipes</div>
@@ -115,6 +119,11 @@
 
     <!-- ── Center: Forge area ─────────────────────────────────────── -->
     <main class="forge-area">
+
+      <!-- Mobile drawer toggle -->
+      <button class="mob-drawer-toggle" @click="drawerOpen = !drawerOpen" :class="{ open: drawerOpen }">
+        <span>{{ drawerOpen ? '‹' : '⚒' }}</span>
+      </button>
 
       <!-- ── SMELT MODE ── -->
       <template v-if="selectedType === 'smelt' && selectedBar">
@@ -553,6 +562,8 @@
       </div>
     </aside>
 
+    </div><!-- /side-drawer -->
+
   </div>
 </template>
 
@@ -627,6 +638,7 @@ const collection = useCollectionStore()
 const artisan    = useArtisanStore()
 
 const showSmithPicker = ref(false)
+const drawerOpen      = ref(false)
 
 const eligibleSmiths = computed(() =>
   collection.roster.filter(({ hero }) =>
@@ -1533,20 +1545,87 @@ function forgeFullSet(tier) {
 .ore-row.active { background: color-mix(in srgb, var(--ore-color) 15%, transparent); border-color: color-mix(in srgb, var(--ore-color) 55%, transparent); }
 .ore-smelt-arrow { font-size: 0.65rem; color: var(--ore-color); opacity: 0.7; flex-shrink: 0; }
 
-/* ── Mobile ── */
+/* ── Mobile drawer layout ── */
+.mob-drawer-toggle { display: none; }
+.mob-drawer-backdrop { display: none; }
+
 @media (max-width: 640px) {
-  .blacksmith { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+  /* Drawer toggle — tab handle on left edge of forge */
+  .mob-drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 56px;
+    background: rgba(4,2,1,0.92);
+    border: 1px solid var(--border-gold);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    color: var(--gold);
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 25;
+    transition: background 0.15s;
+    padding: 0;
+  }
+  .mob-drawer-toggle:hover { background: rgba(20,10,2,0.98); }
+  .mob-drawer-toggle.open { left: 240px; border-radius: 0 8px 8px 0; }
+
+  /* Backdrop */
+  .mob-drawer-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    background: rgba(0,0,0,0.45);
+  }
+
+  /* Drawer container */
+  .side-drawer {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 240px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+  }
+  .side-drawer.open { transform: translateX(0); }
+
+  /* Panels inside drawer */
   .recipe-panel {
-    width: 100%; border-right: none; border-bottom: 1px solid var(--border-gold);
-    max-height: 220px; flex-shrink: 0;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-gold);
+    max-height: none;
+    flex: 1;
+    overflow-y: auto;
   }
   .ore-panel {
-    width: 100%; border-left: none; border-top: 1px solid var(--border-gold);
-    flex-shrink: 0; max-height: 260px;
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid rgba(201,162,39,0.2);
+    flex-shrink: 0;
+    max-height: 220px;
+    overflow-y: auto;
   }
-  .forge-area { padding: 12px 10px; width: 100%; }
+
+  /* Forge area fills all available space */
+  .forge-area {
+    padding: 12px 14px 20px 36px;
+    width: 100%;
+    overflow-y: auto;
+  }
   .forge-details { flex-direction: column; max-width: 100%; }
   .forge-col { flex: none; }
   .stars-track { max-width: 100%; }
+  .forge-smith-bar { max-width: 100%; }
+  .smith-xp-bar { max-width: 100%; }
 }
 </style>
