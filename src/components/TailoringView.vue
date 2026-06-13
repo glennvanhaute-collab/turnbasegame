@@ -1,8 +1,14 @@
 <template>
-  <div class="tailoring">
+  <div class="tailoring" :class="{ 'drawer-open': drawerOpen }">
 
     <div class="tailoring-bg" :style="{ backgroundImage: `url(${bg})` }" />
     <div class="tailoring-overlay" />
+    <div class="mob-drawer-backdrop" v-if="drawerOpen" @click="drawerOpen = false" />
+
+    <!-- Mobile drawer toggle -->
+    <button class="mob-drawer-toggle" @click="drawerOpen = !drawerOpen" :class="{ open: drawerOpen }">
+      <span>{{ drawerOpen ? '‹' : '🧵' }}</span>
+    </button>
 
     <!-- ── Left: Recipe list ────────────────────────────────────── -->
     <aside class="recipe-panel">
@@ -392,6 +398,7 @@ const artisan    = useArtisanStore()
 const collection = useCollectionStore()
 
 const showPicker  = ref(false)
+const drawerOpen   = ref(typeof window !== 'undefined' && window.innerWidth <= 640)
 const selectedType = ref(null)  // 'weave' | 'craft' | null
 const selectedId   = ref(null)
 const weaveQty     = ref(1)
@@ -408,8 +415,8 @@ const selectedTierName  = computed(() => TAILORING_RECIPE_TIERS.find(t => t.id =
 const openTier = ref(null)
 function toggleTier(id) { openTier.value = openTier.value === id ? null : id }
 
-function selectWeave(cloth)   { selectedType.value = 'weave'; selectedId.value = cloth.id  }
-function selectCraft(recipe)  { selectedType.value = 'craft'; selectedId.value = recipe.id }
+function selectWeave(cloth)   { selectedType.value = 'weave'; selectedId.value = cloth.id;   drawerOpen.value = false }
+function selectCraft(recipe)  { selectedType.value = 'craft'; selectedId.value = recipe.id; drawerOpen.value = false }
 
 function canAffordBowstring(bs) {
   return (resources.cloths[bs.clothId] ?? 0) >= bs.clothCost
@@ -882,11 +889,55 @@ function craftFullSet(tier) {
 .stock-row.active { background: color-mix(in srgb, var(--mat-color) 15%, transparent); border-color: color-mix(in srgb, var(--mat-color) 55%, transparent); }
 .stock-arrow { font-size: 0.65rem; color: var(--mat-color); opacity: 0.7; flex-shrink: 0; }
 
-/* ── Mobile ── */
+/* ── Mobile drawer ── */
+.mob-drawer-toggle  { display: none; }
+.mob-drawer-backdrop { display: none; }
+
 @media (max-width: 640px) {
-  .tailoring { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
-  .recipe-panel { width: 100%; border-right: none; border-bottom: 1px solid rgba(160,128,224,0.25); max-height: 200px; flex-shrink: 0; }
-  .stock-panel { width: 100%; border-left: none; border-top: 1px solid rgba(160,128,224,0.25); flex-shrink: 0; max-height: 220px; }
+  .recipe-panel {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 240px;
+    max-height: none;
+    z-index: 20;
+    border-right: 1px solid rgba(160,128,224,0.4);
+    border-bottom: none;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+  }
+  .tailoring.drawer-open .recipe-panel { transform: translateX(0); }
+  .stock-panel { display: none; }
+  .mob-drawer-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    background: rgba(0,0,0,0.5);
+  }
+  .mob-drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 56px;
+    background: rgba(4,2,12,0.92);
+    border: 1px solid rgba(160,128,224,0.4);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    color: #c0a0ff;
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 25;
+    padding: 0;
+    transition: background 0.15s;
+  }
+  .mob-drawer-toggle:hover { background: rgba(20,10,40,0.98); }
+  .mob-drawer-toggle.open  { left: 240px; }
   .work-area { padding: 12px 10px; }
 }
 </style>

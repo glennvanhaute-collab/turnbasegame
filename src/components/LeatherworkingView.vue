@@ -1,8 +1,14 @@
 <template>
-  <div class="tannery">
+  <div class="tannery" :class="{ 'drawer-open': drawerOpen }">
 
     <div class="tannery-bg" :style="{ backgroundImage: `url(${bg})` }" />
     <div class="tannery-overlay" />
+    <div class="mob-drawer-backdrop" v-if="drawerOpen" @click="drawerOpen = false" />
+
+    <!-- Mobile drawer toggle -->
+    <button class="mob-drawer-toggle" @click="drawerOpen = !drawerOpen" :class="{ open: drawerOpen }">
+      <span>{{ drawerOpen ? '‹' : '🪡' }}</span>
+    </button>
 
     <!-- ── Left: Recipe list ────────────────────────────────────── -->
     <aside class="recipe-panel">
@@ -373,6 +379,7 @@ const artisan    = useArtisanStore()
 const collection = useCollectionStore()
 
 const showPicker = ref(false)
+const drawerOpen  = ref(typeof window !== 'undefined' && window.innerWidth <= 640)
 const selectedType = ref(null)  // 'tan' | 'craft' | null
 const selectedId   = ref(null)
 const tanQty       = ref(1)
@@ -389,8 +396,8 @@ const selectedTierName  = computed(() => LEATHER_RECIPE_TIERS.find(t => t.id ===
 const openTier = ref(null)
 function toggleTier(id) { openTier.value = openTier.value === id ? null : id }
 
-function selectTan(leather)    { selectedType.value = 'tan';   selectedId.value = leather.id }
-function selectCraft(recipe)   { selectedType.value = 'craft'; selectedId.value = recipe.id  }
+function selectTan(leather)    { selectedType.value = 'tan';   selectedId.value = leather.id;  drawerOpen.value = false }
+function selectCraft(recipe)   { selectedType.value = 'craft'; selectedId.value = recipe.id; drawerOpen.value = false }
 
 function canAfford(recipe) {
   if (!recipe?.materialCost) return false
@@ -850,10 +857,55 @@ function craftFullSet(tier) {
 .stock-arrow { font-size: 0.65rem; color: var(--mat-color); opacity: 0.7; flex-shrink: 0; }
 
 /* ── Mobile ── */
+/* ── Mobile drawer ── */
+.mob-drawer-toggle  { display: none; }
+.mob-drawer-backdrop { display: none; }
+
 @media (max-width: 640px) {
-  .tannery { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
-  .recipe-panel { width: 100%; border-right: none; border-bottom: 1px solid rgba(200,144,110,0.3); max-height: 200px; flex-shrink: 0; }
-  .stock-panel { width: 100%; border-left: none; border-top: 1px solid rgba(200,144,110,0.3); flex-shrink: 0; max-height: 220px; }
+  .recipe-panel {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 240px;
+    max-height: none;
+    z-index: 20;
+    border-right: 1px solid rgba(200,144,110,0.4);
+    border-bottom: none;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+  }
+  .tannery.drawer-open .recipe-panel { transform: translateX(0); }
+  .stock-panel { display: none; }
+  .mob-drawer-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    background: rgba(0,0,0,0.5);
+  }
+  .mob-drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 56px;
+    background: rgba(4,2,1,0.92);
+    border: 1px solid rgba(200,144,110,0.4);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    color: #c8906e;
+    font-size: 0.9rem;
+    cursor: pointer;
+    z-index: 25;
+    padding: 0;
+    transition: background 0.15s;
+  }
+  .mob-drawer-toggle:hover { background: rgba(20,10,2,0.98); }
+  .mob-drawer-toggle.open  { left: 240px; }
   .work-area { padding: 12px 10px; }
 }
 </style>
