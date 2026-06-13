@@ -161,6 +161,12 @@ export const useCollectionStore = defineStore('collection', () => {
         ? playerHero.buildHeroInstance()
         : HERO_TEMPLATES[key]?.()
       if (!hero) return null
+      // Apply gear onto base stats first, then scale — so flat gear bonuses multiply with level.
+      // Player character stats are baked into buildHeroInstance() instead of using applyLevelScale,
+      // so we pass levelMultiplier as flatScale to keep gear proportionally relevant for them too.
+      const { stats, damageReduction, activePassives } = inventory.computeGearStats(key)
+      const flatScale = key === 'PLAYER_CHARACTER' ? playerHero.levelMultiplier : 1
+      hero.applyGear(stats, damageReduction, flatScale)
       // Soul Vessel: scale stats alongside player hero's level
       if (key !== 'PLAYER_CHARACTER' && inventory.isProgressive(key)) {
         const floorLevel      = RARITY_FLOOR_LEVEL[hero.rarity] ?? 1
@@ -168,8 +174,6 @@ export const useCollectionStore = defineStore('collection', () => {
         const effectiveMult   = Math.max(playerHero.levelMultiplier, floorMultiplier)
         hero.applyLevelScale(effectiveMult)
       }
-      const { stats, damageReduction, activePassives } = inventory.computeGearStats(key)
-      hero.applyGear(stats, damageReduction)
       hero.passives = activePassives ?? new Set()
       return hero
     }).filter(Boolean)

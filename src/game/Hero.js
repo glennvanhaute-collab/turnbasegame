@@ -107,12 +107,14 @@ export class Hero {
 
   // Called by useCollectionStore.buildTeam() before battle starts.
   // Folds all gear stat bonuses into this hero's base stats (one-time, not reversible).
-  applyGear(gearStats, damageReduction = 0) {
+  // flatScale: multiplies flat stat additions (hp/atk/def/spd) so gear stays relevant
+  // as the hero's level grows. Pct bonuses and non-scaling stats are unaffected.
+  applyGear(gearStats, damageReduction = 0, flatScale = 1) {
     const g = gearStats
-    this.baseHp   = Math.floor(this.baseHp   * (1 + (g.hpPct  ?? 0)) + (g.hp  ?? 0))
-    this.baseAtk  = Math.floor(this.baseAtk  * (1 + (g.atkPct ?? 0)) + (g.atk ?? 0))
-    this.baseDef  = Math.floor(this.baseDef  * (1 + (g.defPct ?? 0)) + (g.def ?? 0))
-    this.baseSpd  = Math.floor(this.baseSpd  * (1 + (g.spdPct ?? 0)) + (g.spd ?? 0))
+    this.baseHp   = Math.floor(this.baseHp   * (1 + (g.hpPct  ?? 0)) + (g.hp  ?? 0) * flatScale)
+    this.baseAtk  = Math.floor(this.baseAtk  * (1 + (g.atkPct ?? 0)) + (g.atk ?? 0) * flatScale)
+    this.baseDef  = Math.floor(this.baseDef  * (1 + (g.defPct ?? 0)) + (g.def ?? 0) * flatScale)
+    this.baseSpd  = Math.floor(this.baseSpd  * (1 + (g.spdPct ?? 0)) + (g.spd ?? 0) * flatScale)
     this.critRate = Math.min(0.95, this.critRate + (g.critRate    ?? 0))
     this.critDmg  += g.critDmg    ?? 0
     this.resistance = Math.min(1, this.resistance + (g.resistance ?? 0))
