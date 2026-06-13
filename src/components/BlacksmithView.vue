@@ -1,12 +1,9 @@
 <template>
-  <div class="blacksmith">
+  <div class="blacksmith" :class="{ 'drawer-open': drawerOpen }">
 
     <div class="smith-bg" :style="{ backgroundImage: `url(${arsenalBg})` }" />
     <div class="smith-overlay" />
-
-    <!-- ── Left drawer (recipe + stockpile) ── -->
     <div class="mob-drawer-backdrop" v-if="drawerOpen" @click="drawerOpen = false" />
-    <div class="side-drawer" :class="{ open: drawerOpen }">
 
     <!-- ── Left: Recipe list ───────────────────────────────────────── -->
     <aside class="recipe-panel">
@@ -561,8 +558,6 @@
         </div>
       </div>
     </aside>
-
-    </div><!-- /side-drawer -->
 
   </div>
 </template>
@@ -1546,16 +1541,39 @@ function forgeFullSet(tier) {
 .ore-row.active { background: color-mix(in srgb, var(--ore-color) 15%, transparent); border-color: color-mix(in srgb, var(--ore-color) 55%, transparent); }
 .ore-smelt-arrow { font-size: 0.65rem; color: var(--ore-color); opacity: 0.7; flex-shrink: 0; }
 
-/* ── Drawer wrapper: transparent on desktop, positioned container on mobile ── */
-.side-drawer { display: contents; }
-/* Push ore panel after forge-area in both desktop flex and mobile drawer */
-.ore-panel { order: 10; }
-
-.mob-drawer-toggle { display: none; }
+/* ── Mobile drawer ── */
+.mob-drawer-toggle  { display: none; }
 .mob-drawer-backdrop { display: none; }
 
 @media (max-width: 640px) {
-  /* Drawer toggle — tab handle on left edge of forge */
+  /* Recipe panel slides in from the left */
+  .recipe-panel {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 240px;
+    max-height: none;
+    z-index: 20;
+    border-right: 1px solid var(--border-gold);
+    border-bottom: none;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow-y: auto;
+  }
+  .blacksmith.drawer-open .recipe-panel { transform: translateX(0); }
+
+  /* Stockpile hidden on mobile — visible in Arsenal → Inventory → Resources */
+  .ore-panel { display: none; }
+
+  /* Backdrop behind drawer */
+  .mob-drawer-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 18;
+    background: rgba(0,0,0,0.5);
+  }
+
+  /* Toggle handle tab on the left edge of the forge */
   .mob-drawer-toggle {
     display: flex;
     align-items: center;
@@ -1574,63 +1592,20 @@ function forgeFullSet(tier) {
     font-size: 0.9rem;
     cursor: pointer;
     z-index: 25;
-    transition: background 0.15s;
     padding: 0;
+    transition: background 0.15s;
   }
-  .mob-drawer-toggle:hover { background: rgba(20,10,2,0.98); }
-  .mob-drawer-toggle.open { left: 240px; border-radius: 0 8px 8px 0; }
+  .mob-drawer-toggle:hover   { background: rgba(20,10,2,0.98); }
+  .mob-drawer-toggle.open    { left: 240px; }
 
-  /* Backdrop */
-  .mob-drawer-backdrop {
-    display: block;
-    position: absolute;
-    inset: 0;
-    z-index: 18;
-    background: rgba(0,0,0,0.45);
-  }
-
-  /* Drawer container */
-  .side-drawer {
-    position: absolute;
-    top: 0; left: 0; bottom: 0;
-    width: 240px;
-    z-index: 20;
-    display: flex;
-    flex-direction: column;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-    overflow: hidden;
-  }
-  .side-drawer.open { transform: translateX(0); }
-
-  /* Panels inside drawer */
-  .recipe-panel {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-gold);
-    max-height: none;
-    flex: 1;
-    overflow-y: auto;
-  }
-  .ore-panel {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid rgba(201,162,39,0.2);
-    flex-shrink: 0;
-    max-height: 220px;
-    overflow-y: auto;
-  }
-
-  /* Forge area fills all available space */
+  /* Forge area takes full width, left padding makes room for the toggle tab */
   .forge-area {
-    padding: 12px 14px 20px 36px;
-    width: 100%;
+    padding: 12px 14px 20px 34px;
     overflow-y: auto;
   }
   .forge-details { flex-direction: column; max-width: 100%; }
   .forge-col { flex: none; }
-  .stars-track { max-width: 100%; }
   .forge-smith-bar { max-width: 100%; }
-  .smith-xp-bar { max-width: 100%; }
+  .smith-xp-bar    { max-width: 100%; }
 }
 </style>
