@@ -638,7 +638,8 @@ const collection = useCollectionStore()
 const artisan    = useArtisanStore()
 
 const showSmithPicker = ref(false)
-const drawerOpen      = ref(false)
+// Open by default on mobile so recipes are immediately visible
+const drawerOpen = ref(typeof window !== 'undefined' && window.innerWidth <= 640)
 
 const eligibleSmiths = computed(() =>
   collection.roster.filter(({ hero }) =>
@@ -800,8 +801,8 @@ onMounted(() => {
   }
 })
 
-function selectSmelt(bar)    { selectedType.value = 'smelt';   selectedId.value = bar.id }
-function selectForge(recipe) { selectedType.value = 'forge';   selectedId.value = recipe.id }
+function selectSmelt(bar)    { selectedType.value = 'smelt'; selectedId.value = bar.id;    drawerOpen.value = false }
+function selectForge(recipe) { selectedType.value = 'forge'; selectedId.value = recipe.id; drawerOpen.value = false }
 function canAfford(recipe) {
   if (!recipe?.barCost) return false
   return Object.entries(recipe.barCost).every(([id, amt]) => (resources.bars[id] ?? 0) >= amt)
@@ -1545,7 +1546,11 @@ function forgeFullSet(tier) {
 .ore-row.active { background: color-mix(in srgb, var(--ore-color) 15%, transparent); border-color: color-mix(in srgb, var(--ore-color) 55%, transparent); }
 .ore-smelt-arrow { font-size: 0.65rem; color: var(--ore-color); opacity: 0.7; flex-shrink: 0; }
 
-/* ── Mobile drawer layout ── */
+/* ── Drawer wrapper: transparent on desktop, positioned container on mobile ── */
+.side-drawer { display: contents; }
+/* Push ore panel after forge-area in both desktop flex and mobile drawer */
+.ore-panel { order: 10; }
+
 .mob-drawer-toggle { display: none; }
 .mob-drawer-backdrop { display: none; }
 
