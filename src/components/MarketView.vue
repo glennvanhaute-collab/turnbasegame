@@ -23,10 +23,10 @@
       </div>
       <button
         class="btn-sell-all"
-        v-if="filterRarity !== '' && sellableInFilter.length > 0"
+        v-if="sellableInFilter.length > 0"
         @click="confirmSellAll"
       >
-        Sell All {{ filterRarity }} · 🪙 {{ totalSellValue.toLocaleString() }}
+        Sell All{{ filterRarity ? ' ' + filterRarity : '' }} · 🪙 {{ totalSellValue.toLocaleString() }}
       </button>
     </div>
 
