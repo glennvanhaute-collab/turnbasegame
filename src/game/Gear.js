@@ -68,6 +68,9 @@ export const SLOT_LABELS = {
   [GearSlot.GLOVES]:    'Gloves',
 }
 
+// Weapon types that occupy both hands — off-hand is blocked while one is equipped
+export const TWO_HANDED_WEAPON_TYPES = new Set(['staff'])
+
 // Bonus applied when both hands hold weapons
 export const DUAL_WIELD_BONUS = {
   atkPct:   0.15,  // +15% ATK

@@ -8,24 +8,44 @@ export const ORES = {
 
 export const ORE_LIST = Object.values(ORES)
 
-// Returns array of { oreId, amount } based on encounter difficulty.
-// Primary drop is not guaranteed — each difficulty has a base miss chance.
+// Returns array of { oreId, amount } based on dungeon difficulty.
+// Each dungeon tier maps to its matching ore tier — no gold, ore is the reward.
 export function rollOreDrops(difficulty) {
   const drops = []
   const d = difficulty?.toLowerCase() ?? 'easy'
 
   if (d === 'easy') {
-    if (Math.random() < 0.65) drops.push({ oreId: 'copper', amount: rand(1, 3) })
+    if (Math.random() < 0.85) drops.push({ oreId: 'copper', amount: rand(2, 4) })
+    if (Math.random() < 0.65) drops.push({ oreId: 'tin',    amount: rand(1, 3) })
   } else if (d === 'normal' || d === 'medium') {
-    if (Math.random() < 0.60) drops.push({ oreId: 'copper', amount: rand(1, 2) })
-    if (Math.random() < 0.80) drops.push({ oreId: 'tin', amount: rand(1, 2) })
+    if (Math.random() < 0.80) drops.push({ oreId: 'steel',    amount: rand(1, 3) })
   } else if (d === 'hard') {
-    if (Math.random() < 0.75) drops.push({ oreId: 'tin', amount: rand(1, 2) })
-    if (Math.random() < 0.35) drops.push({ oreId: 'steel', amount: 1 })
+    if (Math.random() < 0.80) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
   } else if (d === 'nightmare') {
-    if (Math.random() < 0.80) drops.push({ oreId: 'steel', amount: rand(1, 2) })
-    if (Math.random() < 0.45) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
-    if (Math.random() < 0.03) drops.push({ oreId: 'mithril', amount: 1 })
+    if (Math.random() < 0.75) drops.push({ oreId: 'mithril',  amount: rand(1, 2) })
+  }
+
+  return drops
+}
+
+// Training grounds ore drops — capped at steel, scales with encounter difficulty.
+export function rollTrainingOreDrops(difficulty) {
+  const drops = []
+  const d = difficulty?.toLowerCase() ?? 'easy'
+
+  if (d === 'easy') {
+    if (Math.random() < 0.60) drops.push({ oreId: 'copper', amount: rand(1, 2) })
+    if (Math.random() < 0.30) drops.push({ oreId: 'tin',    amount: rand(1, 2) })
+  } else if (d === 'normal') {
+    if (Math.random() < 0.85) drops.push({ oreId: 'copper', amount: rand(2, 4) })
+    if (Math.random() < 0.55) drops.push({ oreId: 'tin',    amount: rand(1, 3) })
+  } else if (d === 'hard') {
+    if (Math.random() < 0.75) drops.push({ oreId: 'copper', amount: rand(2, 3) })
+    if (Math.random() < 0.70) drops.push({ oreId: 'tin',    amount: rand(2, 4) })
+    if (Math.random() < 0.38) drops.push({ oreId: 'steel',  amount: rand(1, 2) })
+  } else if (d === 'nightmare') {
+    if (Math.random() < 0.70) drops.push({ oreId: 'tin',   amount: rand(2, 3) })
+    if (Math.random() < 0.75) drops.push({ oreId: 'steel', amount: rand(2, 3) })
   }
 
   return drops

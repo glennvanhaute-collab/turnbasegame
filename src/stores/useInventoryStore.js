@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, createItemInstance, computeLineStats } from '../game/Gear.js'
+import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, TWO_HANDED_WEAPON_TYPES, createItemInstance, computeLineStats } from '../game/Gear.js'
 import { SET_BONUSES, SET_PASSIVE_6 } from '../game/data/setBonus.js'
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
@@ -137,10 +137,20 @@ export const useInventoryStore = defineStore('inventory', () => {
     return iid ? instanceById(iid) : null
   }
 
+  function isTwoHanded(item) {
+    return item?.gearType === GearType.WEAPON && TWO_HANDED_WEAPON_TYPES.has(item.weaponType)
+  }
+
+  function isTwoHandedMainHand(heroKey) {
+    return isTwoHanded(getEquippedItem(heroKey, GearSlot.MAIN_HAND))
+  }
+
   function equip(heroKey, slot, instanceId) {
     const item = instanceById(instanceId)
     if (!item) return
     if (!item.fitsSlot(slot)) return
+    // Block off_hand while a two-handed weapon occupies main_hand
+    if (slot === GearSlot.OFF_HAND && isTwoHandedMainHand(heroKey)) return
     // Remove from any other slot first (one item, one hero)
     for (const key of Object.keys(loadouts.value)) {
       for (const s of Object.values(GearSlot)) {
@@ -148,6 +158,10 @@ export const useInventoryStore = defineStore('inventory', () => {
       }
     }
     getLoadout(heroKey)[slot] = instanceId
+    // Two-handed weapon in main_hand → clear off_hand
+    if (slot === GearSlot.MAIN_HAND && isTwoHanded(item)) {
+      getLoadout(heroKey)[GearSlot.OFF_HAND] = null
+    }
   }
 
   function getEquippedBy(instanceId) {
@@ -179,7 +193,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     const loadout = getLoadout(heroKey)
     const mh = loadout[GearSlot.MAIN_HAND] ? instanceById(loadout[GearSlot.MAIN_HAND]) : null
     const oh = loadout[GearSlot.OFF_HAND]  ? instanceById(loadout[GearSlot.OFF_HAND])  : null
-    return mh?.gearType === GearType.WEAPON && oh?.gearType === GearType.WEAPON
+    return mh?.gearType === GearType.WEAPON && oh?.gearType === GearType.WEAPON && !isTwoHanded(mh)
   }
 
   function hasShield(heroKey) {
@@ -348,7 +362,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     instanceById,
     getLoadout, getEquippedItem,
     equip, unequip,
-    isDualWielding, hasShield,
+    isDualWielding, hasShield, isTwoHandedMainHand,
     isGearEnabled, toggleGearEnabled,
     computeGearStats, availableForSlot,
     getEquippedBy, equipTargets,

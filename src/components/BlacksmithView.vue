@@ -32,24 +32,25 @@
               <span class="smelt-btn-lock" v-else>No Blacksmith</span>
             </button>
           </template>
-          <!-- Standard codex-gated bars — hidden if forge accessible but no ore available -->
+          <!-- Standard codex-gated bars — always visible, disabled when requirements unmet or no ore -->
           <button
-            v-else-if="resources.forgeLevel < bar.requiredForge || (resources.ores[bar.oreId] ?? 0) >= bar.oreCost"
+            v-else-if="!FORGE_TIERS[bar.requiredForge]?.special"
             class="smelt-btn"
             :class="{
               active: selectedType === 'smelt' && selectedId === bar.id,
-              locked: resources.forgeLevel < bar.requiredForge
+              locked: resources.forgeLevel < bar.requiredForge || resources.smithingLevel < (bar.smithingLevel ?? 0)
             }"
             :style="{ '--bar-color': bar.color }"
-            :disabled="resources.forgeLevel < bar.requiredForge"
+            :disabled="resources.forgeLevel < bar.requiredForge || resources.smithingLevel < (bar.smithingLevel ?? 0) || (resources.ores[bar.oreId] ?? 0) < bar.oreCost"
             @click="selectSmelt(bar)"
           >
             <GameIcon :icon="barIcon(bar.id)" :size="18" class="smelt-btn-icon" />
             <span class="smelt-btn-name">{{ bar.name }}</span>
-            <span class="smelt-btn-cost" v-if="resources.forgeLevel >= bar.requiredForge">
+            <span class="smelt-btn-cost" v-if="resources.forgeLevel >= bar.requiredForge && resources.smithingLevel >= (bar.smithingLevel ?? 0)">
               {{ bar.oreCost }}× ore
             </span>
-            <span class="smelt-btn-lock" v-else>{{ FORGE_TIERS[bar.requiredForge]?.name }}</span>
+            <span class="smelt-btn-lock" v-else-if="resources.forgeLevel < bar.requiredForge">{{ FORGE_TIERS[bar.requiredForge]?.name }}</span>
+            <span class="smelt-btn-lock" v-else>⚒ Lv.{{ bar.smithingLevel }}</span>
           </button>
         </template>
       </div>
@@ -175,13 +176,14 @@
                 <button class="sqr-adj" @click="adjustQty(5)"  :disabled="smeltQty >= maxSmelt">+5</button>
                 <button class="sqr-max" @click="smeltQty = maxSmelt" :disabled="smeltQty >= maxSmelt || maxSmelt === 0">Max</button>
               </div>
-              <span class="smelt-eta-hint" v-if="maxSmelt > 0">
+              <span class="smelt-no-smith" v-if="!assignedSmith">Assign a smith first</span>
+              <span class="smelt-eta-hint" v-else-if="maxSmelt > 0">
                 Est. {{ formatSmeltTime(smeltQty * selectedBar.smeltTime * 1000 / forgeSpeedMultiplier) }}
               </span>
               <button
                 class="smelt-start-btn"
-                :class="{ ready: maxSmelt > 0 }"
-                :disabled="maxSmelt <= 0 || smeltQty <= 0"
+                :class="{ ready: maxSmelt > 0 && !!assignedSmith }"
+                :disabled="maxSmelt <= 0 || smeltQty <= 0 || !assignedSmith"
                 @click="startSmelt"
               >⊕ Smelt ×{{ smeltQty }}</button>
             </template>
@@ -429,14 +431,15 @@
         <div class="forge-actions" v-if="selected">
           <button
             class="forge-btn"
-            :class="{ ready: canAfford(selected) && !isTierArtisanLocked(selected.tier) && !isTierSmithingLocked(selected.tier) }"
-            :disabled="!canAfford(selected) || isTierArtisanLocked(selected.tier) || isTierSmithingLocked(selected.tier)"
+            :class="{ ready: canAfford(selected) && !isTierArtisanLocked(selected.tier) && !isTierSmithingLocked(selected.tier) && !!assignedSmith }"
+            :disabled="!canAfford(selected) || isTierArtisanLocked(selected.tier) || isTierSmithingLocked(selected.tier) || !assignedSmith"
             @click="forge"
           >
             <span class="forge-btn-icon">⚒</span>
             Forge
           </button>
-          <span class="forge-hint" v-if="isTierSmithingLocked(selected.tier)">Requires Blacksmithing Lv.{{ selectedTier?.smithingLevel }}</span>
+          <span class="forge-hint" v-if="!assignedSmith">Assign a smith to forge</span>
+          <span class="forge-hint" v-else-if="isTierSmithingLocked(selected.tier)">Requires Blacksmithing Lv.{{ selectedTier?.smithingLevel }}</span>
           <span class="forge-hint" v-else-if="isTierArtisanLocked(selected.tier)">Requires a Blacksmith in your roster</span>
           <span class="forge-hint" v-else-if="!canAfford(selected)">Need more bars</span>
         </div>
@@ -777,6 +780,7 @@ const oreToBar = computed(() => {
   for (const ore of ORE_LIST) {
     const bar = BAR_LIST.find(b => {
       if (b.oreId !== ore.id) return false
+      if (resources.smithingLevel < (b.smithingLevel ?? 0)) return false
       if (FORGE_TIERS[b.requiredForge]?.special) return isSpecialForgeUnlocked(b.requiredForge)
       return resources.forgeLevel >= b.requiredForge
     }) ?? BAR_LIST.find(b => b.oreId === ore.id)
@@ -805,6 +809,7 @@ function canAfford(recipe) {
 
 function startSmelt() {
   if (!selectedBar.value || maxSmelt.value <= 0) return
+  if (!assignedSmith.value) return
   if (!artisanMetForForge(selectedBar.value.requiredForge)) return
   smelting.startSmelt(selectedBar.value.id, Math.min(smeltQty.value, maxSmelt.value), forgeSpeedMultiplier.value)
 }
@@ -818,6 +823,7 @@ function addToQueue()   {
 function forge() {
   if (!selected.value || !canAfford(selected.value)) return
   if (isTierArtisanLocked(selected.value.tier) || isTierSmithingLocked(selected.value.tier)) return
+  if (!assignedSmith.value) return
   const recipe = selected.value
   Object.entries(recipe.barCost).forEach(([id, amt]) => resources.removeBar(id, amt))
   const instance = createItemInstance({
@@ -1365,6 +1371,7 @@ function forgeFullSet(tier) {
 .sqr-max:not(:disabled):hover { background: rgba(255,255,255,0.06); border-color: #8a5a18; color: var(--gold); }
 .sqr-max:disabled { opacity: 0.28; cursor: not-allowed; }
 .smelt-eta-hint { font-size: 0.6rem; color: var(--text-dim); font-style: italic; }
+.smelt-no-smith { font-size: 0.62rem; color: #c47a3a; font-style: italic; }
 .smelt-start-btn {
   padding: 12px 44px; border-radius: 8px;
   border: 1px solid var(--border-brown);
@@ -1479,7 +1486,7 @@ function forgeFullSet(tier) {
 .fsb-assign:not(:disabled):hover { border-color: #8a5a18; color: var(--gold); }
 .fsb-assign:disabled { opacity: 0.3; cursor: not-allowed; }
 .fsb-picker {
-  position: absolute; bottom: calc(100% + 6px); left: 0; right: 0; z-index: 10;
+  flex-basis: 100%; order: 99; margin-top: 4px;
   background: rgba(12,6,2,0.97); border: 1px solid var(--border-gold);
   border-radius: 8px; overflow: hidden;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.8);

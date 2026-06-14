@@ -5,7 +5,7 @@ import { useResourceStore } from './useResourceStore.js'
 import { useArtisanStore } from './useArtisanStore.js'
 
 const STORAGE_KEY = 'raid-hunts'
-const MAX_SLOTS   = 3
+const MAX_SLOTS   = 6
 
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -15,10 +15,16 @@ function loadSaved() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') } catch { return null }
 }
 
+function padSlots(arr) {
+  const base = Array.isArray(arr) ? [...arr] : []
+  while (base.length < MAX_SLOTS) base.push(null)
+  return base
+}
+
 export const useHuntStore = defineStore('hunts', () => {
   const saved = loadSaved()
   // Each slot: { missionId, heroKey, startedAt, duration } | null
-  const slots = ref(saved?.slots ?? Array(MAX_SLOTS).fill(null))
+  const slots = ref(padSlots(saved?.slots))
 
   // Last auto-collected cycle — watched by HuntsView for toast display
   const lastAutoCollect = ref(null)
@@ -99,31 +105,43 @@ export const useHuntStore = defineStore('hunts', () => {
     return collected
   }
 
-  // Collect current cycle and immediately restart the same mission (idle loop).
+  // Collect ALL completed cycles and restart. Catches up offline sessions in one tick.
+  const MAX_CATCHUP_CYCLES = 100
   function collectHunt(i) {
     const s = slots.value[i]
     if (!s || !isComplete(i)) return null
 
     const mission   = HUNTS_BY_ID[s.missionId]
-    const collected = _applyDrops(mission, s.heroKey)
+    const combined  = []
+    let startedAt   = s.startedAt
+    let cycles      = 0
 
-    // Restart from the moment this cycle ended (handles offline catch-up)
-    const cycleEnd = s.startedAt + s.duration * 1000
-    slots.value[i] = { missionId: s.missionId, heroKey: s.heroKey, startedAt: cycleEnd, duration: s.duration }
+    while (Date.now() >= startedAt + s.duration * 1000 && cycles < MAX_CATCHUP_CYCLES) {
+      const drops = _applyDrops(mission, s.heroKey)
+      for (const d of drops) {
+        const ex = combined.find(c => c.id === d.id && c.materialType === d.materialType)
+        if (ex) ex.amount += d.amount
+        else combined.push({ ...d })
+      }
+      startedAt += s.duration * 1000
+      cycles++
+    }
+
+    slots.value[i] = { missionId: s.missionId, heroKey: s.heroKey, startedAt, duration: s.duration }
     _persist()
-    return collected
+    return combined.length > 0 ? combined : []
   }
 
-  // Auto-tick: fires every 5s and collects any completed slots automatically
+  // Auto-tick: fires every 1s and collects any completed slots automatically
   setInterval(() => {
     slots.value.forEach((slot, i) => {
       if (slot && isComplete(i)) {
         const missionName = HUNTS_BY_ID[slot.missionId]?.name ?? 'Mission'
         const drops = collectHunt(i)
-        if (drops) lastAutoCollect.value = { missionName, drops }
+        if (drops?.length) lastAutoCollect.value = { missionName, drops }
       }
     })
-  }, 5000)
+  }, 1000)
 
   function cancelHunt(i) {
     if (!slots.value[i]) return

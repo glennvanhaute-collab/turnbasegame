@@ -41,7 +41,7 @@
             <!-- Header -->
             <div class="info-header">
               <div class="badges">
-                <span class="badge rarity" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
+                <span class="badge rarity" :class="displayRarity.toLowerCase()">{{ displayRarity }}</span>
                 <span class="badge faction">{{ hero.faction }}</span>
                 <span class="badge affinity" :class="hero.affinity.toLowerCase()">
                   <GameIcon v-if="AFFINITY_ICON[hero.affinity]" :icon="AFFINITY_ICON[hero.affinity]" :size="14" />
@@ -146,6 +146,20 @@
                     <p class="skill-desc">{{ skill.description }}</p>
                     <div class="skill-target">
                       Target: <span class="target-tag">{{ formatTarget(skill.targetType) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Artisan Skills -->
+              <section class="section" v-if="hero.artisanSkills?.length">
+                <h3 class="section-title">Artisan Skills</h3>
+                <div class="artisan-list">
+                  <div class="artisan-item" v-for="a in hero.artisanSkills" :key="a.id" :style="{ borderLeftColor: a.color }">
+                    <span class="artisan-icon">{{ a.icon }}</span>
+                    <div class="artisan-info">
+                      <span class="artisan-name" :style="{ color: a.color }">{{ a.name }}</span>
+                      <span class="artisan-desc">{{ a.desc }}</span>
                     </div>
                   </div>
                 </div>
@@ -298,8 +312,11 @@ function itemStatChips(item) {
     .slice(0, 3)
 }
 
-const entry = computed(() => store.detailEntry)
-const hero  = computed(() => entry.value?.hero)
+const entry        = computed(() => store.detailEntry)
+const hero         = computed(() => entry.value?.hero)
+const displayRarity = computed(() =>
+  hero.value?.id === 'player_character' ? playerHero.rarity : (hero.value?.rarity ?? '')
+)
 const lightboxOpen = ref(false)
 
 const heroPortrait = computed(() => {
@@ -641,6 +658,19 @@ const stats = computed(() => {
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+/* Artisan Skills */
+.artisan-list { display: flex; flex-direction: column; gap: 6px; }
+.artisan-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(19, 9, 8, 0.7); border: 1px solid #3e1c0c;
+  border-left: 3px solid #cd7f32;
+  border-radius: 6px; padding: 8px 12px;
+}
+.artisan-icon { font-size: 1.1rem; flex-shrink: 0; }
+.artisan-info { display: flex; flex-direction: column; gap: 2px; }
+.artisan-name { font-weight: 700; font-size: 0.78rem; }
+.artisan-desc { font-size: 0.65rem; color: #777; }
 
 /* Soul Vessel */
 .soul-bound-row {

@@ -94,6 +94,18 @@ export class Hero {
     this.slayerUndead = 0      // set by applyGear from line bonuses
   }
 
+  // Applies a per-star bonus (+4% per star to HP/ATK/DEF/SPD). Called before gear/level scale.
+  applyStarBonus(stars) {
+    if (!stars || stars <= 0) return
+    const mult = 1 + stars * 0.04
+    this.baseHp  = Math.floor(this.baseHp  * mult)
+    this.baseAtk = Math.floor(this.baseAtk * mult)
+    this.baseDef = Math.floor(this.baseDef * mult)
+    this.baseSpd = Math.floor(this.baseSpd * mult)
+    this.maxHp   = this.baseHp
+    this.hp      = this.baseHp
+  }
+
   // Scales base combat stats by a level multiplier (Soul Vessel — same XP pool as player hero).
   applyLevelScale(multiplier) {
     if (multiplier <= 1) return

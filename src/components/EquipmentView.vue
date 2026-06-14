@@ -55,7 +55,8 @@
         <h2 class="hero-name">{{ selectedHero.name }}</h2>
         <!-- Off-hand mode badge -->
         <div class="offhand-mode" :class="offhandMode">
-          <span v-if="offhandMode === 'dual'">⚔⚔ Dual Wield — +15% ATK, +5% Crit Rate</span>
+          <span v-if="offhandMode === 'twohanded'">⚑ Two-Handed — off hand occupied</span>
+          <span v-else-if="offhandMode === 'dual'">⚔⚔ Dual Wield — +15% ATK, +5% Crit Rate</span>
           <span v-else-if="offhandMode === 'board'">⚔🛡 Sword & Board — 12% Damage Reduction</span>
           <span v-else>Off hand: empty</span>
         </div>
@@ -78,7 +79,8 @@
           :slot-id="slot"
           :item="inventory.getEquippedItem(selectedKey, slot)"
           :heroKey="selectedKey"
-          @click="inventory.openPicker(selectedKey, slot)"
+          :blocked="slot === 'off_hand' && inventory.isTwoHandedMainHand(selectedKey)"
+          @click="slot === 'off_hand' && inventory.isTwoHandedMainHand(selectedKey) ? null : inventory.openPicker(selectedKey, slot)"
         />
       </div>
 
@@ -208,8 +210,9 @@ const selectedKey  = ref(collection.ownedKeys[0])
 const selectedHero = computed(() => roster.value.find(r => r.key === selectedKey.value)?.hero)
 
 const offhandMode = computed(() => {
-  if (inventory.isDualWielding(selectedKey.value)) return 'dual'
-  if (inventory.hasShield(selectedKey.value))      return 'board'
+  if (inventory.isTwoHandedMainHand(selectedKey.value)) return 'twohanded'
+  if (inventory.isDualWielding(selectedKey.value))      return 'dual'
+  if (inventory.hasShield(selectedKey.value))           return 'board'
   return 'empty'
 })
 
@@ -355,9 +358,10 @@ const pct = v => Math.round(v * 100) + '%'
   border-radius: 20px;
   font-weight: 600;
 }
-.offhand-mode.dual  { background: #3a1a00; color: #ff9944; border: 1px solid #ff9944; }
-.offhand-mode.board { background: #0a1a3a; color: #4fa8ff; border: 1px solid #4fa8ff; }
-.offhand-mode.empty { background: #1a1a2a; color: #444; border: 1px solid #2d2d4e; }
+.offhand-mode.twohanded { background: #1a0a2e; color: #9966dd; border: 1px solid #7744bb; }
+.offhand-mode.dual      { background: #3a1a00; color: #ff9944; border: 1px solid #ff9944; }
+.offhand-mode.board     { background: #0a1a3a; color: #4fa8ff; border: 1px solid #4fa8ff; }
+.offhand-mode.empty     { background: #1a1a2a; color: #444; border: 1px solid #2d2d4e; }
 
 .gear-toggle-btn {
   margin-left: auto;

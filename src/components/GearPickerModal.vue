@@ -42,7 +42,6 @@
 import { computed } from 'vue'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { SLOT_LABELS, GearSlot } from '../game/Gear.js'
-import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import GearItemRow from './GearItemRow.vue'
 
 const inventory = useInventoryStore()
@@ -54,14 +53,12 @@ const currentId   = computed(() => inventory.getLoadout(heroKey.value)?.[slot.va
 const currentItem = computed(() => currentId.value ? inventory.instanceById(currentId.value) : null)
 
 const availableWithOwner = computed(() =>
-  inventory.availableForSlot(heroKey.value, slot.value).map(item => {
-    const owner = inventory.getEquippedBy(item.instanceId)
-    const isThisSlot = owner?.heroKey === heroKey.value && owner?.slot === slot.value
-    const equippedOnName = (owner && !isThisSlot)
-      ? (HERO_TEMPLATES[owner.heroKey]?.()?.name ?? owner.heroKey)
-      : null
-    return { item, equippedOnName }
-  })
+  inventory.availableForSlot(heroKey.value, slot.value)
+    .filter(item => {
+      const owner = inventory.getEquippedBy(item.instanceId)
+      return !owner || owner.heroKey === heroKey.value
+    })
+    .map(item => ({ item, equippedOnName: null }))
 )
 
 function doEquip(instanceId) {

@@ -49,28 +49,6 @@
         </button>
       </div>
 
-      <!-- Staves section -->
-      <div class="recipe-section-head">🪄 Staves</div>
-      <div class="tan-group">
-        <button
-          v-for="stave in STAVE_RECIPES"
-          :key="stave.id"
-          class="tan-btn"
-          :class="{ active: selectedType === 'stave' && selectedId === stave.id, unaffordable: !canAffordStave(stave) }"
-          :style="{ '--mat-color': staveColor(stave.tier) }"
-          @click="selectStave(stave)"
-        >
-          <span class="mat-dot-plain" :style="{ background: staveColor(stave.tier) }" />
-          <span class="tan-name">{{ stave.name }}</span>
-          <span class="tan-cost">
-            <span v-for="(amt, eid) in stave.essenceCost" :key="eid" :class="{ short: !canAffordStave(stave) }">{{ amt }}×</span>
-          </span>
-          <span class="bs-stock" :class="{ short: !canAffordStave(stave) }">
-            {{ Math.min(...Object.entries(stave.essenceCost).map(([id,amt]) => Math.floor((resources.upgradeComponents[id] ?? 0) / amt))) }}
-          </span>
-        </button>
-      </div>
-
       <!-- Craft section -->
       <div class="recipe-section-head">✂ Craft</div>
       <div class="tier-group" v-for="tier in TAILORING_RECIPE_TIERS" :key="tier.id">
@@ -213,67 +191,6 @@
 
       </template>
 
-      <!-- STAVE MODE -->
-      <template v-else-if="selectedType === 'stave' && selectedStave">
-        <div class="work-header">
-          <div class="work-item-name">{{ selectedStave.name }}</div>
-          <div class="work-badges">
-            <span class="work-badge tier-badge" :style="{ '--tier-color': staveColor(selectedStave.tier) }">{{ selectedStave.tier }} Tier</span>
-            <span class="work-badge slot-badge">Weapon</span>
-            <span class="work-badge rarity-badge" :class="selectedStave.rarity.toLowerCase()">{{ selectedStave.rarity }}</span>
-          </div>
-        </div>
-        <div class="item-showcase" :class="{ ready: canAffordStave(selectedStave) }" :style="{ '--tier-color': staveColor(selectedStave.tier) }">
-          <div class="showcase-glow" />
-          <GameIcon :icon="tierSlotIcon(selectedStave.tier, selectedStave.slot, 'tailoring')" :size="72" class="showcase-icon" />
-        </div>
-        <p class="work-desc">{{ selectedStave.desc }}</p>
-        <div class="work-details">
-          <div class="work-col">
-            <div class="work-col-label">Base Stats</div>
-            <div class="work-stats">
-              <div class="work-stat" v-for="(val, key) in selectedStave.baseStats" :key="key">
-                <span class="ws-label">{{ STAT_LABELS[key] ?? key }}</span>
-                <span class="ws-val">{{ formatStatValue(key, val) }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-col">
-            <div class="work-col-label">Essences</div>
-            <div class="work-materials">
-              <div
-                class="material-row"
-                v-for="(amt, eid) in selectedStave.essenceCost"
-                :key="eid"
-                :style="{ '--ore-color': resources.UPGRADE_COMPONENTS[eid]?.color ?? staveColor(selectedStave.tier) }"
-              >
-                <span class="mat-dot" />
-                <span class="mat-name">{{ resources.UPGRADE_COMPONENTS[eid]?.name ?? eid }}</span>
-                <span class="mat-tally">
-                  <span class="mat-have" :class="{ ok: (resources.upgradeComponents[eid] ?? 0) >= amt }">{{ resources.upgradeComponents[eid] ?? 0 }}</span>
-                  <span class="mat-sep">/</span>
-                  <span class="mat-need">{{ amt }}</span>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="work-actions">
-          <button class="work-btn" :class="{ ready: canAffordStave(selectedStave) }" :disabled="!canAffordStave(selectedStave)" @click="craftStave">
-            <span>🪄</span> Craft
-          </button>
-        </div>
-        <Transition name="forge-pop">
-          <div class="craft-result" v-if="craftResult">
-            <span class="cr-icon">✓</span>
-            <div class="cr-text">
-              <span class="cr-name">{{ craftResult }}</span>
-              <span class="cr-sub">added to inventory</span>
-            </div>
-          </div>
-        </Transition>
-      </template>
-
       <!-- CRAFT MODE / IDLE -->
       <template v-else>
 
@@ -288,7 +205,7 @@
 
         <div class="work-idle" v-if="!selected">
           <div class="work-idle-icon">🧵</div>
-          <div class="work-idle-text">Select a recipe, fiber, or stave to begin</div>
+          <div class="work-idle-text">Select a recipe or fiber to begin</div>
         </div>
 
         <template v-if="selected">
@@ -466,7 +383,7 @@ import { createItemInstance, SLOT_LABELS } from '../game/Gear.js'
 import { FIBER_LIST, FIBERS } from '../game/data/fibers.js'
 import { CLOTH_LIST, CLOTHS } from '../game/data/cloths.js'
 import { BOWSTRING_LIST, BOWSTRINGS } from '../game/data/bowstrings.js'
-import { TAILORING_RECIPES, TAILORING_RECIPE_TIERS, TAILORING_XP_PER_TIER, STAVE_RECIPES } from '../game/data/tailoringRecipes.js'
+import { TAILORING_RECIPES, TAILORING_RECIPE_TIERS, TAILORING_XP_PER_TIER } from '../game/data/tailoringRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
 import { SLOT_TO_ICON, tierSlotIcon, fiberIcon, clothIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
@@ -482,7 +399,7 @@ const collection = useCollectionStore()
 
 const showPicker  = ref(false)
 const drawerOpen   = ref(typeof window !== 'undefined' && window.innerWidth <= 640)
-const selectedType = ref(null)  // 'weave' | 'craft' | null
+const selectedType = ref(null)  // 'weave' | 'craft'
 const selectedId   = ref(null)
 const weaveQty     = ref(1)
 const craftResult  = ref(null)
@@ -500,40 +417,6 @@ function toggleTier(id) { openTier.value = openTier.value === id ? null : id }
 
 function selectWeave(cloth)   { selectedType.value = 'weave'; selectedId.value = cloth.id;   drawerOpen.value = false }
 function selectCraft(recipe)  { selectedType.value = 'craft'; selectedId.value = recipe.id; drawerOpen.value = false }
-function selectStave(stave)   { selectedType.value = 'stave'; selectedId.value = stave.id;  drawerOpen.value = false }
-
-const selectedStave = computed(() => selectedType.value === 'stave' ? STAVE_RECIPES.find(r => r.id === selectedId.value) ?? null : null)
-
-const STAVE_TIER_COLORS = {
-  copper: '#cd7f32', tin: '#a8a9ad', steel: '#8899aa',
-  darksteel: '#554466', mithril: '#4499cc', moonsilver: '#99ccff',
-}
-function staveColor(tier) { return STAVE_TIER_COLORS[tier] ?? '#a080e0' }
-
-function canAffordStave(stave) {
-  if (!stave?.essenceCost) return false
-  return Object.entries(stave.essenceCost).every(([id, amt]) => (resources.upgradeComponents[id] ?? 0) >= amt)
-}
-
-function craftStave() {
-  if (!selectedStave.value || !canAffordStave(selectedStave.value)) return
-  const stave = selectedStave.value
-  Object.entries(stave.essenceCost).forEach(([id, amt]) => resources.removeUpgradeComponent(id, amt))
-  const instance = createItemInstance({
-    id: stave.id, name: stave.name, gearType: stave.gearType,
-    weaponType: stave.weaponType, rarity: stave.rarity, description: stave.desc,
-    stats: { ...stave.baseStats }, baseStats: { ...stave.baseStats },
-    tier: stave.tier, slot: stave.slot, armorType: stave.armorType,
-  })
-  instance.craftedAt       = Date.now()
-  instance.crafted         = true
-  instance.craftDiscipline = 'tailoring'
-  inventory.addInstance(instance)
-  resources.addTailoringXp(TAILORING_XP_PER_TIER[stave.tier] ?? 8)
-  craftResult.value = stave.name
-  clearTimeout(_flashTimer)
-  _flashTimer = setTimeout(() => { craftResult.value = null }, 3000)
-}
 
 function canAffordBowstring(bs) {
   return (resources.cloths[bs.clothId] ?? 0) >= bs.clothCost

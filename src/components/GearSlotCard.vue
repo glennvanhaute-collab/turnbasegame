@@ -1,5 +1,5 @@
 <template>
-  <div class="slot-card" :class="{ filled: !!item, [slotId]: true }" @click="$emit('click')">
+  <div class="slot-card" :class="{ filled: !!item, blocked: blocked && !item, [slotId]: true }" @click="$emit('click')">
     <div class="slot-label">{{ SLOT_LABELS[slotId] }}</div>
 
     <div class="slot-content" v-if="item">
@@ -17,10 +17,15 @@
       </div>
     </div>
 
+    <div class="slot-blocked-state" v-else-if="blocked">
+      <span class="blocked-icon">⚑</span>
+      <span class="blocked-label">Two-Handed</span>
+      <span class="blocked-hint">occupied by main weapon</span>
+    </div>
+
     <div class="slot-empty" v-else>
       <GameIcon :icon="slotIcon" :size="24" class="empty-icon" />
       <span class="empty-label">Empty</span>
-      <!-- Off-hand hint -->
       <span class="offhand-hint" v-if="slotId === 'off_hand'">weapon or shield</span>
     </div>
   </div>
@@ -36,6 +41,7 @@ const props = defineProps({
   slotId:  { type: String, required: true },
   item:    { type: Object, default: null },
   heroKey: { type: String, required: true },
+  blocked: { type: Boolean, default: false },
 })
 defineEmits(['click'])
 
@@ -85,6 +91,11 @@ const topStats = computed(() => {
 .slot-card:hover   { border-color: #ffd700; background: #1a0d0a; }
 .slot-card.filled  { border-style: solid; border-color: #5c2810; background: #150a07; }
 .slot-card.off_hand.filled { border-color: #4fa8ff; }
+.slot-card.blocked { border-style: solid; border-color: #6644aa; background: rgba(80,40,140,0.08); cursor: not-allowed; }
+.slot-blocked-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.blocked-icon  { font-size: 1.1rem; color: #7755bb; opacity: 0.6; }
+.blocked-label { font-size: 0.68rem; color: #7755bb; font-weight: 700; }
+.blocked-hint  { font-size: 0.58rem; color: #4a3370; font-style: italic; }
 
 .slot-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: #444; }
 

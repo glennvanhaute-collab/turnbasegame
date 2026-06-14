@@ -15,6 +15,9 @@
           <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }" @click="navigate('realm')">Realm</button>
+          <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
+            <img :src="collectionIcon" class="nav-icon-img" alt="Collection" />
+          </button>
         </nav>
         <div class="currency-display">
           <span class="currency energy" title="Energy (1 per 3 min)">
@@ -263,7 +266,8 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import arsenalBg     from './assets/backgrounds/arsenal.png'
 import explorationBg from './assets/backgrounds/exploration_bg.png'
 import navBg from './assets/backgrounds/bg_nav.png'
-import codexIcon from './assets/ui/codex.png'
+import codexIcon        from './assets/ui/codex.png'
+import collectionIcon  from './assets/ui/collection-icon.png'
 import closeImg from './assets/ui/close.png'
 import GameIcon from './components/ui/GameIcon.vue'
 import { useAdvisorStore } from './stores/useAdvisorStore.js'
@@ -538,6 +542,13 @@ body {
 .nav-btn:hover:not(:disabled) { color: var(--text-parchment); border-bottom-color: var(--gold-dim); }
 .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+.nav-icon-btn { padding: 4px 8px; border-bottom: 2px solid transparent; }
+.nav-icon-btn:hover { border-bottom-color: var(--gold-dim); }
+.nav-icon-btn.active { border-bottom-color: var(--gold); }
+.nav-icon-img { width: 35px; height: 35px; object-fit: contain; display: block; filter: brightness(0.75) sepia(0.3); transition: filter 0.15s; }
+.nav-icon-btn:hover .nav-icon-img { filter: brightness(1) sepia(0.1); }
+.nav-icon-btn.active .nav-icon-img { filter: brightness(1.1) sepia(0.2) drop-shadow(0 0 2px var(--gold)); }
 
 .currency-display {
   margin-left: auto;

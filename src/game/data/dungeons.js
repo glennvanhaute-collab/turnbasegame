@@ -82,17 +82,17 @@ const LOOT_WEIGHTS = {
 }
 
 export const LOOT_LABEL = {
-  Easy:      'Common / Uncommon',
-  Medium:    'Uncommon / Rare',
-  Hard:      'Rare / Epic',
-  Nightmare: 'Legendary + Lines',
+  Easy:      'Common / Uncommon · Copper & Tin Ore & Essence',
+  Medium:    'Uncommon / Rare · Steel Ore & Essence',
+  Hard:      'Rare / Epic · Darksteel Ore & Essence',
+  Nightmare: 'Legendary + Lines · Mithril Ore & Essence',
 }
 
 export const DUNGEON_REWARDS = {
-  Easy:      { gold: 300,  diamonds: 0  },
-  Medium:    { gold: 600,  diamonds: 5  },
-  Hard:      { gold: 1000, diamonds: 10 },
-  Nightmare: { gold: 2000, diamonds: 30 },
+  Easy:      { gold: 0, diamonds: 0  },
+  Medium:    { gold: 0, diamonds: 5  },
+  Hard:      { gold: 0, diamonds: 10 },
+  Nightmare: { gold: 0, diamonds: 30 },
 }
 
 export const TIER_DIFFICULTY = {
@@ -178,10 +178,27 @@ let _counter = 0
 function uid()  { return `dng_${Date.now()}_${++_counter}` }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
 
-const NIGHTMARE_CHANCE = 0.12
-const FORGE_CHANCE     = 0.01
-const BLESSED_CHANCE   = 0.01
-const TAVERN_CHANCE    = 0.08
+const FORGE_CHANCE   = 0.01
+const BLESSED_CHANCE = 0.01
+const TAVERN_CHANCE  = 0.08
+
+// Per-slot tier weights — lower tiers roll more often
+const TIER_WEIGHTS = [
+  { tier: 'Easy',      weight: 45 },
+  { tier: 'Medium',    weight: 30 },
+  { tier: 'Hard',      weight: 17 },
+  { tier: 'Nightmare', weight: 8  },
+]
+const TIER_WEIGHT_TOTAL = TIER_WEIGHTS.reduce((s, e) => s + e.weight, 0)
+
+function rollTier() {
+  let r = Math.random() * TIER_WEIGHT_TOTAL
+  for (const { tier, weight } of TIER_WEIGHTS) {
+    r -= weight
+    if (r <= 0) return tier
+  }
+  return 'Easy'
+}
 
 const CITY_CONFIG = {
   Easy:      { chance: 0.20, rarities: ['Rare'] },
@@ -240,43 +257,46 @@ function buildCityCard(city) {
     faction: city.faction, cityName: city.cityName, heroKey: city.heroKey, heroName: city.heroName, heroRarity: city.heroRarity }
 }
 
-function rollSlot3() {
+// Returns a special node type if one rolls, else null
+function rollSpecialNode() {
   const r = Math.random()
-  if (r < FORGE_CHANCE)                                                     return { nodeType: 'forge' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE)                                    return { nodeType: 'blessed' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE)                    return { nodeType: 'tavern' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE + NIGHTMARE_CHANCE) return { dungeon: 'Nightmare' }
-  return { dungeon: 'Hard' }
+  if (r < FORGE_CHANCE)                            return { nodeType: 'forge' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE)           return { nodeType: 'blessed' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE) return { nodeType: 'tavern' }
+  return null
 }
 
+const NUM_EXPEDITION_SLOTS = 5
+
 export function generateDungeonOptions() {
-  const slot3 = rollSlot3()
+  const special     = rollSpecialNode()
+  const specialSlot = special ? Math.floor(Math.random() * NUM_EXPEDITION_SLOTS) : -1
 
-  return ['Easy', 'Medium', 'Hard'].map((tier, i) => {
-    // All slots can yield a city node — rarity and chance are gated by tier
-    const city = rollCityNode(tier)
-    if (city) return buildCityCard(city)
-
-    if (i === 2 && slot3.nodeType) {
-      // Slot 3 is a discovery node (forge / blessed / tavern)
+  return Array.from({ length: NUM_EXPEDITION_SLOTS }, (_, i) => {
+    // One slot may become a special discovery node (forge / blessed / tavern)
+    if (i === specialSlot) {
       return {
         id: uid(),
-        name: pick(NODE_NAMES[slot3.nodeType]),
-        nodeType: slot3.nodeType,
+        name: pick(NODE_NAMES[special.nodeType]),
+        nodeType: special.nodeType,
         isNode: true,
         isDungeon: false,
         pinned: false,
       }
     }
-    const t = (i === 2 && slot3.dungeon === 'Nightmare') ? 'Nightmare' : tier
-    const enemyPoolId = pick(POOLS_BY_TIER[t])
+
+    const tier = rollTier()
+    const city = rollCityNode(tier)
+    if (city) return buildCityCard(city)
+
+    const enemyPoolId = pick(POOLS_BY_TIER[tier])
     return {
       id: uid(),
-      name: pick(NAMES[t]),
-      tier: t,
+      name: pick(NAMES[tier]),
+      tier,
       enemyPoolId,
-      rewards: DUNGEON_REWARDS[t],
-      difficulty: TIER_DIFFICULTY[t],
+      rewards: DUNGEON_REWARDS[tier],
+      difficulty: TIER_DIFFICULTY[tier],
       isDungeon: true,
       isNode: false,
       pinned: false,

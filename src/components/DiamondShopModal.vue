@@ -48,6 +48,34 @@
         </div>
       </div>
 
+      <!-- Utility -->
+      <div class="shop-section-label" style="margin-top: 20px;">Utility</div>
+      <div class="shop-grid">
+        <div class="shop-card" style="--item-color: #aaff44">
+          <div class="energy-icon-lg">⚡</div>
+          <div class="shop-card-info">
+            <div class="shop-card-name">Energy Refill</div>
+            <div class="shop-card-desc">Restores 30 energy instantly. Energy regenerates on its own over time, but sometimes the call of adventure can't wait.</div>
+          </div>
+          <div class="shop-card-buy">
+            <div class="shop-qty-row">
+              <button class="qty-btn" @click="energyQty > 1 && energyQty--">−</button>
+              <span class="qty-val">{{ energyQty }}</span>
+              <button class="qty-btn" @click="energyQty++">+</button>
+            </div>
+            <div class="shop-price">
+              <span class="price-icon">💎</span>
+              <span class="price-amount">{{ (30 * energyQty).toLocaleString() }}</span>
+            </div>
+            <button
+              class="btn-buy"
+              :disabled="!currencyStore.canAffordDiamonds(30 * energyQty)"
+              @click="buyEnergy()"
+            >Buy</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Relics -->
       <div class="shop-section-label" style="margin-top: 20px;">Relics</div>
       <div class="shop-grid">
@@ -88,12 +116,14 @@ import theTruthImg from '../assets/lore/The truth.png'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useForgeStore, ORBS } from '../stores/useForgeStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { useEnergyStore } from '../stores/useEnergyStore.js'
 
 defineEmits(['close'])
 
 const currencyStore  = useCurrencyStore()
 const forgeStore     = useForgeStore()
 const inventoryStore = useInventoryStore()
+const energyStore    = useEnergyStore()
 
 const ORB_ITEMS = reactive([
   {
@@ -125,7 +155,8 @@ const ORB_ITEMS = reactive([
   },
 ])
 
-const soulQty = ref(1)
+const soulQty   = ref(1)
+const energyQty = ref(1)
 
 function buyOrb(item) {
   const total = item.price * item.qty
@@ -139,6 +170,13 @@ function buySoulVessel() {
   if (!currencyStore.spendDiamonds(total)) return
   inventoryStore.soulVessels += soulQty.value
   soulQty.value = 1
+}
+
+function buyEnergy() {
+  const total = 30 * energyQty.value
+  if (!currencyStore.spendDiamonds(total)) return
+  energyStore.add(30 * energyQty.value)
+  energyQty.value = 1
 }
 </script>
 
@@ -336,5 +374,16 @@ function buySoulVessel() {
 .btn-buy:disabled {
   opacity: 0.3;
   cursor: not-allowed;
+}
+
+.energy-icon-lg {
+  font-size: 2.2rem;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 8px #aaff4488);
 }
 </style>

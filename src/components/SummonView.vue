@@ -69,17 +69,27 @@
           <span>💨 {{ store.lastResult.hero.baseSpd }}</span>
         </div>
 
+        <!-- Stars row (shown when hero has any stars) -->
+        <div class="result-stars" v-if="store.lastResult.newStarCount > 0">
+          <img
+            v-for="i in 6" :key="i"
+            :src="starImg"
+            class="rstar"
+            :class="{ filled: i <= store.lastResult.newStarCount, gained: store.lastResult.starAdded && i === store.lastResult.newStarCount }"
+            alt=""
+          />
+        </div>
+
         <!-- Duplicate notice -->
         <div class="duplicate-banner" v-if="store.lastResult.isDuplicate">
-          <span class="dup-icon">↺</span>
-          Already owned — received
-          <strong v-if="store.lastResult.compensation?.gold">
-            🪙 {{ store.lastResult.compensation.gold }} gold
-          </strong>
-          <strong v-else-if="store.lastResult.compensation?.diamonds">
-            💎 {{ store.lastResult.compensation.diamonds }} diamonds
-          </strong>
-          in return
+          <template v-if="store.lastResult.starAdded">
+            ★ Star {{ store.lastResult.newStarCount }}/6 unlocked!
+          </template>
+          <template v-else>
+            ✦ Max stars reached —
+          </template>
+          <strong v-if="store.lastResult.compensation?.gold"> +🪙 {{ store.lastResult.compensation.gold }}</strong>
+          <strong v-else-if="store.lastResult.compensation?.diamonds"> +💎 {{ store.lastResult.compensation.diamonds }}</strong>
         </div>
         <div class="new-banner" v-else>
           ✦ Added to your collection!
@@ -117,7 +127,8 @@
             <div class="mh-name">{{ result.hero.name }}</div>
             <div class="mh-rarity" :class="result.rarity.toLowerCase()">{{ result.rarity }}</div>
             <div class="mh-badge new-badge" v-if="!result.isDuplicate">NEW</div>
-            <div class="mh-badge dup-badge" v-else>DUP</div>
+            <div class="mh-badge star-badge" v-else-if="result.starAdded">★{{ result.newStarCount }}</div>
+            <div class="mh-badge dup-badge" v-else>MAX ★</div>
           </div>
         </div>
         <button class="dismiss-btn" @click="store.dismissResults()">Continue</button>
@@ -168,6 +179,7 @@
 <script setup>
 import { computed } from 'vue'
 import recruitmentBg from '../assets/backgrounds/recruitment_bg.png'
+import starImg from '../assets/ui/star.png'
 import bondUnlockImage from '../assets/lore/bond-unlocked-helga-aldric.png'
 import { BOND_LORE } from '../game/data/lore.js'
 import { useSummonStore } from '../stores/useSummonStore.js'
@@ -474,6 +486,13 @@ function heroDisplayName(id) { return HERO_DISPLAY_NAMES[id] ?? id }
 .mh-badge    { font-size: 0.55rem; font-weight: 800; letter-spacing: 1px; padding: 1px 6px; border-radius: 4px; }
 .new-badge   { background: #0a2a0a; color: #4dff88; border: 1px solid #1a5a1a; }
 .dup-badge   { background: #2a1a00; color: #ff9944; border: 1px solid #5a3a00; }
+.star-badge  { background: #2a2000; color: #ffd700; border: 1px solid #6a5000; }
+
+.result-stars { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; animation: fade-up 0.3s 0.55s both; }
+.rstar { width: 22px; height: 22px; object-fit: contain; opacity: 0.15; transition: opacity 0.2s; }
+.rstar.filled { opacity: 0.6; }
+.rstar.gained { opacity: 1; filter: drop-shadow(0 0 6px #ffd700); animation: star-pop 0.4s 0.7s both; }
+@keyframes star-pop { from { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.3); } to { transform: scale(1); opacity: 1; } }
 
 /* ── Keyframes ── */
 @keyframes backdrop-in {

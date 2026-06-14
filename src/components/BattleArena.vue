@@ -96,6 +96,15 @@
           </div>
         </div>
 
+        <!-- Forge unlock banner -->
+        <div class="forge-unlock-banner" v-if="store.lastReward.forgeUnlock === 'darksteel'">
+          <span class="forge-unlock-icon">⚒</span>
+          <div class="forge-unlock-text">
+            <div class="forge-unlock-title">Darksteel Forge Unlocked</div>
+            <div class="forge-unlock-sub">You can now smelt Darksteel Bars at the Blacksmith.</div>
+          </div>
+        </div>
+
         <!-- Drops -->
         <div class="drops-row" v-if="store.lastReward.oreDrops?.length || store.lastReward.componentDrops?.length">
           <div
@@ -138,6 +147,7 @@
           <div class="batch-fill" :style="{ width: (store.batchDone / store.batchTotal * 100) + '%' }" />
         </div>
         <button class="btn btn-retry" @click="store.stopBatch()">■ Stop</button>
+        <button v-if="$isDev" class="btn btn-dev-instant" @click="store.devCompleteBatch()">⚡ Instant Complete</button>
       </div>
 
       <!-- Controls after battle -->
@@ -150,8 +160,18 @@
             @click="nextEncounter"
           >Next →</button>
           <button class="btn btn-retry"      @click="retryEncounter">▷ Run Once</button>
-          <button class="btn btn-batch"      v-if="!encounter?.isDungeon" @click="startBatch">⚡ Run 10×</button>
-          <button class="btn btn-batch100"   v-if="canRun100 && !encounter?.isDungeon" @click="startBatch100">⚡ Run 100×</button>
+          <button
+            class="btn btn-batch"
+            v-if="!encounter?.isDungeon"
+            :disabled="!currency.canAffordDiamonds(BATCH10_COST)"
+            @click="startBatch"
+          >⚡ Run 10× <span class="batch-cost">💎{{ BATCH10_COST }}</span></button>
+          <button
+            class="btn btn-batch100"
+            v-if="canRun100 && !encounter?.isDungeon"
+            :disabled="!currency.canAffordDiamonds(BATCH100_COST)"
+            @click="startBatch100"
+          >⚡ Run 100× <span class="batch-cost">💎{{ BATCH100_COST }}</span></button>
           <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
         </template>
         <!-- Defeat -->
@@ -171,6 +191,7 @@ import { ref, computed } from 'vue'
 import { useBattleStore }     from '../stores/useBattleStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
+import { useCurrencyStore }   from '../stores/useCurrencyStore.js'
 import { ORES }               from '../game/data/ores.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import CombatStage from './PixiCombatStage.vue'
@@ -203,17 +224,17 @@ const isDungeonVictory = computed(() =>
 const playerHero = usePlayerHeroStore()
 const store      = useBattleStore()
 const collection = useCollectionStore()
+const currency   = useCurrencyStore()
+
+const BATCH10_COST  = 5
+const BATCH100_COST = 25
 
 const rarityAtBattleStart = ref(playerHero.rarity)
 const rarityChanged = computed(() =>
   store.lastReward?.levelsGained > 0 && playerHero.rarity !== rarityAtBattleStart.value
 )
 
-const EPIC_OR_HIGHER = new Set(['Epic', 'Legendary', 'Mythical', 'Ancient'])
-const canRun100 = computed(() =>
-  encounter.value?.difficulty === 'Easy' &&
-  EPIC_OR_HIGHER.has(playerHero.rarity)
-)
+const canRun100 = computed(() => !encounter.value?.isDungeon)
 
 const encounter = computed(() =>
   store.currentEncounter ?? store.ENCOUNTERS?.[store.currentEncounterIndex]
@@ -233,9 +254,11 @@ function retryEncounter() {
   store.initBattle(store.currentEncounterIndex, team)
 }
 function startBatch() {
+  if (!currency.spendDiamonds(BATCH10_COST)) return
   store.startBatchRun(10)
 }
 function startBatch100() {
+  if (!currency.spendDiamonds(BATCH100_COST)) return
   store.startBatchRun(100)
 }
 </script>
@@ -349,6 +372,15 @@ function startBatch100() {
 .chip.diamonds { color: #88ccff; border-color: #0a2040; }
 .chip.xp       { color: #aaff44; border-color: #1a2a00; }
 
+.forge-unlock-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(124,92,191,0.12); border: 1px solid #7c5cbf;
+  border-radius: 8px; padding: 10px 14px;
+}
+.forge-unlock-icon { font-size: 1.4rem; flex-shrink: 0; }
+.forge-unlock-title { font-size: 0.78rem; font-weight: 700; color: #b48fff; font-family: var(--font-head); letter-spacing: 1px; }
+.forge-unlock-sub   { font-size: 0.62rem; color: var(--text-muted); margin-top: 2px; }
+
 .drops-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .drop-chip {
   display: flex;
@@ -397,8 +429,10 @@ function startBatch100() {
 .btn-primary   { background: #e94560; color: #fff; }
 .btn-retry     { background: #5c2810; color: #d4a060; border: 1px solid #7a3a18; }
 .btn-secondary { background: #3e1c0c; color: #ccc; }
-.btn-batch     { background: #0a1a2a; color: #4fa8ff; border: 1px solid #1a3a5a; }
-.btn-batch100  { background: #180a2a; color: #b44fff; border: 1px solid #3a1a5a; }
+.btn-batch      { background: #0a1a2a; color: #4fa8ff; border: 1px solid #1a3a5a; }
+.btn-batch100   { background: #180a2a; color: #b44fff; border: 1px solid #3a1a5a; }
+.batch-cost     { margin-left: 5px; font-size: 0.65em; opacity: 0.7; }
+.btn-dev-instant { background: #0a2a0a; color: #88cc44; border: 1px dashed #3a5a10; font-size: 0.7rem; }
 
 /* ── Batch progress ──────────────────────────────────────────────── */
 .batch-progress {

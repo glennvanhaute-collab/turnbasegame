@@ -1,3 +1,5 @@
+import { SMELT_TIMES as ST } from './artisanSettings.js'
+
 export const FORGE_TIERS = [
   {
     level:  0,
@@ -61,14 +63,14 @@ export const FORGE_TIERS = [
 ]
 
 export const BARS = {
-  copper:     { id: 'copper',     name: 'Copper Bar',     color: '#cd7f32', oreId: 'copper',    oreCost: 2, requiredForge: 0, xp: 5,  smeltTime: 6  },
-  tin:        { id: 'tin',        name: 'Tin Bar',        color: '#9ea8a8', oreId: 'tin',       oreCost: 2, requiredForge: 0, xp: 8,  smeltTime: 10 },
-  steel:      { id: 'steel',      name: 'Steel Bar',      color: '#6b7c85', oreId: 'steel',     oreCost: 3, requiredForge: 1, xp: 15, smeltTime: 18 },
-  darksteel:  { id: 'darksteel',  name: 'Darksteel Bar',  color: '#7c5cbf', oreId: 'darksteel', oreCost: 3, requiredForge: 2, xp: 25, smeltTime: 30 },
-  mithril:    { id: 'mithril',    name: 'Mithril Bar',    color: '#5bacd4', oreId: 'mithril',   oreCost: 4, requiredForge: 3, xp: 40, smeltTime: 50 },
-  moonsilver: { id: 'moonsilver', name: 'Moonsilver Bar', color: '#7ee8ff', oreId: 'mithril',   oreCost: 2, requiredForge: 4, xp: 80, smeltTime: 80 },
-  vaultmetal: { id: 'vaultmetal', name: 'Vaultmetal Bar', color: '#a8d840', oreId: 'darksteel', oreCost: 3, requiredForge: 5, xp: 60, smeltTime: 55 },
-  runeite:    { id: 'runeite',    name: 'Runeite Bar',    color: '#e07828', oreId: 'mithril',   oreCost: 3, requiredForge: 6, xp: 70, smeltTime: 65 },
+  copper:     { id: 'copper',     name: 'Copper Bar',     color: '#cd7f32', oreId: 'copper',    oreCost: 2, requiredForge: 0, xp: 5,  smeltTime: ST.copper     },
+  tin:        { id: 'tin',        name: 'Tin Bar',        color: '#9ea8a8', oreId: 'tin',       oreCost: 2, requiredForge: 0, xp: 8,  smeltTime: ST.tin        },
+  steel:      { id: 'steel',      name: 'Steel Bar',      color: '#6b7c85', oreId: 'steel',     oreCost: 3, requiredForge: 0, smithingLevel: 5, xp: 15, smeltTime: ST.steel    },
+  darksteel:  { id: 'darksteel',  name: 'Darksteel Bar',  color: '#7c5cbf', oreId: 'darksteel', oreCost: 3, requiredForge: 2, xp: 25, smeltTime: ST.darksteel  },
+  mithril:    { id: 'mithril',    name: 'Mithril Bar',    color: '#5bacd4', oreId: 'mithril',   oreCost: 4, requiredForge: 3, xp: 40, smeltTime: ST.mithril    },
+  moonsilver: { id: 'moonsilver', name: 'Moonsilver Bar', color: '#7ee8ff', oreId: 'mithril',   oreCost: 2, requiredForge: 4, xp: 80, smeltTime: ST.moonsilver },
+  vaultmetal: { id: 'vaultmetal', name: 'Vaultmetal Bar', color: '#a8d840', oreId: 'darksteel', oreCost: 3, requiredForge: 5, xp: 60, smeltTime: ST.vaultmetal },
+  runeite:    { id: 'runeite',    name: 'Runeite Bar',    color: '#e07828', oreId: 'mithril',   oreCost: 3, requiredForge: 6, xp: 70, smeltTime: ST.runeite    },
 }
 
 export const BAR_LIST = Object.values(BARS)

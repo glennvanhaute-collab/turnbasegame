@@ -362,8 +362,8 @@ function showToast(msg) {
 
 .dungeon-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
 }
 
 .empty-hint { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
@@ -506,7 +506,10 @@ function showToast(msg) {
 .empty-text { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
 .empty-sub  { font-size: 0.75rem; font-style: italic; }
 
-/* ── Mobile ── */
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .dungeon-grid { grid-template-columns: repeat(3, 1fr); }
+}
 @media (max-width: 700px) {
   .dungeon-grid { grid-template-columns: repeat(2, 1fr); }
   .dungeon-wrap { padding: 0 14px 60px; }

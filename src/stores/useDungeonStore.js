@@ -50,7 +50,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     energy.spend(EXPLORE_COST)
     const options = generateDungeonOptions()
     const discovery = rollForgeDiscovery()
-    if (discovery) options[2] = discovery
+    if (discovery) options[Math.floor(Math.random() * options.length)] = discovery
     currentOptions.value = options
     persist()
     return true
@@ -58,6 +58,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
 
   function rollForgeDiscovery() {
     const resources = useResourceStore()
+    if (resources.smithingLevel < 70) return null
     let forgeType = null
     if (!resources.elvenForgeUnlocked)       forgeType = 'elven'
     else if (!resources.goblinForgeUnlocked) forgeType = 'goblin'
@@ -117,11 +118,26 @@ export const useDungeonStore = defineStore('dungeons', () => {
 
     useForgeStore().awardMaterials(effectiveTier)
 
-    // Upgrade component drops (every run)
+    // First Hard clear unlocks Darksteel forge
+    let forgeUnlock = null
+    if (effectiveTier === 'Hard' && resources.forgeLevel < 2) {
+      resources.forgeLevel = 2
+      forgeUnlock = 'darksteel'
+    }
+
+    // Essence drops — scale with dungeon tier; copper/tin come from training grounds
+    const ESSENCE_TABLE = {
+      Easy:      [{ id: 'copper_essence', chance: 0.28 }, { id: 'tin_essence', chance: 0.15 }],
+      Medium:    [{ id: 'steel_essence',     chance: 0.28 }],
+      Hard:      [{ id: 'darksteel_essence', chance: 0.28 }, { id: 'steel_essence',     chance: 0.10 }],
+      Nightmare: [{ id: 'mithril_essence',   chance: 0.28 }, { id: 'darksteel_essence', chance: 0.12 }],
+    }
     const componentDrops = []
-    if (effectiveTier === 'Easy') {
-      if (Math.random() < 0.20) { resources.addUpgradeComponent('copper_essence', 1); componentDrops.push('copper_essence') }
-      if (Math.random() < 0.08) { resources.addUpgradeComponent('tin_essence',    1); componentDrops.push('tin_essence') }
+    for (const { id, chance } of (ESSENCE_TABLE[effectiveTier] ?? [])) {
+      if (Math.random() < chance) {
+        resources.addUpgradeComponent(id, 1)
+        componentDrops.push(id)
+      }
     }
 
     if (effectiveTier === 'Nightmare' && Math.random() < 0.04) {
@@ -129,7 +145,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     }
 
     persist()
-    return { componentDrops }
+    return { componentDrops, forgeUnlock }
   }
 
   function findDungeon(id) {

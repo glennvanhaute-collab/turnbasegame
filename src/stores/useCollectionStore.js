@@ -25,6 +25,7 @@ export const useCollectionStore = defineStore('collection', () => {
 
   const starterChosen = ref(saved?.starterChosen ?? (validSaved.length > 0))
   const ownedKeys = ref(starterChosen.value ? (validSaved.length > 0 ? validSaved : [...STARTER_KEYS]) : [])
+  const heroStars = ref(saved?.heroStars ?? {})
 
   const team = ref((saved?.team ?? []).filter(k => ownedKeys.value.includes(k)))
 
@@ -91,8 +92,23 @@ export const useCollectionStore = defineStore('collection', () => {
 
   function ownsHero(key) { return ownedKeys.value.includes(key) }
 
+  function getStars(key) { return heroStars.value[key] ?? 0 }
+
+  function addStar(key) {
+    const current = heroStars.value[key] ?? 0
+    if (current >= 6) return false
+    heroStars.value = { ...heroStars.value, [key]: current + 1 }
+    return true
+  }
+
   function addToRoster(key) {
     if (!ownedKeys.value.includes(key)) ownedKeys.value = [...ownedKeys.value, key]
+  }
+
+  function removeFromRoster(key) {
+    if (key === 'PLAYER_CHARACTER') return
+    ownedKeys.value = ownedKeys.value.filter(k => k !== key)
+    team.value = team.value.filter(k => k !== key)
   }
 
   function isInTeam(key) {
@@ -128,11 +144,12 @@ export const useCollectionStore = defineStore('collection', () => {
   function openDetail(key) { detailHeroKey.value = key }
   function closeDetail()   { detailHeroKey.value = null }
 
-  watch([ownedKeys, team, starterChosen], () => {
+  watch([ownedKeys, team, starterChosen, heroStars], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ownedKeys: ownedKeys.value,
       team: team.value,
       starterChosen: starterChosen.value,
+      heroStars: heroStars.value,
     }))
   }, { deep: true })
 
@@ -164,6 +181,8 @@ export const useCollectionStore = defineStore('collection', () => {
       // Apply gear onto base stats first, then scale — so flat gear bonuses multiply with level.
       // Player character stats are baked into buildHeroInstance() instead of using applyLevelScale,
       // so we pass levelMultiplier as flatScale to keep gear proportionally relevant for them too.
+      const stars = heroStars.value[key] ?? 0
+      if (stars > 0) hero.applyStarBonus(stars)
       const { stats, damageReduction, activePassives } = inventory.computeGearStats(key)
       const flatScale = key === 'PLAYER_CHARACTER' ? playerHero.levelMultiplier : 1
       hero.applyGear(stats, damageReduction, flatScale)
@@ -173,6 +192,11 @@ export const useCollectionStore = defineStore('collection', () => {
         const floorMultiplier = multiplierForLevel(floorLevel)
         const effectiveMult   = Math.max(playerHero.levelMultiplier, floorMultiplier)
         hero.applyLevelScale(effectiveMult)
+        const effLevel = Math.max(playerHero.level, floorLevel)
+        if (effLevel >= 101)     hero.displayRarity = Rarity.MYTHICAL
+        else if (effLevel >= 61) hero.displayRarity = Rarity.LEGENDARY
+        else if (effLevel >= 26) hero.displayRarity = Rarity.EPIC
+        else                     hero.displayRarity = Rarity.RARE
       }
       hero.passives = activePassives ?? new Set()
       return hero
@@ -190,8 +214,9 @@ export const useCollectionStore = defineStore('collection', () => {
     RARITIES: Object.values(Rarity).filter(r => r !== 'Common' && r !== 'Uncommon'),
     AFFINITIES: Object.values(Affinity),
     starterChosen, claimStarterHero,
-    ownsHero, addToRoster, addPlayerCharacter, unlockAll,
+    ownsHero, addToRoster, removeFromRoster, addPlayerCharacter, unlockAll,
     isInTeam, toggleTeam, removeFromTeam, moveUp, moveDown,
     openDetail, closeDetail, buildTeam,
+    heroStars, getStars, addStar,
   }
 })

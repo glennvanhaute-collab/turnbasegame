@@ -1,8 +1,8 @@
 import { GearSlot, GearType, WeaponType } from '../Gear.js'
 import { WOODS } from './woods.js'
 
-// Bows only — strung with a Tailoring bowstring to complete.
-// Staves moved to Tailoring and crafted from dungeon essences.
+// Bows — strung with a Tailoring bowstring to complete (finishType: 'string').
+// Staves — carved from planks, imbued with dungeon essence in one step (no finishType, produced finished).
 
 export const WOODWORKING_RECIPES = [
   // ── Pine (Common) ────────────────────────────────────────────────
@@ -98,6 +98,94 @@ export const WOODWORKING_RECIPES = [
     plankCost: { dragonwood: 8 },
     bowstringCost: 'moonweave',
     baseStats: { atk: 450, spd: 22 },
+    rarity: 'Legendary',
+  },
+
+  // ── Staves ────────────────────────────────────────────────────────
+  // Carved from planks + imbued with dungeon essence in one step → finished weapon.
+
+  {
+    id: 'pine_stave',
+    name: 'Pine Stave',
+    tier: 'pine',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.STAFF,
+    armorType: 'cloth',
+    desc: "Smooth pine carved to a balanced grip. Copper essence drawn from iron constructs bonds to the grain — a mage's first real weapon.",
+    plankCost: { pine: 4 },
+    essenceCost: { copper_essence: 2 },
+    baseStats: { atk: 100, critRate: 0.03 },
+    rarity: 'Common',
+  },
+  {
+    id: 'oak_stave',
+    name: 'Oak Stave',
+    tier: 'oak',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.STAFF,
+    armorType: 'cloth',
+    desc: 'Dense oak holds its channel well. Tin essence fused into the core gives it a faint harmonic hum. Spells flow more willingly.',
+    plankCost: { oak: 5 },
+    essenceCost: { tin_essence: 2 },
+    baseStats: { atk: 135, critRate: 0.04 },
+    rarity: 'Uncommon',
+  },
+  {
+    id: 'yew_stave',
+    name: 'Yew Stave',
+    tier: 'yew',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.STAFF,
+    armorType: 'cloth',
+    desc: 'Yew has natural arcane conductivity. Steel essence fused into the grain — the wood no longer bends. It commands.',
+    plankCost: { yew: 5 },
+    essenceCost: { steel_essence: 2 },
+    baseStats: { atk: 182, critRate: 0.05 },
+    rarity: 'Rare',
+  },
+  {
+    id: 'ashwood_stave',
+    name: 'Ashwood Stave',
+    tier: 'ashwood',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.STAFF,
+    armorType: 'cloth',
+    desc: 'Pale ashwood channels void energy with unsettling ease. Darksteel essence bleeds into every crack — it strikes before the spell is cast.',
+    plankCost: { ashwood: 6 },
+    essenceCost: { darksteel_essence: 2 },
+    baseStats: { atk: 246, critRate: 0.06 },
+    rarity: 'Epic',
+  },
+  {
+    id: 'ironwood_stave',
+    name: 'Ironwood Stave',
+    tier: 'ironwood',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.STAFF,
+    armorType: 'cloth',
+    desc: 'Rings like metal when you tap it. Mithril resonance crystallised in the core. Every critical strike feels inevitable.',
+    plankCost: { ironwood: 7 },
+    essenceCost: { mithril_essence: 3 },
+    baseStats: { atk: 332, critRate: 0.07 },
+    rarity: 'Legendary',
+  },
+  {
+    id: 'dragonwood_stave',
+    name: 'Dragonwood Stave',
+    tier: 'dragonwood',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.STAFF,
+    armorType: 'cloth',
+    desc: 'Still radiates faint heat from ancient fires. Moonsilver essence cannot be contained — it chose this staff. You just hold it.',
+    plankCost: { dragonwood: 8 },
+    essenceCost: { moonsilver_essence: 3 },
+    baseStats: { atk: 450, critRate: 0.08 },
     rarity: 'Legendary',
   },
 ]

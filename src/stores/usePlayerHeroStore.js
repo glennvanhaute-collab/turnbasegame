@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { Hero, Rarity, Faction, Affinity } from '../game/Hero.js'
 import { SKILLS } from '../game/data/skills.js'
+import { ARTISAN } from '../game/data/artisanSkills.js'
 import { useArtisanStore } from './useArtisanStore.js'
 
 const STORAGE_KEY = 'player-hero'
@@ -174,7 +175,8 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
       baseSpd:  85   + Math.floor((lv - 1) * 0.5),
       critRate: Math.min(0.5, 0.12 + lv * 0.001),
       critDmg:  0.50 + lv * 0.005,
-      skills:   [SKILLS.CRUDE_SWING, SKILLS.FORTIFY, SKILLS.PATCH_UP],
+      skills:        [SKILLS.CRUDE_SWING, SKILLS.FORTIFY, SKILLS.PATCH_UP],
+      artisanSkills: heroArtisanSkill.value ? [ARTISAN[heroArtisanSkill.value]].filter(Boolean) : [],
       isPlayer: true,
     })
     // Extra fields for UI display (not part of Hero class formally)

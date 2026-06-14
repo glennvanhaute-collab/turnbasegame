@@ -10,21 +10,26 @@
 
       <div class="recipe-section-head">🪵 Planks</div>
       <div class="plank-group">
-        <button
-          v-for="plank in PLANK_LIST"
-          :key="plank.id"
-          class="plank-btn"
-          :style="{ '--pc': plank.color }"
-          :disabled="(resources.logs[plank.id] ?? 0) < plank.logCost"
-          @click="makePlanks(plank.id)"
-        >
-          <span class="pb-dot" />
-          <span class="pb-name">{{ plank.name }}</span>
-          <span class="pb-cost">{{ plank.logCost }} logs → 1</span>
-          <span class="pb-stock" :class="{ short: (resources.logs[plank.id] ?? 0) < plank.logCost }">
-            {{ resources.logs[plank.id] ?? 0 }}
-          </span>
-        </button>
+        <div v-for="plank in PLANK_LIST" :key="plank.id" class="plank-row" :style="{ '--pc': plank.color }">
+          <button
+            class="plank-btn"
+            :disabled="(resources.logs[plank.id] ?? 0) < plank.logCost"
+            @click="makePlanks(plank.id)"
+          >
+            <span class="pb-dot" />
+            <span class="pb-name">{{ plank.name }}</span>
+            <span class="pb-cost">{{ plank.logCost }}→1</span>
+            <span class="pb-stock" :class="{ short: (resources.logs[plank.id] ?? 0) < plank.logCost }">
+              {{ resources.logs[plank.id] ?? 0 }}
+            </span>
+          </button>
+          <button
+            class="plank-btn-all"
+            :disabled="(resources.logs[plank.id] ?? 0) < plank.logCost"
+            @click="makePlanksAll(plank.id)"
+            title="Convert all logs to planks"
+          >All</button>
+        </div>
       </div>
 
       <div class="recipe-section-head">⚐ Carve</div>
@@ -73,6 +78,11 @@
                   class="cost-pill string-pill"
                   :class="{ short: (resources.bowstrings[recipe.bowstringCost] ?? 0) < 1 }"
                 >🏹</span>
+                <span
+                  v-if="recipe.essenceCost"
+                  class="cost-pill imbue-pill"
+                  :class="{ short: !canAfford(recipe) }"
+                >✦</span>
               </template>
               <template v-else>
                 <span
@@ -101,7 +111,7 @@
           <span class="craft-badge type-badge" :class="selected.finishType">
             {{ selected.weaponType === 'bow' ? 'Bow' : 'Staff' }}
           </span>
-          <span class="craft-badge unfinished-badge">
+          <span class="craft-badge unfinished-badge" v-if="selected.finishType">
             {{ selected.finishType === 'string' ? 'Needs Stringing' : 'Needs Imbuing' }}
           </span>
         </div>
@@ -124,7 +134,7 @@
           <div class="showcase-icon-wrap">
             <GameIcon :icon="`ww_${selected.tier}_${selected.weaponType}`" :size="96" class="showcase-weapon-icon" />
           </div>
-          <div class="unfinished-tag" :class="selected.finishType">
+          <div class="unfinished-tag" :class="selected.finishType" v-if="selected.finishType">
             {{ selected.finishType === 'string' ? 'Unstrung' : 'Unimbued' }}
           </div>
         </div>
@@ -171,6 +181,20 @@
                   <span class="mat-need">1</span>
                 </span>
               </div>
+              <div
+                class="material-row"
+                v-for="(amt, eid) in selected.essenceCost"
+                :key="eid"
+                :style="{ '--wood-color': resources.UPGRADE_COMPONENTS[eid]?.color ?? '#a080e0' }"
+              >
+                <span class="mat-dot" />
+                <span class="mat-name">{{ resources.UPGRADE_COMPONENTS[eid]?.name ?? eid }}</span>
+                <span class="mat-tally">
+                  <span class="mat-have" :class="{ ok: (resources.upgradeComponents[eid] ?? 0) >= amt }">{{ resources.upgradeComponents[eid] ?? 0 }}</span>
+                  <span class="mat-sep">/</span>
+                  <span class="mat-need">{{ amt }}</span>
+                </span>
+              </div>
             </template>
             <template v-else>
               <div
@@ -204,9 +228,8 @@
           Carve
         </button>
         <span class="craft-hint" v-if="isTierLocked(selected.tier)">Requires Woodworking Lv.{{ selectedTier?.woodworkingLevel }}</span>
-        <span class="craft-hint" v-else-if="!canAfford(selected)">Need more logs</span>
+        <span class="craft-hint" v-else-if="!canAfford(selected)">Need more materials</span>
         <span class="craft-hint finish-hint" v-else-if="selected.finishType === 'string'">Needs a bowstring from Tailoring to complete</span>
-        <span class="craft-hint finish-hint" v-else-if="selected.finishType === 'imbue'">Needs Runesmithing inscription to complete</span>
       </div>
 
       <!-- Success flash -->
@@ -215,7 +238,7 @@
           <span class="craft-result-icon">✓</span>
           <div class="craft-result-text">
             <span class="craft-result-name">{{ craftResult }}</span>
-            <span class="craft-result-sub">added to inventory (unfinished)</span>
+            <span class="craft-result-sub">{{ selected?.finishType ? 'added to inventory (unfinished)' : 'added to inventory' }}</span>
           </div>
         </div>
       </Transition>
@@ -349,9 +372,10 @@ function isTierLocked(tierId) {
 
 function canAfford(recipe) {
   if (recipe?.plankCost) {
-    const planksOk = Object.entries(recipe.plankCost).every(([id, amt]) => (resources.planks[id] ?? 0) >= amt)
-    const stringOk = !recipe.bowstringCost || (resources.bowstrings[recipe.bowstringCost] ?? 0) >= 1
-    return planksOk && stringOk
+    const planksOk  = Object.entries(recipe.plankCost).every(([id, amt]) => (resources.planks[id] ?? 0) >= amt)
+    const stringOk  = !recipe.bowstringCost || (resources.bowstrings[recipe.bowstringCost] ?? 0) >= 1
+    const essenceOk = !recipe.essenceCost   || Object.entries(recipe.essenceCost).every(([id, amt]) => (resources.upgradeComponents[id] ?? 0) >= amt)
+    return planksOk && stringOk && essenceOk
   }
   if (recipe?.logCost) {
     return Object.entries(recipe.logCost).every(([id, amt]) => (resources.logs[id] ?? 0) >= amt)
@@ -366,6 +390,18 @@ function makePlanks(woodId) {
   resources.removeLog(woodId, plank.logCost)
   resources.addPlank(woodId, 1)
   resources.addWoodworkingXp(3)
+}
+
+function makePlanksAll(woodId) {
+  const plank = PLANKS[woodId]
+  if (!plank) return
+  let count = 0
+  while ((resources.logs[woodId] ?? 0) >= plank.logCost) {
+    resources.removeLog(woodId, plank.logCost)
+    resources.addPlank(woodId, 1)
+    count++
+  }
+  if (count > 0) resources.addWoodworkingXp(3 * count)
 }
 
 function toggleTier(id) {
@@ -417,6 +453,7 @@ function carve() {
   if (recipe.plankCost) {
     Object.entries(recipe.plankCost).forEach(([id, amt]) => resources.removePlank(id, amt))
     if (recipe.bowstringCost) resources.removeBowstring(recipe.bowstringCost, 1)
+    if (recipe.essenceCost) Object.entries(recipe.essenceCost).forEach(([id, amt]) => resources.removeUpgradeComponent(id, amt))
   } else {
     Object.entries(recipe.logCost).forEach(([id, amt]) => resources.removeLog(id, amt))
   }
@@ -433,7 +470,7 @@ function carve() {
     tier:        recipe.tier,
     slot:        recipe.slot,
     armorType:   recipe.armorType,
-    unfinished:  true,
+    unfinished:  !!recipe.finishType,
     finishType:  recipe.finishType,
   })
   instance.craftedAt = Date.now()
@@ -455,10 +492,9 @@ function carve() {
   if (!localStorage.getItem('bow-tip-woodworking')) {
     localStorage.setItem('bow-tip-woodworking', '1')
     setTimeout(() => advisor.say([
-      `A fine piece of work. The ${recipe.name} is in your inventory — but it is unfinished. ` +
-      (recipe.finishType === 'string'
-        ? `A bowstring is needed before it can be strung. Your tailor can craft one.`
-        : `It needs rune inscription before its power manifests. A runesmith can imbue it.`),
+      recipe.finishType === 'string'
+        ? `A fine piece of work. The ${recipe.name} is in your inventory — unfinished. A bowstring from your tailor will string it.`
+        : `The ${recipe.name} is complete and ready to equip.`,
     ]), 600)
   }
 }
@@ -517,15 +553,25 @@ function carve() {
 .tier-group { margin-bottom: 6px; }
 
 .plank-group { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
+.plank-row { display: flex; align-items: center; gap: 3px; }
 .plank-btn {
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 7px; flex: 1;
   padding: 5px 8px; border-radius: 6px;
   background: transparent; border: 1px solid transparent;
-  cursor: pointer; text-align: left; width: 100%;
+  cursor: pointer; text-align: left;
   transition: background 0.1s, border-color 0.1s;
 }
 .plank-btn:hover:not(:disabled) { background: rgba(255,255,255,0.05); border-color: color-mix(in srgb, var(--pc) 30%, transparent); }
 .plank-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.plank-btn-all {
+  padding: 4px 7px; border-radius: 5px; flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--pc) 35%, transparent);
+  background: color-mix(in srgb, var(--pc) 10%, transparent);
+  color: var(--pc); font-family: var(--font-head); font-size: 0.58rem; font-weight: 700;
+  cursor: pointer; transition: background 0.1s, border-color 0.1s; white-space: nowrap;
+}
+.plank-btn-all:hover:not(:disabled) { background: color-mix(in srgb, var(--pc) 22%, transparent); border-color: var(--pc); }
+.plank-btn-all:disabled { opacity: 0.28; cursor: not-allowed; }
 .pb-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; background: var(--pc); }
 .pb-name { flex: 1; font-size: 0.64rem; font-weight: 600; color: #887766; font-family: var(--font-head); }
 .pb-cost { font-size: 0.58rem; color: #554433; font-family: var(--font-head); }
@@ -580,6 +626,7 @@ function carve() {
   border-radius: 8px; padding: 0 5px; line-height: 1.6;
 }
 .cost-pill.short { color: #ff6b6b; background: rgba(255,107,107,0.12); }
+.imbue-pill { color: #b44fff; background: rgba(180,79,255,0.12); border: 1px solid rgba(180,79,255,0.2); }
 
 /* ── Center: Craft area ─────────────────────────────────────────── */
 .craft-area {

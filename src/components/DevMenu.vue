@@ -192,6 +192,25 @@
           </div>
         </section>
 
+        <!-- Roster -->
+        <section class="dev-section">
+          <div class="dev-section-label">Roster</div>
+          <div
+            v-for="entry in collection.roster.filter(r => r && r.key !== 'PLAYER_CHARACTER')"
+            :key="entry.key"
+            class="dev-row"
+          >
+            <span class="dev-row-name" :style="{ color: rarityColor(entry.hero.rarity) }">
+              {{ entry.hero.name }}
+              <span style="font-size:0.55rem; opacity:0.6"> — {{ entry.hero.rarity }}</span>
+            </span>
+            <div class="dev-btns">
+              <button class="dev-remove-btn" @click="collection.removeFromRoster(entry.key)">Remove</button>
+            </div>
+          </div>
+          <div v-if="collection.roster.filter(r => r && r.key !== 'PLAYER_CHARACTER').length === 0" style="font-size:0.62rem; color:#554466; font-style:italic">No recruited units</div>
+        </section>
+
         <!-- Reset -->
         <section class="dev-section">
           <div class="dev-section-label">Reset</div>
@@ -225,6 +244,9 @@ const resources  = useResourceStore()
 const currency   = useCurrencyStore()
 const collection = useCollectionStore()
 const energy     = useEnergyStore()
+
+const RARITY_COLORS = { Common: '#9a9a9a', Uncommon: '#4dcc4d', Rare: '#4d9fff', Epic: '#cc66ff', Legendary: '#ff9900', Mythical: '#ff4466' }
+function rarityColor(r) { return RARITY_COLORS[r] ?? '#9a9a9a' }
 
 onMounted(() => {
   collection.addToRoster('ARCHITECT')
@@ -401,6 +423,19 @@ function resetAll() {
 .dev-reset-btn:hover { background: rgba(255,255,255,0.07); color: #aaa; }
 .dev-reset-btn.danger { border-color: #5a1a1a; color: #886666; }
 .dev-reset-btn.danger:hover { background: rgba(255,80,80,0.08); color: #ff6b6b; }
+.dev-remove-btn {
+  background: rgba(180,40,40,0.12);
+  border: 1px solid #5a1a1a;
+  color: #cc6666;
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-head);
+  transition: background 0.1s;
+}
+.dev-remove-btn:hover { background: rgba(200,40,40,0.28); border-color: #aa3333; color: #ff8888; }
 
 /* Slide transition */
 .dev-slide-enter-active { transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.22,1,0.36,1); }

@@ -27,12 +27,12 @@
             v-for="{ key, hero } in progressionRoster"
             :key="key"
             class="roster-card"
-            :class="[`rarity-${hero.rarity.toLowerCase()}`, `affinity-${hero.affinity.toLowerCase()}`, `hero-${hero.id}`, { selected: store.isInTeam(key) }]"
+            :class="[`rarity-${effectiveRarity(hero, key).toLowerCase()}`, `affinity-${hero.affinity.toLowerCase()}`, `hero-${hero.id}`, { selected: store.isInTeam(key) }]"
           >
             <div class="card-portrait" @click="store.openDetail(key)">
               <img v-if="getPortrait(hero)" :src="getPortrait(hero)" class="portrait-img" alt="" />
               <div class="portrait-fade" />
-              <span class="rarity-tag" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
+              <span class="rarity-tag" :class="effectiveRarity(hero, key).toLowerCase()">{{ effectiveRarity(hero, key) }}</span>
               <span class="affinity-tag" :class="hero.affinity.toLowerCase()">{{ hero.affinity }}</span>
               <span class="level-tag" v-if="hero.isPlayerCharacter || inventory.isProgressive(key)">Lv.{{ effectiveLevel(hero) }}</span>
               <div class="selected-badge" v-if="store.isInTeam(key)">#{{ store.team.indexOf(key) + 1 }}</div>
@@ -40,6 +40,9 @@
             <div class="card-info" @click="store.openDetail(key)">
               <div class="card-name">{{ hero.name }}<svg class="name-magnify" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.4"/><line x1="9.7" y1="9.7" x2="13.5" y2="13.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></div>
               <div class="card-faction">{{ hero.faction }}</div>
+              <div class="card-stars" v-if="store.getStars(key) > 0">
+                <img v-for="i in 6" :key="i" :src="starImg" class="cstar" :class="{ filled: i <= store.getStars(key) }" alt="" />
+              </div>
               <div class="card-stats">
                 <span title="HP">❤ {{ (hero.baseHp / 1000).toFixed(1) }}k</span>
                 <span title="ATK">⚔ {{ hero.baseAtk }}</span>
@@ -48,7 +51,7 @@
               </div>
             </div>
             <div class="card-footer">
-              <div class="skill-pips"><span v-for="skill in hero.skills" :key="skill.id" class="skill-pip" :title="skill.name" /></div>
+              <div class="skill-pips"><span v-for="skill in hero.skills" :key="skill.id" class="skill-pip" :title="skill.name">{{ skill.name.split(' ')[0] }}</span></div>
               <span class="card-cp" title="Combat Power">⚡ {{ formatCP(inventory.heroCP(key)) }}</span>
               <button class="team-btn" :class="{ 'in-team': store.isInTeam(key) }" :disabled="!store.isInTeam(key) && store.isFull" @click.stop="store.toggleTeam(key)" :title="store.isInTeam(key) ? 'Remove from team' : 'Add to team'">{{ store.isInTeam(key) ? '✓' : '+' }}</button>
             </div>
@@ -101,7 +104,7 @@
           <!-- Footer -->
           <div class="card-footer">
             <div class="skill-pips">
-              <span v-for="skill in hero.skills" :key="skill.id" class="skill-pip" :title="skill.name" />
+              <span v-for="skill in hero.skills" :key="skill.id" class="skill-pip" :title="skill.name">{{ skill.name.split(' ')[0] }}</span>
             </div>
             <span class="card-cp" title="Combat Power">⚡ {{ formatCP(inventory.heroCP(key)) }}</span>
             <button
@@ -135,7 +138,7 @@
         <div v-for="(entry, i) in teamSlots" :key="i" class="team-slot" :class="{ filled: !!entry }">
           <template v-if="entry">
             <div class="slot-info" @click="store.openDetail(entry.key)">
-              <span class="slot-rarity" :class="entry.hero.rarity.toLowerCase()">●</span>
+              <span class="slot-rarity" :class="effectiveRarity(entry.hero, entry.key).toLowerCase()">●</span>
               <div class="slot-text">
                 <span class="slot-name">{{ entry.hero.name }}</span>
                 <span class="slot-faction">{{ entry.hero.faction }}</span>
@@ -175,6 +178,7 @@
 import { computed } from 'vue'
 const emit = defineEmits(['back'])
 import collectionBg from '../assets/backgrounds/collection_bg.png'
+import starImg from '../assets/ui/star.png'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { usePlayerHeroStore, RARITY_FLOOR_LEVEL } from '../stores/usePlayerHeroStore.js'
@@ -199,6 +203,19 @@ function getPortrait(hero) {
 const store      = useCollectionStore()
 const inventory  = useInventoryStore()
 const playerHero = usePlayerHeroStore()
+
+function effectiveRarity(hero, key = null) {
+  if (hero.id === 'player_character') return playerHero.rarity
+  if (key && inventory.isProgressive(key)) {
+    const floor = RARITY_FLOOR_LEVEL[hero.rarity] ?? 1
+    const level = Math.max(playerHero.level, floor)
+    if (level >= 101) return 'Mythical'
+    if (level >= 61)  return 'Legendary'
+    if (level >= 26)  return 'Epic'
+    return 'Rare'
+  }
+  return hero.rarity
+}
 
 function effectiveLevel(hero) {
   const floor = RARITY_FLOOR_LEVEL[hero.rarity] ?? 1
@@ -624,9 +641,12 @@ const activeBonds = computed(() =>
 .card-faction {
   font-size: 0.6rem;
   color: var(--text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   letter-spacing: 0.3px;
 }
+.card-stars { display: flex; gap: 2px; margin-bottom: 4px; }
+.cstar { width: 12px; height: 12px; object-fit: contain; opacity: 0.18; }
+.cstar.filled { opacity: 1; filter: drop-shadow(0 0 2px #ffd70066); }
 .card-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -646,12 +666,19 @@ const activeBonds = computed(() =>
   gap: 6px;
   margin-top: auto;
 }
-.skill-pips { display: flex; gap: 3px; flex: 1; }
+.skill-pips { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; align-items: center; }
 .skill-pip {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--gold-faint);
+  font-size: 0.50rem;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(90, 50, 10, 0.4);
   border: 1px solid var(--gold-dim);
+  color: #a07838;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 48px;
+  text-overflow: ellipsis;
+  line-height: 1.3;
 }
 .card-cp {
   font-size: 0.58rem;

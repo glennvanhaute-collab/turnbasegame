@@ -9,7 +9,7 @@ import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
 import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
-import { rollOreDrops }           from '../game/data/ores.js'
+import { rollOreDrops, rollTrainingOreDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops }  from '../game/data/raidEncounters.js'
 
 export const useBattleStore = defineStore('battle', () => {
@@ -128,13 +128,29 @@ export const useBattleStore = defineStore('battle', () => {
         const easyCapReached = enc.difficulty === 'Easy' && EPIC_OR_HIGHER.has(ph.rarity)
         const xpGained     = easyCapReached ? 0 : ph.xpForDifficulty(enc.difficulty)
         const levelsGained = ph.addXp(xpGained)
-        const oreDrops = rollOreDrops(enc.difficulty)
+        const oreDrops = enc.isTraining
+          ? rollTrainingOreDrops(enc.difficulty)
+          : rollOreDrops(enc.difficulty)
         const resources = useResourceStore()
         oreDrops.forEach(({ oreId, amount }) => resources.addOre(oreId, amount))
         let componentDrops = []
+        let forgeUnlock    = null
         if (enc.isDungeon) {
           const dungeonResult = useDungeonStore().onDungeonVictory(enc.dungeonId, enc.tier)
           componentDrops = dungeonResult?.componentDrops ?? []
+          forgeUnlock    = dungeonResult?.forgeUnlock ?? null
+        }
+        if (enc.isTraining) {
+          const TRAINING_ESSENCE = {
+            Hard:      [{ id: 'copper_essence', chance: 0.12 }, { id: 'tin_essence',   chance: 0.12 }],
+            Nightmare: [{ id: 'tin_essence',    chance: 0.15 }, { id: 'steel_essence', chance: 0.10 }],
+          }
+          for (const { id, chance } of (TRAINING_ESSENCE[enc.difficulty] ?? [])) {
+            if (Math.random() < chance) {
+              resources.addUpgradeComponent(id, 1)
+              componentDrops.push(id)
+            }
+          }
         }
         let raidDrops = null
         if (enc.isRaid) {
@@ -146,7 +162,7 @@ export const useBattleStore = defineStore('battle', () => {
           raidDrops.leathers.forEach(({ id, amount }) => resources.addLeather(id, amount))
           raidDrops.cloths.forEach(({ id, amount })   => resources.addCloth(id, amount))
         }
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops, raidDrops }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops, raidDrops, forgeUnlock }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run
@@ -202,6 +218,47 @@ export const useBattleStore = defineStore('battle', () => {
     batchDone.value  = 0
   }
 
+  function devCompleteBatch() {
+    if (!isBatchRunning.value) return
+    const enc = currentEncounter.value
+    if (!enc) { stopBatch(); return }
+
+    const ph        = usePlayerHeroStore()
+    const resources = useResourceStore()
+    const EPIC_OR_HIGHER = new Set(['Epic', 'Legendary', 'Mythical', 'Ancient'])
+    const remaining = batchTotal.value - batchDone.value
+    const br = batchRewards.value
+
+    for (let i = 0; i < remaining; i++) {
+      currency.addGold(enc.rewards.gold ?? 0)
+      currency.addDiamonds(enc.rewards.diamonds ?? 0)
+      br.gold         += enc.rewards.gold     ?? 0
+      br.diamonds     += enc.rewards.diamonds ?? 0
+
+      const easyCapReached = enc.difficulty === 'Easy' && EPIC_OR_HIGHER.has(ph.rarity)
+      const xpGained     = easyCapReached ? 0 : ph.xpForDifficulty(enc.difficulty)
+      const levelsGained = ph.addXp(xpGained)
+      br.xp           += xpGained
+      br.levelsGained += levelsGained
+
+      const oreDrops = enc.isTraining
+        ? rollTrainingOreDrops(enc.difficulty)
+        : rollOreDrops(enc.difficulty)
+      oreDrops.forEach(({ oreId, amount }) => {
+        resources.addOre(oreId, amount)
+        const ex = br.oreDrops.find(d => d.oreId === oreId)
+        if (ex) ex.amount += amount
+        else br.oreDrops.push({ oreId, amount })
+      })
+    }
+
+    lastReward.value = { ...br }
+    batchTotal.value = 0
+    batchDone.value  = 0
+    engine.value = null          // stop pending autoplay turns
+    state.value  = BattleState.VICTORY  // show reward panel
+  }
+
   function _runBatchNext() {
     const team = useCollectionStore().buildTeam()
     const enc  = currentEncounterIndex.value >= 0 ? currentEncounterIndex.value : currentEncounter.value
@@ -218,6 +275,6 @@ export const useBattleStore = defineStore('battle', () => {
     isPlayerTurn, canAct, isOver,
     initBattle, selectSkill, selectTarget,
     toggleAutoplay, setSpeed,
-    startBatchRun, stopBatch,
+    startBatchRun, stopBatch, devCompleteBatch,
   }
 })
