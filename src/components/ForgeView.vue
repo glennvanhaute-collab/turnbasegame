@@ -399,11 +399,37 @@ const SLOT_FILTERS = [
   { slot: GearSlot.GLOVES,    icon: SLOT_TO_ICON[GearSlot.GLOVES]    ?? 'gloves'  },
 ]
 
+function canAffordUpgrade(item) {
+  const nextStar   = item.stars + 1
+  const barCost    = STAR_BAR_COST[nextStar] ?? 0
+  const tier       = item.tier
+  const discipline = item.craftDiscipline ?? 'blacksmithing'
+  let stock = 0
+  if (discipline === 'leatherworking') {
+    const id = LEATHER_FOR_TIER[tier]
+    stock = id ? (resources.leathers[id] ?? 0) : 0
+  } else if (discipline === 'tailoring') {
+    const id = CLOTH_FOR_TIER[tier]
+    stock = id ? (resources.cloths[id] ?? 0) : 0
+  } else {
+    const id = TIER_TO_BAR[tier]
+    stock = id ? (resources.bars[id] ?? 0) : 0
+  }
+  if (stock < barCost) return false
+  const gate = STAR_GATES[nextStar]
+  if (gate) {
+    const compId = gate.component(tier)
+    if ((resources.upgradeComponents[compId] ?? 0) < (gate.qty ?? 1)) return false
+    if (gate.smithingLevel && discipline === 'blacksmithing' && resources.smithingLevel < gate.smithingLevel) return false
+  }
+  return true
+}
+
 const craftedItems = computed(() =>
   inventory.ownedItems
     .filter(item =>
       item.craftedAt && item.tier &&
-      (!hideMaxed.value || item.stars < (TIER_MAX_STARS[item.tier] ?? 10)) &&
+      (!hideMaxed.value || (item.stars < (TIER_MAX_STARS[item.tier] ?? 10) && canAffordUpgrade(item))) &&
       (!filterSlot.value || item.slot === filterSlot.value)
     )
     .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))

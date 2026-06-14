@@ -180,7 +180,8 @@
 import { computed } from 'vue'
 import recruitmentBg from '../assets/backgrounds/recruitment_bg.png'
 import starImg from '../assets/ui/star.png'
-import bondUnlockImage from '../assets/lore/bond-unlocked-helga-aldric.png'
+import bondUnlockImage     from '../assets/lore/bond-unlocked-helga-aldric.png'
+import bondHildaArneImage  from '../assets/lore/bond-unlocked-hilda-arne.png'
 import { BOND_LORE } from '../game/data/lore.js'
 import { useSummonStore } from '../stores/useSummonStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
@@ -207,7 +208,7 @@ const portalLabel = computed(() =>
 )
 
 // Bond reveal helpers
-const BOND_IMAGES = { iron_vow: bondUnlockImage }
+const BOND_IMAGES = { iron_vow: bondUnlockImage, last_conquest: bondHildaArneImage }
 const bondImage = computed(() => BOND_IMAGES[store.pendingBondReveal?.id] ?? null)
 const bondLore  = computed(() => store.pendingBondReveal ? BOND_LORE[store.pendingBondReveal.id] : null)
 

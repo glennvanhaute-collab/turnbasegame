@@ -69,6 +69,14 @@
         >
           {{ inventory.isGearEnabled(selectedKey) ? '⚔ Gear Active' : '⊘ Gear Disabled' }}
         </button>
+        <button
+          class="unequip-all-btn"
+          :disabled="equippedCount(selectedKey) === 0"
+          @click="unequipAll(selectedKey)"
+          title="Remove all equipped items"
+        >
+          ✕ Unequip All
+        </button>
       </div>
 
       <!-- Gear slots grid -->
@@ -218,6 +226,12 @@ const offhandMode = computed(() => {
 
 function equippedCount(key) {
   return SLOTS.filter(s => !!inventory.getEquippedItem(key, s)).length
+}
+
+function unequipAll(key) {
+  for (const slot of SLOTS) {
+    if (inventory.getEquippedItem(key, slot)) inventory.unequip(key, slot)
+  }
 }
 
 function buildBaseHero(key) {
@@ -373,6 +387,16 @@ const pct = v => Math.round(v * 100) + '%'
 }
 .gear-toggle-btn:hover { opacity: 0.8; }
 .gear-toggle-btn.gear-off { background: #2a1a1a; color: #ff6b6b; border-color: #ff6b6b; }
+.unequip-all-btn {
+  margin-left: 8px;
+  font-size: 0.72rem; font-weight: 700;
+  padding: 5px 14px; border-radius: 20px; border: 1px solid #888;
+  background: #1a1a1a; color: #aaa;
+  cursor: pointer; transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.unequip-all-btn:hover:not(:disabled) { border-color: #ff6b6b; color: #ff6b6b; background: #2a1a1a; }
+.unequip-all-btn:disabled { opacity: 0.3; cursor: default; }
 
 .slots-disabled { opacity: 0.4; pointer-events: none; }
 

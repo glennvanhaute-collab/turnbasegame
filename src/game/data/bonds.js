@@ -6,12 +6,23 @@ export const BONDS = [
   {
     id:          'iron_vow',
     name:        'The Iron Vow',
-    keys:        ['LORD_ALDRIC', 'HELGA'],   // template keys — used by UI to detect active bonds
-    heroes:      ['lord_aldric', 'helga'],   // hero IDs  — used by applyBonds at battle start
+    keys:        ['LORD_ALDRIC', 'HELGA'],
+    heroes:      ['lord_aldric', 'helga'],
     description: 'Aldric and Helga have stood together through war and silence. She steadies him; he sets her alight.',
     bonuses: {
       lord_aldric: { hpPct: 0.15, defPct: 0.20 },
       helga:        { hpPct: 0.15, atkPct: 0.20 },
+    },
+  },
+  {
+    id:          'last_conquest',
+    name:        'The Last Conquest',
+    keys:        ['ARNE_FROSTBOUND', 'HILDA_SHIELDMAIDEN'],
+    heroes:      ['arne_frostbound', 'hilda_shieldmaiden'],
+    description: 'He conquered kingdoms and called it easy. She held a gate alone and called it Tuesday. Together, nothing has stood against them since.',
+    bonuses: {
+      arne_frostbound:    { hpPct: 0.18, atkPct: 0.22 },
+      hilda_shieldmaiden: { hpPct: 0.20, defPct: 0.24 },
     },
   },
 ]

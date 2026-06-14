@@ -1852,5 +1852,26 @@ They have never lost a battle they fought side by side.
 
 This may be coincidence. The soldiers do not believe it is.`,
   },
+
+  last_conquest: {
+    name:     'The Last Conquest',
+    subtitle: 'Arne Frostbound · Hilda the Shieldmaiden',
+    quote:    '"He came to that gate with a warband and a reputation. She sent him home alone, twice, before she let him through. Now nobody sends either of them home." — Ignar border record',
+    body: `Arne Frostbound had taken twelve territories by the time he reached the western gate.
+
+He was not expecting a gate that talked back.
+
+Hilda had held that village for three years without reinforcements, without recognition, and without asking for either. When Arne arrived with his warband and his standard, she came out alone. She did not draw her shield. She asked him what he planned to do with the land after he took it, and whether he had thought about the people who would still be living there once his warband moved on.
+
+He did not have a good answer. She told him to come back when he did.
+
+He came back twice more before she let him through the gate. Each time, his answer was better. Each time, she told him it still wasn't enough. The third time, he didn't bring a warband. He came alone, in the rain, with a plan for the village that she later admitted was actually quite good.
+
+She has never once admitted that was the moment she decided.
+
+He will tell anyone who asks that conquering twelve territories was easy. He will tell them, if they keep asking, that nothing he has done since has been as difficult or as worth it as earning the trust of the woman at the gate.
+
+They fight differently. He goes forward. She holds the line. Between them, there is no line that has ever needed to be redrawn.`,
+  },
 }
 

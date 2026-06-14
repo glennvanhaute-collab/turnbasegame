@@ -404,6 +404,31 @@ export const HERO_TEMPLATES = {
     lore: 'The dragon did not choose a conqueror. It chose her because she was the first person in three hundred years to offer it food before asking for anything in return. Jade Dragonforge has never started a war — but she has ended several. Her enemies remember the fire. Her allies remember that she learned every one of their names on the first day.',
   }),
 
+  // ── Normal Portal — House Ignar (Force · Raiders) ───────────────
+  ARNE_FROSTBOUND: () => new Hero({
+    id: 'arne_frostbound', name: 'Arne Frostbound',
+    faction: Faction.IGNAR, rarity: Rarity.EPIC, affinity: Affinity.FORCE,
+    baseHp: 16500, baseAtk: 1600, baseDef: 750, baseSpd: 95,
+    critRate: 0.24, critDmg: 0.68,
+    skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
+    artisanSkills: [ARTISAN.leatherworking],
+    isPlayer: true,
+    quote: 'I have taken kingdoms. She was the only thing I could not take — so I had to earn her instead.',
+    lore: 'Arne Frostbound earned his title on the northern shores, where the ice never fully leaves the ground and mercy is considered a tactical error. As Jarl, he led his warband across twelve territories, each won through force of arms and sheer refusal to stop. He expected the same of Hilda. What he found instead was the one opponent who made him rethink his methods entirely — not because she was stronger, though she was, but because she simply did not care how many lands he had taken. She only asked what he planned to do with them. He has been trying to answer that question ever since.',
+  }),
+
+  HILDA_SHIELDMAIDEN: () => new Hero({
+    id: 'hilda_shieldmaiden', name: 'Hilda the Shieldmaiden',
+    faction: Faction.IGNAR, rarity: Rarity.EPIC, affinity: Affinity.FORCE,
+    baseHp: 20500, baseAtk: 1100, baseDef: 1150, baseSpd: 87,
+    critRate: 0.12, critDmg: 0.45,
+    skills: [SKILLS.PROVOKE, SKILLS.IRON_BASTION, SKILLS.BATTLE_CRY],
+    artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring, ARTISAN.apothecary, ARTISAN.herbalism],
+    isPlayer: true,
+    quote: 'He fights to conquer. I fight so that the people behind me never have to.',
+    lore: 'Hilda did not become a shieldmaiden because she was told to. She became one because nobody else was doing it well enough. Born in a raided village on the western edge of Ignar territory, she rebuilt it herself, trained its defenders herself, and held it against three separate incursions before anyone in Ignar command even knew her name. When Arne came with his warband, she met him at the gate alone. He expected a battle. What he got was a negotiation — and he lost. She has never let him forget it, and he has never wanted to.',
+  }),
+
   // ── Ancient tier ────────────────────────────────────────────────
   VALERIUS: () => new Hero({
     id: 'valerius', name: 'Valerius Dawnchaser',
@@ -557,6 +582,8 @@ export const RECRUIT_POOL = [
   { key: 'NYXARA',              rarity: 'Rare' },
   { key: 'GRIBZAK',             rarity: 'Rare' },
   // ── Epic ─────────────────────────────────────────────────────────
+  { key: 'ARNE_FROSTBOUND',     rarity: 'Epic' },
+  { key: 'HILDA_SHIELDMAIDEN',  rarity: 'Epic' },
   { key: 'GWENDAL',             rarity: 'Epic' },
   { key: 'BRENNA',              rarity: 'Epic' },
   { key: 'CAIUS',               rarity: 'Epic' },

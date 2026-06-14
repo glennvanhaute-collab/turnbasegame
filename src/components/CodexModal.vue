@@ -192,7 +192,8 @@ import { useJournalStore, ENTRY_TYPES } from '../stores/useJournalStore.js'
 import { useBondStore } from '../stores/useBondStore.js'
 import { useCodexStore } from '../stores/useCodexStore.js'
 import { LORE, BOND_LORE } from '../game/data/lore.js'
-import bondHelgaAldricImg from '../assets/lore/bond-unlocked-helga-aldric.png'
+import bondHelgaAldricImg  from '../assets/lore/bond-unlocked-helga-aldric.png'
+import bondHildaArneImg    from '../assets/lore/bond-unlocked-hilda-arne.png'
 import avatarAldric  from '../assets/units/legendary/lord-aldric.png'
 import avatarHelga   from '../assets/units/legendary/Helga.png'
 import avatarGarrett from '../assets/units/rare/garrett-the-unbroken.png'
@@ -233,7 +234,7 @@ const hasHiddenHeroes = computed(() =>
   )
 )
 
-const BOND_IMAGES   = { iron_vow: bondHelgaAldricImg }
+const BOND_IMAGES   = { iron_vow: bondHelgaAldricImg, last_conquest: bondHildaArneImg }
 const HERO_AVATARS  = { lord_aldric: avatarAldric, helga: avatarHelga, hedge_blade: avatarGarrett }
 const writing = ref(false)
 const newTitle = ref('')

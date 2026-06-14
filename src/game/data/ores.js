@@ -20,7 +20,8 @@ export function rollOreDrops(difficulty) {
   } else if (d === 'normal' || d === 'medium') {
     if (Math.random() < 0.80) drops.push({ oreId: 'steel',    amount: rand(1, 3) })
   } else if (d === 'hard') {
-    if (Math.random() < 0.80) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
+    drops.push({ oreId: 'darksteel', amount: rand(2, 4) })
+    if (Math.random() < 0.50) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
   } else if (d === 'nightmare') {
     if (Math.random() < 0.75) drops.push({ oreId: 'mithril',  amount: rand(1, 2) })
   }
