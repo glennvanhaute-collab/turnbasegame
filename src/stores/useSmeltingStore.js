@@ -109,12 +109,18 @@ export const useSmeltingStore = defineStore('smelting', () => {
     _persist()
   }
 
+  function instantFinish() {
+    if (!job.value) return
+    job.value.startedAt = Date.now() - job.value.totalBars * job.value.timePerBar - 1000
+    tick()
+  }
+
   // Catch up on init (handles offline progress)
   tick()
 
   return {
     job, isRunning,
     completedCount, remainingCount, currentBarProgress,
-    tick, startSmelt, addToQueue, cancelSmelt,
+    tick, startSmelt, addToQueue, cancelSmelt, instantFinish,
   }
 })

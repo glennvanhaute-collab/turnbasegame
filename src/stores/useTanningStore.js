@@ -108,11 +108,17 @@ export const useTanningStore = defineStore('tanning', () => {
     _persist()
   }
 
+  function instantFinish() {
+    if (!job.value) return
+    job.value.startedAt = Date.now() - job.value.totalStrips * job.value.timePerStrip - 1000
+    tick()
+  }
+
   tick()
 
   return {
     job, isRunning,
     completedCount, remainingCount, currentProgress,
-    tick, startTan, addToQueue, cancelTan,
+    tick, startTan, addToQueue, cancelTan, instantFinish,
   }
 })

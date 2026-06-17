@@ -139,6 +139,16 @@
           </div>
         </section>
 
+        <!-- Crafting -->
+        <section class="dev-section">
+          <div class="dev-section-label">Crafting</div>
+          <div class="dev-reset-row">
+            <button class="dev-reset-btn" @click="finishAllJobs" :disabled="!anyJobRunning">
+              ⚡ Finish All
+            </button>
+          </div>
+        </section>
+
         <!-- Forge -->
         <section class="dev-section">
           <div class="dev-section-label">Forge</div>
@@ -226,11 +236,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useEnergyStore } from '../stores/useEnergyStore.js'
+import { useSmeltingStore } from '../stores/useSmeltingStore.js'
+import { useTanningStore } from '../stores/useTanningStore.js'
+import { useWeavingStore } from '../stores/useWeavingStore.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 import { HIDE_LIST } from '../game/data/hides.js'
@@ -244,6 +257,17 @@ const resources  = useResourceStore()
 const currency   = useCurrencyStore()
 const collection = useCollectionStore()
 const energy     = useEnergyStore()
+const smelting   = useSmeltingStore()
+const tanning    = useTanningStore()
+const weaving    = useWeavingStore()
+
+const anyJobRunning = computed(() => smelting.isRunning || tanning.isRunning || weaving.isRunning)
+
+function finishAllJobs() {
+  smelting.instantFinish()
+  tanning.instantFinish()
+  weaving.instantFinish()
+}
 
 const RARITY_COLORS = { Common: '#9a9a9a', Uncommon: '#4dcc4d', Rare: '#4d9fff', Epic: '#cc66ff', Legendary: '#ff9900', Mythical: '#ff4466' }
 function rarityColor(r) { return RARITY_COLORS[r] ?? '#9a9a9a' }

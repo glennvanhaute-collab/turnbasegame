@@ -107,11 +107,17 @@ export const useWeavingStore = defineStore('weaving', () => {
     _persist()
   }
 
+  function instantFinish() {
+    if (!job.value) return
+    job.value.startedAt = Date.now() - job.value.totalBolts * job.value.timePerBolt - 1000
+    tick()
+  }
+
   tick()
 
   return {
     job, isRunning,
     completedCount, remainingCount, currentProgress,
-    tick, startWeave, addToQueue, cancelWeave,
+    tick, startWeave, addToQueue, cancelWeave, instantFinish,
   }
 })
