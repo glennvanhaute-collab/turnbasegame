@@ -86,16 +86,16 @@ export function rollTrainingKeyDrops(difficulty) {
   const d = difficulty?.toLowerCase() ?? 'easy'
 
   if (d === 'easy') {
-    if (Math.random() < 0.30) drops.push({ tier: 'easy', amount: 1 })
+    if (Math.random() < 0.50) drops.push({ tier: 'easy', amount: 1 })
   } else if (d === 'normal') {
-    if (Math.random() < 0.45) drops.push({ tier: 'easy',   amount: 1 })
-    if (Math.random() < 0.15) drops.push({ tier: 'medium', amount: 1 })
+    if (Math.random() < 0.60) drops.push({ tier: 'easy',   amount: 1 })
+    if (Math.random() < 0.25) drops.push({ tier: 'medium', amount: 1 })
   } else if (d === 'hard') {
-    if (Math.random() < 0.40) drops.push({ tier: 'medium', amount: 1 })
-    if (Math.random() < 0.12) drops.push({ tier: 'hard',   amount: 1 })
+    if (Math.random() < 0.65) drops.push({ tier: 'medium', amount: 1 })
+    if (Math.random() < 0.20) drops.push({ tier: 'hard',   amount: 1 })
   } else if (d === 'nightmare') {
-    if (Math.random() < 0.35) drops.push({ tier: 'hard',      amount: 1 })
-    if (Math.random() < 0.10) drops.push({ tier: 'nightmare', amount: 1 })
+    if (Math.random() < 0.55) drops.push({ tier: 'hard',      amount: 1 })
+    if (Math.random() < 0.18) drops.push({ tier: 'nightmare', amount: 1 })
   }
 
   return drops
