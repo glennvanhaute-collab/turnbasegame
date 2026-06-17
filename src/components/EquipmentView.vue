@@ -70,6 +70,13 @@
           {{ inventory.isGearEnabled(selectedKey) ? '⚔ Gear Active' : '⊘ Gear Disabled' }}
         </button>
         <button
+          class="quick-equip-btn"
+          @click="inventory.quickEquip(selectedKey)"
+          title="Auto-equip the best unequipped item in each empty slot"
+        >
+          ⚡ Quick Equip
+        </button>
+        <button
           class="unequip-all-btn"
           :disabled="equippedCount(selectedKey) === 0"
           @click="unequipAll(selectedKey)"
@@ -387,6 +394,15 @@ const pct = v => Math.round(v * 100) + '%'
 }
 .gear-toggle-btn:hover { opacity: 0.8; }
 .gear-toggle-btn.gear-off { background: #2a1a1a; color: #ff6b6b; border-color: #ff6b6b; }
+.quick-equip-btn {
+  margin-left: 8px;
+  font-size: 0.72rem; font-weight: 700;
+  padding: 5px 14px; border-radius: 20px; border: 1px solid #c9a227;
+  background: #1a140a; color: #c9a227;
+  cursor: pointer; transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.quick-equip-btn:hover { opacity: 0.8; }
 .unequip-all-btn {
   margin-left: 8px;
   font-size: 0.72rem; font-weight: 700;

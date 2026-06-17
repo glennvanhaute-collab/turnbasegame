@@ -361,6 +361,25 @@ export const useInventoryStore = defineStore('inventory', () => {
     return computeCP(hero)
   }
 
+  const RARITY_RANK = { Common: 0, Uncommon: 1, Rare: 2, Epic: 3, Legendary: 4, Mythical: 5, Ancient: 6 }
+  function _scoreItem(item) {
+    return (item.stars ?? 0) * 10 + (RARITY_RANK[item.rarity] ?? 0)
+  }
+
+  function quickEquip(heroKey) {
+    for (const slot of Object.values(GearSlot)) {
+      if (slot === GearSlot.OFF_HAND && isTwoHandedMainHand(heroKey)) continue
+      const currentItem  = getEquippedItem(heroKey, slot)
+      const currentScore = currentItem ? _scoreItem(currentItem) : -1
+      const candidates   = ownedInstances.value.filter(item =>
+        item.fitsSlot(slot) && !getEquippedBy(item.instanceId)
+      )
+      if (!candidates.length) continue
+      const best = candidates.reduce((a, b) => _scoreItem(a) >= _scoreItem(b) ? a : b)
+      if (_scoreItem(best) > currentScore) equip(heroKey, slot, best.instanceId)
+    }
+  }
+
   function getSetPieces(heroKey) {
     const loadout  = getLoadout(heroKey)
     const counts = { plate: 0, leather: 0, cloth: 0 }
@@ -390,6 +409,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     soulVessels, progressiveHeroKeys,
     awardSoulVessel, useSoulVessel, isProgressive,
     sellItem, sellAllByRarity,
-    getSetPieces,
+    getSetPieces, quickEquip,
   }
 })
