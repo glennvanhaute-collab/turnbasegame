@@ -139,24 +139,28 @@ function mechanicHints(dungeon) {
   return POOL_MECHANIC_HINTS[dungeon.enemyPoolId] ?? []
 }
 
-// Background images — same stable-pick-by-id logic as old DungeonCard
+// Background images — explicit per-dungeon assignments for thematic accuracy
 const _dungeonBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
-const TIER_BG_PREFIX = { medium: 'intermediate' }
-function tierbgs(tier) {
-  const key   = tier.toLowerCase()
-  const label = TIER_BG_PREFIX[key] ?? key
-  return Object.entries(_dungeonBgs)
-    .filter(([p]) => {
-      const file = p.split('/').pop()
-      return file.startsWith(`dungeon_${label}_`) || file.startsWith(`${label}_`)
-    })
-    .map(([, m]) => m.default)
+
+const DUNGEON_IMAGE_MAP = {
+  dng_goblin_warrens:        'dungeon_easy_01.png',
+  dng_crypt_of_ash:          'easy_undead_crypt.png',
+  dng_bandit_cave:           'easy_desolate_swamp.png',
+  dng_ashveil_mine:          'dungeon_intermediate_01.png',
+  dng_thornwood_depths:      'dungeon_intermediate_01.png',
+  dng_ruins_of_vel:          'intermediate_forgotten lair.png',
+  dng_thornhaven_ruins:      'dungeon_hard_01.png',
+  dng_the_dread_spire:       'dungeon_hard_02.png',
+  dng_the_crimson_hold:      'hard_vampire_castle.png',
+  dng_barrow_kings_tomb:     'dungeon_nightmare_01.png',
+  dng_necropolis_of_valdris: 'dungeon_nightmare_01.png',
+  dng_the_wailing_crypts:    'dungeon_nightmare_01.png',
 }
-function pickBg(tier, seed) {
-  const pool = tierbgs(tier)
-  if (!pool.length) return null
-  const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
-  return pool[idx]
+
+function pickBg(tier, id) {
+  const filename = DUNGEON_IMAGE_MAP[id]
+  if (!filename) return null
+  return _dungeonBgs[`../assets/dungeons/${filename}`]?.default ?? null
 }
 
 function enterDungeon(dungeon) {
