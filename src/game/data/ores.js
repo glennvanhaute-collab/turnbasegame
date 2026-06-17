@@ -79,6 +79,28 @@ export function rollDungeonGatheringDrops(difficulty) {
   return { hides, fibers }
 }
 
+// Training grounds key drops — each run has a chance to drop a dungeon key.
+// Easy TG → Copper Keys; Normal → Copper/Iron; Hard → Iron/Darksteel; Nightmare → Darksteel/Void.
+export function rollTrainingKeyDrops(difficulty) {
+  const drops = []
+  const d = difficulty?.toLowerCase() ?? 'easy'
+
+  if (d === 'easy') {
+    if (Math.random() < 0.30) drops.push({ tier: 'easy', amount: 1 })
+  } else if (d === 'normal') {
+    if (Math.random() < 0.45) drops.push({ tier: 'easy',   amount: 1 })
+    if (Math.random() < 0.15) drops.push({ tier: 'medium', amount: 1 })
+  } else if (d === 'hard') {
+    if (Math.random() < 0.40) drops.push({ tier: 'medium', amount: 1 })
+    if (Math.random() < 0.12) drops.push({ tier: 'hard',   amount: 1 })
+  } else if (d === 'nightmare') {
+    if (Math.random() < 0.35) drops.push({ tier: 'hard',      amount: 1 })
+    if (Math.random() < 0.10) drops.push({ tier: 'nightmare', amount: 1 })
+  }
+
+  return drops
+}
+
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }

@@ -9,7 +9,7 @@ import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
 import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
-import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops } from '../game/data/ores.js'
+import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops }  from '../game/data/raidEncounters.js'
 
 export const useBattleStore = defineStore('battle', () => {
@@ -147,6 +147,7 @@ export const useBattleStore = defineStore('battle', () => {
           componentDrops = dungeonResult?.componentDrops ?? []
           forgeUnlock    = dungeonResult?.forgeUnlock ?? null
         }
+        let keyDrops = []
         if (enc.isTraining) {
           const TRAINING_ESSENCE = {
             Hard:      [{ id: 'copper_essence', chance: 0.12 }, { id: 'tin_essence',   chance: 0.12 }],
@@ -158,6 +159,8 @@ export const useBattleStore = defineStore('battle', () => {
               componentDrops.push(id)
             }
           }
+          keyDrops = rollTrainingKeyDrops(enc.difficulty)
+          keyDrops.forEach(({ tier, amount }) => resources.addDungeonKey(tier, amount))
         }
         let raidDrops = null
         if (enc.isRaid) {
@@ -169,7 +172,7 @@ export const useBattleStore = defineStore('battle', () => {
           raidDrops.leathers.forEach(({ id, amount }) => resources.addLeather(id, amount))
           raidDrops.cloths.forEach(({ id, amount })   => resources.addCloth(id, amount))
         }
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, raidDrops, forgeUnlock }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run
@@ -194,6 +197,11 @@ export const useBattleStore = defineStore('battle', () => {
             else br.gatherDrops.fibers.push({ ...drop })
           }
           br.componentDrops.push(...(runReward.componentDrops ?? []))
+          for (const drop of (runReward.keyDrops ?? [])) {
+            const ex = br.keyDrops.find(d => d.tier === drop.tier)
+            if (ex) ex.amount += drop.amount
+            else br.keyDrops.push({ ...drop })
+          }
           batchDone.value++
           if (batchDone.value < batchTotal.value) {
             setTimeout(() => _runBatchNext(), 250)
@@ -225,7 +233,7 @@ export const useBattleStore = defineStore('battle', () => {
   function startBatchRun(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
     _runBatchNext()
   }

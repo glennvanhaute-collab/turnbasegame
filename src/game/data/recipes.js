@@ -508,7 +508,7 @@ export const TIER_MAX_STARS = {
   copper:     4,
   tin:        6,
   steel:      6,
-  darksteel:  8,
+  darksteel:  6,
   mithril:    10,
   moonsilver: 10,
 }

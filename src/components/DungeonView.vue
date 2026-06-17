@@ -3,286 +3,155 @@
 
     <!-- Header -->
     <div class="dungeon-header">
-      <h2 class="dungeon-title">Exploration</h2>
-      <p class="dungeon-intro">Spend energy to discover what lurks nearby. Choose wisely — the hardest path may hold treasures with power beyond ordinary gear.</p>
+      <h2 class="dungeon-title">Dungeons</h2>
+      <p class="dungeon-intro">Each dungeon costs one key. Keys drop from the training grounds. Harder grounds yield rarer keys.</p>
     </div>
 
-    <!-- Explore button -->
-    <div class="explore-row">
-      <button
-        class="explore-btn"
-        :disabled="!energy.canAfford(dungeonStore.EXPLORE_COST)"
-        @click="doExplore"
+    <!-- Key inventory -->
+    <div class="key-bar">
+      <div
+        v-for="(tier, idx) in KEY_TIERS"
+        :key="tier"
+        class="key-chip"
+        :style="{ '--kc': KEY_COLORS[tier] }"
       >
-        <span class="explore-icon">🔭</span>
-        Explore
-        <span class="explore-cost">
-          <span class="energy-icon">⚡</span>{{ dungeonStore.EXPLORE_COST }}
+        <span class="key-icon">🗝</span>
+        <span class="key-name">{{ KEY_NAMES[tier] }}</span>
+        <span class="key-count" :class="{ zero: resources.getDungeonKeys(tier) === 0 }">
+          {{ resources.getDungeonKeys(tier) }}
         </span>
-      </button>
-      <span class="energy-status">{{ energy.energy }}/{{ energy.maxEnergy }} energy</span>
-    </div>
-
-    <!-- Current discovered options -->
-    <div v-if="dungeonStore.currentOptions.length" class="section">
-      <div class="section-label">Discovered</div>
-      <div class="dungeon-grid">
-        <DungeonCard
-          v-for="d in dungeonStore.currentOptions"
-          :key="d.id"
-          :dungeon="d"
-          @enter="$emit('enter-dungeon', d)"
-          @pin="dungeonStore.pin(d.id)"
-          @claim="openNodePicker(d.id)"
-        />
       </div>
     </div>
 
-    <div v-else-if="explored" class="empty-hint">No dungeons found. Explore again.</div>
-
-    <!-- Pinned Nightmares -->
-    <div v-if="dungeonStore.pinnedDungeons.length" class="section">
-      <div class="section-label">
-        📌 Pinned Nightmares
-        <span class="section-note">— saved until you clear them</span>
+    <!-- Dungeon tiers -->
+    <div v-for="tier in TIERS" :key="tier" class="tier-section">
+      <div class="tier-heading" :style="{ '--tc': TIER_COLORS[tier] }">
+        <span class="tier-label">{{ tier }}</span>
+        <span class="tier-key-count">
+          <span class="tier-key-icon">🗝</span>
+          {{ KEY_NAMES[KEY_TIERS_BY_TIER[tier]] }} ×{{ resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) }}
+        </span>
       </div>
       <div class="dungeon-grid">
-        <DungeonCard
-          v-for="d in dungeonStore.pinnedDungeons"
-          :key="d.id"
-          :dungeon="d"
-          @enter="$emit('enter-dungeon', d)"
-          @unpin="dungeonStore.unpin(d.id)"
-        />
-      </div>
-    </div>
-
-    <!-- Tavern modal -->
-    <div class="modal-backdrop" v-if="dungeonStore.pendingTavernId" @click.self="dungeonStore.closeTavern()">
-      <div class="node-modal tavern-modal">
-        <div class="modal-title">{{ tavernNode?.name }}</div>
-        <div class="tavern-scene">
-          You settle into a corner and listen to the murmur of the room...
-        </div>
-
-        <div v-if="dungeonStore.pendingTavernFrag" class="fragment-reveal">
-          <div class="fragment-header">
-            <img
-              v-if="HERO_AVATARS[dungeonStore.pendingTavernFrag.heroId]"
-              :src="HERO_AVATARS[dungeonStore.pendingTavernFrag.heroId]"
-              class="fragment-avatar"
-              alt=""
-            />
-            <div class="fragment-header-text">
-              <div class="fragment-title">"{{ dungeonStore.pendingTavernFrag.frag.title }}"</div>
-              <div class="fragment-hero">— A rumor about <em>{{ dungeonStore.pendingTavernFrag.heroTitle }}</em></div>
-            </div>
+        <div
+          v-for="dungeon in dungeonsByTier[tier]"
+          :key="dungeon.id"
+          class="dungeon-card"
+          :class="`tier-${tier.toLowerCase()}`"
+          :style="pickBg(dungeon.tier, dungeon.id) ? { backgroundImage: `url(${pickBg(dungeon.tier, dungeon.id)})` } : {}"
+        >
+          <div class="tier-badge" :style="{ color: TIER_COLORS[tier], borderColor: TIER_COLORS[tier] + '44' }">
+            {{ tier }}
           </div>
-          <div v-if="dungeonStore.pendingTavernFrag.frag.text" class="fragment-excerpt">
-            {{ dungeonStore.pendingTavernFrag.frag.text.slice(0, 220).trimEnd() }}...
+
+          <div class="card-name">{{ dungeon.name }}</div>
+
+          <div class="card-row">
+            <span class="card-label">Enemies</span>
+            <span class="card-value">{{ POOL_LABELS[dungeon.enemyPoolId] ?? '?' }}</span>
           </div>
-          <div class="fragment-hint">Full account available in the Codex.</div>
-        </div>
-        <div v-else class="no-legends">
-          Nothing of note tonight. The regulars are quiet.
-        </div>
 
-        <div class="modal-actions">
+          <div class="card-row">
+            <span class="card-label">Loot</span>
+            <span class="card-value loot" :style="{ color: TIER_COLORS[tier] }">{{ LOOT_LABEL[tier] }}</span>
+          </div>
+
+          <div v-if="dungeon.rewards.diamonds > 0" class="card-row">
+            <span class="card-label">Diamonds</span>
+            <span class="card-value gold">💎 {{ dungeon.rewards.diamonds }}</span>
+          </div>
+
+          <div v-if="tier === 'Nightmare'" class="nightmare-badge">
+            ◈ Lines gear guaranteed
+          </div>
+
+          <div v-if="mechanicHints(dungeon).length" class="mechanic-hints">
+            <div v-for="hint in mechanicHints(dungeon)" :key="hint" class="mechanic-hint">{{ hint }}</div>
+          </div>
+
           <button
-            class="enter-btn tavern-claim-btn"
-            :disabled="!dungeonStore.pendingTavernFrag"
-            @click="claimTavern"
-          >Remember This</button>
-          <button class="modal-cancel" @click="dungeonStore.closeTavern()">Leave</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Node picker modal -->
-    <div class="modal-backdrop" v-if="dungeonStore.pendingNodeId" @click.self="dungeonStore.closeNode()">
-      <div class="node-modal">
-        <div class="modal-title">
-          {{ pendingNode?.nodeType === 'forge' ? '🔨 Ancient Forge' : '✨ Blessed Area' }}
-        </div>
-        <div class="modal-sub">Choose an item to receive a permanent stat line.</div>
-
-        <div v-if="equippedLegendaries.length" class="legend-list">
-          <button
-            v-for="entry in equippedLegendaries"
-            :key="entry.instance.instanceId"
-            class="legend-item"
-            :class="entry.instance.rarity.toLowerCase()"
-            @click="claimNode(entry.instance.instanceId)"
+            class="enter-btn"
+            :class="{ 'no-key': resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) === 0 }"
+            :style="{ borderColor: TIER_COLORS[tier], color: TIER_COLORS[tier] }"
+            :disabled="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) === 0"
+            @click="enterDungeon(dungeon)"
           >
-            <div class="li-name">{{ entry.instance.name }}</div>
-            <div class="li-meta">{{ entry.instance.rarity }} · {{ entry.heroName }} · {{ entry.slot }}</div>
-            <div class="li-lines" v-if="entry.instance.lines?.length">{{ entry.instance.lines.length }} line{{ entry.instance.lines.length > 1 ? 's' : '' }} already</div>
+            <span v-if="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) > 0">
+              🗝 Enter →
+            </span>
+            <span v-else>No key</span>
           </button>
         </div>
-
-        <div v-else class="no-legends">
-          No items equipped on your team — equip gear first.
-        </div>
-
-        <button class="modal-cancel" @click="dungeonStore.closeNode()">Cancel</button>
       </div>
-    </div>
-
-    <!-- Claim result toast -->
-    <div class="claim-toast" :class="{ visible: !!claimResult }">
-      ✦ {{ claimResult }}
-    </div>
-
-    <!-- Empty state -->
-    <div v-if="!dungeonStore.currentOptions.length && !dungeonStore.pinnedDungeons.length && !explored" class="empty-state">
-      <div class="empty-icon">⚔</div>
-      <div class="empty-text">No dungeons discovered yet.</div>
-      <div class="empty-sub">Hit Explore to reveal what lurks nearby.</div>
     </div>
 
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useDungeonStore }  from '../stores/useDungeonStore.js'
-import { useCityStore }     from '../stores/useCityStore.js'
-import { useAdvisorStore }  from '../stores/useAdvisorStore.js'
-import { useEnergyStore } from '../stores/useEnergyStore.js'
-import { useInventoryStore } from '../stores/useInventoryStore.js'
-import { useCollectionStore } from '../stores/useCollectionStore.js'
-import { GearSlot, SLOT_LABELS } from '../game/Gear.js'
-import DungeonCard from './DungeonCard.vue'
-import avatarAldric  from '../assets/units/legendary/lord-aldric.png'
-import avatarHelga   from '../assets/units/legendary/Helga.png'
-import avatarGarrett from '../assets/units/rare/garrett-the-unbroken.png'
+import { computed } from 'vue'
+import { useResourceStore } from '../stores/useResourceStore.js'
+import {
+  DUNGEON_LIST,
+  POOL_LABELS,
+  LOOT_LABEL,
+  POOL_MECHANIC_HINTS,
+  DUNGEON_KEY_TIERS,
+  DUNGEON_KEY_NAMES,
+  DUNGEON_KEY_COLORS,
+} from '../game/data/dungeons.js'
 
-const HERO_AVATARS = { lord_aldric: avatarAldric, helga: avatarHelga, hedge_blade: avatarGarrett }
+const emit   = defineEmits(['enter-dungeon'])
+const resources = useResourceStore()
 
-defineEmits(['enter-dungeon'])
+const TIERS       = ['Easy', 'Medium', 'Hard', 'Nightmare']
+const TIER_COLORS = { Easy: '#4dff88', Medium: '#4fa8ff', Hard: '#ff9944', Nightmare: '#cc44ff' }
+const KEY_TIERS   = ['easy', 'medium', 'hard', 'nightmare']
+const KEY_NAMES   = DUNGEON_KEY_NAMES
+const KEY_COLORS  = DUNGEON_KEY_COLORS
 
-const dungeonStore = useDungeonStore()
-const cityStore    = useCityStore()
-const advisor      = useAdvisorStore()
-const energy       = useEnergyStore()
-const inventory    = useInventoryStore()
-const collection   = useCollectionStore()
-const explored     = ref(dungeonStore.currentOptions.length > 0)
-const claimResult  = ref('')
-let claimTimer = null
+// Maps tier label → key tier string
+const KEY_TIERS_BY_TIER = {
+  Easy:      DUNGEON_KEY_TIERS.Easy,
+  Medium:    DUNGEON_KEY_TIERS.Medium,
+  Hard:      DUNGEON_KEY_TIERS.Hard,
+  Nightmare: DUNGEON_KEY_TIERS.Nightmare,
+}
 
-const pendingNode = computed(() =>
-  dungeonStore.pendingNodeId
-    ? dungeonStore.findDungeon(dungeonStore.pendingNodeId)
-    : null
-)
-
-const tavernNode = computed(() =>
-  dungeonStore.pendingTavernId
-    ? dungeonStore.findDungeon(dungeonStore.pendingTavernId)
-    : null
-)
-
-// All equipped items across the team — any rarity can receive a node line
-const equippedLegendaries = computed(() => {
-  const results = []
-  for (const heroKey of collection.team) {
-    const heroEntry = collection.roster.find(r => r.key === heroKey)
-    for (const slot of Object.values(GearSlot)) {
-      const item = inventory.getEquippedItem(heroKey, slot)
-      if (item) {
-        results.push({
-          instance: item,
-          heroName: heroEntry?.hero?.name ?? heroKey,
-          slot: SLOT_LABELS[slot] ?? slot,
-        })
-      }
-    }
-  }
-  return results
+const dungeonsByTier = computed(() => {
+  const map = {}
+  for (const tier of TIERS) map[tier] = DUNGEON_LIST.filter(d => d.tier === tier)
+  return map
 })
 
-function doExplore() {
-  dungeonStore.explore()
-  explored.value = true
+function mechanicHints(dungeon) {
+  return POOL_MECHANIC_HINTS[dungeon.enemyPoolId] ?? []
 }
 
-const NODE_ADVISOR_FLAGS = {
-  forge:   'seen-node-forge',
-  blessed: 'seen-node-blessed',
-  tavern:  'seen-node-tavern',
-  city:    'seen-node-city',
+// Background images — same stable-pick-by-id logic as old DungeonCard
+const _dungeonBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
+const TIER_BG_PREFIX = { medium: 'intermediate' }
+function tierbgs(tier) {
+  const key   = tier.toLowerCase()
+  const label = TIER_BG_PREFIX[key] ?? key
+  return Object.entries(_dungeonBgs)
+    .filter(([p]) => {
+      const file = p.split('/').pop()
+      return file.startsWith(`dungeon_${label}_`) || file.startsWith(`${label}_`)
+    })
+    .map(([, m]) => m.default)
 }
-const NODE_ADVISOR_LINES = {
-  forge: [
-    'A forge imbued with ancient power — rarer than anything you will find in camp.',
-    'You can use it to inscribe a physical stat line onto any Legendary item you carry. The enhancement is permanent.',
-    'Choose wisely. The forge will not wait.',
-  ],
-  blessed: [
-    'Sacred ground, still warm with old light. These places predate the houses.',
-    'A blessed area can inscribe a magical stat line onto a Legendary item. Critical rates, resistances, things the hammer cannot add.',
-    'Once chosen, the blessing is bound to that item forever. Think before you act.',
-  ],
-  tavern: [
-    'Sit long enough in any tavern and the world talks around you. People forget you are listening.',
-    'Some of what you overhear is useful. Some of it is history that was never meant to be recorded.',
-    'I keep notes. Visit the Codex — Heroes tab — when you want to read what we have gathered so far.',
-  ],
-  city: [
-    'Every great house has cities. And every city has names worth knowing.',
-    'When you pass through a city aligned with a house, you may hear of a notable warrior looking for a worthy banner to follow.',
-    'Hear enough of their name and they will answer when you call. Visit the summon portal — they will be waiting.',
-  ],
+function pickBg(tier, seed) {
+  const pool = tierbgs(tier)
+  if (!pool.length) return null
+  const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
+  return pool[idx]
 }
 
-function maybeShowNodeAdvisor(nodeType) {
-  const flag = NODE_ADVISOR_FLAGS[nodeType]
-  if (!flag || localStorage.getItem(flag)) return
-  localStorage.setItem(flag, '1')
-  const lines = NODE_ADVISOR_LINES[nodeType]
-  if (lines) advisor.say(lines)
-}
-
-function openNodePicker(id) {
-  const node = dungeonStore.findDungeon(id)
-  if (node?.nodeType) maybeShowNodeAdvisor(node.nodeType)
-  if (node?.nodeType === 'tavern') {
-    const result = dungeonStore.openTavern(id)
-    if (!result) showToast('Nothing new in the tavern tonight.')
-  } else if (node?.nodeType === 'forge_discovery') {
-    const forgeType = dungeonStore.claimForgeDiscovery(id)
-    if (forgeType) {
-      const labels = { elven: 'Elven Moonforge', goblin: 'Goblin Contraption Works', dwarf: 'Dwarven Ironhall' }
-      showToast(`✦ ${labels[forgeType]} discovered — new crafting tier unlocked!`)
-    }
-  } else if (node?.nodeType === 'city') {
-    const result = dungeonStore.claimCityNode(id)
-    if (result) {
-      cityStore.addPending(result.heroKey)
-      showToast(`🏙 You heard of ${result.heroName} in ${node.cityName}. They will answer your next call.`)
-    }
-  } else {
-    dungeonStore.openNode(id)
-  }
-}
-
-function claimNode(instanceId) {
-  const result = dungeonStore.applyNodeToItem(instanceId)
-  if (result) {
-    showToast(`${result.itemName} received: ${result.line.label}`)
-  }
-}
-
-function claimTavern() {
-  const result = dungeonStore.claimTavern()
-  if (result) showToast(`Fragment discovered: "${result.frag.title}"`)
-}
-
-function showToast(msg) {
-  claimResult.value = msg
-  clearTimeout(claimTimer)
-  claimTimer = setTimeout(() => { claimResult.value = '' }, 3500)
+function enterDungeon(dungeon) {
+  const keyTier = KEY_TIERS_BY_TIER[dungeon.tier]
+  if (!resources.spendDungeonKey(keyTier)) return
+  emit('enter-dungeon', dungeon)
 }
 </script>
 
@@ -314,167 +183,144 @@ function showToast(msg) {
   line-height: 1.6;
 }
 
-/* Explore row */
-.explore-row { display: flex; align-items: center; gap: 14px; }
-.explore-btn {
+/* Key bar */
+.key-bar {
   display: flex;
-  align-items: center;
   gap: 10px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #1a0e05, #2a1508);
-  border: 1px solid var(--gold-dim);
-  border-radius: 8px;
-  color: var(--gold);
-  font-family: var(--font-head);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+  flex-wrap: wrap;
+  justify-content: center;
 }
-.explore-btn:hover:not(:disabled) { border-color: var(--gold); box-shadow: 0 0 14px rgba(201,162,39,0.25); }
-.explore-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.explore-icon { font-size: 1rem; }
-.explore-cost {
+.key-chip {
   display: flex;
   align-items: center;
-  gap: 3px;
-  background: rgba(0,0,0,0.35);
-  border-radius: 4px;
-  padding: 2px 8px;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--kc);
+  border-radius: 20px;
+  background: rgba(0,0,0,0.3);
   font-size: 0.75rem;
-  color: #aaff44;
 }
-.energy-icon { font-size: 0.78rem; }
-.energy-status { font-size: 0.72rem; color: var(--text-muted); }
+.key-icon  { font-size: 0.85rem; }
+.key-name  { color: var(--kc); font-weight: 700; }
+.key-count { color: var(--kc); font-weight: 700; font-size: 0.9rem; }
+.key-count.zero { color: #444; }
 
-/* Section */
-.section { display: flex; flex-direction: column; gap: 12px; }
-.section-label {
+/* Tier section */
+.tier-section { display: flex; flex-direction: column; gap: 12px; }
+.tier-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tier-label {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  color: var(--text-muted);
-  font-weight: 600;
+  color: var(--tc);
+  font-weight: 700;
 }
-.section-note { text-transform: none; font-style: italic; letter-spacing: 0; color: var(--text-dim); }
+.tier-key-count {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tier-key-icon { font-size: 0.75rem; }
 
 .dungeon-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
 
-.empty-hint { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
-
-/* Node picker modal */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
-}
-.node-modal {
-  background: #120a05;
-  border: 1px solid var(--border-gold);
-  border-radius: 12px;
-  padding: 24px;
-  width: min(480px, 92vw);
-  display: flex; flex-direction: column; gap: 14px;
-  box-shadow: 0 0 40px rgba(0,0,0,0.8);
-}
-.modal-title { font-family: var(--font-head); font-size: 1rem; color: var(--gold); font-weight: 700; letter-spacing: 2px; }
-.modal-sub   { font-size: 0.75rem; color: var(--text-muted); }
-.legend-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
-.legend-item {
-  background: #0e0804; border: 1px solid #3a1c0a; border-radius: 8px;
-  padding: 10px 14px; text-align: left; cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-  display: flex; flex-direction: column; gap: 3px;
-}
-.legend-item:hover          { background: #180e06; border-color: var(--gold-dim); }
-.legend-item.legendary      { border-color: #7a5228; }
-.legend-item.legendary:hover{ border-color: var(--gold); }
-.legend-item.mythical       { border-color: #6a1a6a; }
-.legend-item.mythical:hover { border-color: #cc44ff; }
-.li-name  { font-size: 0.85rem; font-weight: 700; color: var(--text-parchment); }
-.li-meta  { font-size: 0.65rem; color: var(--text-muted); }
-.li-lines { font-size: 0.62rem; color: #cc44ff; font-weight: 600; }
-.no-legends { font-size: 0.75rem; color: var(--text-dim); font-style: italic; text-align: center; padding: 16px 0; }
-.modal-cancel {
-  align-self: flex-end; background: none; border: 1px solid #3a1c0a;
-  border-radius: 6px; color: var(--text-muted); font-size: 0.72rem;
-  padding: 6px 16px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
-}
-.modal-cancel:hover { color: #ff6b6b; border-color: #ff6b6b66; }
-
-/* Tavern modal */
-.tavern-modal { border-color: #4a3208; }
-.tavern-scene {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-style: italic;
-  line-height: 1.6;
-}
-.fragment-reveal {
-  display: flex; flex-direction: column; gap: 10px;
-  background: #0a0804; border: 1px solid #3a2c0a;
-  border-radius: 8px; padding: 16px;
-}
-.fragment-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-.fragment-avatar {
-  width: 56px;
-  height: 68px;
-  object-fit: cover;
-  object-position: top center;
-  border-radius: 4px;
-  flex-shrink: 0;
-  filter: sepia(0.15);
-  border: 1px solid #3a2c0a;
-}
-.fragment-header-text {
-  flex: 1;
+/* Cards */
+.dungeon-card {
+  background: #0e0804;
+  border: 1px solid var(--border-brown);
+  border-radius: 10px;
+  padding: 20px 18px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  justify-content: center;
+  gap: 10px;
+  position: relative;
+  min-height: 280px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-size: cover;
+  background-position: center top;
+  overflow: hidden;
 }
-.fragment-title {
-  font-family: var(--font-head);
-  font-size: 0.95rem;
-  color: var(--gold);
+.dungeon-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(8,4,2,0.45) 0%, rgba(8,4,2,0.72) 55%, rgba(8,4,2,0.92) 100%);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 10px;
+}
+.dungeon-card > * { position: relative; z-index: 1; }
+
+.dungeon-card.tier-easy      { border-color: #1a4a22; }
+.dungeon-card.tier-easy:hover { border-color: #2a7a38; box-shadow: 0 0 20px rgba(60,200,80,0.15); }
+.dungeon-card.tier-medium     { border-color: #1a3a6a; }
+.dungeon-card.tier-medium:hover { border-color: #2a5aaa; box-shadow: 0 0 22px rgba(50,130,220,0.18); }
+.dungeon-card.tier-hard       { border-color: #7a3a08; }
+.dungeon-card.tier-hard:hover { border-color: #b05010; box-shadow: 0 0 24px rgba(255,120,30,0.20); }
+.dungeon-card.tier-nightmare  { border-color: #6622aa; box-shadow: 0 0 24px rgba(180,60,255,0.15); }
+.dungeon-card.tier-nightmare:hover { border-color: #aa44ee; box-shadow: 0 0 32px rgba(180,60,255,0.30); }
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 2px 8px;
+  width: fit-content;
 }
-.fragment-hero {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
+.card-name {
+  font-family: var(--font-head);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-parchment);
+  margin: 2px 0 4px;
 }
-.fragment-hero em { color: #c9a227; font-style: normal; }
-.fragment-excerpt {
-  font-size: 0.72rem;
-  color: #aaa;
-  line-height: 1.65;
-  border-left: 2px solid #3a2c0a;
-  padding-left: 10px;
-  margin-top: 4px;
+.card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.74rem;
 }
-.fragment-hint {
+.card-label { color: var(--text-muted); min-width: 60px; flex-shrink: 0; }
+.card-value { color: #aaa; flex: 1; line-height: 1.4; }
+.card-value.gold { color: var(--gold); }
+
+.nightmare-badge {
   font-size: 0.62rem;
-  color: var(--text-dim);
-  font-style: italic;
+  color: #cc44ff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
 }
-.modal-actions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; }
-.tavern-claim-btn {
-  padding: 8px 18px;
+.mechanic-hints { display: flex; flex-direction: column; gap: 3px; }
+.mechanic-hint {
+  font-size: 0.6rem;
+  color: #ff8844;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0.85;
+}
+
+.enter-btn {
+  margin-top: auto;
+  padding: 11px 14px;
   background: transparent;
-  border: 1px solid #c9a227;
+  border: 1px solid;
   border-radius: 6px;
-  color: #c9a227;
   font-family: var(--font-head);
   font-size: 0.72rem;
   font-weight: 700;
@@ -482,39 +328,25 @@ function showToast(msg) {
   text-transform: uppercase;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
+  width: 100%;
 }
-.tavern-claim-btn:hover:not(:disabled) { background: rgba(201,162,39,0.1); box-shadow: 0 0 12px rgba(201,162,39,0.2); }
-.tavern-claim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.enter-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+.enter-btn.no-key,
+.enter-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: #444 !important;
+  color: #444 !important;
+}
 
-/* Toast */
-.claim-toast {
-  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
-  background: #1a1208; border: 1px solid var(--gold-dim);
-  border-radius: 8px; padding: 10px 20px;
-  font-size: 0.8rem; color: var(--gold); font-weight: 600;
-  z-index: 200; pointer-events: none;
-  opacity: 0; transition: opacity 0.3s;
-}
-.claim-toast.visible { opacity: 1; }
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-dim);
-}
-.empty-icon { font-size: 2rem; margin-bottom: 12px; opacity: 0.3; }
-.empty-text { font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
-.empty-sub  { font-size: 0.75rem; font-style: italic; }
-
-/* ── Responsive ── */
-@media (max-width: 1100px) {
-  .dungeon-grid { grid-template-columns: repeat(3, 1fr); }
-}
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .dungeon-grid { grid-template-columns: repeat(2, 1fr); }
-  .dungeon-wrap { padding: 0 14px 60px; }
 }
-@media (max-width: 460px) {
+@media (max-width: 560px) {
   .dungeon-grid { grid-template-columns: 1fr; }
+  .dungeon-wrap { padding: 0 14px 60px; }
 }
 </style>

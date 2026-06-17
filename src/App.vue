@@ -202,12 +202,13 @@
       </div>
       <div v-else-if="view === 'dungeon'" class="gear-view exploration-view" :style="{ '--exploration-bg': `url(${explorationBg})` }">
         <div class="gear-tabs">
-          <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Exploration</button>
-          <button class="gear-tab" :class="{ active: expTab === 'exploration' }" @click="expTab = 'exploration'">Inventory</button>
+          <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Dungeons</button>
+          <button class="gear-tab" :class="{ active: expTab === 'explore' }" @click="expTab = 'explore'">Explore</button>
           <button class="gear-tab" :class="{ active: expTab === 'raids' }" @click="expTab = 'raids'">Raids</button>
           <button class="gear-tab" :class="{ active: expTab === 'sieges' }" @click="expTab = 'sieges'">Sieges</button>
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
+        <ExploreView v-else-if="expTab === 'explore'" @enter-dungeon="startDungeonBattle" />
         <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" />
         <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
@@ -250,6 +251,7 @@ import EquipmentView from './components/EquipmentView.vue'
 import SummonView from './components/SummonView.vue'
 import BattleArena from './components/BattleArena.vue'
 import DungeonView from './components/DungeonView.vue'
+import ExploreView from './components/ExploreView.vue'
 import RaidsView from './components/RaidsView.vue'
 import RaidBattleArena from './components/RaidBattleArena.vue'
 import SiegesView from './components/SiegesView.vue'

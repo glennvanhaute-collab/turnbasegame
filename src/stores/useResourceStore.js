@@ -48,6 +48,8 @@ export const useResourceStore = defineStore('resources', () => {
     saved?.upgradeComponents ?? Object.fromEntries(Object.keys(UPGRADE_COMPONENTS).map(k => [k, 0]))
   )
 
+  const dungeonKeys = ref(saved?.dungeonKeys ?? { easy: 0, medium: 0, hard: 0, nightmare: 0 })
+
   const smithingLevel          = computed(() => Math.floor(smithingXp.value / XP_PER_LEVEL) + 1)
   const smithingProgress       = computed(() => (smithingXp.value % XP_PER_LEVEL) / XP_PER_LEVEL)
   const smithingXpInLevel      = computed(() => smithingXp.value % XP_PER_LEVEL)
@@ -66,7 +68,7 @@ export const useResourceStore = defineStore('resources', () => {
 
   watch([ores, bars, smithingXp, leatherworkingXp, tailoringXp, woodworkingXp, logs, planks, bowstrings,
          hides, leathers, fibers, cloths,
-         forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents], () => {
+         forgeLevel, elvenForgeUnlocked, goblinForgeUnlocked, dwarfForgeUnlocked, upgradeComponents, dungeonKeys], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       ores:                ores.value,
       bars:                bars.value,
@@ -86,6 +88,7 @@ export const useResourceStore = defineStore('resources', () => {
       goblinForgeUnlocked: goblinForgeUnlocked.value,
       dwarfForgeUnlocked:  dwarfForgeUnlocked.value,
       upgradeComponents:   upgradeComponents.value,
+      dungeonKeys:         dungeonKeys.value,
     }))
   }, { deep: true })
 
@@ -121,6 +124,20 @@ export const useResourceStore = defineStore('resources', () => {
     if (id in upgradeComponents.value) upgradeComponents.value[id] = Math.max(0, upgradeComponents.value[id] - amount)
   }
 
+  function addDungeonKey(tier, amount = 1) {
+    const t = tier.toLowerCase()
+    if (t in dungeonKeys.value) dungeonKeys.value[t] += amount
+  }
+  function spendDungeonKey(tier) {
+    const t = tier.toLowerCase()
+    if (!(t in dungeonKeys.value) || dungeonKeys.value[t] <= 0) return false
+    dungeonKeys.value[t]--
+    return true
+  }
+  function getDungeonKeys(tier) {
+    return dungeonKeys.value[tier.toLowerCase()] ?? 0
+  }
+
   return {
     ores, addOre, removeOre,
     bars, addBar, removeBar,
@@ -143,6 +160,7 @@ export const useResourceStore = defineStore('resources', () => {
     cloths, addCloth, removeCloth,
     upgradeComponents, addUpgradeComponent, removeUpgradeComponent,
     UPGRADE_COMPONENTS,
+    dungeonKeys, addDungeonKey, spendDungeonKey, getDungeonKeys,
     XP_PER_LEVEL,
   }
 })

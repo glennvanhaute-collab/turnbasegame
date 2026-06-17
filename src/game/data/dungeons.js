@@ -95,6 +95,51 @@ export const DUNGEON_REWARDS = {
   Nightmare: { gold: 0, diamonds: 30 },
 }
 
+// Keys required to enter dungeons — one type per tier
+export const DUNGEON_KEY_TIERS = {
+  Easy:      'easy',
+  Medium:    'medium',
+  Hard:      'hard',
+  Nightmare: 'nightmare',
+}
+
+export const DUNGEON_KEY_NAMES = {
+  easy:      'Copper Key',
+  medium:    'Iron Key',
+  hard:      'Darksteel Key',
+  nightmare: 'Void Key',
+}
+
+export const DUNGEON_KEY_COLORS = {
+  easy:      '#cd7f32',
+  medium:    '#4fa8ff',
+  hard:      '#7c5cbf',
+  nightmare: '#cc44ff',
+}
+
+// Static dungeon list — always available, gated by keys
+export const DUNGEON_LIST = [
+  { id: 'dng_goblin_warrens',        name: 'Goblin Warrens',           tier: 'Easy',      enemyPoolId: 'easy_1' },
+  { id: 'dng_crypt_of_ash',          name: 'Crypt of Ash',             tier: 'Easy',      enemyPoolId: 'easy_2' },
+  { id: 'dng_bandit_cave',           name: 'Bandit Cave',              tier: 'Easy',      enemyPoolId: 'easy_3' },
+  { id: 'dng_ashveil_mine',          name: 'Ashveil Mine',             tier: 'Medium',    enemyPoolId: 'med_1' },
+  { id: 'dng_thornwood_depths',      name: 'Thornwood Depths',         tier: 'Medium',    enemyPoolId: 'med_2' },
+  { id: 'dng_ruins_of_vel',          name: 'Ruins of Vel',             tier: 'Medium',    enemyPoolId: 'med_3' },
+  { id: 'dng_thornhaven_ruins',      name: 'Thornhaven Ruins',         tier: 'Hard',      enemyPoolId: 'hard_1' },
+  { id: 'dng_the_dread_spire',       name: 'The Dread Spire',          tier: 'Hard',      enemyPoolId: 'hard_2' },
+  { id: 'dng_the_crimson_hold',      name: 'The Crimson Hold',         tier: 'Hard',      enemyPoolId: 'hard_3' },
+  { id: 'dng_barrow_kings_tomb',     name: "The Barrow King's Tomb",   tier: 'Nightmare', enemyPoolId: 'nm_1' },
+  { id: 'dng_necropolis_of_valdris', name: 'Necropolis of Valdris',    tier: 'Nightmare', enemyPoolId: 'nm_2' },
+  { id: 'dng_the_wailing_crypts',    name: 'The Wailing Crypts',       tier: 'Nightmare', enemyPoolId: 'nm_3' },
+].map(d => ({
+  ...d,
+  rewards:    DUNGEON_REWARDS[d.tier],
+  difficulty: TIER_DIFFICULTY[d.tier],
+  isDungeon:  true,
+  isNode:     false,
+  pinned:     false,
+}))
+
 export const TIER_DIFFICULTY = {
   Easy:      'Easy',
   Medium:    'Normal',

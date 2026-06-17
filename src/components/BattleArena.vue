@@ -58,7 +58,15 @@
         >
           <span class="dot" />{{ UPGRADE_COMPONENTS[key]?.name ?? key }}
         </div>
-        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.gatherDrops?.hides?.length && !store.lastReward.gatherDrops?.fibers?.length && !store.lastReward.componentDrops?.length">
+        <div
+          v-for="kd in store.lastReward.keyDrops"
+          :key="'k_'+kd.tier"
+          class="drop-chip"
+          :style="{ '--c': DUNGEON_KEY_COLORS[kd.tier] ?? '#888' }"
+        >
+          <span class="dot" />{{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
+        </div>
+        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.gatherDrops?.hides?.length && !store.lastReward.gatherDrops?.fibers?.length && !store.lastReward.componentDrops?.length && !store.lastReward.keyDrops?.length">
           No drops this run
         </div>
       </div>
@@ -122,7 +130,7 @@
         </div>
 
         <!-- Drops -->
-        <div class="drops-row" v-if="store.lastReward.oreDrops?.length || store.lastReward.gatherDrops?.hides?.length || store.lastReward.gatherDrops?.fibers?.length || store.lastReward.componentDrops?.length">
+        <div class="drops-row" v-if="store.lastReward.oreDrops?.length || store.lastReward.gatherDrops?.hides?.length || store.lastReward.gatherDrops?.fibers?.length || store.lastReward.componentDrops?.length || store.lastReward.keyDrops?.length">
           <div
             v-for="drop in store.lastReward.oreDrops"
             :key="drop.oreId"
@@ -154,6 +162,14 @@
             :style="{ '--c': UPGRADE_COMPONENTS[key]?.color ?? '#888' }"
           >
             <span class="dot" />{{ UPGRADE_COMPONENTS[key]?.name ?? key }}
+          </div>
+          <div
+            v-for="kd in store.lastReward.keyDrops"
+            :key="'k_'+kd.tier"
+            class="drop-chip"
+            :style="{ '--c': DUNGEON_KEY_COLORS[kd.tier] ?? '#888' }"
+          >
+            <span class="dot" />{{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
           </div>
         </div>
 
@@ -228,6 +244,7 @@ import { ORES }               from '../game/data/ores.js'
 import { HIDES }              from '../game/data/hides.js'
 import { FIBERS }             from '../game/data/fibers.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
+import { DUNGEON_KEY_NAMES, DUNGEON_KEY_COLORS } from '../game/data/dungeons.js'
 import CombatStage from './PixiCombatStage.vue'
 import SkillPanel  from './SkillPanel.vue'
 import BattleLog   from './BattleLog.vue'
