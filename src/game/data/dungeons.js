@@ -117,6 +117,13 @@ export const DUNGEON_KEY_COLORS = {
   nightmare: '#cc44ff',
 }
 
+export const TIER_DIFFICULTY = {
+  Easy:      'Easy',
+  Medium:    'Normal',
+  Hard:      'Hard',
+  Nightmare: 'Nightmare',
+}
+
 // Static dungeon list — always available, gated by keys
 export const DUNGEON_LIST = [
   { id: 'dng_goblin_warrens',        name: 'Goblin Warrens',           tier: 'Easy',      enemyPoolId: 'easy_1' },
@@ -139,13 +146,6 @@ export const DUNGEON_LIST = [
   isNode:     false,
   pinned:     false,
 }))
-
-export const TIER_DIFFICULTY = {
-  Easy:      'Easy',
-  Medium:    'Normal',
-  Hard:      'Hard',
-  Nightmare: 'Nightmare',
-}
 
 // Discovery line value ranges
 const LINE_RANGES = {
