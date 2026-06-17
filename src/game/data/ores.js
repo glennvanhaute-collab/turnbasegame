@@ -15,10 +15,11 @@ export function rollOreDrops(difficulty) {
   const d = difficulty?.toLowerCase() ?? 'easy'
 
   if (d === 'easy') {
-    if (Math.random() < 0.85) drops.push({ oreId: 'copper', amount: rand(2, 4) })
-    if (Math.random() < 0.65) drops.push({ oreId: 'tin',    amount: rand(1, 3) })
+    drops.push({ oreId: 'copper', amount: rand(2, 5) })
+    if (Math.random() < 0.65) drops.push({ oreId: 'tin', amount: rand(1, 3) })
   } else if (d === 'normal' || d === 'medium') {
-    if (Math.random() < 0.80) drops.push({ oreId: 'steel',    amount: rand(1, 3) })
+    drops.push({ oreId: 'steel', amount: rand(2, 4) })
+    if (Math.random() < 0.50) drops.push({ oreId: 'steel', amount: rand(1, 2) })
   } else if (d === 'hard') {
     drops.push({ oreId: 'darksteel', amount: rand(2, 4) })
     if (Math.random() < 0.50) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
