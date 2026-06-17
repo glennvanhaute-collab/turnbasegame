@@ -154,9 +154,16 @@ export const NIGHTMARE_SLAYER_LINE = {
 
 export function rollDungeonDrops(tier) {
   const weights = LOOT_WEIGHTS[tier]
-  const count = (tier === 'Nightmare')
-    ? (Math.random() < 0.5 ? 2 : 1)
-    : (Math.random() < 0.30 ? 2 : 1)
+  let count
+  if (tier === 'Nightmare') {
+    count = 2 + (Math.random() < 0.65 ? 1 : 0)           // 2 guaranteed + 65% for 3rd
+  } else if (tier === 'Hard') {
+    count = 2 + (Math.random() < 0.40 ? 1 : 0)           // 2 guaranteed + 40% for 3rd
+  } else if (tier === 'Medium') {
+    count = 1 + (Math.random() < 0.55 ? 1 : 0)           // 1 guaranteed + 55% for 2nd
+  } else {
+    count = 1 + (Math.random() < 0.40 ? 1 : 0)           // Easy: 1 + 40% for 2nd
+  }
 
   const drops = []
   for (let i = 0; i < count; i++) {

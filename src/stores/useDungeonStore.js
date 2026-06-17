@@ -127,15 +127,15 @@ export const useDungeonStore = defineStore('dungeons', () => {
 
     // Essence drops — scale with dungeon tier; copper/tin come from training grounds
     const ESSENCE_TABLE = {
-      Easy:      [{ id: 'copper_essence', chance: 0.28 }, { id: 'tin_essence', chance: 0.15 }],
-      Medium:    [{ id: 'steel_essence',     chance: 0.28 }],
-      Hard:      [{ id: 'darksteel_essence', chance: 0.28 }, { id: 'steel_essence',     chance: 0.10 }],
-      Nightmare: [{ id: 'mithril_essence',   chance: 0.28 }, { id: 'darksteel_essence', chance: 0.12 }],
+      Easy:      [{ id: 'copper_essence', chance: 0.60, amt: 1 }, { id: 'tin_essence',       chance: 0.35, amt: 1 }],
+      Medium:    [{ id: 'steel_essence',     chance: 0.60, amt: 1 }, { id: 'tin_essence',     chance: 0.30, amt: 1 }],
+      Hard:      [{ id: 'darksteel_essence', chance: 0.65, amt: 2 }, { id: 'steel_essence',   chance: 0.40, amt: 1 }],
+      Nightmare: [{ id: 'mithril_essence',   chance: 0.70, amt: 2 }, { id: 'darksteel_essence', chance: 0.50, amt: 1 }],
     }
     const componentDrops = []
-    for (const { id, chance } of (ESSENCE_TABLE[effectiveTier] ?? [])) {
+    for (const { id, chance, amt } of (ESSENCE_TABLE[effectiveTier] ?? [])) {
       if (Math.random() < chance) {
-        resources.addUpgradeComponent(id, 1)
+        resources.addUpgradeComponent(id, amt)
         componentDrops.push(id)
       }
     }
