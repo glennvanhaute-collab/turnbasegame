@@ -417,6 +417,7 @@ function startBattle(encounterIndex) {
 function startDungeonBattle(dungeon) {
   const team = collectionStore.buildTeam()
   const encounter = buildDungeonEncounter(dungeon)
+  if (dungeon.batchCount > 1) battleStore.setupBatch(dungeon.batchCount)
   battleStore.initBattle(encounter, team)
   if (!battleStore.autoplay) battleStore.toggleAutoplay()
   showBattle.value = true

@@ -69,18 +69,29 @@
             <div v-for="hint in mechanicHints(dungeon)" :key="hint" class="mechanic-hint">{{ hint }}</div>
           </div>
 
-          <button
-            class="enter-btn"
-            :class="{ 'no-key': resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) === 0 }"
-            :style="{ borderColor: TIER_COLORS[tier], color: TIER_COLORS[tier] }"
-            :disabled="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) === 0"
-            @click="enterDungeon(dungeon)"
-          >
-            <span v-if="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) > 0">
-              🗝 Enter →
-            </span>
-            <span v-else>No key</span>
-          </button>
+          <div class="enter-row">
+            <button
+              class="enter-btn"
+              :class="{ 'no-key': resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) === 0 }"
+              :style="{ borderColor: TIER_COLORS[tier], color: TIER_COLORS[tier] }"
+              :disabled="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) === 0"
+              @click="enterDungeon(dungeon)"
+            >
+              <span v-if="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) > 0">🗝 Enter</span>
+              <span v-else>No key</span>
+            </button>
+            <button
+              class="enter-btn batch-btn"
+              :class="{ 'no-key': resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) < 10 }"
+              :style="{ borderColor: TIER_COLORS[tier], color: TIER_COLORS[tier] }"
+              :disabled="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) < 10"
+              :title="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) < 10 ? 'Need 10 keys' : 'Run 10 times, spend 10 keys'"
+              @click="enterDungeonBatch(dungeon, 10)"
+            >
+              <span v-if="resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) >= 10">🗝×10</span>
+              <span v-else>🗝×10 ({{ resources.getDungeonKeys(KEY_TIERS_BY_TIER[tier]) }})</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -152,6 +163,13 @@ function enterDungeon(dungeon) {
   const keyTier = KEY_TIERS_BY_TIER[dungeon.tier]
   if (!resources.spendDungeonKey(keyTier)) return
   emit('enter-dungeon', dungeon)
+}
+
+function enterDungeonBatch(dungeon, count) {
+  const keyTier = KEY_TIERS_BY_TIER[dungeon.tier]
+  if (resources.getDungeonKeys(keyTier) < count) return
+  for (let i = 0; i < count; i++) resources.spendDungeonKey(keyTier)
+  emit('enter-dungeon', { ...dungeon, batchCount: count })
 }
 </script>
 
@@ -315,8 +333,12 @@ function enterDungeon(dungeon) {
   opacity: 0.85;
 }
 
-.enter-btn {
+.enter-row {
   margin-top: auto;
+  display: flex;
+  gap: 6px;
+}
+.enter-btn {
   padding: 11px 14px;
   background: transparent;
   border: 1px solid;
@@ -328,7 +350,7 @@ function enterDungeon(dungeon) {
   text-transform: uppercase;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
-  width: 100%;
+  flex: 1;
 }
 .enter-btn:hover:not(:disabled) {
   background: rgba(255,255,255,0.05);
@@ -341,6 +363,7 @@ function enterDungeon(dungeon) {
   border-color: #444 !important;
   color: #444 !important;
 }
+.batch-btn { flex: 0 0 auto; padding: 11px 16px; }
 
 @media (max-width: 900px) {
   .dungeon-grid { grid-template-columns: repeat(2, 1fr); }

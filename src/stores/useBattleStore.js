@@ -238,6 +238,15 @@ export const useBattleStore = defineStore('battle', () => {
     _runBatchNext()
   }
 
+  // Primes batch state without starting the first run — call initBattle afterwards.
+  // Used for dungeon key batches where the caller controls the encounter.
+  function setupBatch(n) {
+    batchTotal.value   = n
+    batchDone.value    = 0
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [] }
+    if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
+  }
+
   function stopBatch() {
     batchTotal.value = 0
     batchDone.value  = 0
@@ -300,6 +309,6 @@ export const useBattleStore = defineStore('battle', () => {
     isPlayerTurn, canAct, isOver,
     initBattle, selectSkill, selectTarget,
     toggleAutoplay, setSpeed,
-    startBatchRun, stopBatch, devCompleteBatch,
+    startBatchRun, setupBatch, stopBatch, devCompleteBatch,
   }
 })
