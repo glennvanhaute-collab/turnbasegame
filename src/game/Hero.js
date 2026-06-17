@@ -59,6 +59,7 @@ export class Hero {
     quote = null,
     lore = null,
     forgeAffinities = [],
+    role = null,
   }) {
     this.id = id
     this.name = name
@@ -69,6 +70,7 @@ export class Hero {
     this.quote = quote
     this.lore = lore
     this.forgeAffinities = forgeAffinities
+    this.role = role
 
     // Base stats
     this.baseHp = baseHp

@@ -276,6 +276,25 @@ export const useInventoryStore = defineStore('inventory', () => {
       if (count >= 6 && SET_PASSIVE_6[armorType]) activePassives.add(SET_PASSIVE_6[armorType].id)
     }
 
+    // Role-based passives — base passive always active; boosted when gear matches role condition
+    const ROLE_TO_PASSIVE = { warrior: 'execute', tank: 'grit', mage: 'spellweave', healer: 'mending', ranger: 'mark', debuffer: 'lingering_curse' }
+    const heroRole = HERO_TEMPLATES[heroKey]?.()?.role ?? null
+    if (heroRole && ROLE_TO_PASSIVE[heroRole]) {
+      activePassives.add(ROLE_TO_PASSIVE[heroRole])
+      const mainHandItem = loadout[GearSlot.MAIN_HAND] ? instanceById(loadout[GearSlot.MAIN_HAND]) : null
+      const mwt = mainHandItem?.weaponType
+      const PLATE_WEAPONS = ['sword', 'axe', 'mace', 'spear']
+      const STAFF_WEAPONS = ['staff', 'wand']
+      let boosted = false
+      if      (heroRole === 'warrior')  boosted = isDualWielding(heroKey) && setPieces.plate >= 3
+      else if (heroRole === 'tank')     boosted = PLATE_WEAPONS.includes(mwt) && hasShield(heroKey) && setPieces.plate >= 3
+      else if (heroRole === 'mage')     boosted = STAFF_WEAPONS.includes(mwt) && setPieces.cloth >= 3
+      else if (heroRole === 'healer')   boosted = STAFF_WEAPONS.includes(mwt) && setPieces.cloth >= 3
+      else if (heroRole === 'ranger')   boosted = setPieces.leather >= 3
+      else if (heroRole === 'debuffer') boosted = setPieces.leather >= 3 || setPieces.cloth >= 3
+      if (boosted) activePassives.add(ROLE_TO_PASSIVE[heroRole] + '_boosted')
+    }
+
     const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
     return { stats: totals, damageReduction: dr, setPieces, forgeAffinityCount, activePassives }
   }

@@ -26,6 +26,7 @@ export const StatusEffect = {
   IMMUNITY: 'immunity',
   CONTINUOUS_HEAL: 'continuous_heal',
   PROVOKE: 'provoke',        // forces enemies to target this unit
+  MARKED: 'marked',          // ranger mark — target takes bonus damage
 }
 
 export const TargetType = {

@@ -134,7 +134,7 @@ export class BattleEngine {
       for (let hit = 0; hit < (effect.hits ?? 1); hit++) {
         for (const target of targets) {
           if (target.isDead) continue
-          const result = this._applyEffect(caster, target, effect, isAoe)
+          const result = this._applyEffect(caster, target, effect, isAoe, skill)
           results.push({ target, ...result })
 
           if (result.damage) {
@@ -148,6 +148,13 @@ export class BattleEngine {
           }
           if (target.isDead) {
             this.logMessage(`${target.name} has been defeated!`)
+            // Execute: warrior passive — gain turn meter on kill
+            if (caster.isPlayer && !target.isPlayer && caster.passives?.has('execute')) {
+              const bonus = caster.passives.has('execute_boosted') ? 60 : 40
+              caster.turnMeter = Math.min(100, caster.turnMeter + bonus)
+              if (caster.passives.has('execute_boosted')) caster.applyStatus(StatusEffect.INCREASE_ATK, 1, 0.20)
+              this.logMessage(`⚡ ${caster.name}'s Execute — +${bonus} turn meter!`)
+            }
             // Revival mechanic: boss rises once at 30% HP
             if (!target.isPlayer && target.canRevive && !this.revivedIds.has(target.id) && this.mechanics.includes('revival')) {
               this.revivedIds.add(target.id)
@@ -201,7 +208,7 @@ export class BattleEngine {
     return next ? { ...next, action } : { action }
   }
 
-  _applyEffect(caster, target, effect, isAoe = false) {
+  _applyEffect(caster, target, effect, isAoe = false, skill = null) {
     const result = {}
 
     if (effect.type === EffectType.DAMAGE) {
@@ -215,25 +222,60 @@ export class BattleEngine {
       if (openerMult > 1) this._openerUsed.add(caster.id)
       // AOE Amplify (cloth 6pc): AOE skills deal 15% more damage
       const aoeMult = (isAoe && caster.passives?.has('aoe_amplify')) ? 1.15 : 1
-      // Damage formula: ATK * multiplier * affinity * slayer / (1 + DEF/1000)
-      const raw = caster.atk * effect.multiplier * affinityMult * critMult * slayerMult * openerMult * aoeMult
+      // Spellweave: mage passive — skills that apply a status deal bonus damage
+      const skillHasStatus = skill?.effects?.some(e => e.statusEffect) ?? false
+      const spellweaveMult = (skillHasStatus && caster.passives?.has('spellweave'))
+        ? (caster.passives.has('spellweave_boosted') ? 1.20 : 1.12) : 1
+      // Mark: target takes bonus damage when marked
+      const markMult = target.hasStatus(StatusEffect.MARKED) ? (caster.passives?.has('mark_boosted') ? 1.20 : 1.15) : 1
+      // Damage formula
+      const raw = caster.atk * effect.multiplier * affinityMult * critMult * slayerMult * openerMult * aoeMult * spellweaveMult * markMult
       const mitigated = raw / (1 + target.def / 1000)
-      const damage = Math.floor(mitigated)
+      // Grit: tank passive — reduce large incoming hits
+      let damage = Math.floor(mitigated)
+      if (target.passives?.has('grit') && damage > target.maxHp * 0.15) {
+        damage = Math.floor(damage * (target.passives.has('grit_boosted') ? 0.70 : 0.80))
+      }
       const dealt = target.takeDamage(damage)
       result.damage = dealt
       result.crit = isCrit
+      // Mark application: ranger passive — chance to mark on single-target hits
+      if (!isAoe && dealt > 0 && caster.isPlayer && !target.isPlayer && caster.passives?.has('mark')) {
+        const markChance = caster.passives.has('mark_boosted') ? 0.40 : 0.25
+        if (Math.random() < markChance) {
+          target.applyStatus(StatusEffect.MARKED, caster.passives.has('mark_boosted') ? 2 : 1)
+          result.marked = true
+        }
+      }
 
     } else if (effect.type === EffectType.HEAL) {
-      const amount = effect.healPercent
+      let amount = effect.healPercent
         ? Math.floor(target.maxHp * effect.healPercent)
         : Math.floor(caster.atk * effect.multiplier)
+      // Mending: healer passive — extra heal amount
+      if (caster.passives?.has('mending')) {
+        amount += Math.floor(target.maxHp * (caster.passives.has('mending_boosted') ? 0.08 : 0.05))
+      }
       result.heal = target.heal(amount)
+      // Mending+: remove one debuff from the healed target
+      if (caster.passives?.has('mending_boosted') && result.heal > 0) {
+        this._removeOneDebuff(target)
+      }
 
     } else if (effect.type === EffectType.DEBUFF && effect.statusEffect) {
-      const resistChance = Math.max(0, target.resistance - caster.accuracy)
+      let resistChance = Math.max(0, target.resistance - caster.accuracy)
+      // Spellweave+: status effects are harder to resist
+      if (caster.passives?.has('spellweave_boosted')) resistChance = Math.max(0, resistChance - 0.15)
       if (Math.random() > resistChance) {
-        const applied = target.applyStatus(effect.statusEffect, effect.statusDuration, effect.buffValue || null)
-        if (applied) result.statusApplied = effect.statusEffect
+        let duration = effect.statusDuration
+        // Lingering Curse: debuffer passive — debuffs last longer
+        if (caster.passives?.has('lingering_curse')) duration += caster.passives.has('lingering_curse_boosted') ? 2 : 1
+        const applied = target.applyStatus(effect.statusEffect, duration, effect.buffValue || null)
+        if (applied) {
+          result.statusApplied = effect.statusEffect
+          // Lingering Curse+: also poison the target when a debuff lands
+          if (caster.passives?.has('lingering_curse_boosted')) target.applyStatus(StatusEffect.POISON, duration)
+        }
       }
 
     } else if (effect.type === EffectType.BUFF && effect.statusEffect) {
@@ -242,6 +284,15 @@ export class BattleEngine {
     }
 
     return result
+  }
+
+  _removeOneDebuff(hero) {
+    const DEBUFF_TYPES = [
+      StatusEffect.POISON, StatusEffect.BURN, StatusEffect.FREEZE, StatusEffect.STUN,
+      StatusEffect.WEAKEN, StatusEffect.DECREASE_ATK, StatusEffect.DECREASE_DEF, StatusEffect.DECREASE_SPD, StatusEffect.SLEEP,
+    ]
+    const idx = hero.statusEffects.findIndex(se => DEBUFF_TYPES.includes(se.type))
+    if (idx >= 0) hero.statusEffects.splice(idx, 1)
   }
 
   _resolveTargets(caster, skill, explicitTarget) {
