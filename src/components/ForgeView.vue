@@ -159,6 +159,9 @@
                 <button class="upgrade-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeItem">
                   ⚒ ★{{ artisanItem.stars }} → ★{{ nextStar }}
                 </button>
+                <button class="upgrade-btn upgrade-max-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeMax" title="Upgrade as many times as materials allow">
+                  Max
+                </button>
                 <span class="next-rarity-hint" v-if="nextRarity !== rarityForStars(artisanItem.stars)">↑ {{ nextRarity }}</span>
               </div>
             </div>
@@ -513,6 +516,10 @@ function tierColorForItem(item) {
   return RECIPE_TIERS.find(t => t.id === item.tier)?.color ?? '#888'
 }
 
+function upgradeMax() {
+  while (canUpgrade.value) upgradeItem()
+}
+
 function upgradeItem() {
   const item = artisanItem.value
   if (!item || !canUpgrade.value) return
@@ -817,6 +824,7 @@ function upgradeItem() {
   background: color-mix(in srgb, var(--tier-color, #c9a227) 22%, rgba(5,3,1,0.85));
   border-color: var(--tier-color, var(--gold));
 }
+.upgrade-max-btn { flex: 0 0 56px; font-size: 0.72rem; letter-spacing: 1px; }
 .next-rarity-hint { font-family: var(--font-head); font-size: 0.6rem; color: rgba(255,200,100,0.6); letter-spacing: 1.5px; flex-shrink: 0; }
 
 .maxed-msg {
