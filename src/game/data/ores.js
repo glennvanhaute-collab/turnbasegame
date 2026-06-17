@@ -47,8 +47,9 @@ export function rollTrainingOreDrops(difficulty) {
     if (Math.random() < 0.70) drops.push({ oreId: 'tin',    amount: rand(2, 4) })
     if (Math.random() < 0.38) drops.push({ oreId: 'steel',  amount: rand(1, 2) })
   } else if (d === 'nightmare') {
-    if (Math.random() < 0.70) drops.push({ oreId: 'tin',   amount: rand(2, 3) })
-    if (Math.random() < 0.75) drops.push({ oreId: 'steel', amount: rand(2, 3) })
+    if (Math.random() < 0.70) drops.push({ oreId: 'tin',       amount: rand(2, 3) })
+    if (Math.random() < 0.75) drops.push({ oreId: 'steel',     amount: rand(2, 3) })
+    if (Math.random() < 0.20) drops.push({ oreId: 'darksteel', amount: 1 })
   }
 
   return drops
