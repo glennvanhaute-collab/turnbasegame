@@ -313,7 +313,7 @@ export function generateDungeonOptions() {
 
 // Stat multipliers applied to enemy base stats per difficulty tier.
 // Easy = raw template stats. Each tier scales HP, ATK, DEF, SPD together.
-const ENEMY_SCALE = { Easy: 1.0, Medium: 1.35, Hard: 2.6, Nightmare: 4.0 }
+const ENEMY_SCALE = { Easy: 1.0, Medium: 1.35, Hard: 2.6, Nightmare: 3.0 }
 
 export function buildDungeonEncounter(dungeon) {
   return {

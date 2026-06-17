@@ -109,12 +109,15 @@ export class Hero {
   }
 
   // Scales base combat stats by a level multiplier (Soul Vessel — same XP pool as player hero).
-  applyLevelScale(multiplier) {
+  // spdMultiplier defaults to multiplier; pass Math.sqrt(multiplier) for enemies so they don't
+  // dominate turn order at high difficulty scales.
+  applyLevelScale(multiplier, spdMultiplier = null) {
     if (multiplier <= 1) return
+    const spdMult = spdMultiplier ?? multiplier
     this.baseHp  = Math.floor(this.baseHp  * multiplier)
     this.baseAtk = Math.floor(this.baseAtk * multiplier)
     this.baseDef = Math.floor(this.baseDef * multiplier)
-    this.baseSpd = Math.floor(this.baseSpd * multiplier)
+    this.baseSpd = Math.floor(this.baseSpd * spdMult)
     this.maxHp   = this.baseHp
     this.hp      = this.baseHp
   }
