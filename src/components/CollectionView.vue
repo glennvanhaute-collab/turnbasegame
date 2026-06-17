@@ -35,6 +35,7 @@
               <span class="rarity-tag" :class="effectiveRarity(hero, key).toLowerCase()">{{ effectiveRarity(hero, key) }}</span>
               <span class="affinity-tag" :class="hero.affinity.toLowerCase()">{{ hero.affinity }}</span>
               <span class="level-tag" v-if="hero.isPlayerCharacter || inventory.isProgressive(key)">Lv.{{ effectiveLevel(hero) }}</span>
+              <span v-else-if="hero.role" class="role-tag" :class="hero.role">{{ hero.role }}</span>
               <div class="selected-badge" v-if="store.isInTeam(key)">#{{ store.team.indexOf(key) + 1 }}</div>
             </div>
             <div class="card-info" @click="store.openDetail(key)">
@@ -80,6 +81,7 @@
             <span class="rarity-tag" :class="hero.rarity.toLowerCase()">{{ hero.rarity }}</span>
             <span class="affinity-tag" :class="hero.affinity.toLowerCase()">{{ hero.affinity }}</span>
             <span class="level-tag" v-if="hero.isPlayerCharacter || inventory.isProgressive(key)">Lv.{{ effectiveLevel(hero) }}</span>
+            <span v-else-if="hero.role" class="role-tag" :class="hero.role">{{ hero.role }}</span>
             <div class="selected-badge" v-if="store.isInTeam(key)">#{{ store.team.indexOf(key) + 1 }}</div>
           </div>
 
@@ -591,6 +593,29 @@ const activeBonds = computed(() =>
   color: #aaff44;
   border: 1px solid #aaff4466;
 }
+
+/* Role tag — bottom left (regular heroes) */
+.role-tag {
+  position: absolute;
+  bottom: 10px; left: 8px;
+  z-index: 3;
+  font-size: 0.50rem;
+  font-family: var(--font-head);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(2px);
+  border: 1px solid currentColor;
+}
+.role-tag.warrior  { color: #e08840; }
+.role-tag.tank     { color: #6090c8; }
+.role-tag.mage     { color: #a060d0; }
+.role-tag.healer   { color: #40cc80; }
+.role-tag.ranger   { color: #88bb44; }
+.role-tag.debuffer { color: #c08044; }
 
 /* Team slot badge */
 .selected-badge {
