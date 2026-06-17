@@ -4,30 +4,39 @@
 
 ---
 
-## Implementation Status *(updated 2026-06-06)*
+## Implementation Status *(updated 2026-06-17)*
 
 ### Done
 - Turn-meter combat engine with affinities, crits, status effects, set bonus passives
 - Hero collection, roster building, gear equipping
-- Forge: copper gear only (recipes, smelting, star upgrades, orbing stub)
-- Dungeons (Easy → Nightmare), dungeon victory screen
+- Forge + all three crafting disciplines complete:
+  - **Blacksmithing** — plate armor + metal weapons (copper → moonsilver, all 5 armor slots + sword/axe/mace/spear/shield)
+  - **Leatherworking** — leather armor + daggers (rough → moonscale, all tiers)
+  - **Tailoring** — cloth armor + staves (cotton → moonweave cloth armor; staves crafted from dungeon essences)
+  - **Woodworking** — bows only (pine → dragonwood, strung with matching Tailoring bowstring)
+- Star upgrades (★0 → ★10, Common → Mythical), orbing system, discovery lines on Legendary+ gear
+- Dungeons (Easy → Nightmare) with difficulty scaling (Medium 1.35×, Hard 2.6×, Nightmare 4.0×), dungeon victory screen
 - Raids: lore browser + FF-style full-screen battle arena
   - **The Throne of Regret** — Batman, Lord of Nightmares (solo, 3 phases)
   - **The Void Heir** — Aurelian Dragonforge + Nytherax the Starless Wyrm (2 enemies, 3 phases)
   - Raids are **intentionally overtuned** — require legendary gear + substats to clear
+- All enemy portraits complete (including lich-sovereign, nytherax, bloodtusk, karg, skeleton, zombie)
+- New Epic heroes: **Hilda the Shieldmaiden** + **Arne Frostbound** (House Ignar)
+- Bond system: **Last Conquest** bond (Hilda + Arne) with Legendary-range stat bonuses + codex unlock
+- GearPickerModal redesign — 2-column card grid with rarity/tier/armor-type filters and sort tabs
+- Artisan timing centralised in `artisanSettings.js` (smelt, weave, tan, gather durations)
 - The Architect — dev-only god unit, auto-unlocked in DevMenu
 - Settings panel with house theme selector and reset progress button
 - Collab folder for lore contributions from non-technical friends
 
-### Next priority — Gear expansion
-Raids are the content goal but copper gear leaves players nowhere near raid-viable.
-The unlock path that needs building:
+### Next priority — Combat depth + soul bind
+The gear progression path is now complete end-to-end. The next layer that matters most for making gearing feel rewarding:
 
-1. **Gear recipes for all bar tiers** (tin → steel → darksteel → mithril → moonsilver/vaultmetal/runeite)
-2. **Substats / discovery lines on Legendary+ gear** — the orbing system
-3. **Re-tune raid difficulty** against real legendary gear stats once it exists
+1. **Set 6-piece passives** — steadfast (plate) / opener (leather) / aoe_amplify (cloth) are stubbed but have no combat hooks yet; these make build identity matter
+2. **Hero gear affinity bonuses** — e.g. Lirien +10% ATK with bow, Ember Sage +15% skill damage with staff; adds thematic reward for matching gear to hero
+3. **Soul Bind UI** — `levelMultiplier` exists, transfer/upgrade flow pending; lets players commit to a non-default progression unit
 
-Everything else (gear history, deed tracking, named weapons) layers on top of this foundation.
+Everything else (exploration additives, deed inscriptions, named weapons) layers on top of this foundation.
 
 ---
 
@@ -336,7 +345,7 @@ When your roster grows large, Training Grounds and Dungeons are not enough. Sieg
 | House Caelwyn | Spirit | Nature, memory, healers |
 | House Mordaine | Void | Shadow, corruption, assassins |
 | House Bloodtusk | Blood | Vampiric, life-drain |
-| House Ignar | — | TBD |
+| House Ignar | Force | Raiders, conquest, northern warbands |
 | Ancient Nobles | — | Late-game, locked behind deep progression |
 
 ---
@@ -527,11 +536,18 @@ const SHEET_URLS = { 1: sheet1Url, 2: sheet2Url, N: sheetNUrl }
 | Set bonus counting + flat stat application in computeGearStats | ✅ Complete |
 | Set passive 6-piece effects (steadfast / opener / aoe_amplify) | 🔧 Stubbed in setBonus.js, combat hooks pending |
 | Hero gear affinity bonuses (e.g. +ATK when bow equipped) | ❌ Designed, not yet built |
-| Leatherworking crafting discipline | ❌ Designed, not yet built |
-| Tailoring crafting discipline | ❌ Designed, not yet built |
-| Woodworking crafting discipline (bow, staff, wand) | ❌ Designed, not yet built |
-| Copper full set complete (sword, dagger, shield, helmet, chest, legplates, greaves, gauntlets) | ✅ Complete |
-| Elven set armorType tagged as plate | ✅ Complete |
+| Blacksmithing — full tier set (copper → moonsilver, all slots + weapons) | ✅ Complete |
+| Leatherworking — full tier set (rough → moonscale, all slots + daggers) | ✅ Complete |
+| Tailoring — full tier set (cotton → moonweave cloth armor + staves via essences) | ✅ Complete |
+| Woodworking — bows (pine → dragonwood, bowstring finish via Tailoring) | ✅ Complete |
+| Gear tier expansion (tin/steel/darksteel/mithril/moonsilver recipes in all disciplines) | ✅ Complete |
+| Artisan timers centralised (artisanSettings.js) | ✅ Complete |
+| Enemy portrait set complete (all dungeon + raid enemies) | ✅ Complete |
+| House Ignar heroes — Hilda the Shieldmaiden + Arne Frostbound (Epic) | ✅ Complete |
+| Last Conquest bond (Hilda + Arne) with lore codex reveal | ✅ Complete |
+| GearPickerModal redesign (card grid, filters, sort) | ✅ Complete |
+| Difficulty scaling per tier (Medium 1.35×, Hard 2.6×, Nightmare 4.0×) | ✅ Complete |
+| Soul Bind upgrade flow | 🔧 Multiplier exists, UI/transfer logic pending |
 | Gear history / deed inscriptions / named weapons | ❌ Future work |
 | Reputation system | ❌ Future / DLC |
 | Lore-based recruitment | ❌ DLC |
