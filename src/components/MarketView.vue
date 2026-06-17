@@ -46,7 +46,7 @@
         :class="item.rarity.toLowerCase()"
       >
         <div class="mc-top">
-          <span class="mc-icon">{{ GEAR_ICONS[item.gearType] ?? '▪' }}</span>
+          <span class="mc-icon">{{ item.weaponType ? (WEAPON_ICONS[item.weaponType] ?? '⚔') : (GEAR_ICONS[item.gearType] ?? '▪') }}</span>
           <div class="mc-info">
             <span class="mc-name">{{ item.name }}</span>
             <div class="mc-badges">
@@ -103,9 +103,24 @@ const RARITY_OPTS = [
 ]
 
 const GEAR_ICONS = {
-  [GearType.WEAPON]: '⚔', [GearType.SHIELD]: '🛡',
-  [GearType.HELMET]: '⛑', [GearType.ARMOR]:  '🥋',
-  [GearType.BOOTS]:  '👟', [GearType.GLOVES]: '🧤',
+  [GearType.WEAPON]: '⚔',
+  [GearType.SHIELD]: '🛡',
+  [GearType.HELMET]: '🪖',
+  [GearType.ARMOR]:  '🧥',
+  [GearType.LEGS]:   '🦵',
+  [GearType.BOOTS]:  '🥾',
+  [GearType.GLOVES]: '🧤',
+}
+
+const WEAPON_ICONS = {
+  sword:  '⚔',
+  axe:    '🪓',
+  dagger: '🗡',
+  staff:  '🪄',
+  mace:   '⚒',
+  spear:  '🔱',
+  bow:    '🏹',
+  wand:   '✦',
 }
 
 const STAT_LABELS = {
