@@ -111,7 +111,9 @@ export const useSmeltingStore = defineStore('smelting', () => {
 
   function instantFinish() {
     if (!job.value) return
-    job.value.startedAt = Date.now() - job.value.totalBars * job.value.timePerBar - 1000
+    const t = Date.now() - job.value.totalBars * job.value.timePerBar - 1000
+    job.value.startedAt  = t
+    job.value.lastTickAt = t
     tick()
   }
 
