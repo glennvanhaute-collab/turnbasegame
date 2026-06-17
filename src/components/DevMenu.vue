@@ -155,6 +155,11 @@
         <!-- Forge -->
         <section class="dev-section">
           <div class="dev-section-label">Forge</div>
+          <div class="dev-reset-row" style="margin-bottom:8px">
+            <button class="dev-reset-btn" @click="upgradeAllGearMax">
+              ★ Upgrade All Max
+            </button>
+          </div>
           <div class="dev-row">
             <span class="dev-row-icon">🔥</span>
             <span class="dev-row-name">Forge Level</span>
@@ -252,6 +257,9 @@ import { RECIPES } from '../game/data/recipes.js'
 import { LEATHER_RECIPES } from '../game/data/leatherRecipes.js'
 import { TAILORING_RECIPES } from '../game/data/tailoringRecipes.js'
 import { createItemInstance } from '../game/Gear.js'
+import { STAR_BAR_COST, TIER_MAX_STARS, starMultiplier, rarityForStars } from '../game/data/recipes.js'
+import { LEATHER_FOR_TIER } from '../game/data/leathers.js'
+import { CLOTH_FOR_TIER } from '../game/data/cloths.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 import { HIDE_LIST } from '../game/data/hides.js'
@@ -276,6 +284,46 @@ function finishAllJobs() {
   smelting.instantFinish()
   tanning.instantFinish()
   weaving.instantFinish()
+}
+
+function upgradeAllGearMax() {
+  const TIER_TO_BAR = { copper: 'copper', tin: 'tin', steel: 'steel', darksteel: 'darksteel', mithril: 'mithril', moonsilver: 'moonsilver' }
+  const PCT_STATS   = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','resistance','accuracy']
+  const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythical: 5 }
+  for (const item of inventory.ownedInstances) {
+    if (!item.craftedAt || !item.tier) continue
+    const maxStars   = TIER_MAX_STARS[item.tier] ?? 10
+    const discipline = item.craftDiscipline ?? 'blacksmithing'
+    while (item.stars < maxStars) {
+      const toStar = item.stars + 1
+      const cost   = STAR_BAR_COST[toStar] ?? 0
+      let matId, stock
+      if (discipline === 'leatherworking') {
+        matId = LEATHER_FOR_TIER[item.tier]
+        stock = matId ? (resources.leathers[matId] ?? 0) : 0
+      } else if (discipline === 'tailoring') {
+        matId = CLOTH_FOR_TIER[item.tier]
+        stock = matId ? (resources.cloths[matId] ?? 0) : 0
+      } else {
+        matId = TIER_TO_BAR[item.tier]
+        stock = matId ? (resources.bars[matId] ?? 0) : 0
+      }
+      if (!matId || stock < cost) break
+      if (discipline === 'leatherworking') resources.removeLeather(matId, cost)
+      else if (discipline === 'tailoring')  resources.removeCloth(matId, cost)
+      else                                  resources.removeBar(matId, cost)
+      item.stars = toStar
+      const starRarity = rarityForStars(toStar)
+      if ((RARITY_RANK[starRarity.toLowerCase()] ?? 0) > (RARITY_RANK[item.rarity?.toLowerCase()] ?? 0))
+        item.rarity = starRarity
+      const mult = starMultiplier(toStar)
+      Object.keys(item.baseStats).forEach(key => {
+        item.stats[key] = PCT_STATS.includes(key)
+          ? Math.round(item.baseStats[key] * mult * 1000) / 1000
+          : Math.round(item.baseStats[key] * mult)
+      })
+    }
+  }
 }
 
 function craftAllGear() {
