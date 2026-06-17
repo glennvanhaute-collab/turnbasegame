@@ -146,6 +146,9 @@
             <button class="dev-reset-btn" @click="finishAllJobs" :disabled="!anyJobRunning">
               ⚡ Finish All
             </button>
+            <button class="dev-reset-btn" @click="craftAllGear">
+              ⚒ Craft All Gear
+            </button>
           </div>
         </section>
 
@@ -244,6 +247,11 @@ import { useEnergyStore } from '../stores/useEnergyStore.js'
 import { useSmeltingStore } from '../stores/useSmeltingStore.js'
 import { useTanningStore } from '../stores/useTanningStore.js'
 import { useWeavingStore } from '../stores/useWeavingStore.js'
+import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { RECIPES } from '../game/data/recipes.js'
+import { LEATHER_RECIPES } from '../game/data/leatherRecipes.js'
+import { TAILORING_RECIPES } from '../game/data/tailoringRecipes.js'
+import { createItemInstance } from '../game/Gear.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 import { HIDE_LIST } from '../game/data/hides.js'
@@ -260,6 +268,7 @@ const energy     = useEnergyStore()
 const smelting   = useSmeltingStore()
 const tanning    = useTanningStore()
 const weaving    = useWeavingStore()
+const inventory  = useInventoryStore()
 
 const anyJobRunning = computed(() => smelting.isRunning || tanning.isRunning || weaving.isRunning)
 
@@ -267,6 +276,41 @@ function finishAllJobs() {
   smelting.instantFinish()
   tanning.instantFinish()
   weaving.instantFinish()
+}
+
+function craftAllGear() {
+  const now = Date.now()
+  function makeInstance(recipe) {
+    const inst = createItemInstance({
+      id: recipe.id, name: recipe.name, gearType: recipe.gearType,
+      weaponType: recipe.weaponType ?? null, rarity: recipe.rarity,
+      description: recipe.desc, stats: { ...recipe.baseStats },
+      baseStats: { ...recipe.baseStats }, tier: recipe.tier,
+      slot: recipe.slot, image: recipe.image ?? null,
+      frame: recipe.frame ?? null, armorType: recipe.armorType ?? null,
+    })
+    inst.craftedAt = now
+    inst.crafted   = true
+    return inst
+  }
+  for (const recipe of RECIPES) {
+    if (!recipe.barCost) continue
+    if (!Object.entries(recipe.barCost).every(([id, amt]) => (resources.bars[id] ?? 0) >= amt)) continue
+    Object.entries(recipe.barCost).forEach(([id, amt]) => resources.removeBar(id, amt))
+    inventory.addInstance(makeInstance(recipe))
+  }
+  for (const recipe of LEATHER_RECIPES) {
+    if (!recipe.materialCost) continue
+    if (!Object.entries(recipe.materialCost).every(([id, amt]) => (resources.leathers[id] ?? 0) >= amt)) continue
+    Object.entries(recipe.materialCost).forEach(([id, amt]) => resources.removeLeather(id, amt))
+    inventory.addInstance(makeInstance(recipe))
+  }
+  for (const recipe of TAILORING_RECIPES) {
+    if (!recipe.materialCost) continue
+    if (!Object.entries(recipe.materialCost).every(([id, amt]) => (resources.cloths[id] ?? 0) >= amt)) continue
+    Object.entries(recipe.materialCost).forEach(([id, amt]) => resources.removeCloth(id, amt))
+    inventory.addInstance(makeInstance(recipe))
+  }
 }
 
 const RARITY_COLORS = { Common: '#9a9a9a', Uncommon: '#4dcc4d', Rare: '#4d9fff', Epic: '#cc66ff', Legendary: '#ff9900', Mythical: '#ff4466' }
