@@ -55,6 +55,30 @@ export function rollTrainingOreDrops(difficulty) {
   return drops
 }
 
+// Dungeon gathering drops — hides and fibers at the equivalent tier to the dungeon's ore tier.
+// These are bonus drops on top of ores; amounts are intentionally modest.
+export function rollDungeonGatheringDrops(difficulty) {
+  const d = difficulty?.toLowerCase() ?? 'easy'
+  const hides  = []
+  const fibers = []
+
+  if (d === 'easy') {
+    if (Math.random() < 0.35) hides.push({ id: 'rough',      amount: rand(1, 2) })
+    if (Math.random() < 0.25) fibers.push({ id: 'cotton',     amount: rand(1, 2) })
+  } else if (d === 'normal' || d === 'medium') {
+    if (Math.random() < 0.45) hides.push({ id: 'hardened',   amount: rand(1, 2) })
+    if (Math.random() < 0.40) fibers.push({ id: 'silkthread', amount: rand(1, 2) })
+  } else if (d === 'hard') {
+    if (Math.random() < 0.55) hides.push({ id: 'shadow',      amount: rand(1, 2) })
+    if (Math.random() < 0.50) fibers.push({ id: 'shadowthread', amount: rand(1, 2) })
+  } else if (d === 'nightmare') {
+    if (Math.random() < 0.65) hides.push({ id: 'celestial',   amount: rand(1, 2) })
+    if (Math.random() < 0.55) fibers.push({ id: 'starthread',  amount: rand(1, 2) })
+  }
+
+  return { hides, fibers }
+}
+
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }

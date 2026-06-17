@@ -9,7 +9,7 @@ import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
 import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
-import { rollOreDrops, rollTrainingOreDrops } from '../game/data/ores.js'
+import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops }  from '../game/data/raidEncounters.js'
 
 export const useBattleStore = defineStore('battle', () => {
@@ -133,6 +133,13 @@ export const useBattleStore = defineStore('battle', () => {
           : rollOreDrops(enc.difficulty)
         const resources = useResourceStore()
         oreDrops.forEach(({ oreId, amount }) => resources.addOre(oreId, amount))
+        let gatherDrops = { hides: [], fibers: [] }
+        if (enc.isDungeon) {
+          const g = rollDungeonGatheringDrops(enc.difficulty)
+          gatherDrops = g
+          g.hides.forEach(({ id, amount })  => resources.addHide(id, amount))
+          g.fibers.forEach(({ id, amount }) => resources.addFiber(id, amount))
+        }
         let componentDrops = []
         let forgeUnlock    = null
         if (enc.isDungeon) {
@@ -162,7 +169,7 @@ export const useBattleStore = defineStore('battle', () => {
           raidDrops.leathers.forEach(({ id, amount }) => resources.addLeather(id, amount))
           raidDrops.cloths.forEach(({ id, amount })   => resources.addCloth(id, amount))
         }
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops, raidDrops, forgeUnlock }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, raidDrops, forgeUnlock }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run
@@ -175,6 +182,16 @@ export const useBattleStore = defineStore('battle', () => {
             const ex = br.oreDrops.find(d => d.oreId === drop.oreId)
             if (ex) ex.amount += drop.amount
             else br.oreDrops.push({ ...drop })
+          }
+          for (const drop of (runReward.gatherDrops?.hides ?? [])) {
+            const ex = br.gatherDrops.hides.find(d => d.id === drop.id)
+            if (ex) ex.amount += drop.amount
+            else br.gatherDrops.hides.push({ ...drop })
+          }
+          for (const drop of (runReward.gatherDrops?.fibers ?? [])) {
+            const ex = br.gatherDrops.fibers.find(d => d.id === drop.id)
+            if (ex) ex.amount += drop.amount
+            else br.gatherDrops.fibers.push({ ...drop })
           }
           br.componentDrops.push(...(runReward.componentDrops ?? []))
           batchDone.value++
@@ -208,7 +225,7 @@ export const useBattleStore = defineStore('battle', () => {
   function startBatchRun(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], componentDrops: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
     _runBatchNext()
   }
