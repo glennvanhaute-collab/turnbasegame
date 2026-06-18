@@ -14,6 +14,7 @@
           <button class="nav-btn" :class="{ active: view === 'summon' }" @click="navigate('summon')">Recruit</button>
           <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
+          <button class="nav-btn" :class="{ active: view === 'camp' }" @click="navigate('camp')">Stronghold</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }" @click="navigate('realm')">Realm</button>
           <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
             <img :src="collectionIcon" class="nav-icon-img" alt="Collection" />
@@ -213,6 +214,7 @@
         <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
       </div>
+      <CampView v-else-if="view === 'camp'" />
       <RealmView v-else-if="view === 'realm'" />
     </main>
   </div>
