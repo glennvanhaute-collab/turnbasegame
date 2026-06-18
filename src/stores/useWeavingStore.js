@@ -100,6 +100,8 @@ export const useWeavingStore = defineStore('weaving', () => {
 
   function cancelWeave() {
     if (!job.value) return
+    tick()
+    if (!job.value) return
     const resources = useResourceStore()
     const cloth = CLOTHS[job.value.clothId]
     resources.addFiber(cloth.fiberId, remainingCount.value * cloth.fiberCost)

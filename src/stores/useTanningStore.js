@@ -101,6 +101,8 @@ export const useTanningStore = defineStore('tanning', () => {
 
   function cancelTan() {
     if (!job.value) return
+    tick()
+    if (!job.value) return
     const resources = useResourceStore()
     const leather = LEATHERS[job.value.leatherId]
     resources.addHide(leather.hideId, remainingCount.value * leather.hideCost)

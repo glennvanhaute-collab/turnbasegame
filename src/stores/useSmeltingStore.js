@@ -102,6 +102,8 @@ export const useSmeltingStore = defineStore('smelting', () => {
 
   function cancelSmelt() {
     if (!job.value) return
+    tick() // flush completed bars so remainingCount reflects real time
+    if (!job.value) return // tick may have completed the job
     const resources = useResourceStore()
     const bar = BARS[job.value.barId]
     resources.addOre(bar.oreId, remainingCount.value * bar.oreCost)
