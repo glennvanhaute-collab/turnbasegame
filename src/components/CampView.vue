@@ -100,18 +100,33 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import campBg from '../assets/backgrounds/training_camp.png'
+import { computed, onMounted, onUnmounted } from 'vue'
+import campBgDefault  from '../assets/backgrounds/training_camp.png'
+import campBgAldric   from '../assets/lore/siege_aldric.png'
+import campBgValdris  from '../assets/lore/siege_Valdris.png'
+import campBgCaelwyn  from '../assets/lore/siege_caelwyn.png'
+import campBgMordaine from '../assets/lore/siege_mordaine.png'
 import { useCampStore }          from '../stores/useCampStore.js'
 import { useCurrencyStore }      from '../stores/useCurrencyStore.js'
 import { useResourceStore }      from '../stores/useResourceStore.js'
 import { useCampBuildingStore }  from '../stores/useCampBuildingStore.js'
+import { useSettingsStore }      from '../stores/useSettingsStore.js'
 import { CAMP_BUILDINGS, BUILDING_IDS, ORE_NAMES } from '../game/data/campBuildings.js'
 
 const camp      = useCampStore()
 const currency  = useCurrencyStore()
 const resources = useResourceStore()
 const buildings = useCampBuildingStore()
+const settings  = useSettingsStore()
+
+const HOUSE_BGS = {
+  aldric:   campBgAldric,
+  valdris:  campBgValdris,
+  caelwyn:  campBgCaelwyn,
+  mordaine: campBgMordaine,
+}
+
+const campBg = computed(() => HOUSE_BGS[settings.theme] ?? campBgDefault)
 
 // Eager-load building images
 const _buildingBgs = import.meta.glob('../assets/camp/*.png', { eager: true })
