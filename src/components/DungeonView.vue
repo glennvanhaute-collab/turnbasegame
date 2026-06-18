@@ -143,18 +143,18 @@ function mechanicHints(dungeon) {
 const _dungeonBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
 
 const DUNGEON_IMAGE_MAP = {
-  dng_goblin_warrens:        'dungeon_easy_01.png',
+  dng_goblin_warrens:        'dungeon_easy_goblin_warrens.png',
   dng_crypt_of_ash:          'easy_undead_crypt.png',
   dng_bandit_cave:           'easy_desolate_swamp.png',
-  dng_ashveil_mine:          'dungeon_intermediate_01.png',
-  dng_thornwood_depths:      'dungeon_intermediate_01.png',
+  dng_ashveil_mine:          'dungeon_intermediate_ashveil_mine.png',
+  dng_thornwood_depths:      'dungeon_intermediate_thornwood_depths.png',
   dng_ruins_of_vel:          'intermediate_forgotten lair.png',
-  dng_thornhaven_ruins:      'dungeon_hard_01.png',
-  dng_the_dread_spire:       'dungeon_hard_02.png',
+  dng_thornhaven_ruins:      'dungeon_hard_thornhaven_ruins.png',
+  dng_the_dread_spire:       'dungeon_hard_dread_spire.png',
   dng_the_crimson_hold:      'hard_vampire_castle.png',
-  dng_barrow_kings_tomb:     'dungeon_nightmare_01.png',
-  dng_necropolis_of_valdris: 'dungeon_nightmare_01.png',
-  dng_the_wailing_crypts:    'dungeon_nightmare_01.png',
+  dng_barrow_kings_tomb:     'dungeon_nightmare_barrow_kings_tomb.png',
+  dng_necropolis_of_valdris: 'ungeon_nightmare_necropolis_of_valdris.png',
+  dng_the_wailing_crypts:    'dungeon_nightmare_wailing_crypts.png',
 }
 
 function pickBg(tier, id) {
