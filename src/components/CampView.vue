@@ -132,11 +132,11 @@ const campBg = computed(() => HOUSE_BGS[settings.theme] ?? campBgDefault)
 const _buildingBgs = import.meta.glob('../assets/camp/*.png', { eager: true })
 
 function cardBg(id) {
-  const filename = CAMP_BUILDINGS[id]?.image
-  if (!filename) return {}
-  const url = _buildingBgs[`../assets/camp/${filename}`]?.default
-  if (!url) return {}
-  return { backgroundImage: `url(${url})` }
+  const house    = settings.theme  // 'aldric' | 'valdris' | 'caelwyn' | 'mordaine'
+  const houseKey = `../assets/camp/${house}_${id}.png`
+  const generic  = `../assets/camp/${CAMP_BUILDINGS[id]?.image ?? ''}`
+  const url = (_buildingBgs[houseKey] ?? _buildingBgs[generic])?.default
+  return url ? { backgroundImage: `url(${url})` } : {}
 }
 
 let interval = null
