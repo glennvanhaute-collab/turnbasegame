@@ -117,6 +117,32 @@ export const useIdleTrainingStore = defineStore('idleTraining', () => {
     accumulatedOres.value.length > 0 || accumulatedKeys.value.length > 0
   )
 
+  const xpHourlyRate = computed(() => {
+    if (!session.value) return 0
+    const ph = usePlayerHeroStore()
+    return Math.round(ph.xpForDifficulty(session.value.difficulty) * FIGHTS_PER_HOUR)
+  })
+
+  // Per-resource next-unit countdowns. Always returns entries; nextMs is null when capped.
+  const resourceTimers = computed(() => {
+    if (!session.value) return { ores: [], keys: [] }
+    _tick.value
+    const t     = elapsedHours.value
+    const rates = IDLE_HOURLY_RATES[session.value.difficulty]
+
+    function msToNext(rate) {
+      if (!rate || rate <= 0 || isCapped.value) return null
+      const nextUnit    = Math.floor(rate * t) + 1
+      const hoursNeeded = nextUnit / rate
+      return Math.max(0, (hoursNeeded - t) * 3_600_000)
+    }
+
+    return {
+      ores: (rates?.ores ?? []).map(o => ({ id: o.id, rate: o.rate, nextMs: msToNext(o.rate) })),
+      keys: (rates?.keys ?? []).map(k => ({ tier: k.tier, rate: k.rate, nextMs: msToNext(k.rate) })),
+    }
+  })
+
   function startIdle(encounter) {
     session.value = {
       encounterId:   encounter.id,
@@ -159,6 +185,7 @@ export const useIdleTrainingStore = defineStore('idleTraining', () => {
     realElapsedMs, elapsedMs, elapsedHours,
     isCapped, capProgress, hasAnything,
     accumulatedXp, accumulatedGold, accumulatedOres, accumulatedKeys,
+    xpHourlyRate, resourceTimers,
     FIGHTS_PER_HOUR, CAP_HOURS, IDLE_HOURLY_RATES,
     startIdle, stopIdle, collect,
   }

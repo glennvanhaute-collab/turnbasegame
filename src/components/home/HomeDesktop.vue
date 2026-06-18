@@ -141,10 +141,43 @@
 
           <!-- Accumulated resources -->
           <div class="idle-resources">
-            <div class="idle-res-chip xp" v-if="idle.accumulatedXp > 0">✦ {{ idle.accumulatedXp.toLocaleString() }} XP</div>
-            <div class="idle-res-chip gold" v-if="idle.accumulatedGold > 0">🪙 {{ idle.accumulatedGold.toLocaleString() }}</div>
-            <div class="idle-res-chip ore" v-for="ore in idle.accumulatedOres" :key="ore.id">⛏ {{ ore.id }} ×{{ ore.amount }}</div>
-            <div class="idle-res-chip key" v-for="k in idle.accumulatedKeys" :key="k.tier">🗝 ×{{ k.amount }}</div>
+
+            <!-- XP -->
+            <div class="idle-res-chip xp">
+              <div class="chip-main">✦ {{ idle.accumulatedXp.toLocaleString() }} XP</div>
+              <div class="chip-rate">+{{ idle.xpHourlyRate.toLocaleString() }}/hr</div>
+            </div>
+
+            <!-- Gold -->
+            <div class="idle-res-chip gold">
+              <div class="chip-main">🪙 {{ idle.accumulatedGold.toLocaleString() }}</div>
+              <div class="chip-rate">+{{ idle.IDLE_HOURLY_RATES[idle.session.difficulty]?.gold ?? 0 }}/hr</div>
+            </div>
+
+            <!-- Ores -->
+            <div class="idle-res-chip ore"
+              v-for="t in idle.resourceTimers.ores" :key="t.id">
+              <div class="chip-main">⛏ {{ t.id }} ×{{ idle.accumulatedOres.find(o => o.id === t.id)?.amount ?? 0 }}</div>
+              <div class="chip-sub">
+                <span class="chip-rate">+{{ t.rate }}/hr</span>
+                <span class="chip-next" v-if="!idle.isCapped && t.nextMs !== null">
+                  next {{ formatCountdown(t.nextMs) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Keys -->
+            <div class="idle-res-chip key"
+              v-for="t in idle.resourceTimers.keys" :key="t.tier">
+              <div class="chip-main">🗝 ×{{ idle.accumulatedKeys.find(k => k.tier === t.tier)?.amount ?? 0 }}</div>
+              <div class="chip-sub">
+                <span class="chip-rate">+{{ t.rate }}/hr</span>
+                <span class="chip-next" v-if="!idle.isCapped && t.nextMs !== null">
+                  next {{ formatCountdown(t.nextMs) }}
+                </span>
+              </div>
+            </div>
+
           </div>
 
           <div class="idle-actions">
@@ -314,7 +347,7 @@ const {
   selectZone, teamEntry,
   canBattle, battleHint, startBattle,
   isActiveIdleZone,
-  lastCollect, collectIdle, startIdleHere, formatElapsed,
+  lastCollect, collectIdle, startIdleHere, formatElapsed, formatCountdown,
   formatCP,
 } = useHomeLogic(emit)
 </script>
@@ -612,14 +645,23 @@ const {
   display: flex; flex-wrap: wrap; gap: 5px;
 }
 .idle-res-chip {
-  font-size: 0.68rem; font-weight: 700;
-  padding: 3px 9px; border-radius: 10px;
-  border: 1px solid;
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 5px 10px; border-radius: 8px; border: 1px solid;
+  min-width: 0;
 }
 .idle-res-chip.xp   { color: #aaffcc; border-color: #1a4a2a; background: rgba(0,30,15,0.6); }
 .idle-res-chip.gold { color: var(--gold); border-color: #3a2a00; background: rgba(20,12,0,0.6); }
 .idle-res-chip.ore  { color: #b07840; border-color: #3a2010; background: rgba(20,10,0,0.6); }
 .idle-res-chip.key  { color: #cd7f32; border-color: #3a2800; background: rgba(20,14,0,0.6); }
+.chip-main { font-size: 0.72rem; font-weight: 700; white-space: nowrap; }
+.chip-rate { font-size: 0.58rem; color: #556; font-weight: 400; }
+.chip-sub  { display: flex; gap: 6px; align-items: center; }
+.chip-next {
+  font-size: 0.58rem; font-weight: 600;
+  color: #88cc88; opacity: 0.85;
+  white-space: nowrap;
+}
+.chip-next::before { content: '· '; }
 .idle-actions { display: flex; gap: 8px; }
 .btn-collect {
   flex: 1; padding: 8px; border-radius: 6px; border: none;

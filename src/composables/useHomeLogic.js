@@ -134,6 +134,19 @@ export function useHomeLogic(emit) {
     return m > 0 ? `${m}m ${s}s` : `${s}s`
   }
 
+  // Compact countdown for resource chips: "4m 30s" or "1h 12m"
+  function formatCountdown(ms) {
+    if (ms === null || ms === undefined) return null
+    if (ms <= 0) return 'now'
+    const totalSec = Math.ceil(ms / 1000)
+    const h = Math.floor(totalSec / 3600)
+    const m = Math.floor((totalSec % 3600) / 60)
+    const s = totalSec % 60
+    if (h > 0) return `${h}h ${m}m`
+    if (m > 0) return `${m}m ${s}s`
+    return `${s}s`
+  }
+
   return {
     activeHomeTab,
     camp, collection, campaign, idle, playerHero,
@@ -144,7 +157,7 @@ export function useHomeLogic(emit) {
     selectZone, teamEntry,
     canBattle, battleHint, startBattle,
     isActiveIdleZone,
-    lastCollect, collectIdle, startIdleHere, formatElapsed,
+    lastCollect, collectIdle, startIdleHere, formatElapsed, formatCountdown,
     formatCP,
   }
 }
