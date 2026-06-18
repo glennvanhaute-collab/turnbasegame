@@ -223,11 +223,34 @@ export const useBattleStore = defineStore('battle', () => {
     }
   }
 
+  // When the tab is hidden browsers throttle setTimeout heavily.
+  // Store the pending resolve so the visibilitychange handler can fire it
+  // immediately when the player returns to the tab.
+  let _pendingResolve = null
+  let _pendingTimeout = null
+
   async function _runAutoTurn() {
-    await new Promise(r => setTimeout(r, turnDelay.value))
+    await new Promise(r => {
+      _pendingResolve = r
+      _pendingTimeout = setTimeout(() => {
+        _pendingResolve = null
+        r()
+      }, turnDelay.value)
+    })
     if (!engine.value) return
     const result = runAI(engine.value)
     if (result) _applyResult(result)
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && _pendingResolve) {
+        clearTimeout(_pendingTimeout)
+        const resolve = _pendingResolve
+        _pendingResolve = null
+        resolve()
+      }
+    })
   }
 
   function startBatchRun(n) {
