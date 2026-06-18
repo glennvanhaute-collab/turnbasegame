@@ -26,7 +26,7 @@ export const CAMP_BUILDINGS = {
     id:    'warband_hall',
     name:  'The Warband Hall',
     lore:  'Where soldiers sleep, sharpen blades, and remember what they fight for.',
-    image: 'camp_warband_hall.png',
+    image: 'The Warband Hall.png',
     tiers: [
       { cost: { gold: 500,   ores: { copper:    15 } }, bonus: '+5% ATK to all heroes'  },
       { cost: { gold: 1200,  ores: { tin:       20 } }, bonus: '+10% ATK to all heroes' },
@@ -40,7 +40,7 @@ export const CAMP_BUILDINGS = {
     id:    'breachwrights_yard',
     name:  "The Breachwright's Yard",
     lore:  'Siege engines are not built in a day. But when they are ready, walls mean nothing.',
-    image: 'camp_breachwrights_yard.png',
+    image: "The Breachwright's Yard.png",
     tiers: [
       { cost: { gold: 800,   ores: { copper:    20 } }, bonus: 'Unlocks Easy Sieges',                   unlocks: ['siege_easy']      },
       { cost: { gold: 2000,  ores: { tin:       25 } }, bonus: 'Unlocks Medium Sieges',                 unlocks: ['siege_medium']    },
@@ -54,7 +54,7 @@ export const CAMP_BUILDINGS = {
     id:    'the_vigil',
     name:  'The Vigil',
     lore:  'The tower watches. The tower remembers. No enemy moves unseen.',
-    image: 'camp_the_vigil.png',
+    image: 'The Vigil (Watchtower).png',
     tiers: [
       { cost: { gold: 600,   ores: { copper:    10 } }, bonus: 'See enemy HP before entering dungeons'       },
       { cost: { gold: 1500,  ores: { tin:       15 } }, bonus: 'See enemy skills before entering dungeons'   },
@@ -68,7 +68,7 @@ export const CAMP_BUILDINGS = {
     id:    'healers_tent',
     name:  "The Healer's Tent",
     lore:  'The battle is won or lost in here, long after the swords fall silent.',
-    image: 'camp_healers_tent.png',
+    image: "The Healer's Tent.png",
     tiers: [
       { cost: { gold: 700,   ores: { copper:    12 } }, bonus: 'All heroes start battle with +5% HP'          },
       { cost: { gold: 1600,  ores: { tin:       18 } }, bonus: '+10% effectiveness of all healing skills'     },
@@ -82,7 +82,7 @@ export const CAMP_BUILDINGS = {
     id:    'arcane_post',
     name:  'The Arcane Post',
     lore:  'House Valdris sends no soldiers. They send knowledge. Which is worse.',
-    image: 'camp_arcane_post.png',
+    image: 'The Arcane Post.png',
     tiers: [
       { cost: { gold: 900,   ores: { copper:    18 } }, bonus: '+5% magic damage'                         },
       { cost: { gold: 2200,  ores: { tin:       22 } }, bonus: '+8% magic damage, +5% magic resistance'   },
@@ -96,7 +96,7 @@ export const CAMP_BUILDINGS = {
     id:    'quartermasters_hold',
     name:  "The Quartermaster's Hold",
     lore:  'An army travels on its stomach. A warband survives on its ledger.',
-    image: 'camp_quartermasters_hold.png',
+    image: "The Quartermaster's Hold.png",
     tiers: [
       { cost: { gold: 500,   ores: { copper:    10 } }, bonus: '+20% idle training gold rate'              },
       { cost: { gold: 1200,  ores: { tin:       14 } }, bonus: '+25% idle gold, +15% idle ore rates'       },
@@ -110,7 +110,7 @@ export const CAMP_BUILDINGS = {
     id:    'siege_forge',
     name:  'The Siege Forge',
     lore:  'The blacksmith who forges a siege bolt forges the outcome of a battle.',
-    image: 'camp_siege_forge.png',
+    image: 'The Siege Forge.png',
     tiers: [
       { cost: { gold: 1000,  ores: { copper:    25 } }, bonus: 'Siege materials begin dropping from sieges'    },
       { cost: { gold: 2500,  ores: { tin:       30 } }, bonus: 'Unlocks Tier 1 siege gear recipes'             },
