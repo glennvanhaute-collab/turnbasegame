@@ -64,7 +64,13 @@
               </div>
 
               <div class="upgrade-cost">
-                <span class="cost-row gold-cost">🪙 {{ buildings.getNextCost(id).gold.toLocaleString() }}</span>
+                <span
+                  class="cost-row gold-cost"
+                  :class="{ insufficient: currency.gold < buildings.getNextCost(id).gold }"
+                >
+                  🪙 {{ buildings.getNextCost(id).gold.toLocaleString() }}
+                  <span class="ore-owned">({{ currency.gold.toLocaleString() }})</span>
+                </span>
                 <span
                   v-for="(amount, oreId) in buildings.getNextCost(id).ores"
                   :key="oreId"
