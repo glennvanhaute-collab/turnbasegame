@@ -169,7 +169,7 @@
             <!-- Keys -->
             <div class="idle-res-chip key"
               v-for="t in idle.resourceTimers.keys" :key="t.tier">
-              <div class="chip-main">🗝 ×{{ idle.accumulatedKeys.find(k => k.tier === t.tier)?.amount ?? 0 }}</div>
+              <div class="chip-main">🗝 {{ DUNGEON_KEY_NAMES[t.tier] }} ×{{ idle.accumulatedKeys.find(k => k.tier === t.tier)?.amount ?? 0 }}</div>
               <div class="chip-sub">
                 <span class="chip-rate">+{{ t.rate }}/hr</span>
                 <span class="chip-next" v-if="!idle.isCapped && t.nextMs !== null">
@@ -326,6 +326,7 @@
 
 <script setup>
 import { useHomeLogic }       from '../../composables/useHomeLogic.js'
+import { DUNGEON_KEY_NAMES }  from '../../game/data/dungeons.js'
 import trainingBg             from '../../assets/backgrounds/homepage_bg.png'
 import codexIcon              from '../../assets/ui/codex.png'
 import leatherworkingIcon     from '../../assets/ui/leatherworking_icon.png'
