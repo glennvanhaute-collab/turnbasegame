@@ -125,24 +125,41 @@
           <div class="idle-status-header">
             <span class="idle-running-dot" />
             <span class="idle-status-label">Idle Training</span>
-            <span class="idle-elapsed">{{ formatElapsed(idle.elapsedMs) }}</span>
+            <span class="idle-elapsed">{{ formatElapsed(idle.realElapsedMs) }}</span>
+            <span class="idle-cap-badge" v-if="idle.isCapped">FULL</span>
           </div>
-          <div class="idle-xp-row">
-            <span class="idle-xp-value">+{{ idle.accumulatedXp.toLocaleString() }} XP</span>
-            <span class="idle-rate-pct">@ {{ Math.round(idle.currentRate * 100) }}% rate</span>
+
+          <!-- Cap progress bar -->
+          <div class="idle-cap-row">
+            <div class="idle-cap-track">
+              <div class="idle-cap-fill" :style="{ width: (idle.capProgress * 100) + '%' }" />
+            </div>
+            <span class="idle-cap-label">
+              {{ idle.isCapped ? `${idle.CAP_HOURS}h cap reached` : formatElapsed((idle.CAP_HOURS * 3_600_000) - idle.elapsedMs) + ' left' }}
+            </span>
           </div>
-          <div class="idle-rate-track">
-            <div class="idle-rate-fill" :style="{ width: (idle.currentRate * 100) + '%' }" />
+
+          <!-- Accumulated resources -->
+          <div class="idle-resources">
+            <div class="idle-res-chip xp" v-if="idle.accumulatedXp > 0">✦ {{ idle.accumulatedXp.toLocaleString() }} XP</div>
+            <div class="idle-res-chip gold" v-if="idle.accumulatedGold > 0">🪙 {{ idle.accumulatedGold.toLocaleString() }}</div>
+            <div class="idle-res-chip ore" v-for="ore in idle.accumulatedOres" :key="ore.id">⛏ {{ ore.id }} ×{{ ore.amount }}</div>
+            <div class="idle-res-chip key" v-for="k in idle.accumulatedKeys" :key="k.tier">🗝 ×{{ k.amount }}</div>
           </div>
+
           <div class="idle-actions">
-            <button class="btn-collect" @click="collectIdle" :disabled="idle.accumulatedXp <= 0">
-              Collect XP
+            <button class="btn-collect" @click="collectIdle" :disabled="!idle.hasAnything">
+              Collect
             </button>
             <button class="btn-stop-idle" @click="idle.stopIdle()">Stop</button>
           </div>
+
           <Transition name="collect-pop">
             <div class="collect-result" v-if="lastCollect">
-              <div class="collect-xp">+{{ lastCollect.xp.toLocaleString() }} XP collected</div>
+              <div class="collect-row" v-if="lastCollect.xp > 0">✦ {{ lastCollect.xp.toLocaleString() }} XP</div>
+              <div class="collect-row gold" v-if="lastCollect.gold > 0">🪙 {{ lastCollect.gold.toLocaleString() }}</div>
+              <div class="collect-row" v-for="o in lastCollect.ores" :key="o.id">⛏ {{ o.id }} ×{{ o.amount }}</div>
+              <div class="collect-row" v-for="k in lastCollect.keys" :key="k.tier">🗝 ×{{ k.amount }}</div>
               <div class="collect-levelups" v-if="lastCollect.levelUps.length">
                 <div class="levelup-row" v-for="(lu, i) in lastCollect.levelUps" :key="i">
                   <span class="levelup-star">★</span>
@@ -582,11 +599,27 @@ const {
 }
 .idle-status-label { font-size: 0.65rem; font-weight: 700; color: #4dff88; text-transform: uppercase; letter-spacing: 1px; }
 .idle-elapsed      { font-size: 0.65rem; color: #666; margin-left: auto; }
-.idle-xp-row { display: flex; align-items: baseline; gap: 8px; }
-.idle-xp-value { font-size: 0.92rem; font-weight: 800; color: #aaffcc; }
-.idle-rate-pct { font-size: 0.62rem; color: #556; }
-.idle-rate-track { height: 3px; background: #0a1a10; border-radius: 2px; overflow: hidden; }
-.idle-rate-fill { height: 100%; background: linear-gradient(to right, #44ffaa, #aaff44); border-radius: 2px; transition: width 2s ease; }
+.idle-cap-badge {
+  font-size: 0.55rem; font-weight: 800; letter-spacing: 1px;
+  color: #ffdd44; background: rgba(255,220,40,0.12); border: 1px solid #554400;
+  border-radius: 4px; padding: 1px 6px;
+}
+.idle-cap-row { display: flex; align-items: center; gap: 8px; }
+.idle-cap-track { flex: 1; height: 4px; background: #0a1a10; border-radius: 2px; overflow: hidden; }
+.idle-cap-fill { height: 100%; background: linear-gradient(to right, #44ffaa, #aaff44); border-radius: 2px; transition: width 4s linear; }
+.idle-cap-label { font-size: 0.58rem; color: #446; white-space: nowrap; }
+.idle-resources {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.idle-res-chip {
+  font-size: 0.68rem; font-weight: 700;
+  padding: 3px 9px; border-radius: 10px;
+  border: 1px solid;
+}
+.idle-res-chip.xp   { color: #aaffcc; border-color: #1a4a2a; background: rgba(0,30,15,0.6); }
+.idle-res-chip.gold { color: var(--gold); border-color: #3a2a00; background: rgba(20,12,0,0.6); }
+.idle-res-chip.ore  { color: #b07840; border-color: #3a2010; background: rgba(20,10,0,0.6); }
+.idle-res-chip.key  { color: #cd7f32; border-color: #3a2800; background: rgba(20,14,0,0.6); }
 .idle-actions { display: flex; gap: 8px; }
 .btn-collect {
   flex: 1; padding: 8px; border-radius: 6px; border: none;
@@ -604,9 +637,10 @@ const {
 .collect-result {
   background: #0a0f06; border: 1px solid #1a4411;
   border-radius: 8px; padding: 10px 14px;
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column; gap: 5px;
 }
-.collect-xp { font-size: 0.72rem; font-weight: 700; color: #aaffcc; letter-spacing: 0.5px; }
+.collect-row { font-size: 0.72rem; font-weight: 700; color: #aaffcc; letter-spacing: 0.5px; }
+.collect-row.gold { color: var(--gold); }
 .collect-levelups { display: flex; flex-direction: column; gap: 4px; }
 .levelup-row { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; }
 .levelup-star { color: var(--gold); font-size: 0.8rem; }

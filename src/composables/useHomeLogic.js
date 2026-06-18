@@ -113,9 +113,9 @@ export function useHomeLogic(emit) {
         levelUps.push({ name: playerHero.name, level: lv, rarity: playerHero.rarity })
       }
     }
-    lastCollect.value = { xp: result.xp, levelUps }
+    lastCollect.value = { xp: result.xp, gold: result.gold, ores: result.ores, keys: result.keys, levelUps }
     clearTimeout(_collectTimer)
-    _collectTimer = setTimeout(() => { lastCollect.value = null }, 5000)
+    _collectTimer = setTimeout(() => { lastCollect.value = null }, 6000)
   }
 
   function startIdleHere() {
