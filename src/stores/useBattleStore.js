@@ -244,11 +244,18 @@ export const useBattleStore = defineStore('battle', () => {
 
   if (typeof document !== 'undefined') {
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && _pendingResolve) {
-        clearTimeout(_pendingTimeout)
-        const resolve = _pendingResolve
-        _pendingResolve = null
-        resolve()
+      if (document.hidden) {
+        // Tab hidden while a batch is running — complete all remaining runs instantly
+        // so the player returns to a finished result screen, not a frozen mid-run.
+        if (isBatchRunning.value) devCompleteBatch()
+      } else {
+        // Tab visible again — fire any pending single-turn delay immediately
+        if (_pendingResolve) {
+          clearTimeout(_pendingTimeout)
+          const resolve = _pendingResolve
+          _pendingResolve = null
+          resolve()
+        }
       }
     })
   }
