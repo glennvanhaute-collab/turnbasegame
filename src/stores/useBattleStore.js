@@ -165,12 +165,14 @@ export const useBattleStore = defineStore('battle', () => {
         let raidDrops = null
         if (enc.isRaid) {
           raidDrops = rollRaidResourceDrops()
-          raidDrops.ores.forEach(({ id, amount })     => resources.addOre(id, amount))
-          raidDrops.logs.forEach(({ id, amount })     => resources.addLog(id, amount))
-          raidDrops.hides.forEach(({ id, amount })    => resources.addHide(id, amount))
-          raidDrops.fibers.forEach(({ id, amount })   => resources.addFiber(id, amount))
-          raidDrops.leathers.forEach(({ id, amount }) => resources.addLeather(id, amount))
-          raidDrops.cloths.forEach(({ id, amount })   => resources.addCloth(id, amount))
+          raidDrops.ores.forEach(({ id, amount })       => resources.addOre(id, amount))
+          raidDrops.logs.forEach(({ id, amount })       => resources.addLog(id, amount))
+          raidDrops.hides.forEach(({ id, amount })      => resources.addHide(id, amount))
+          raidDrops.fibers.forEach(({ id, amount })     => resources.addFiber(id, amount))
+          raidDrops.leathers.forEach(({ id, amount })   => resources.addLeather(id, amount))
+          raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
+          raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
+          componentDrops.push(...raidDrops.components.map(c => c.id))
         }
         const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock }
 

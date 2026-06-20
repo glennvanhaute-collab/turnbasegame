@@ -182,13 +182,20 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + m
 // Guaranteed top-tier resource drop for every successful raid clear.
 // Returns arrays of { id, amount } keyed by resource type.
 export function rollRaidResourceDrops() {
+  const components = []
+  // Guaranteed moonsilver_essence every raid clear
+  components.push({ id: 'moonsilver_essence', amount: rand(1, 2) })
+  // ~30% chance at a moonsilver_core (rarer)
+  if (Math.random() < 0.30) components.push({ id: 'moonsilver_core', amount: 1 })
+
   return {
-    ores:     [{ id: 'mithril',    amount: rand(5, 10) }],
-    logs:     [{ id: 'dragonwood', amount: rand(3,  7) }],
-    hides:    [{ id: 'moonscale',  amount: rand(3,  7) }],
-    fibers:   [{ id: 'moonthread', amount: rand(3,  7) }],
-    leathers: [{ id: 'moonscale',  amount: rand(1,  3) }],
-    cloths:   [{ id: 'moonweave',  amount: rand(1,  3) }],
+    ores:       [{ id: 'mithril',    amount: rand(5, 10) }],
+    logs:       [{ id: 'dragonwood', amount: rand(3,  7) }],
+    hides:      [{ id: 'moonscale',  amount: rand(3,  7) }],
+    fibers:     [{ id: 'moonthread', amount: rand(3,  7) }],
+    leathers:   [{ id: 'moonscale',  amount: rand(1,  3) }],
+    cloths:     [{ id: 'moonweave',  amount: rand(1,  3) }],
+    components,
   }
 }
 
