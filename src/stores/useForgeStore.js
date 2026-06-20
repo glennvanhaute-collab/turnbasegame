@@ -108,7 +108,8 @@ export const useForgeStore = defineStore('forge', () => {
     if (stamps.value <= 0) return false
     const inventory = useInventoryStore()
     const item = inventory.instanceById(instanceId)
-    if (!item || item.potentialTier) return false  // already has potential
+    if (!item || item.potentialTier) return false
+    if (item.rarity !== 'Legendary' && item.rarity !== 'Mythical') return false
     const lineCount = POTENTIAL_LINE_COUNT.rare
     item.potentialLines = Array.from({ length: lineCount }, () => rollLineForPotential('rare', false))
     item.potentialTier  = 'rare'

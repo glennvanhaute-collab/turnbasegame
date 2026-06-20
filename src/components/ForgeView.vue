@@ -254,7 +254,7 @@
             <div class="ws-row">
               <label class="ws-label">Item</label>
               <select class="ws-select" v-model="selectedItemId">
-                <option value="">— Select a crafted item —</option>
+                <option value="">— Select a Legendary / Mythical item —</option>
                 <option v-for="item in orbableItems" :key="item.instanceId" :value="item.instanceId">
                   {{ item.name }}{{ item.potentialTier ? ' ◈' : '' }} ({{ item.rarity }})
                 </option>
@@ -444,7 +444,9 @@ const selectedOrb    = ref('')
 
 // Items that have potential (stamped) come first, then rest of crafted items
 const orbableItems = computed(() => {
-  const all = inventory.ownedInstances.filter(i => i.craftedAt && i.tier)
+  const all = inventory.ownedInstances.filter(i =>
+    i.craftedAt && i.tier && (i.rarity === 'Legendary' || i.rarity === 'Mythical')
+  )
   return [
     ...all.filter(i => i.potentialTier),
     ...all.filter(i => !i.potentialTier),
