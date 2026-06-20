@@ -53,9 +53,11 @@ function loadSoulData() {
 }
 
 function attachMethod(item) {
-  item.lines     = item.lines     ?? []
-  item.stars     = item.stars     ?? 0
-  item.baseStats = item.baseStats ?? { ...item.stats }
+  item.lines          = item.lines          ?? []
+  item.potentialLines = item.potentialLines ?? []
+  item.potentialTier  = item.potentialTier  ?? null
+  item.stars          = item.stars          ?? 0
+  item.baseStats      = item.baseStats      ?? { ...item.stats }
   item.fitsSlot  = function(slot) { return SLOT_ALLOWED_TYPES[slot]?.includes(this.gearType) ?? false }
   return item
 }
@@ -206,12 +208,12 @@ export const useInventoryStore = defineStore('inventory', () => {
     gearDisabled.value[heroKey] = isGearEnabled(heroKey) ? true : false
   }
 
-  const EMPTY_STATS = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0 }
+  const EMPTY_STATS = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0, siegeDmg: 0, raidDmg: 0 }
 
   function computeGearStats(heroKey) {
     if (!isGearEnabled(heroKey)) return { stats: { ...EMPTY_STATS }, damageReduction: 0 }
 
-    const totals = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0 }
+    const totals = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0, siegeDmg: 0, raidDmg: 0 }
     const loadout = getLoadout(heroKey)
 
     for (const slot of Object.values(GearSlot)) {
@@ -223,10 +225,18 @@ export const useInventoryStore = defineStore('inventory', () => {
         if (key in totals) totals[key] += val
       }
 
-      // Line bonuses
+      // Line bonuses (discovery / use / slayer)
       if (item.lines?.length) {
         const lineStats = computeLineStats(item.lines)
         for (const [key, val] of Object.entries(lineStats)) {
+          if (key in totals) totals[key] += val
+        }
+      }
+
+      // Potential line bonuses
+      if (item.potentialLines?.length) {
+        const potStats = computeLineStats(item.potentialLines)
+        for (const [key, val] of Object.entries(potStats)) {
           if (key in totals) totals[key] += val
         }
       }

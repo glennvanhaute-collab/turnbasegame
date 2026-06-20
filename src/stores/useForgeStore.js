@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { rollLine } from '../game/data/dungeons.js'
+import { rollLine, rollLineForPotential, POTENTIAL_LINE_COUNT, POTENTIAL_NEXT_TIER } from '../game/data/dungeons.js'
 import { LineType } from '../game/Gear.js'
 import { useInventoryStore } from './useInventoryStore.js'
 
@@ -52,14 +52,20 @@ export const useForgeStore = defineStore('forge', () => {
     dark:    saved?.orbs?.dark    ?? saved?.cubes?.dark    ?? 0,
   })
 
-  // Dark Orb: holds a pending comparison before the player commits
-  const darkPreview = ref(null)
-  // { instanceId, oldLines: [...], newLines: [...] }
+  const stamps = ref(saved?.stamps ?? 0)  // Potential Stamps (bought with diamonds)
 
-  watch([materials, orbs], () => {
+  // Dark Orb: holds a pending comparison before the player commits
+  // { instanceId, oldLines, newLines, oldTier, newTier, ranked }
+  const darkPreview = ref(null)
+
+  // Rank-up probability per orb type
+  const ORB_RANKUP = { cracked: 0.05, master: 0.15, dark: 0.25 }
+
+  watch([materials, orbs, stamps], () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       materials: materials.value,
       orbs:      orbs.value,
+      stamps:    stamps.value,
     }))
   }, { deep: true })
 
@@ -96,13 +102,24 @@ export const useForgeStore = defineStore('forge', () => {
     return true
   }
 
-  // ── Orbing ──────────────────────────────────────────────────────
-  function _rerollLines(item, prime) {
-    const discovery = item.lines.filter(l => l.type === LineType.DISCOVERY)
-    const rest      = item.lines.filter(l => l.type !== LineType.DISCOVERY)
-    const count     = Math.max(1, discovery.length)
-    const newLines  = Array.from({ length: count }, () => rollLine(prime))
-    return { rest, newLines }
+  // ── Potential Stamp ─────────────────────────────────────────────
+  // Reveals potential on an item — sets tier to Rare, rolls 2 initial lines.
+  function applyPotentialStamp(instanceId) {
+    if (stamps.value <= 0) return false
+    const inventory = useInventoryStore()
+    const item = inventory.instanceById(instanceId)
+    if (!item || item.potentialTier) return false  // already has potential
+    const lineCount = POTENTIAL_LINE_COUNT.rare
+    item.potentialLines = Array.from({ length: lineCount }, () => rollLineForPotential('rare', false))
+    item.potentialTier  = 'rare'
+    stamps.value--
+    return true
+  }
+
+  // ── Orbing (potential tier re-roll + rank-up) ────────────────────
+  function _rollPotentialLines(tier, prime) {
+    const count = POTENTIAL_LINE_COUNT[tier] ?? 2
+    return Array.from({ length: count }, () => rollLineForPotential(tier, prime))
   }
 
   function applyOrb(instanceId, orbId) {
@@ -110,23 +127,54 @@ export const useForgeStore = defineStore('forge', () => {
     const inventory = useInventoryStore()
     const item = inventory.instanceById(instanceId)
     if (!item) return false
+
+    // Potential-tier items use the new system
+    if (item.potentialTier) {
+      const ranked   = Math.random() < (ORB_RANKUP[orbId] ?? 0)
+      const nextTier = ranked ? (POTENTIAL_NEXT_TIER[item.potentialTier] ?? item.potentialTier) : item.potentialTier
+      const prime    = orbId === 'master' || ranked
+      const newLines = _rollPotentialLines(nextTier, prime)
+
+      if (orbId === 'dark') {
+        orbs.value.dark--
+        darkPreview.value = {
+          instanceId,
+          oldLines: [...(item.potentialLines ?? [])],
+          newLines,
+          oldTier:  item.potentialTier,
+          newTier:  nextTier,
+          ranked,
+        }
+        return true
+      }
+
+      item.potentialLines = newLines
+      if (ranked) item.potentialTier = nextTier
+      orbs.value[orbId]--
+      return true
+    }
+
+    // Legacy path — items with discovery lines but no potential tier
     if (item.rarity !== 'Legendary' && item.rarity !== 'Mythical') return false
+    const discovery = item.lines.filter(l => l.type === LineType.DISCOVERY)
+    const rest      = item.lines.filter(l => l.type !== LineType.DISCOVERY)
+    const count     = Math.max(1, discovery.length)
+    const prime     = orbId === 'master'
+    const newLines  = Array.from({ length: count }, () => rollLine(prime))
 
     if (orbId === 'dark') {
-      const discovery = item.lines.filter(l => l.type === LineType.DISCOVERY)
-      const count     = Math.max(1, discovery.length)
-      const newLines  = Array.from({ length: count }, () => rollLine(false))
       orbs.value.dark--
       darkPreview.value = {
         instanceId,
         oldLines: [...discovery],
         newLines,
+        oldTier:  null,
+        newTier:  null,
+        ranked:   false,
       }
       return true
     }
 
-    const prime = orbId === 'master'
-    const { rest, newLines } = _rerollLines(item, prime)
     item.lines = [...rest, ...newLines]
     orbs.value[orbId]--
     return true
@@ -137,8 +185,15 @@ export const useForgeStore = defineStore('forge', () => {
     const inventory = useInventoryStore()
     const item = inventory.instanceById(darkPreview.value.instanceId)
     if (item && keepNew) {
-      const rest = item.lines.filter(l => l.type !== LineType.DISCOVERY)
-      item.lines = [...rest, ...darkPreview.value.newLines]
+      if (item.potentialTier) {
+        // Potential system
+        item.potentialLines = darkPreview.value.newLines
+        if (darkPreview.value.ranked) item.potentialTier = darkPreview.value.newTier
+      } else {
+        // Legacy discovery lines
+        const rest = item.lines.filter(l => l.type !== LineType.DISCOVERY)
+        item.lines = [...rest, ...darkPreview.value.newLines]
+      }
     }
     darkPreview.value = null
   }
@@ -152,9 +207,10 @@ export const useForgeStore = defineStore('forge', () => {
   )
 
   return {
-    materials, orbs, darkPreview, totalOrbs,
-    MATERIALS, ORBS,
+    materials, orbs, stamps, darkPreview, totalOrbs,
+    MATERIALS, ORBS, ORB_RANKUP,
     awardMaterials, canCraft, craft,
     applyOrb, confirmDark, cancelDarkPreview,
+    applyPotentialStamp,
   }
 })

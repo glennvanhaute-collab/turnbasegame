@@ -147,7 +147,7 @@ export const DUNGEON_LIST = [
   pinned:     false,
 }))
 
-// Discovery line value ranges
+// Discovery line value ranges (dungeon drops, unchanged)
 const LINE_RANGES = {
   atk:      { min: 80,   max: 150  },
   atkPct:   { min: 0.04, max: 0.10 },
@@ -158,13 +158,13 @@ const LINE_RANGES = {
   critDmg:  { min: 0.06, max: 0.12 },
 }
 const LINE_STAT_KEYS = Object.keys(LINE_RANGES)
-const PCT_STATS = new Set(['atkPct', 'defPct', 'hpPct', 'spdPct', 'critRate', 'critDmg', 'resistance', 'accuracy'])
+const PCT_STATS = new Set(['atkPct', 'defPct', 'hpPct', 'spdPct', 'critRate', 'critDmg', 'resistance', 'accuracy', 'siegeDmg', 'raidDmg'])
 
 function rollDiscoveryLine() {
   return rollLine(false)
 }
 
-// Exported so the forge system can re-roll lines.
+// Exported so the forge system can re-roll discovery lines.
 // prime=true biases each roll to the upper 30% of the range (Master Cube behaviour).
 export function rollLine(prime = false) {
   const stat = pick(LINE_STAT_KEYS)
@@ -178,6 +178,102 @@ export function rollLine(prime = false) {
     ? `+${Math.round(val * 100)}% ${stat.replace('Pct', '').toUpperCase()}`
     : `+${val} ${stat.toUpperCase()}`
   return { type: LineType.DISCOVERY, label, bonus: { [stat]: val }, source: 'cube', earnedAt: Date.now() }
+}
+
+// ── Potential system line ranges (scale per tier) ────────────────────────
+// Each tier unlocks better stat ceilings. ATK scales aggressively since
+// the user noted damage numbers feel low at endgame.
+export const POTENTIAL_TIER_RANGES = {
+  rare: {
+    atk:      { min: 80,   max: 180  },
+    atkPct:   { min: 0.04, max: 0.12 },
+    def:      { min: 60,   max: 110  },
+    hp:       { min: 600,  max: 1400 },
+    spd:      { min: 3,    max: 8    },
+    critRate: { min: 0.02, max: 0.05 },
+    critDmg:  { min: 0.06, max: 0.13 },
+    siegeDmg: { min: 0.03, max: 0.07 },
+    raidDmg:  { min: 0.03, max: 0.07 },
+  },
+  epic: {
+    atk:      { min: 140,  max: 300  },
+    atkPct:   { min: 0.07, max: 0.18 },
+    def:      { min: 100,  max: 190  },
+    hp:       { min: 1000, max: 2400 },
+    spd:      { min: 5,    max: 13   },
+    critRate: { min: 0.03, max: 0.08 },
+    critDmg:  { min: 0.10, max: 0.20 },
+    siegeDmg: { min: 0.05, max: 0.11 },
+    raidDmg:  { min: 0.05, max: 0.11 },
+  },
+  unique: {
+    atk:      { min: 220,  max: 460  },
+    atkPct:   { min: 0.11, max: 0.26 },
+    def:      { min: 160,  max: 300  },
+    hp:       { min: 1600, max: 3800 },
+    spd:      { min: 8,    max: 19   },
+    critRate: { min: 0.05, max: 0.11 },
+    critDmg:  { min: 0.15, max: 0.30 },
+    siegeDmg: { min: 0.08, max: 0.17 },
+    raidDmg:  { min: 0.08, max: 0.17 },
+  },
+  legendary: {
+    atk:      { min: 340,  max: 700  },
+    atkPct:   { min: 0.17, max: 0.38 },
+    def:      { min: 240,  max: 460  },
+    hp:       { min: 2400, max: 5800 },
+    spd:      { min: 12,   max: 26   },
+    critRate: { min: 0.07, max: 0.15 },
+    critDmg:  { min: 0.22, max: 0.45 },
+    siegeDmg: { min: 0.13, max: 0.25 },
+    raidDmg:  { min: 0.13, max: 0.25 },
+  },
+}
+
+const POTENTIAL_STAT_LABEL = {
+  atk:      v => `+${v} ATK`,
+  atkPct:   v => `+${Math.round(v * 100)}% ATK`,
+  def:      v => `+${v} DEF`,
+  hp:       v => `+${v} HP`,
+  spd:      v => `+${v} SPD`,
+  critRate: v => `+${Math.round(v * 100)}% Crit Rate`,
+  critDmg:  v => `+${Math.round(v * 100)}% Crit DMG`,
+  siegeDmg: v => `+${Math.round(v * 100)}% Siege DMG`,
+  raidDmg:  v => `+${Math.round(v * 100)}% Raid DMG`,
+}
+
+// Rolls one potential line from a tier-specific pool.
+// prime=true (Magnificent Orb behaviour) biases rolls to the upper 30%.
+export function rollLineForPotential(potentialTier, prime = false) {
+  const ranges = POTENTIAL_TIER_RANGES[potentialTier] ?? POTENTIAL_TIER_RANGES.rare
+  const stats  = Object.keys(ranges)
+  const stat   = pick(stats)
+  const { min, max } = ranges[stat]
+  const rng = prime ? 0.7 + Math.random() * 0.3 : Math.random()
+  let val = min + rng * (max - min)
+  val = PCT_STATS.has(stat) ? Math.round(val * 1000) / 1000 : Math.round(val)
+  const label = (POTENTIAL_STAT_LABEL[stat] ?? (v => `+${v} ${stat}`))(val)
+  return { type: LineType.POTENTIAL, label, bonus: { [stat]: val }, source: 'potential', earnedAt: Date.now() }
+}
+
+// Line count per potential tier
+export const POTENTIAL_LINE_COUNT = { rare: 2, epic: 3, unique: 3, legendary: 3 }
+
+// Rank-up path
+export const POTENTIAL_NEXT_TIER = { rare: 'epic', epic: 'unique', unique: 'legendary', legendary: null }
+
+export const POTENTIAL_TIER_COLORS = {
+  rare:      '#4dff88',
+  epic:      '#b44fff',
+  unique:    '#ffd700',
+  legendary: '#ff88ff',
+}
+
+export const POTENTIAL_TIER_LABELS = {
+  rare:      'Rare Potential',
+  epic:      'Epic Potential',
+  unique:    'Unique Potential',
+  legendary: 'Legendary Potential',
 }
 
 function rollRarity(weights) {
