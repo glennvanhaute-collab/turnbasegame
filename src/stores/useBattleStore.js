@@ -10,7 +10,7 @@ import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
 import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
-import { rollRaidResourceDrops }  from '../game/data/raidEncounters.js'
+import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -26,6 +26,13 @@ export const useBattleStore = defineStore('battle', () => {
   const currentEncounterIndex = ref(0)
   const currentEncounter = ref(null)
   const lastReward = ref(null)   // { gold, diamonds, xp, levelsGained, oreDrops } shown after victory
+
+  const _savedClears = JSON.parse(localStorage.getItem('raid-clears') ?? '[]')
+  const clearedRaids  = ref(new Set(_savedClears))
+  const currentRaidId = ref(null)
+  function _persistClears() {
+    localStorage.setItem('raid-clears', JSON.stringify([...clearedRaids.value]))
+  }
 
   const lastAction = ref(null)
 
@@ -173,6 +180,10 @@ export const useBattleStore = defineStore('battle', () => {
           raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
           raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
           componentDrops.push(...raidDrops.components.map(c => c.id))
+          if (currentRaidId.value) {
+            clearedRaids.value.add(currentRaidId.value)
+            _persistClears()
+          }
         }
         const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock }
 
@@ -331,16 +342,46 @@ export const useBattleStore = defineStore('battle', () => {
     initBattle(enc, team)
   }
 
+  // ── Auto-complete a raid (already-cleared fast path) ─────────────
+  function autoCompleteRaid(raidId) {
+    const enc = RAID_ENCOUNTERS[raidId]
+    if (!enc || !clearedRaids.value.has(raidId)) return
+    const resources = useResourceStore()
+    currency.addGold(enc.rewards.gold ?? 0)
+    currency.addDiamonds(enc.rewards.diamonds ?? 0)
+    const raidDrops = rollRaidResourceDrops()
+    raidDrops.ores.forEach(({ id, amount })       => resources.addOre(id, amount))
+    raidDrops.logs.forEach(({ id, amount })       => resources.addLog(id, amount))
+    raidDrops.hides.forEach(({ id, amount })      => resources.addHide(id, amount))
+    raidDrops.fibers.forEach(({ id, amount })     => resources.addFiber(id, amount))
+    raidDrops.leathers.forEach(({ id, amount })   => resources.addLeather(id, amount))
+    raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
+    raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
+    currentRaidId.value  = raidId
+    engine.value         = null
+    state.value          = BattleState.VICTORY
+    lastReward.value     = {
+      gold: enc.rewards.gold ?? 0,
+      diamonds: enc.rewards.diamonds ?? 0,
+      xp: 0, levelsGained: 0,
+      raidDrops,
+      componentDrops: raidDrops.components.map(c => c.id),
+      isAutoComplete: true,
+    }
+  }
+
   return {
     engine, state, activeHero, battleKey,
     playerTeam, enemyTeam, battleLog,
     selectedSkillIndex, currentEncounterIndex, currentEncounter,
     autoplay, battleSpeed, lastReward, lastAction,
     batchTotal, batchDone, isBatchRunning,
+    clearedRaids, currentRaidId,
     ENCOUNTERS,
     isPlayerTurn, canAct, isOver,
     initBattle, selectSkill, selectTarget,
     toggleAutoplay, setSpeed,
     startBatchRun, setupBatch, stopBatch, devCompleteBatch,
+    autoCompleteRaid,
   }
 })

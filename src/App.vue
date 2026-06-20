@@ -165,7 +165,8 @@
         <RaidBattleArena
           v-if="showRaidBattle && activeRaidId"
           :raidId="activeRaidId"
-          @back="showRaidBattle = false"
+          :autoComplete="isAutoRaid"
+          @back="showRaidBattle = false; isAutoRaid = false"
         />
       </Transition>
     </Teleport>
@@ -210,7 +211,7 @@
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
         <ExploreView v-else-if="expTab === 'explore'" @enter-dungeon="startDungeonBattle" />
-        <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" />
+        <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" @auto-raid="startAutoRaid" />
         <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
       </div>
@@ -306,7 +307,16 @@ function closeAllPanels() {
   showCodex.value           = false
 }
 
+const isAutoRaid = ref(false)
+
 function startRaidBattle(raidId) {
+  isAutoRaid.value     = false
+  activeRaidId.value   = raidId
+  showRaidBattle.value = true
+}
+
+function startAutoRaid(raidId) {
+  isAutoRaid.value     = true
   activeRaidId.value   = raidId
   showRaidBattle.value = true
 }

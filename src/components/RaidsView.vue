@@ -87,8 +87,16 @@
         <div class="quote-attribution">— {{ selected.boss }}</div>
       </div>
 
-      <!-- Enter button -->
+      <!-- Enter / Auto buttons -->
       <div class="enter-row">
+        <button
+          v-if="battleStore.clearedRaids.has(selected.id)"
+          class="btn-auto"
+          @click="emit('auto-raid', selected.id)"
+        >
+          ⚡ Auto Clear
+          <span class="enter-note">· instant loot</span>
+        </button>
         <button class="btn-enter" @click="emit('enter-raid', selected.id)">
           Enter the Throne
           <span class="enter-note">· Nightmare difficulty</span>
@@ -109,8 +117,10 @@
 <script setup>
 import { ref } from 'vue'
 import { RAIDS } from '../game/data/raids.js'
+import { useBattleStore } from '../stores/useBattleStore.js'
 
-const emit = defineEmits(['enter-raid'])
+const emit = defineEmits(['enter-raid', 'auto-raid'])
+const battleStore = useBattleStore()
 
 const _raidBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
 const raidBgMap = {}
@@ -324,7 +334,21 @@ const selected = ref(RAIDS[0] ?? null)
 }
 
 /* ── Enter button ───────────────────────── */
-.enter-row { padding: 20px 28px; background: rgba(6, 3, 1, 0.72); }
+.enter-row { padding: 20px 28px; background: rgba(6, 3, 1, 0.72); display: flex; gap: 10px; align-items: center; }
+.btn-auto {
+  background: #0a1a08;
+  border: 1px solid #44aa33;
+  border-radius: 6px;
+  color: #88dd66;
+  font-family: var(--font-head);
+  font-size: 0.8rem; font-weight: 800;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 12px 22px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-auto:hover { background: #122010; border-color: #88dd66; }
 .btn-enter {
   background: #1a0a00;
   border: 1px solid var(--gold-dim, #7a5228);

@@ -18,9 +18,11 @@
     <Transition name="end-fade">
       <div class="end-overlay" v-if="store.isOver">
         <div class="end-title" :class="store.state">
-          {{ store.state === 'victory' ? 'Raid Complete' : 'Defeated' }}
+          {{ store.state === 'victory' ? (store.lastReward?.isAutoComplete ? 'Quick Clear' : 'Raid Complete') : 'Defeated' }}
         </div>
-        <div class="end-sub" v-if="store.state === 'victory'">The Throne of Regret falls silent.</div>
+        <div class="end-sub" v-if="store.state === 'victory'">
+          {{ store.lastReward?.isAutoComplete ? 'Loot awarded — no battle required.' : encounter?.victoryText ?? 'The raid falls silent.' }}
+        </div>
         <div class="end-sub" v-else>The darkness was too great.</div>
         <div class="end-rewards" v-if="store.state === 'victory' && store.lastReward">
           <div class="reward-main-row">
@@ -191,7 +193,10 @@ import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
 
-const props = defineProps({ raidId: { type: String, required: true } })
+const props = defineProps({
+  raidId:       { type: String,  required: true },
+  autoComplete: { type: Boolean, default: false },
+})
 defineEmits(['back'])
 
 const store      = useBattleStore()
@@ -365,8 +370,13 @@ function seClass(type) {
 
 // ── Init battle on mount ─────────────────────────────────────────
 onMounted(() => {
+  if (props.autoComplete) {
+    store.autoCompleteRaid(props.raidId)
+    return
+  }
   const team = collection.buildTeam()
   if (store.autoplay) store.toggleAutoplay()
+  store.currentRaidId = props.raidId
   store.initBattle(encounter, team)
   // Allow phase watcher to fire after first render
   nextTick(() => { phaseWatchReady = true })
