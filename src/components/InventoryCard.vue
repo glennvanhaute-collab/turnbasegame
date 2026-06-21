@@ -31,7 +31,7 @@ const HERO_NAMES = Object.fromEntries(
     .map(([key, f]) => [key, f().name])
 )
 
-const slotIcon = computed(() => tierSlotIcon(props.item.tier, props.item.slot, props.item.craftDiscipline))
+const slotIcon = computed(() => props.item.image ?? tierSlotIcon(props.item.tier, props.item.slot, props.item.craftDiscipline))
 </script>
 
 <style scoped>

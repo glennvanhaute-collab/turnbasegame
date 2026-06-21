@@ -47,6 +47,7 @@ const GEARTYPE_SLOT = {
 }
 
 const itemIcon = computed(() => {
+  if (props.item.image) return props.item.image
   const slot = props.item.slot ?? GEARTYPE_SLOT[props.item.gearType]
   return tierSlotIcon(props.item.tier, slot, props.item.craftDiscipline)
 })

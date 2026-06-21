@@ -47,7 +47,7 @@ defineEmits(['click'])
 
 const slotIcon = computed(() =>
   props.item
-    ? tierSlotIcon(props.item.tier, props.slotId, props.item.craftDiscipline)
+    ? (props.item.image ?? tierSlotIcon(props.item.tier, props.slotId, props.item.craftDiscipline))
     : (SLOT_TO_ICON[props.slotId] ?? 'sword')
 )
 
