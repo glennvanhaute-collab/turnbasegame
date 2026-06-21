@@ -9,6 +9,7 @@
 // sprites_leatherworking.png — 5×6 grid (1145×1374px) — tiered leather gear
 // sprites_tailoring.png    — 5×6 grid (1145×1374px)  — tiered cloth gear
 // sprites_materials.png    — 6×4 grid (1536×1024px)  — hides, leathers, fibers, cloths
+// sprites_elvish.png       — 8×6 grid (1448×1086px)  — tiered elvish gear (copper→moonsilver quality)
 
 export const SHEET_COLS = 8
 
@@ -141,6 +142,19 @@ WW_TIERS.forEach((tier, row) => {
   })
 })
 
+// ── Sheet ELV: sprites_elvish.png ────────────────────────────────────────
+// rows: 0=copper, 1=tin, 2=steel, 3=darksteel, 4=mithril, 5=moonsilver (quality tiers)
+// cols: 0=sword, 1=dagger, 2=shield, 3=helmet, 4=chest, 5=legs, 6=boots, 7=gloves
+export const SHEET_ELV_COLS = 8
+export const SHEET_ELV_ROWS = 6
+
+const ICONS_ELV = {}
+BS_TIERS.forEach((tier, row) => {
+  BS_SLOTS.forEach((slot, col) => {
+    ICONS_ELV[`elv_${tier}_${slot}`] = pos(col, row, 'elv')
+  })
+})
+
 // ── Sheet MATS: sprites_materials.png ────────────────────────────────────
 // rows: 0=hides, 1=leathers, 2=fibers, 3=cloths
 // cols: 0=rough/cotton, 1=thick/wool, 2=hardened/silkweave, 3=shadow, 4=celestial/starweave, 5=moonscale/moonweave
@@ -159,7 +173,7 @@ FIBER_IDS.forEach((id, col)   => { ICONS_MATS[`fiber_${id}`]   = pos(col, 2, 'ma
 CLOTH_IDS.forEach((id, col)   => { ICONS_MATS[`cloth_${id}`]   = pos(col, 3, 'mats') })
 
 // ── Merged lookup ─────────────────────────────────────────────────────────
-export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS, ...ICONS_WW }
+export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS, ...ICONS_WW, ...ICONS_ELV }
 
 // ── Convenience helpers ───────────────────────────────────────────────────
 export function oreIcon(tierId)     { return `${tierId}_ore` }
@@ -211,6 +225,11 @@ export function tierSlotIcon(tier, slot, discipline = 'blacksmithing') {
     const slotKey = SLOT_TO_LW_KEY[slot]
     if (tier && slotKey && BS_TIERS.includes(tier)) return `tw_${tier}_${slotKey}`
     return SLOT_TO_ICON[slot] ?? 'chest'
+  }
+  if (discipline === 'elven') {
+    const slotKey = SLOT_TO_BS_KEY[slot]
+    if (tier && slotKey && BS_TIERS.includes(tier)) return `elv_${tier}_${slotKey}`
+    return SLOT_TO_ICON[slot] ?? 'sword'
   }
   const slotKey = SLOT_TO_BS_KEY[slot]
   if (tier && slotKey && BS_TIERS.includes(tier)) return `${tier}_${slotKey}`

@@ -48,9 +48,11 @@ export const useDungeonStore = defineStore('dungeons', () => {
     const energy = useEnergyStore()
     if (!energy.canAfford(EXPLORE_COST)) return false
     energy.spend(EXPLORE_COST)
+    const DIFF_ORDER = ['Easy', 'Normal', 'Hard', 'Brutal', 'Nightmare']
     const options = generateDungeonOptions()
     const discovery = rollForgeDiscovery()
     if (discovery) options[Math.floor(Math.random() * options.length)] = discovery
+    options.sort((a, b) => (DIFF_ORDER.indexOf(a.difficulty) ?? 99) - (DIFF_ORDER.indexOf(b.difficulty) ?? 99))
     currentOptions.value = options
     persist()
     return true
