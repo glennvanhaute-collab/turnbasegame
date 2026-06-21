@@ -41,6 +41,14 @@
               <span v-for="d in store.lastReward.raidDrops.components" :key="'cmp'+d.id" class="reward-pill essence">✦ {{ d.amount }}× {{ UPGRADE_COMPONENTS[d.id]?.name ?? d.id }}</span>
             </div>
           </template>
+          <template v-if="store.lastReward.raidDrops?.gearDrops?.length">
+            <div class="raid-drops-label" style="color: #b44fff; border-color: #b44fff44;">Regalia of Regret</div>
+            <div class="raid-drops">
+              <span v-for="g in store.lastReward.raidDrops.gearDrops" :key="g.instanceId" class="reward-pill regret-gear">
+                ◈ {{ g.name }}
+              </span>
+            </div>
+          </template>
         </div>
         <button class="end-btn" @click="$emit('back')">← Return to Raids</button>
       </div>
@@ -880,7 +888,8 @@ onMounted(() => {
 .reward-pill.fiber   { background: rgba(187, 238, 255, 0.10); color: #bbeeff; border: 1px solid rgba(187, 238, 255, 0.25); }
 .reward-pill.leather { background: rgba(126, 232, 255, 0.08); color: #aaddf0; border: 1px solid rgba(126, 232, 255, 0.2); }
 .reward-pill.cloth   { background: rgba(136, 204, 255, 0.10); color: #88ccff; border: 1px solid rgba(136, 204, 255, 0.22); }
-.reward-pill.essence { background: rgba(153, 204, 255, 0.15); color: #99ccff; border: 1px solid rgba(153, 204, 255, 0.40); }
+.reward-pill.essence     { background: rgba(153, 204, 255, 0.15); color: #99ccff; border: 1px solid rgba(153, 204, 255, 0.40); }
+.reward-pill.regret-gear { background: rgba(180, 79, 255, 0.12); color: #cc88ff; border: 1px solid rgba(180, 79, 255, 0.40); font-weight: 600; }
 
 .raid-drops-label {
   font-family: 'Cinzel', serif;

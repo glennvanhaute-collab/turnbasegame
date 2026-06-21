@@ -115,7 +115,7 @@ const PLAYER_AVATARS = Object.fromEntries(
 )
 
 const _RARITY_BORDER = {
-  Mythical: '#ff6ef7', Legendary: '#ffd700', Epic: '#b44fff',
+  Mythical: '#ff2244', Legendary: '#ffd700', Epic: '#b44fff',
   Rare: '#4fa8ff', Uncommon: '#4dff88', Common: '#444', Ancient: '#8b0000',
 }
 
@@ -431,7 +431,7 @@ watch(() => store.battleKey, () => {
   text-shadow: 0 1px 4px rgba(0,0,0,1);
 }
 .hero-name.leader    { color: #ffd700; font-weight: 700; }
-.hero-name.mythical  { color: #ff6ef7; }
+.hero-name.mythical  { color: #ff2244; }
 .hero-name.legendary { color: #ffd700; }
 .hero-name.epic      { color: #b44fff; }
 .hero-name.rare      { color: #4fa8ff; }

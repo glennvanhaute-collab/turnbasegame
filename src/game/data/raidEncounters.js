@@ -1,5 +1,6 @@
 import { Skill, SkillEffect, EffectType, TargetType, StatusEffect } from '../Skill.js'
 import { Hero, Faction, Rarity, Affinity } from '../Hero.js'
+import { rollThroneGear } from './raidGear.js'
 
 function makeBatmanSkills() {
   return [
@@ -181,12 +182,12 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + m
 
 // Guaranteed top-tier resource drop for every successful raid clear.
 // Returns arrays of { id, amount } keyed by resource type.
-export function rollRaidResourceDrops() {
+export function rollRaidResourceDrops(raidId) {
   const components = []
-  // Guaranteed moonsilver_essence every raid clear
   components.push({ id: 'moonsilver_essence', amount: rand(1, 2) })
-  // ~30% chance at a moonsilver_core (rarer)
   if (Math.random() < 0.30) components.push({ id: 'moonsilver_core', amount: 1 })
+
+  const gearDrops = raidId === 'throne_of_regret' ? rollThroneGear() : []
 
   return {
     ores:       [{ id: 'mithril',    amount: rand(5, 10) }],
@@ -196,6 +197,7 @@ export function rollRaidResourceDrops() {
     leathers:   [{ id: 'moonscale',  amount: rand(1,  3) }],
     cloths:     [{ id: 'moonweave',  amount: rand(1,  3) }],
     components,
+    gearDrops,
   }
 }
 

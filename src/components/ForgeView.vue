@@ -521,12 +521,12 @@ const craftedItems = computed(() =>
     .sort((a, b) => (TIER_ORDER[a.tier] ?? 99) - (TIER_ORDER[b.tier] ?? 99))
 )
 
-const RARITY_COLOR = { common: '#aaa', uncommon: '#4dff88', rare: '#4fa8ff', epic: '#b44fff', legendary: '#ffd700', mythical: '#ff88ff' }
-function tierCapColor(tier) { return RARITY_COLOR[rarityForStars(TIER_MAX_STARS[tier] ?? 10).toLowerCase()] ?? '#ff88ff' }
+const RARITY_COLOR = { common: '#aaa', uncommon: '#4dff88', rare: '#4fa8ff', epic: '#b44fff', legendary: '#ffd700', mythical: '#ff2244' }
+function tierCapColor(tier) { return RARITY_COLOR[rarityForStars(TIER_MAX_STARS[tier] ?? 10).toLowerCase()] ?? '#ff2244' }
 
 const artisanItem      = computed(() => artisanItemId.value ? inventory.instanceById(artisanItemId.value) : null)
 const artisanTier      = computed(() => artisanItem.value?.tier ?? null)
-const artisanCapColor  = computed(() => RARITY_COLOR[rarityForStars(TIER_MAX_STARS[artisanItem.value?.tier] ?? 10).toLowerCase()] ?? '#ff88ff')
+const artisanCapColor  = computed(() => RARITY_COLOR[rarityForStars(TIER_MAX_STARS[artisanItem.value?.tier] ?? 10).toLowerCase()] ?? '#ff2244')
 const artisanTierColor = computed(() => RECIPE_TIERS.find(t => t.id === artisanTier.value)?.color ?? '#888')
 
 const artisanDiscipline = computed(() => artisanItem.value?.craftDiscipline ?? 'blacksmithing')
@@ -764,7 +764,7 @@ function upgradeItem() {
 .item-list-btn.rare      { border-left-color: #4fa8ff; }
 .item-list-btn.epic      { border-left-color: #b44fff; }
 .item-list-btn.legendary { border-left-color: #ffd700; }
-.item-list-btn.mythical  { border-left-color: #ff88ff; }
+.item-list-btn.mythical  { border-left-color: #ff2244; }
 .ilb-icon  { flex-shrink: 0; opacity: 0.75; }
 .ilb-name  { font-size: 0.63rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
 .ilb-eq    { font-size: 0.5rem; color: #ffd700; opacity: 0.7; flex-shrink: 0; }
@@ -807,7 +807,7 @@ function upgradeItem() {
 .rarity-badge.rare      { color: #4fa8ff; border-color: #1a3060; background: rgba(79,168,255,0.05); }
 .rarity-badge.epic      { color: #b44fff; border-color: #3a1060; background: rgba(180,79,255,0.05); }
 .rarity-badge.legendary { color: #ffd700; border-color: #5a3a00; background: rgba(255,215,0,0.05); }
-.rarity-badge.mythical  { color: #ff88ff; border-color: #5a1050; background: rgba(255,136,255,0.05); }
+.rarity-badge.mythical  { color: #ff2244; border-color: #5a1010; background: rgba(255,34,68,0.05); }
 .legacy-badge { color: #887755; border-color: #443322; background: rgba(136,119,85,0.08); }
 
 /* Item showcase */
@@ -848,7 +848,7 @@ function upgradeItem() {
 .showcase-rarity.rare      { color: #4fa8ff; }
 .showcase-rarity.epic      { color: #b44fff; text-shadow: 0 0 10px rgba(180,79,255,0.5); }
 .showcase-rarity.legendary { color: #ffd700; text-shadow: 0 0 14px rgba(255,215,0,0.55); }
-.showcase-rarity.mythical  { color: #ff88ff; text-shadow: 0 0 14px rgba(255,136,255,0.55); }
+.showcase-rarity.mythical  { color: #ff2244; text-shadow: 0 0 14px rgba(255,34,68,0.55); }
 .item-showcase.maxed { border-color: color-mix(in srgb, var(--rarity-color) 45%, transparent); }
 
 /* Stats panel */

@@ -618,7 +618,7 @@ async function selectFaction(faction) {
 .rdm-modal.epic      .rdm-portrait { border-right: 2px solid #b44fff; }
 .rdm-modal.rare      .rdm-portrait { border-right: 2px solid #4fa8ff; }
 .rdm-modal.uncommon  .rdm-portrait { border-right: 2px solid #4dff88; }
-.rdm-modal.mythical  .rdm-portrait { border-right: 2px solid #ff88ff; }
+.rdm-modal.mythical  .rdm-portrait { border-right: 2px solid #ff2244; }
 
 /* Info column */
 .rdm-info {
@@ -639,7 +639,7 @@ async function selectFaction(faction) {
 .rdm-rarity.epic      { background: #1a0a2a; color: #b44fff; border-color: #3a1a5a; }
 .rdm-rarity.rare      { background: #0a1a3a; color: #4fa8ff; border-color: #1a2a5a; }
 .rdm-rarity.uncommon  { background: #0a2a0a; color: #4dff88; border-color: #1a4a1a; }
-.rdm-rarity.mythical  { background: #2a0a2a; color: #ff88ff; border-color: #5a1a5a; }
+.rdm-rarity.mythical  { background: #2a0808; color: #ff2244; border-color: #5a1010; }
 .rdm-affinity.force  { background: #3a1a0a; color: #ff8c42; border-color: #5a2a10; }
 .rdm-affinity.magic  { background: #0a1a3a; color: #4fa8ff; border-color: #1a2a5a; }
 .rdm-affinity.spirit { background: #0a2a1a; color: #4dff88; border-color: #1a4a2a; }

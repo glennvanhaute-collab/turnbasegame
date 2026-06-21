@@ -48,7 +48,7 @@ const slotIcon = computed(() => tierSlotIcon(props.item.tier, props.item.slot, p
 }
 .inv-row:hover { border-color: #5a2a10; }
 
-.inv-row.mythical  { border-left-color: #ff6ef7; }
+.inv-row.mythical  { border-left-color: #ff2244; }
 .inv-row.legendary { border-left-color: #ffd700; }
 .inv-row.epic      { border-left-color: #b44fff; }
 .inv-row.rare      { border-left-color: #4fa8ff; }

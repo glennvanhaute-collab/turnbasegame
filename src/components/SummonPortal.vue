@@ -253,7 +253,7 @@ const cost10Label = computed(() => {
 .ceiling-text strong.rare      { color: #4fa8ff; }
 .ceiling-text strong.epic      { color: #b44fff; }
 .ceiling-text strong.legendary { color: #ffd700; }
-.ceiling-text strong.mythical  { color: #ff88cc; }
+.ceiling-text strong.mythical  { color: #ff2244; }
 .ceiling-text strong.uncommon  { color: #4dff88; }
 .ceiling-text strong.common    { color: #888; }
 .ceiling-next { color: #444; }

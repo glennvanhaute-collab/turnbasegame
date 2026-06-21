@@ -110,7 +110,7 @@ const statLines = computed(() => {
   flex-shrink: 0;
   background: #333;
 }
-.gear-card.mythical  .rarity-stripe { background: #ff6ef7; }
+.gear-card.mythical  .rarity-stripe { background: #ff2244; }
 .gear-card.legendary .rarity-stripe { background: #ffd700; }
 .gear-card.epic      .rarity-stripe { background: #b44fff; }
 .gear-card.rare      .rarity-stripe { background: #4fa8ff; }
@@ -135,7 +135,7 @@ const statLines = computed(() => {
 .gear-sprite { flex-shrink: 0; opacity: 0.9; }
 .name-block  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .item-name   { font-size: 0.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.item-name.mythical  { color: #ff6ef7; }
+.item-name.mythical  { color: #ff2244; }
 .item-name.legendary { color: #ffd700; }
 .item-name.epic      { color: #b44fff; }
 .item-name.rare      { color: #4fa8ff; }

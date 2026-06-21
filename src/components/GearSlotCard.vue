@@ -105,7 +105,7 @@ const topStats = computed(() => {
 .item-name-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 4px; min-width: 0; }
 .item-name     { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .item-stars    { font-size: 0.58rem; white-space: nowrap; flex-shrink: 0; letter-spacing: 0; }
-.item-name.mythical,  .item-stars.mythical  { color: #ff6ef7; }
+.item-name.mythical,  .item-stars.mythical  { color: #ff2244; }
 .item-name.legendary, .item-stars.legendary { color: #ffd700; }
 .item-name.epic,      .item-stars.epic      { color: #b44fff; }
 .item-name.rare,      .item-stars.rare      { color: #4fa8ff; }

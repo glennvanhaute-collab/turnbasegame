@@ -545,7 +545,7 @@ const {
 .no-team    { font-size: 0.68rem; color: #444; font-style: italic; }
 .team-hero-chip { display: flex; align-items: center; gap: 4px; }
 .chip-dot { font-size: 0.55rem; }
-.chip-dot.mythical  { color: #ff6ef7; }
+.chip-dot.mythical  { color: #ff2244; }
 .chip-dot.legendary { color: #ffd700; }
 .chip-dot.epic      { color: #b44fff; }
 .chip-dot.rare      { color: #4fa8ff; }
@@ -689,7 +689,7 @@ const {
 .levelup-star { color: var(--gold); font-size: 0.8rem; }
 .levelup-name { font-family: var(--font-head); font-weight: 700; }
 .levelup-name.legendary { color: var(--gold-bright); }
-.levelup-name.mythical  { color: #ff88ff; }
+.levelup-name.mythical  { color: #ff2244; }
 .levelup-name.epic      { color: #c070ff; }
 .levelup-name.rare      { color: #60b0ff; }
 .levelup-name.uncommon  { color: #50ff90; }
