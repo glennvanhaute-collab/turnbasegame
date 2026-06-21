@@ -1,6 +1,6 @@
 <template>
   <div class="inv-row" :class="item.rarity.toLowerCase()">
-    <GameIcon :icon="slotIcon" :size="22" class="ir-icon" />
+    <GameIcon :icon="slotIcon" :size="36" class="ir-icon" />
     <div class="ir-body">
       <span class="ir-name">{{ item.name }}</span>
       <span class="ir-eq" v-if="equippedBy">● {{ HERO_NAMES[equippedBy.heroKey] }}</span>
