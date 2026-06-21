@@ -293,7 +293,7 @@ function doSellAll() {
 .merch-card:hover { border-color: #6a2e14; }
 .merch-card.equipped { opacity: 0.55; }
 
-.merch-card.mythical  { border-left: 3px solid #ff6ef7; }
+.merch-card.mythical  { border-left: 3px solid #ff2244; }
 .merch-card.legendary { border-left: 3px solid #ffd700; }
 .merch-card.epic      { border-left: 3px solid #b44fff; }
 .merch-card.rare      { border-left: 3px solid #4fa8ff; }
@@ -311,7 +311,7 @@ function doSellAll() {
 .mc-badges { display: flex; flex-wrap: wrap; gap: 4px; }
 
 .rarity-badge { font-size: 0.58rem; padding: 1px 6px; border-radius: 10px; font-weight: 700; }
-.rarity-badge.mythical  { background: #2a0a2a; color: #ff6ef7; }
+.rarity-badge.mythical  { background: #2a0808; color: #ff2244; }
 .rarity-badge.legendary { background: #3a2a00; color: #ffd700; }
 .rarity-badge.epic      { background: #2a0a3a; color: #b44fff; }
 .rarity-badge.rare      { background: #0a1a3a; color: #4fa8ff; }

@@ -184,7 +184,7 @@ const props = defineProps({
 
 defineEmits(['enter', 'pin', 'unpin', 'claim'])
 
-const RARITY_COLORS = { Rare: '#4fa8ff', Epic: '#b44fff', Legendary: '#ffd700', Mythical: '#ff6ef7' }
+const RARITY_COLORS = { Rare: '#4fa8ff', Epic: '#b44fff', Legendary: '#ffd700', Mythical: '#ff2244' }
 
 function pickCityBg(faction, seed) {
   const short = CITY_DATA[faction]?.short ?? 'aldric'

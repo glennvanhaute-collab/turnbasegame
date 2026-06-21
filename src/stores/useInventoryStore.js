@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, TWO_HANDED_WEAPON_TYPES, createItemInstance, computeLineStats } from '../game/Gear.js'
-import { SET_BONUSES, SET_PASSIVE_6 } from '../game/data/setBonus.js'
+import { SET_BONUSES, SET_PASSIVE_6, NAMED_SET_BONUSES, NAMED_SET_PASSIVE_6 } from '../game/data/setBonus.js'
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
@@ -281,9 +281,31 @@ export const useInventoryStore = defineStore('inventory', () => {
       }
     }
 
+    // Named (raid) set bonus counting — keyed by setId
+    const namedSetPieces = {}
+    for (const slot of Object.values(GearSlot)) {
+      const item = loadout[slot] ? instanceById(loadout[slot]) : null
+      if (!item?.setId) continue
+      namedSetPieces[item.setId] = (namedSetPieces[item.setId] ?? 0) + 1
+    }
+    for (const [setId, count] of Object.entries(namedSetPieces)) {
+      const bonusTiers = NAMED_SET_BONUSES[setId]
+      if (!bonusTiers) continue
+      for (const [threshold, stats] of Object.entries(bonusTiers)) {
+        if (count >= Number(threshold)) {
+          for (const [key, val] of Object.entries(stats)) {
+            if (key in totals) totals[key] += val
+          }
+        }
+      }
+    }
+
     const activePassives = new Set()
     for (const [armorType, count] of Object.entries(setPieces)) {
       if (count >= 6 && SET_PASSIVE_6[armorType]) activePassives.add(SET_PASSIVE_6[armorType].id)
+    }
+    for (const [setId, count] of Object.entries(namedSetPieces)) {
+      if (count >= 6 && NAMED_SET_PASSIVE_6[setId]) activePassives.add(NAMED_SET_PASSIVE_6[setId].id)
     }
 
     // Role-based passives — base passive always active; boosted when gear matches role condition

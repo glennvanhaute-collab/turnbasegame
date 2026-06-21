@@ -126,6 +126,18 @@ BS_TIERS.forEach((tier, row) => {
   })
 })
 
+// ── Sheet REGRET: sprites_regret.png ─────────────────────────────────────
+// rows: 0=regret (single tier)
+// cols: 0=sword, 1=shield, 2=helmet, 3=chest, 4=legs, 5=boots, 6=gloves
+export const SHEET_REGRET_COLS = 7
+export const SHEET_REGRET_ROWS = 1
+
+const REGRET_SLOTS = ['sword', 'shield', 'helmet', 'chest', 'legs', 'boots', 'gloves']
+const ICONS_REGRET = {}
+REGRET_SLOTS.forEach((slot, col) => {
+  ICONS_REGRET[`regret_${slot}`] = pos(col, 0, 'regret')
+})
+
 // ── Sheet WW: sprites_woodworking.png ────────────────────────────────────
 // rows: 0=pine, 1=oak, 2=yew, 3=ashwood, 4=ironwood, 5=dragonwood
 // cols: 0=bow, 1=staff, 2=logs
@@ -173,7 +185,7 @@ FIBER_IDS.forEach((id, col)   => { ICONS_MATS[`fiber_${id}`]   = pos(col, 2, 'ma
 CLOTH_IDS.forEach((id, col)   => { ICONS_MATS[`cloth_${id}`]   = pos(col, 3, 'mats') })
 
 // ── Merged lookup ─────────────────────────────────────────────────────────
-export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS, ...ICONS_WW, ...ICONS_ELV }
+export const ICONS = { ...ICONS_1, ...ICONS_2, ...ICONS_BS, ...ICONS_LW, ...ICONS_TW, ...ICONS_MATS, ...ICONS_WW, ...ICONS_ELV, ...ICONS_REGRET }
 
 // ── Convenience helpers ───────────────────────────────────────────────────
 export function oreIcon(tierId)     { return `${tierId}_ore` }

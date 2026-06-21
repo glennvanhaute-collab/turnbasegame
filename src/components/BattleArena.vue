@@ -422,7 +422,7 @@ function startBatch100() {
 }
 .levelup-rarity.epic      { background: #2a0a3a; color: #b44fff; }
 .levelup-rarity.legendary { background: #3a2a00; color: #ffd700; }
-.levelup-rarity.mythical  { background: #2a0a2a; color: #ff6ef7; }
+.levelup-rarity.mythical  { background: #2a0808; color: #ff2244; }
 @keyframes levelup-pulse { from { transform: scale(1.03); } to { transform: scale(1); } }
 
 .reward-chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }

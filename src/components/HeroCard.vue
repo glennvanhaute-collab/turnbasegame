@@ -109,7 +109,7 @@ const statusIcon = type => STATUS_ICONS[type] ?? '?'
 .hero-card.enemy   { border-color: #5a0000; }
 
 .hero-name           { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: #eee; }
-.hero-name.mythical  { color: #ff6ef7; }
+.hero-name.mythical  { color: #ff2244; }
 .hero-name.legendary { color: #ffd700; }
 .hero-name.epic      { color: #b44fff; }
 .hero-name.rare      { color: #4fa8ff; }

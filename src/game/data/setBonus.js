@@ -33,3 +33,23 @@ export const SET_NAMES = {
   leather: 'Leather',
   cloth:   'Cloth',
 }
+
+// ── Named (raid) set bonuses — keyed by setId ──────────────────────────────
+export const NAMED_SET_BONUSES = {
+  regret: {
+    2: { raidDmg: 0.15, siegeDmg: 0.10 },                      // +15% Raid DMG, +10% Siege DMG
+    4: { atkPct: 0.20, critDmg: 0.20 },                        // +20% ATK, +20% Crit DMG
+    6: { raidDmg: 0.15 },                                       // additional +15% Raid DMG
+  },
+}
+
+export const NAMED_SET_PASSIVE_6 = {
+  regret: {
+    id:   'throne_judgment',
+    desc: 'Shadow Throne: Your first skill each turn surges with void energy, dealing +50% bonus damage.',
+  },
+}
+
+export const NAMED_SET_INFO = {
+  regret: { name: 'Regalia of Regret', color: '#b44fff', source: 'The Throne of Regret' },
+}

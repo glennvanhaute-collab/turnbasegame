@@ -104,14 +104,14 @@ const AFFINITY_COLORS = {
   Spirit: { light: '#5dff9a', mid: '#2ecc70', dark: '#001a0c', text: '#90ffcc' },
   Void:   { light: '#cc66ff', mid: '#9933ee', dark: '#0f001a', text: '#dd99ff' },
   Blood:  { light: '#ff4455', mid: '#cc1133', dark: '#1a0005', text: '#ff9aaa' },
-  Astral: { light: '#ff88ff', mid: '#ee44cc', dark: '#1a0018', text: '#ffaaff' },
+  Astral: { light: '#ff2244', mid: '#ee44cc', dark: '#1a0018', text: '#ffaaff' },
 }
 
 const AFFINITY_SYMBOLS = { Force: '⚔', Magic: '✦', Spirit: '☽', Void: '◈', Blood: '◆', Astral: '✧' }
 
 const RARITY_COLORS = {
   Ancient:   '#3a0808',
-  Mythical:  '#ff6ef7',
+  Mythical:  '#ff2244',
   Legendary: '#ffd700',
   Epic:      '#b44fff',
   Rare:      '#4fa8ff',

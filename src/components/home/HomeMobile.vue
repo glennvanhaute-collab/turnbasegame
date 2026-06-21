@@ -318,7 +318,7 @@ const {
   gap: 5px;
 }
 .mob-chip-dot { font-size: 0.6rem; }
-.mob-chip-dot.mythical  { color: #ff6ef7; }
+.mob-chip-dot.mythical  { color: #ff2244; }
 .mob-chip-dot.legendary { color: #ffd700; }
 .mob-chip-dot.epic      { color: #b44fff; }
 .mob-chip-dot.rare      { color: #4fa8ff; }
@@ -563,7 +563,7 @@ const {
 .levelup-star { color: var(--gold); }
 .levelup-name { font-family: var(--font-head); font-weight: 700; }
 .levelup-name.legendary { color: var(--gold-bright); }
-.levelup-name.mythical  { color: #ff88ff; }
+.levelup-name.mythical  { color: #ff2244; }
 .levelup-name.epic      { color: #c070ff; }
 .levelup-name.rare      { color: #60b0ff; }
 .levelup-name.uncommon  { color: #50ff90; }

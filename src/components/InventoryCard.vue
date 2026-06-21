@@ -1,6 +1,6 @@
 <template>
   <div class="inv-row" :class="item.rarity.toLowerCase()">
-    <GameIcon :icon="slotIcon" :size="22" class="ir-icon" />
+    <GameIcon :icon="slotIcon" :size="36" class="ir-icon" />
     <div class="ir-body">
       <span class="ir-name">{{ item.name }}</span>
       <span class="ir-eq" v-if="equippedBy">● {{ HERO_NAMES[equippedBy.heroKey] }}</span>
@@ -31,7 +31,7 @@ const HERO_NAMES = Object.fromEntries(
     .map(([key, f]) => [key, f().name])
 )
 
-const slotIcon = computed(() => tierSlotIcon(props.item.tier, props.item.slot, props.item.craftDiscipline))
+const slotIcon = computed(() => props.item.image ?? tierSlotIcon(props.item.tier, props.item.slot, props.item.craftDiscipline))
 </script>
 
 <style scoped>
@@ -48,7 +48,7 @@ const slotIcon = computed(() => tierSlotIcon(props.item.tier, props.item.slot, p
 }
 .inv-row:hover { border-color: #5a2a10; }
 
-.inv-row.mythical  { border-left-color: #ff6ef7; }
+.inv-row.mythical  { border-left-color: #ff2244; }
 .inv-row.legendary { border-left-color: #ffd700; }
 .inv-row.epic      { border-left-color: #b44fff; }
 .inv-row.rare      { border-left-color: #4fa8ff; }

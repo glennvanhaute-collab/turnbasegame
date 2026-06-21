@@ -9,6 +9,7 @@ import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
 import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
+import { useInventoryStore }   from './useInventoryStore.js'
 import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
 import { useCodexStore } from './useCodexStore.js'
@@ -172,7 +173,7 @@ export const useBattleStore = defineStore('battle', () => {
         }
         let raidDrops = null
         if (enc.isRaid) {
-          raidDrops = rollRaidResourceDrops()
+          raidDrops = rollRaidResourceDrops(currentRaidId.value)
           raidDrops.ores.forEach(({ id, amount })       => resources.addOre(id, amount))
           raidDrops.logs.forEach(({ id, amount })       => resources.addLog(id, amount))
           raidDrops.hides.forEach(({ id, amount })      => resources.addHide(id, amount))
@@ -181,6 +182,10 @@ export const useBattleStore = defineStore('battle', () => {
           raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
           raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
           componentDrops.push(...raidDrops.components.map(c => c.id))
+          if (raidDrops.gearDrops?.length) {
+            const inventory = useInventoryStore()
+            raidDrops.gearDrops.forEach(inst => inventory.addInstance(inst))
+          }
           if (currentRaidId.value) {
             clearedRaids.value.add(currentRaidId.value)
             _persistClears()
@@ -362,7 +367,7 @@ export const useBattleStore = defineStore('battle', () => {
     const resources = useResourceStore()
     currency.addGold(enc.rewards.gold ?? 0)
     currency.addDiamonds(enc.rewards.diamonds ?? 0)
-    const raidDrops = rollRaidResourceDrops()
+    const raidDrops = rollRaidResourceDrops(raidId)
     raidDrops.ores.forEach(({ id, amount })       => resources.addOre(id, amount))
     raidDrops.logs.forEach(({ id, amount })       => resources.addLog(id, amount))
     raidDrops.hides.forEach(({ id, amount })      => resources.addHide(id, amount))
@@ -370,6 +375,10 @@ export const useBattleStore = defineStore('battle', () => {
     raidDrops.leathers.forEach(({ id, amount })   => resources.addLeather(id, amount))
     raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
     raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
+    if (raidDrops.gearDrops?.length) {
+      const inventory = useInventoryStore()
+      raidDrops.gearDrops.forEach(inst => inventory.addInstance(inst))
+    }
     currentRaidId.value  = raidId
     engine.value         = null
     state.value          = BattleState.VICTORY

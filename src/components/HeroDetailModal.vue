@@ -489,7 +489,7 @@ const stats = computed(() => {
 }
 .badges { display: flex; gap: 6px; flex-wrap: wrap; }
 .badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
-.rarity.mythical  { background: #2a0a2a; color: #ff6ef7; border: 1px solid #ff6ef7; }
+.rarity.mythical  { background: #2a0808; color: #ff2244; border: 1px solid #ff2244; }
 .rarity.legendary { background: #3a2a00; color: #ffd700; border: 1px solid #ffd700; }
 .rarity.epic      { background: #2a0a3a; color: #b44fff; border: 1px solid #b44fff; }
 .rarity.rare      { background: #0a1a3a; color: #4fa8ff; border: 1px solid #4fa8ff; }
@@ -523,7 +523,7 @@ const stats = computed(() => {
 .prog-rarity-badge.rare      { background: #0a1a3a; color: #4fa8ff; border: 1px solid #4fa8ff55; }
 .prog-rarity-badge.epic      { background: #2a0a3a; color: #b44fff; border: 1px solid #b44fff55; }
 .prog-rarity-badge.legendary { background: #3a2a00; color: #ffd700; border: 1px solid #ffd70055; }
-.prog-rarity-badge.mythical  { background: #2a0a2a; color: #ff6ef7; border: 1px solid #ff6ef755; }
+.prog-rarity-badge.mythical  { background: #2a0808; color: #ff2244; border: 1px solid #ff224455; }
 .prog-xp-label { display: flex; justify-content: space-between; font-size: 0.62rem; color: #555; margin-bottom: 4px; }
 .prog-bar-track { height: 5px; background: #1a0e06; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
 .prog-bar-fill  { height: 100%; background: linear-gradient(to right, #4dff88, #aaff44); border-radius: 3px; transition: width 0.4s; }
@@ -540,7 +540,7 @@ const stats = computed(() => {
 .thr-rarity.rare      { color: #4fa8ff; }
 .thr-rarity.epic      { color: #b44fff; }
 .thr-rarity.legendary { color: #ffd700; }
-.thr-rarity.mythical  { color: #ff6ef7; }
+.thr-rarity.mythical  { color: #ff2244; }
 .thr-level  { font-size: 0.58rem; color: #555; }
 .prog-threshold.next .thr-level { color: var(--gold-dim); }
 
@@ -552,7 +552,7 @@ const stats = computed(() => {
   background: rgba(19, 9, 8, 0.7); border-left: 3px solid #333;
   font-size: 0.72rem;
 }
-.eq-row.mythical  { border-left-color: #ff6ef7; }
+.eq-row.mythical  { border-left-color: #ff2244; }
 .eq-row.legendary { border-left-color: #ffd700; }
 .eq-row.epic      { border-left-color: #b44fff; }
 .eq-row.rare      { border-left-color: #4fa8ff; }
@@ -565,14 +565,14 @@ const stats = computed(() => {
 .eq-name-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
 .eq-name     { font-weight: 700; color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .eq-stars    { font-size: 0.6rem; letter-spacing: 0; white-space: nowrap; flex-shrink: 0; }
-.eq-stars.mythical  { color: #ff6ef7; }
+.eq-stars.mythical  { color: #ff2244; }
 .eq-stars.legendary { color: #ffd700; }
 .eq-stars.epic      { color: #b44fff; }
 .eq-stars.rare      { color: #4fa8ff; }
 .eq-stars.uncommon  { color: #4dff88; }
 .eq-stars.common    { color: #888; }
 .eq-rarity  { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.eq-rarity.mythical  { color: #ff6ef7; }
+.eq-rarity.mythical  { color: #ff2244; }
 .eq-rarity.legendary { color: #ffd700; }
 .eq-rarity.epic      { color: #b44fff; }
 .eq-rarity.rare      { color: #4fa8ff; }

@@ -205,7 +205,7 @@ watch(() => store.lastAction, (action) => {
 
 // ── Portrait card helpers ──
 const _RARITY_BORDER = {
-  Mythical:  '#ff6ef7', Legendary: '#ffd700', Epic: '#b44fff',
+  Mythical:  '#ff2244', Legendary: '#ffd700', Epic: '#b44fff',
   Rare: '#4fa8ff', Uncommon: '#4dff88', Common: '#444', Ancient: '#8b0000',
 }
 function portrait(hero)     { return getPortrait(hero) }

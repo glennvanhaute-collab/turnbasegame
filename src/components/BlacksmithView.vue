@@ -1223,7 +1223,7 @@ function forgeFullSet(tier) {
 .star-node.rare      .star-node-rarity { color: #4fa8ff; }
 .star-node.epic      .star-node-rarity { color: #b44fff; }
 .star-node.legendary .star-node-rarity { color: #ffd700; }
-.star-node.mythical  .star-node-rarity { color: #ff88ff; }
+.star-node.mythical  .star-node-rarity { color: #ff2244; }
 
 /* Forge button */
 .forge-actions { display: flex; align-items: center; gap: 12px; }

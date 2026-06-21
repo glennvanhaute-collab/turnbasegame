@@ -224,11 +224,11 @@ function doUnequip() {
 .rarity-pill.rare   { color: #4fa8ff44; border-color: #4fa8ff22; }
 .rarity-pill.epic   { color: #b44fff44; border-color: #b44fff22; }
 .rarity-pill.legendary { color: #ffd70044; border-color: #ffd70022; }
-.rarity-pill.mythical  { color: #ff6ef744; border-color: #ff6ef722; }
+.rarity-pill.mythical  { color: #ff224444; border-color: #ff224422; }
 .rarity-pill.rare.active      { color: #4fa8ff; border-color: #4fa8ff; background: #0a1a3a; }
 .rarity-pill.epic.active      { color: #b44fff; border-color: #b44fff; background: #1a0a2a; }
 .rarity-pill.legendary.active { color: #ffd700; border-color: #ffd700; background: #2a1a00; }
-.rarity-pill.mythical.active  { color: #ff6ef7; border-color: #ff6ef7; background: #2a0a2a; }
+.rarity-pill.mythical.active  { color: #ff2244; border-color: #ff2244; background: #2a0808; }
 
 .armor-pills { display: flex; gap: 3px; }
 .armor-pill {
