@@ -29,19 +29,29 @@
         </select>
       </div>
 
+      <button class="team-only-btn" :class="{ active: teamOnly }" @click="teamOnly = !teamOnly">
+        ⚑ Team Only
+      </button>
+
       <div class="list-count">{{ filteredRoster.length }} / {{ roster.length }}</div>
 
       <div
         v-for="{ key, hero } in filteredRoster"
         :key="key"
         class="hero-entry"
-        :class="{ active: selectedKey === key }"
+        :class="{ active: selectedKey === key, 'in-team': collection.team.includes(key) }"
         @click="selectedKey = key"
       >
-        <span class="hero-rarity" :class="hero.rarity.toLowerCase()">●</span>
+        <div class="hero-avatar-wrap">
+          <HeroAvatar :hero="hero" :size="38" :noBorder="true" />
+          <span v-if="collection.team.includes(key)" class="team-slot-badge">
+            {{ collection.team.indexOf(key) + 1 }}
+          </span>
+        </div>
         <div class="hero-entry-info">
           <span class="hero-entry-name">{{ hero.name }}</span>
           <span class="hero-entry-meta">{{ hero.faction }} · {{ hero.affinity }}</span>
+          <span class="role-tag" :class="'role-' + hero.role">{{ ROLE_ICONS[hero.role] }} {{ ROLE_LABELS[hero.role] }}</span>
         </div>
         <span class="gear-count" :title="equippedCount(key) + ' items equipped'">
           {{ equippedCount(key) }}/5
@@ -161,7 +171,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
@@ -171,6 +181,7 @@ import { Rarity, Faction } from '../game/Hero.js'
 import { SET_BONUSES, SET_PASSIVE_6, SET_NAMES } from '../game/data/setBonus.js'
 import GearSlotCard from './GearSlotCard.vue'
 import GearPickerModal from './GearPickerModal.vue'
+import HeroAvatar from './HeroAvatar.vue'
 
 const inventory = useInventoryStore()
 const collection = useCollectionStore()
@@ -178,6 +189,9 @@ const playerHero = usePlayerHeroStore()
 
 const SLOTS    = Object.values(GearSlot)
 const RARITIES = Object.values(Rarity)
+
+const ROLE_ICONS  = { warrior: '⚔', mage: '✦', healer: '✚', ranger: '⊕', tank: '⬡', debuffer: '✸' }
+const ROLE_LABELS = { warrior: 'Warrior', mage: 'Mage', healer: 'Healer', ranger: 'Ranger', tank: 'Tank', debuffer: 'Debuffer' }
 const FACTIONS = Object.values(Faction).filter(f =>
   collection.roster.some(({ hero }) => hero.faction === f)
 )
@@ -189,6 +203,8 @@ const search        = ref('')
 const filterRarity  = ref('')
 const filterFaction = ref('')
 const sortBy        = ref('default')
+const teamOnly      = ref(localStorage.getItem('equip-team-only') === 'true')
+watch(teamOnly, v => localStorage.setItem('equip-team-only', v))
 
 const RARITY_ORDER = { Common: 0, Uncommon: 1, Rare: 2, Epic: 3, Legendary: 4 }
 
@@ -197,6 +213,8 @@ const filteredRoster = computed(() => {
 
   if (search.value)
     list = list.filter(({ hero }) => hero.name.toLowerCase().includes(search.value.toLowerCase()))
+  if (teamOnly.value)
+    list = list.filter(({ key }) => collection.team.includes(key))
   if (filterRarity.value)
     list = list.filter(({ hero }) => hero.rarity === filterRarity.value)
   if (filterFaction.value)
@@ -345,6 +363,16 @@ const pct = v => Math.round(v * 100) + '%'
   transition: border-color 0.15s;
 }
 .list-search:focus, .list-select:focus { border-color: #ffd700; }
+.team-only-btn {
+  width: 100%; padding: 5px 10px; margin-bottom: 6px;
+  border-radius: 6px; border: 1px solid rgba(255,215,0,0.2);
+  background: transparent; color: #666;
+  font-family: var(--font-head); font-size: 0.62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.team-only-btn:hover { border-color: rgba(255,215,0,0.45); color: #aaa; }
+.team-only-btn.active { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.55); color: var(--gold, #ffd700); }
 .list-count { font-size: 0.62rem; color: #444; text-align: right; margin-bottom: 6px; }
 .hero-entry {
   display: flex;
@@ -356,16 +384,32 @@ const pct = v => Math.round(v * 100) + '%'
   transition: background 0.15s;
   border: 1px solid transparent;
 }
-.hero-entry:hover  { background: #221108; }
-.hero-entry.active { background: #221108; border-color: #ffd700; }
-.hero-rarity.legendary { color: #ffd700; }
-.hero-rarity.epic      { color: #b44fff; }
-.hero-rarity.rare      { color: #4fa8ff; }
-.hero-rarity.uncommon  { color: #4dff88; }
-.hero-rarity.common    { color: #888; }
+.hero-entry:hover         { background: #221108; }
+.hero-entry.in-team       { background: rgba(255,215,0,0.04); border-color: rgba(255,215,0,0.18); }
+.hero-entry.active        { background: #221108; border-color: #ffd700; }
+.hero-avatar-wrap         { position: relative; flex-shrink: 0; }
+.team-slot-badge {
+  position: absolute; bottom: -2px; right: -2px;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: var(--gold, #ffd700); color: #1a0a00;
+  font-size: 0.52rem; font-weight: 900; font-family: var(--font-head);
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid #1a0a00; line-height: 1; pointer-events: none;
+}
 .hero-entry-info { flex: 1; min-width: 0; }
 .hero-entry-name { display: block; font-size: 0.8rem; font-weight: 600; color: #ddd; }
 .hero-entry-meta { font-size: 0.65rem; color: #555; }
+.role-tag {
+  display: block; margin-top: 3px;
+  font-size: 0.58rem; font-weight: 700; font-family: var(--font-head);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.role-warrior  { color: #e07840; }
+.role-mage     { color: #a06aff; }
+.role-healer   { color: #44cc88; }
+.role-ranger   { color: #44bbcc; }
+.role-tank     { color: #5599ff; }
+.role-debuffer { color: #cc7788; }
 .gear-count { font-size: 0.65rem; color: #555; flex-shrink: 0; }
 
 /* Main panel */

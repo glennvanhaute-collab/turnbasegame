@@ -66,7 +66,15 @@
         >
           <span class="dot" />{{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
         </div>
-        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.gatherDrops?.hides?.length && !store.lastReward.gatherDrops?.fibers?.length && !store.lastReward.componentDrops?.length && !store.lastReward.keyDrops?.length">
+        <div
+          v-for="lf in store.lastReward.loreFragments"
+          :key="'lf_'+lf.frag.id"
+          class="drop-chip"
+          style="--c: #d4a855"
+        >
+          <span class="dot" />📜 Lore Fragment
+        </div>
+        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.gatherDrops?.hides?.length && !store.lastReward.gatherDrops?.fibers?.length && !store.lastReward.componentDrops?.length && !store.lastReward.keyDrops?.length && !store.lastReward.loreFragments?.length">
           No drops this run
         </div>
       </div>
@@ -128,6 +136,17 @@
             <div class="forge-unlock-sub">You can now smelt Darksteel Bars at the Blacksmith.</div>
           </div>
         </div>
+
+        <!-- Lore fragment drops -->
+        <template v-if="store.lastReward.loreFragments?.length">
+          <div class="lore-frag-banner" v-for="frag in store.lastReward.loreFragments" :key="frag.frag.id">
+            <span class="lore-frag-icon">📜</span>
+            <div class="lore-frag-text">
+              <div class="lore-frag-title">Lore Fragment Discovered</div>
+              <div class="lore-frag-sub">{{ frag.heroTitle }} — {{ frag.frag.title }}</div>
+            </div>
+          </div>
+        </template>
 
         <!-- Drops -->
         <div class="drops-row" v-if="store.lastReward.oreDrops?.length || store.lastReward.gatherDrops?.hides?.length || store.lastReward.gatherDrops?.fibers?.length || store.lastReward.componentDrops?.length || store.lastReward.keyDrops?.length">
@@ -431,6 +450,15 @@ function startBatch100() {
 .forge-unlock-icon { font-size: 1.4rem; flex-shrink: 0; }
 .forge-unlock-title { font-size: 0.78rem; font-weight: 700; color: #b48fff; font-family: var(--font-head); letter-spacing: 1px; }
 .forge-unlock-sub   { font-size: 0.62rem; color: var(--text-muted); margin-top: 2px; }
+
+.lore-frag-banner {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(180,144,80,0.10); border: 1px solid #a07840;
+  border-radius: 8px; padding: 10px 14px;
+}
+.lore-frag-icon  { font-size: 1.2rem; flex-shrink: 0; }
+.lore-frag-title { font-size: 0.78rem; font-weight: 700; color: #d4a855; font-family: var(--font-head); letter-spacing: 1px; }
+.lore-frag-sub   { font-size: 0.62rem; color: var(--text-muted); margin-top: 2px; font-style: italic; }
 
 .drops-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .drop-chip {

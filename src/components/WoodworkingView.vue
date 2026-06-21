@@ -227,6 +227,15 @@
           <span class="craft-btn-icon">⚐</span>
           Carve
         </button>
+        <button
+          v-if="!selected.bowstringCost && !selected.essenceCost"
+          class="craft-btn craft-all-btn"
+          :class="{ ready: canAfford(selected) && !isTierLocked(selected.tier) }"
+          :disabled="!canAfford(selected) || isTierLocked(selected.tier)"
+          @click="carveAll"
+        >
+          Carve All
+        </button>
         <span class="craft-hint" v-if="isTierLocked(selected.tier)">Requires Woodworking Lv.{{ selectedTier?.woodworkingLevel }}</span>
         <span class="craft-hint" v-else-if="!canAfford(selected)">Need more materials</span>
         <span class="craft-hint finish-hint" v-else-if="selected.finishType === 'string'">Needs a bowstring from Tailoring to complete</span>
@@ -316,6 +325,21 @@
           <GameIcon :icon="`ww_${wood.id}_logs`" :size="20" class="log-icon" />
           <span class="log-name">{{ wood.name }}</span>
           <span class="log-count">{{ resources.logs[wood.id] ?? 0 }}</span>
+        </div>
+      </div>
+
+      <div class="panel-sublabel" style="margin-top: 14px;">Planks</div>
+      <div class="log-list">
+        <div
+          v-for="plank in PLANK_LIST"
+          :key="plank.id"
+          class="log-row"
+          :class="{ empty: !resources.planks[plank.id] }"
+          :style="{ '--wood-color': plank.color }"
+        >
+          <span class="plank-chip" />
+          <span class="log-name">{{ plank.name }}</span>
+          <span class="log-count">{{ resources.planks[plank.id] ?? 0 }}</span>
         </div>
       </div>
     </aside>
@@ -445,11 +469,7 @@ function assignCarpenter(key) {
 
 const XP_PER_TIER = { pine: 10, oak: 20, yew: 35, ashwood: 55, ironwood: 80, dragonwood: 120 }
 
-function carve() {
-  if (!selected.value || !canAfford(selected.value)) return
-  if (isTierLocked(selected.value.tier)) return
-  const recipe = selected.value
-
+function _craftOnce(recipe) {
   if (recipe.plankCost) {
     Object.entries(recipe.plankCost).forEach(([id, amt]) => resources.removePlank(id, amt))
     if (recipe.bowstringCost) resources.removeBowstring(recipe.bowstringCost, 1)
@@ -457,7 +477,6 @@ function carve() {
   } else {
     Object.entries(recipe.logCost).forEach(([id, amt]) => resources.removeLog(id, amt))
   }
-
   const instance = createItemInstance({
     id:          recipe.id,
     name:        recipe.name,
@@ -476,19 +495,22 @@ function carve() {
   instance.craftedAt = Date.now()
   instance.crafted   = true
   inventory.addInstance(instance)
-
   const baseXp = XP_PER_TIER[recipe.tier] ?? 10
   const bonus  = assignedCarpenter.value ? carpenterXpBonus.value / 100 : 0
   resources.addWoodworkingXp(Math.round(baseXp * (1 + bonus)))
-
   if (assignedCarpenter.value) {
     artisan.addSkillXp(artisan.assignedCarpenterKey, 'woodworking', Math.ceil(baseXp * 0.5))
   }
+}
 
+function carve() {
+  if (!selected.value || !canAfford(selected.value)) return
+  if (isTierLocked(selected.value.tier)) return
+  const recipe = selected.value
+  _craftOnce(recipe)
   craftResult.value = recipe.name
   clearTimeout(_flashTimer)
   _flashTimer = setTimeout(() => { craftResult.value = null }, 3000)
-
   if (!localStorage.getItem('bow-tip-woodworking')) {
     localStorage.setItem('bow-tip-woodworking', '1')
     setTimeout(() => advisor.say([
@@ -496,6 +518,21 @@ function carve() {
         ? `A fine piece of work. The ${recipe.name} is in your inventory — unfinished. A bowstring from your tailor will string it.`
         : `The ${recipe.name} is complete and ready to equip.`,
     ]), 600)
+  }
+}
+
+function carveAll() {
+  if (!selected.value || !canAfford(selected.value) || isTierLocked(selected.value.tier)) return
+  const recipe = selected.value
+  let count = 0
+  while (canAfford(recipe)) {
+    _craftOnce(recipe)
+    count++
+  }
+  if (count > 0) {
+    craftResult.value = `${recipe.name} ×${count}`
+    clearTimeout(_flashTimer)
+    _flashTimer = setTimeout(() => { craftResult.value = null }, 3000)
   }
 }
 </script>
@@ -766,6 +803,7 @@ function carve() {
   box-shadow: 0 0 32px rgba(80,180,40,0.35), inset 0 1px 0 rgba(140,220,80,0.1);
 }
 .craft-btn-icon { font-size: 1rem; }
+.craft-all-btn { padding: 12px 24px; font-size: 0.75rem; }
 .craft-hint { font-size: 0.62rem; color: #885544; font-style: italic; }
 .finish-hint { color: #5a6a3a; }
 
@@ -879,6 +917,11 @@ function carve() {
 }
 .log-row.empty { opacity: 0.28; filter: saturate(0.2); }
 .log-icon { flex-shrink: 0; filter: drop-shadow(0 0 3px var(--wood-color)); }
+.plank-chip {
+  width: 20px; height: 20px; flex-shrink: 0; border-radius: 3px;
+  background: color-mix(in srgb, var(--wood-color) 55%, transparent);
+  box-shadow: 0 0 5px var(--wood-color);
+}
 .log-name  { flex: 1; font-size: 0.65rem; font-weight: 600; color: var(--text-parchment); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .log-count { font-family: var(--font-head); font-size: 0.85rem; font-weight: 800; color: var(--wood-color); min-width: 20px; text-align: right; }
 .log-row.empty .log-count { color: var(--text-dim); }

@@ -2,10 +2,24 @@ import { GearSlot, GearType, WeaponType } from '../Gear.js'
 import { WOODS } from './woods.js'
 
 // Bows — strung with a Tailoring bowstring to complete (finishType: 'string').
+// Selfbows — finished planks-only bows; weaker than strung, no secondary material needed.
 // Staves — carved from planks, imbued with dungeon essence in one step (no finishType, produced finished).
 
 export const WOODWORKING_RECIPES = [
   // ── Pine (Common) ────────────────────────────────────────────────
+  {
+    id: 'pine_selfbow',
+    name: 'Pine Selfbow',
+    tier: 'pine',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.BOW,
+    armorType: 'leather',
+    desc: 'A simple stave of pine carved to shape and shot unstrung — not pretty, but ready to use.',
+    plankCost: { pine: 2 },
+    baseStats: { atk: 70, spd: 5 },
+    rarity: 'Common',
+  },
   {
     id: 'pine_shortbow',
     name: 'Pine Shortbow',
@@ -23,6 +37,19 @@ export const WOODWORKING_RECIPES = [
 
   // ── Oak (Uncommon) ───────────────────────────────────────────────
   {
+    id: 'oak_selfbow',
+    name: 'Oak Selfbow',
+    tier: 'oak',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.BOW,
+    armorType: 'leather',
+    desc: 'Dense oak gives a firm draw without string. It bites, even unfinished.',
+    plankCost: { oak: 3 },
+    baseStats: { atk: 95, spd: 6 },
+    rarity: 'Uncommon',
+  },
+  {
     id: 'oak_shortbow',
     name: 'Oak Shortbow',
     tier: 'oak',
@@ -38,6 +65,19 @@ export const WOODWORKING_RECIPES = [
   },
 
   // ── Yew (Rare) ───────────────────────────────────────────────────
+  {
+    id: 'yew_selfbow',
+    name: 'Yew Selfbow',
+    tier: 'yew',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.BOW,
+    armorType: 'leather',
+    desc: "Yew flexes enough on its own. No string needed — the wood does all the work.",
+    plankCost: { yew: 4 },
+    baseStats: { atk: 128, spd: 8 },
+    rarity: 'Rare',
+  },
   {
     id: 'yew_longbow',
     name: 'Yew Longbow',
@@ -55,6 +95,19 @@ export const WOODWORKING_RECIPES = [
 
   // ── Ashwood (Epic) ───────────────────────────────────────────────
   {
+    id: 'ashwood_selfbow',
+    name: 'Ashwood Selfbow',
+    tier: 'ashwood',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.BOW,
+    armorType: 'leather',
+    desc: 'Highland ash holds tension better than most strung bows. The lack of string goes unnoticed by its targets.',
+    plankCost: { ashwood: 5 },
+    baseStats: { atk: 172, spd: 10 },
+    rarity: 'Epic',
+  },
+  {
     id: 'ashwood_longbow',
     name: 'Ashwood Longbow',
     tier: 'ashwood',
@@ -71,6 +124,19 @@ export const WOODWORKING_RECIPES = [
 
   // ── Ironwood (Legendary) ─────────────────────────────────────────
   {
+    id: 'ironwood_selfbow',
+    name: 'Ironwood Selfbow',
+    tier: 'ironwood',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.BOW,
+    armorType: 'leather',
+    desc: 'Heavy enough to use as a club. Capable of launching an arrow clean through a war shield — unstrung.',
+    plankCost: { ironwood: 5 },
+    baseStats: { atk: 232, spd: 13 },
+    rarity: 'Legendary',
+  },
+  {
     id: 'ironwood_warbow',
     name: 'Ironwood Warbow',
     tier: 'ironwood',
@@ -86,6 +152,19 @@ export const WOODWORKING_RECIPES = [
   },
 
   // ── Dragonwood (Legendary) ───────────────────────────────────────
+  {
+    id: 'dragonwood_selfbow',
+    name: 'Dragonwood Selfbow',
+    tier: 'dragonwood',
+    slot: GearSlot.MAIN_HAND,
+    gearType: GearType.WEAPON,
+    weaponType: WeaponType.BOW,
+    armorType: 'leather',
+    desc: 'Carved from scorched ancient wood. The heat stored in the grain gives every shot a faint scorch mark at the end of it.',
+    plankCost: { dragonwood: 6 },
+    baseStats: { atk: 315, spd: 17 },
+    rarity: 'Legendary',
+  },
   {
     id: 'dragonwood_warbow',
     name: 'Dragonwood Warbow',

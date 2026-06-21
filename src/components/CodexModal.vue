@@ -15,6 +15,7 @@
           <button class="codex-tab" :class="{ active: tab === 'journal' }"    @click="tab = 'journal'">Adventure Log</button>
           <button class="codex-tab" :class="{ active: tab === 'lore' }"       @click="tab = 'lore'">Lore</button>
           <button class="codex-tab" :class="{ active: tab === 'heroes' }"     @click="tab = 'heroes'">Heroes</button>
+          <button class="codex-tab" :class="{ active: tab === 'gear' }"       @click="tab = 'gear'">Gear</button>
           <button class="codex-tab" :class="{ active: tab === 'tips' }"       @click="tab = 'tips'">
             Tips
             <span class="tips-count" v-if="unreadTips > 0">{{ unreadTips }}</span>
@@ -125,6 +126,86 @@
         </div>
       </div>
 
+      <!-- Gear tab -->
+      <div class="codex-body" v-else-if="tab === 'gear'">
+
+        <!-- ── Armor Sets ───────────────────────────── -->
+        <div class="g-section-title">Armor Set Bonuses</div>
+        <p class="g-intro">Bonuses stack — 6 pieces gives you 2pc + 4pc + 6pc at once.</p>
+
+        <div v-for="(bonuses, setId) in SET_BONUSES" :key="setId"
+          class="g-set-block" :class="'gs-' + setId"
+          @click="openSet = openSet === setId ? null : setId"
+        >
+          <div class="g-set-head">
+            <span class="g-set-dot" />
+            <span class="g-set-name">{{ SET_NAMES[setId] }} Set</span>
+            <span class="g-set-chevron">{{ openSet === setId ? '▾' : '›' }}</span>
+          </div>
+          <div class="g-set-body" v-if="openSet === setId">
+            <div v-for="(stats, pieces) in bonuses" :key="pieces" class="g-set-row">
+              <span class="g-set-pc">{{ pieces }}pc</span>
+              <span class="g-set-stats">
+                <span v-for="(val, stat) in stats" :key="stat" class="g-stat-pill">+{{ formatSetStat(stat, val) }}</span>
+              </span>
+            </div>
+            <div class="g-set-row g-passive-row">
+              <span class="g-set-pc">6pc</span>
+              <span class="g-passive-line">
+                <span class="g-passive-name">{{ SET_PASSIVE_6[setId].id }}</span>
+                {{ SET_PASSIVE_6[setId].desc }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Weapon Types ─────────────────────────── -->
+        <div class="g-section-title">Weapon Types</div>
+
+        <div v-for="wt in WEAPON_TYPES" :key="wt.id" class="g-weapon-row">
+          <span class="g-weapon-icon">{{ wt.icon }}</span>
+          <div class="g-weapon-body">
+            <div class="g-weapon-head">
+              <span class="g-weapon-name">{{ wt.name }}</span>
+              <span class="g-weapon-slot">{{ wt.slot }}</span>
+              <span v-for="s in wt.stats" :key="s" class="g-weapon-tag">{{ s }}</span>
+            </div>
+            <p class="g-weapon-desc">{{ wt.desc }}</p>
+          </div>
+        </div>
+
+        <!-- ── Role Passives ────────────────────────── -->
+        <div class="g-section-title">Role Passives</div>
+        <p class="g-intro">Every hero has a passive — always active. Equip the right gear to <em>boost</em> it.</p>
+
+        <div v-for="rp in ROLE_PASSIVES" :key="rp.role"
+          class="g-passive-block" :class="'rp-' + rp.role"
+          @click="openPassive = openPassive === rp.role ? null : rp.role"
+        >
+          <div class="g-passive-head">
+            <span class="g-passive-icon">{{ rp.icon }}</span>
+            <span class="g-passive-role">{{ rp.name }}</span>
+            <span class="g-passive-tag">{{ rp.passive }}</span>
+            <span class="g-passive-chev">{{ openPassive === rp.role ? '▾' : '›' }}</span>
+          </div>
+          <div class="g-passive-body" v-if="openPassive === rp.role">
+            <div class="g-prow">
+              <span class="g-prow-label">Always</span>
+              <span class="g-prow-text">{{ rp.base }}</span>
+            </div>
+            <div class="g-prow g-prow-boost">
+              <span class="g-prow-label">Boost</span>
+              <span class="g-prow-text g-boost-cond">{{ rp.boostCondition }}</span>
+            </div>
+            <div class="g-prow g-prow-boosted">
+              <span class="g-prow-label">Boosted</span>
+              <span class="g-prow-text g-boosted-text">{{ rp.boosted }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
       <!-- Heroes tab -->
       <div class="codex-body" v-else-if="tab === 'heroes'">
         <template v-if="visibleHeroes.length">
@@ -192,6 +273,7 @@ import { useJournalStore, ENTRY_TYPES } from '../stores/useJournalStore.js'
 import { useBondStore } from '../stores/useBondStore.js'
 import { useCodexStore } from '../stores/useCodexStore.js'
 import { LORE, BOND_LORE } from '../game/data/lore.js'
+import { SET_BONUSES, SET_PASSIVE_6, SET_NAMES } from '../game/data/setBonus.js'
 import bondHelgaAldricImg  from '../assets/lore/bond-unlocked-helga-aldric.png'
 import bondHildaArneImg    from '../assets/lore/bond-unlocked-hilda-arne.png'
 import avatarAldric  from '../assets/units/legendary/lord-aldric.png'
@@ -203,7 +285,9 @@ defineEmits(['close'])
 const journal   = useJournalStore()
 const bondStore = useBondStore()
 const codex     = useCodexStore()
-const tab       = ref('journal')
+const tab         = ref('journal')
+const openSet     = ref(null)
+const openPassive = ref(null)
 
 // Heroes visible to the player — locked heroes (e.g. Edran) stay hidden until their unlock fragment is found
 const visibleHeroes = computed(() =>
@@ -279,6 +363,65 @@ function markRead(tipId) {
   const tip = ALL_TIPS.find(t => t.id === tipId)
   if (tip) localStorage.setItem(tip.readFlag, '1')
 }
+
+const STAT_FMT = {
+  defPct:   v => `${Math.round(v * 100)}% DEF`,
+  hpPct:    v => `${Math.round(v * 100)}% HP`,
+  atkPct:   v => `${Math.round(v * 100)}% ATK`,
+  spdPct:   v => `${Math.round(v * 100)}% SPD`,
+  critRate: v => `${Math.round(v * 100)}% Crit Rate`,
+  critDmg:  v => `${Math.round(v * 100)}% Crit DMG`,
+}
+function formatSetStat(stat, val) {
+  return STAT_FMT[stat]?.(val) ?? `${Math.round(val * 100)}% ${stat}`
+}
+
+const ROLE_PASSIVES = [
+  {
+    role: 'warrior', icon: '⚔', name: 'Warrior', passive: 'Execute',
+    base: 'On kill, gain +40 turn meter — lets you act again sooner.',
+    boostCondition: 'Dual Wield + 3× Plate armor',
+    boosted: 'Gain +60 turn meter on kill, plus a temporary +20% ATK buff.',
+  },
+  {
+    role: 'tank', icon: '⬡', name: 'Tank', passive: 'Grit',
+    base: 'Incoming hits that exceed 15% of max HP are reduced by 20%.',
+    boostCondition: 'Plate weapon (sword / spear) + Shield + 3× Plate armor',
+    boosted: 'Damage reduction on those hits increases to 30%.',
+  },
+  {
+    role: 'mage', icon: '✦', name: 'Mage', passive: 'Spellweave',
+    base: 'Skills that apply a status effect deal 12% bonus damage.',
+    boostCondition: 'Staff + 3× Cloth armor',
+    boosted: '20% bonus damage, and status effects become harder for enemies to resist.',
+  },
+  {
+    role: 'healer', icon: '✚', name: 'Healer', passive: 'Mending',
+    base: 'Each heal restores an extra 5% of the target\'s max HP on top of the skill\'s normal amount.',
+    boostCondition: 'Staff + 3× Cloth armor',
+    boosted: 'Extra healing rises to 8% max HP, and the healed target also has one debuff removed.',
+  },
+  {
+    role: 'ranger', icon: '⊕', name: 'Ranger', passive: 'Mark',
+    base: '25% chance on each single-target hit to Mark the enemy for 1 turn. Marked targets take 15% more damage.',
+    boostCondition: '3× Leather armor',
+    boosted: '40% mark chance, lasts 2 turns, and marked targets take 20% more damage instead.',
+  },
+  {
+    role: 'debuffer', icon: '✸', name: 'Debuffer', passive: 'Lingering Curse',
+    base: 'Debuffs applied by this hero last 1 extra turn.',
+    boostCondition: '3× Leather or 3× Cloth armor',
+    boosted: 'Debuffs last 2 extra turns. Landing any debuff also applies Poison.',
+  },
+]
+
+const WEAPON_TYPES = [
+  { id: 'sword',  icon: '⚔', name: 'Sword',   slot: 'Main Hand', stats: ['ATK', 'DEF'],          desc: 'Balanced weapon. Deals solid damage while the broad crossguard adds a measure of protection.' },
+  { id: 'dagger', icon: '🗡', name: 'Dagger',  slot: 'Off Hand',  stats: ['ATK', 'Crit Rate'],    desc: 'Fast and precise. Off-hand daggers boost attack and sharpen the critical strike chance.' },
+  { id: 'shield', icon: '🛡', name: 'Shield',  slot: 'Off Hand',  stats: ['DEF', 'Dmg Reduction'], desc: 'Passive damage reduction in every fight. Best paired with a sword for the Sword & Board bonus.' },
+  { id: 'bow',    icon: '🏹', name: 'Bow',     slot: 'Main Hand', stats: ['ATK', 'SPD'],          desc: 'Ranged weapon favoured by leather-wearers. High attack with a speed bonus to act early in battle.' },
+  { id: 'staff',  icon: '✦',  name: 'Staff',   slot: 'Main Hand', stats: ['ATK', 'Crit Rate'],    desc: 'Magical focus for cloth-wearers. Emphasises raw spell power and critical strike amplification.' },
+]
 
 const TYPE_ICONS = {
   [ENTRY_TYPES.GEAR_DROP]:     '⚔',
@@ -731,6 +874,149 @@ function cancelWrite() {
   text-align: center;
   padding: 12px 0 4px;
 }
+
+/* ── Gear tab ─────────────────────────────────────────────── */
+.g-section-title {
+  font-family: var(--font-head); font-size: 0.56rem; text-transform: uppercase;
+  letter-spacing: 2.5px; color: var(--gold); font-weight: 700;
+  border-bottom: 1px solid #3a2208; padding-bottom: 7px; margin-bottom: 8px; margin-top: 4px;
+}
+.g-intro {
+  font-size: 0.67rem; color: #887766; line-height: 1.7;
+  margin: -2px 0 10px; font-style: italic;
+}
+
+/* Set blocks */
+.g-set-block {
+  border: 1px solid #2a1a08; border-radius: 6px;
+  margin-bottom: 6px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.g-set-block:hover { border-color: #4a2a10; }
+.gs-plate  { border-left: 3px solid #a0b0c8; }
+.gs-leather { border-left: 3px solid #c89060; }
+.gs-cloth  { border-left: 3px solid #9060c0; }
+
+.g-set-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: #100a04;
+}
+.g-set-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.gs-plate  .g-set-dot { background: #a0b0c8; box-shadow: 0 0 6px #a0b0c8; }
+.gs-leather .g-set-dot { background: #c89060; box-shadow: 0 0 6px #c89060; }
+.gs-cloth  .g-set-dot { background: #9060c0; box-shadow: 0 0 6px #9060c0; }
+.g-set-name {
+  font-family: var(--font-head); font-size: 0.75rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.5px; flex: 1;
+}
+.gs-plate  .g-set-name { color: #b8cce0; }
+.gs-leather .g-set-name { color: #d4a870; }
+.gs-cloth  .g-set-name { color: #c090e8; }
+.g-set-chevron { font-size: 0.75rem; color: #665544; }
+
+.g-set-body { background: #0c0803; border-top: 1px solid #2a1a08; }
+.g-set-row {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 8px 16px; border-bottom: 1px solid #1a1006;
+}
+.g-set-row:last-child { border-bottom: none; }
+.g-set-pc {
+  font-family: var(--font-head); font-size: 0.68rem; font-weight: 900;
+  color: var(--gold); min-width: 30px; flex-shrink: 0; padding-top: 1px;
+}
+.g-set-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+.g-stat-pill {
+  font-family: var(--font-head); font-size: 0.7rem; font-weight: 700;
+  color: #88ffcc; background: rgba(100,220,170,0.12);
+  border: 1px solid rgba(100,220,170,0.25);
+  border-radius: 4px; padding: 2px 9px;
+}
+.g-passive-row { align-items: flex-start; }
+.g-passive-line { font-size: 0.65rem; color: #aa9966; line-height: 1.65; }
+.g-passive-name {
+  font-family: var(--font-head); font-size: 0.62rem; font-weight: 800;
+  color: var(--gold); text-transform: uppercase; letter-spacing: 0.5px; margin-right: 5px;
+}
+
+/* Weapon rows */
+.g-weapon-row {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 14px; background: #0e0905;
+  border: 1px solid #2a1a08; border-left: 3px solid #3a2808;
+  border-radius: 6px; margin-bottom: 6px;
+}
+.g-weapon-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.g-weapon-body { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.g-weapon-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.g-weapon-name {
+  font-family: var(--font-head); font-size: 0.78rem; font-weight: 800;
+  color: #e8d8b0; letter-spacing: 0.5px;
+}
+.g-weapon-slot {
+  font-family: var(--font-head); font-size: 0.54rem; color: #665544;
+  text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;
+}
+.g-weapon-tag {
+  font-family: var(--font-head); font-size: 0.6rem; font-weight: 700;
+  color: #ffd700; background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 4px; padding: 1px 8px;
+}
+.g-weapon-desc { font-size: 0.64rem; color: #887766; line-height: 1.65; margin: 0; font-style: italic; }
+
+/* Role passive blocks */
+.g-passive-block {
+  border: 1px solid #2a1a08; border-radius: 6px;
+  margin-bottom: 6px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.g-passive-block:hover { border-color: #4a2a10; }
+.rp-warrior  { border-left: 3px solid #e07840; }
+.rp-tank     { border-left: 3px solid #5599ff; }
+.rp-mage     { border-left: 3px solid #a06aff; }
+.rp-healer   { border-left: 3px solid #44cc88; }
+.rp-ranger   { border-left: 3px solid #44bbcc; }
+.rp-debuffer { border-left: 3px solid #cc7788; }
+
+.g-passive-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: #100a04;
+}
+.g-passive-icon { font-size: 0.95rem; flex-shrink: 0; }
+.g-passive-role {
+  font-family: var(--font-head); font-size: 0.75rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1.5px; flex: 1;
+}
+.rp-warrior  .g-passive-role { color: #e07840; }
+.rp-tank     .g-passive-role { color: #5599ff; }
+.rp-mage     .g-passive-role { color: #a06aff; }
+.rp-healer   .g-passive-role { color: #44cc88; }
+.rp-ranger   .g-passive-role { color: #44bbcc; }
+.rp-debuffer .g-passive-role { color: #cc7788; }
+.g-passive-tag {
+  font-family: var(--font-head); font-size: 0.58rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px; color: #887766;
+  background: #1a1008; border: 1px solid #3a2808;
+  border-radius: 4px; padding: 2px 8px;
+}
+.g-passive-chev { font-size: 0.75rem; color: #665544; }
+
+.g-passive-body { background: #0c0803; border-top: 1px solid #2a1a08; }
+.g-prow {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 8px 16px; border-bottom: 1px solid #1a1006;
+}
+.g-prow:last-child { border-bottom: none; }
+.g-prow-label {
+  font-family: var(--font-head); font-size: 0.54rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  min-width: 48px; flex-shrink: 0; color: #665544; padding-top: 2px;
+}
+.g-prow-boost   .g-prow-label { color: #c8a030; }
+.g-prow-boosted .g-prow-label { color: #44cc88; }
+.g-prow-text { font-size: 0.65rem; color: #bba880; line-height: 1.65; }
+.g-boost-cond  { color: #c8a030; font-style: italic; }
+.g-boosted-text { color: #88ffcc; }
 
 /* Lore tab — bond entries */
 .lore-bond-entry {

@@ -11,6 +11,7 @@ import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
 import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
+import { useCodexStore } from './useCodexStore.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -185,7 +186,18 @@ export const useBattleStore = defineStore('battle', () => {
             _persistClears()
           }
         }
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock }
+        // Lore fragment drop — 5% per battle victory
+        let loreFragment = null
+        if (Math.random() < 0.05) {
+          const codex = useCodexStore()
+          const pick  = codex.pickTavernFragment()
+          if (pick) {
+            codex.unlock(pick.frag.id)
+            loreFragment = pick
+          }
+        }
+
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock, loreFragments: loreFragment ? [loreFragment] : [] }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run
@@ -215,6 +227,7 @@ export const useBattleStore = defineStore('battle', () => {
             if (ex) ex.amount += drop.amount
             else br.keyDrops.push({ ...drop })
           }
+          br.loreFragments.push(...(runReward.loreFragments ?? []))
           batchDone.value++
           if (batchDone.value < batchTotal.value) {
             setTimeout(() => _runBatchNext(), 250)
@@ -276,7 +289,7 @@ export const useBattleStore = defineStore('battle', () => {
   function startBatchRun(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [], loreFragments: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
     _runBatchNext()
   }
@@ -286,7 +299,7 @@ export const useBattleStore = defineStore('battle', () => {
   function setupBatch(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [], loreFragments: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
   }
 
