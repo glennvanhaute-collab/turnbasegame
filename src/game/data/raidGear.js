@@ -18,6 +18,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { atk: 640, critRate: 0.08, critDmg: 0.16 },
     description: 'The blade weeps a thin shadow-ichor. It has never forgotten the hand that first wielded it.',
+    image: 'regret_sword',
   },
   {
     id: 'regret_shield', name: 'Aegis of the Empty Throne',
@@ -25,6 +26,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { def: 460, hp: 8000 },
     description: 'Carved from the throne itself. It stopped being a shield long ago — now it just endures.',
+    image: 'regret_shield',
   },
   {
     id: 'regret_helm', name: 'Crown of the Fallen King',
@@ -32,6 +34,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { hp: 7800, def: 190, resistance: 0.06 },
     description: 'The crown broke in the fall. It was never repaired. It still commands.',
+    image: 'regret_helmet',
   },
   {
     id: 'regret_chest', name: 'Breastplate of the Nightmare Court',
@@ -39,6 +42,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { hp: 12000, def: 320 },
     description: 'Its surface shifts like a held breath. Something inside it is still waiting for a war to end.',
+    image: 'regret_chest',
   },
   {
     id: 'regret_legs', name: 'Greaves of the Endless Dark',
@@ -46,6 +50,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { spd: 30, def: 240, hp: 4200 },
     description: 'They walked into the void once. They walk in it still.',
+    image: 'regret_legs',
   },
   {
     id: 'regret_boots', name: 'Sabatons of the Last March',
@@ -53,6 +58,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { spd: 26, def: 170, hp: 3200 },
     description: 'The last march was the one that ended everything. These boots remember every step.',
+    image: 'regret_boots',
   },
   {
     id: 'regret_gloves', name: 'Gauntlets of the Shattered Vow',
@@ -60,6 +66,7 @@ const BASE_PIECES = [
     rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
     stats: { atk: 340, atkPct: 0.13, critDmg: 0.10 },
     description: 'Clenched for the last time centuries ago. They cannot unclench. They will not.',
+    image: 'regret_gloves',
   },
 ]
 
