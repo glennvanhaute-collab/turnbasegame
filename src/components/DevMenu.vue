@@ -139,9 +139,27 @@
           </div>
         </section>
 
+        <!-- Crafting -->
+        <section class="dev-section">
+          <div class="dev-section-label">Crafting</div>
+          <div class="dev-reset-row">
+            <button class="dev-reset-btn" @click="finishAllJobs" :disabled="!anyJobRunning">
+              ⚡ Finish All
+            </button>
+            <button class="dev-reset-btn" @click="craftAllGear">
+              ⚒ Craft All Gear
+            </button>
+          </div>
+        </section>
+
         <!-- Forge -->
         <section class="dev-section">
           <div class="dev-section-label">Forge</div>
+          <div class="dev-reset-row" style="margin-bottom:8px">
+            <button class="dev-reset-btn" @click="upgradeAllGearMax">
+              ★ Upgrade All Max
+            </button>
+          </div>
           <div class="dev-row">
             <span class="dev-row-icon">🔥</span>
             <span class="dev-row-name">Forge Level</span>
@@ -226,11 +244,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useEnergyStore } from '../stores/useEnergyStore.js'
+import { useSmeltingStore } from '../stores/useSmeltingStore.js'
+import { useTanningStore } from '../stores/useTanningStore.js'
+import { useWeavingStore } from '../stores/useWeavingStore.js'
+import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { RECIPES } from '../game/data/recipes.js'
+import { LEATHER_RECIPES } from '../game/data/leatherRecipes.js'
+import { TAILORING_RECIPES } from '../game/data/tailoringRecipes.js'
+import { createItemInstance } from '../game/Gear.js'
+import { STAR_BAR_COST, TIER_MAX_STARS, starMultiplier, rarityForStars } from '../game/data/recipes.js'
+import { LEATHER_FOR_TIER } from '../game/data/leathers.js'
+import { CLOTH_FOR_TIER } from '../game/data/cloths.js'
 import { ORE_LIST } from '../game/data/ores.js'
 import { BAR_LIST } from '../game/data/bars.js'
 import { HIDE_LIST } from '../game/data/hides.js'
@@ -244,6 +273,93 @@ const resources  = useResourceStore()
 const currency   = useCurrencyStore()
 const collection = useCollectionStore()
 const energy     = useEnergyStore()
+const smelting   = useSmeltingStore()
+const tanning    = useTanningStore()
+const weaving    = useWeavingStore()
+const inventory  = useInventoryStore()
+
+const anyJobRunning = computed(() => smelting.isRunning || tanning.isRunning || weaving.isRunning)
+
+function finishAllJobs() {
+  smelting.instantFinish()
+  tanning.instantFinish()
+  weaving.instantFinish()
+}
+
+function upgradeAllGearMax() {
+  const TIER_TO_BAR = { copper: 'copper', tin: 'tin', steel: 'steel', darksteel: 'darksteel', mithril: 'mithril', moonsilver: 'moonsilver' }
+  const PCT_STATS   = ['hpPct','atkPct','defPct','spdPct','critRate','critDmg','resistance','accuracy']
+  const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4, mythical: 5 }
+  for (const item of inventory.ownedInstances) {
+    if (!item.craftedAt || !item.tier) continue
+    const maxStars   = TIER_MAX_STARS[item.tier] ?? 10
+    const discipline = item.craftDiscipline ?? 'blacksmithing'
+    while (item.stars < maxStars) {
+      const toStar = item.stars + 1
+      const cost   = STAR_BAR_COST[toStar] ?? 0
+      let matId, stock
+      if (discipline === 'leatherworking') {
+        matId = LEATHER_FOR_TIER[item.tier]
+        stock = matId ? (resources.leathers[matId] ?? 0) : 0
+      } else if (discipline === 'tailoring') {
+        matId = CLOTH_FOR_TIER[item.tier]
+        stock = matId ? (resources.cloths[matId] ?? 0) : 0
+      } else {
+        matId = TIER_TO_BAR[item.tier]
+        stock = matId ? (resources.bars[matId] ?? 0) : 0
+      }
+      if (!matId || stock < cost) break
+      if (discipline === 'leatherworking') resources.removeLeather(matId, cost)
+      else if (discipline === 'tailoring')  resources.removeCloth(matId, cost)
+      else                                  resources.removeBar(matId, cost)
+      item.stars = toStar
+      const starRarity = rarityForStars(toStar)
+      if ((RARITY_RANK[starRarity.toLowerCase()] ?? 0) > (RARITY_RANK[item.rarity?.toLowerCase()] ?? 0))
+        item.rarity = starRarity
+      const mult = starMultiplier(toStar)
+      Object.keys(item.baseStats).forEach(key => {
+        item.stats[key] = PCT_STATS.includes(key)
+          ? Math.round(item.baseStats[key] * mult * 1000) / 1000
+          : Math.round(item.baseStats[key] * mult)
+      })
+    }
+  }
+}
+
+function craftAllGear() {
+  const now = Date.now()
+  function makeInstance(recipe) {
+    const inst = createItemInstance({
+      id: recipe.id, name: recipe.name, gearType: recipe.gearType,
+      weaponType: recipe.weaponType ?? null, rarity: recipe.rarity,
+      description: recipe.desc, stats: { ...recipe.baseStats },
+      baseStats: { ...recipe.baseStats }, tier: recipe.tier,
+      slot: recipe.slot, image: recipe.image ?? null,
+      frame: recipe.frame ?? null, armorType: recipe.armorType ?? null,
+    })
+    inst.craftedAt = now
+    inst.crafted   = true
+    return inst
+  }
+  for (const recipe of RECIPES) {
+    if (!recipe.barCost) continue
+    if (!Object.entries(recipe.barCost).every(([id, amt]) => (resources.bars[id] ?? 0) >= amt)) continue
+    Object.entries(recipe.barCost).forEach(([id, amt]) => resources.removeBar(id, amt))
+    inventory.addInstance(makeInstance(recipe))
+  }
+  for (const recipe of LEATHER_RECIPES) {
+    if (!recipe.materialCost) continue
+    if (!Object.entries(recipe.materialCost).every(([id, amt]) => (resources.leathers[id] ?? 0) >= amt)) continue
+    Object.entries(recipe.materialCost).forEach(([id, amt]) => resources.removeLeather(id, amt))
+    inventory.addInstance(makeInstance(recipe))
+  }
+  for (const recipe of TAILORING_RECIPES) {
+    if (!recipe.materialCost) continue
+    if (!Object.entries(recipe.materialCost).every(([id, amt]) => (resources.cloths[id] ?? 0) >= amt)) continue
+    Object.entries(recipe.materialCost).forEach(([id, amt]) => resources.removeCloth(id, amt))
+    inventory.addInstance(makeInstance(recipe))
+  }
+}
 
 const RARITY_COLORS = { Common: '#9a9a9a', Uncommon: '#4dcc4d', Rare: '#4d9fff', Epic: '#cc66ff', Legendary: '#ff9900', Mythical: '#ff4466' }
 function rarityColor(r) { return RARITY_COLORS[r] ?? '#9a9a9a' }

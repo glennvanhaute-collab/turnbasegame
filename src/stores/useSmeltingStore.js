@@ -102,11 +102,21 @@ export const useSmeltingStore = defineStore('smelting', () => {
 
   function cancelSmelt() {
     if (!job.value) return
+    tick() // flush completed bars so remainingCount reflects real time
+    if (!job.value) return // tick may have completed the job
     const resources = useResourceStore()
     const bar = BARS[job.value.barId]
     resources.addOre(bar.oreId, remainingCount.value * bar.oreCost)
     job.value = null
     _persist()
+  }
+
+  function instantFinish() {
+    if (!job.value) return
+    const t = Date.now() - job.value.totalBars * job.value.timePerBar - 1000
+    job.value.startedAt  = t
+    job.value.lastTickAt = t
+    tick()
   }
 
   // Catch up on init (handles offline progress)
@@ -115,6 +125,6 @@ export const useSmeltingStore = defineStore('smelting', () => {
   return {
     job, isRunning,
     completedCount, remainingCount, currentBarProgress,
-    tick, startSmelt, addToQueue, cancelSmelt,
+    tick, startSmelt, addToQueue, cancelSmelt, instantFinish,
   }
 })

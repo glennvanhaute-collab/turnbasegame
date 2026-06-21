@@ -100,6 +100,8 @@ export const useWeavingStore = defineStore('weaving', () => {
 
   function cancelWeave() {
     if (!job.value) return
+    tick()
+    if (!job.value) return
     const resources = useResourceStore()
     const cloth = CLOTHS[job.value.clothId]
     resources.addFiber(cloth.fiberId, remainingCount.value * cloth.fiberCost)
@@ -107,11 +109,19 @@ export const useWeavingStore = defineStore('weaving', () => {
     _persist()
   }
 
+  function instantFinish() {
+    if (!job.value) return
+    const t = Date.now() - job.value.totalBolts * job.value.timePerBolt - 1000
+    job.value.startedAt  = t
+    job.value.lastTickAt = t
+    tick()
+  }
+
   tick()
 
   return {
     job, isRunning,
     completedCount, remainingCount, currentProgress,
-    tick, startWeave, addToQueue, cancelWeave,
+    tick, startWeave, addToQueue, cancelWeave, instantFinish,
   }
 })

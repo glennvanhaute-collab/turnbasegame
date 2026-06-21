@@ -15,15 +15,17 @@ export function rollOreDrops(difficulty) {
   const d = difficulty?.toLowerCase() ?? 'easy'
 
   if (d === 'easy') {
-    if (Math.random() < 0.85) drops.push({ oreId: 'copper', amount: rand(2, 4) })
-    if (Math.random() < 0.65) drops.push({ oreId: 'tin',    amount: rand(1, 3) })
+    drops.push({ oreId: 'copper', amount: rand(2, 5) })
+    if (Math.random() < 0.65) drops.push({ oreId: 'tin', amount: rand(1, 3) })
   } else if (d === 'normal' || d === 'medium') {
-    if (Math.random() < 0.80) drops.push({ oreId: 'steel',    amount: rand(1, 3) })
+    drops.push({ oreId: 'steel', amount: rand(2, 4) })
+    if (Math.random() < 0.50) drops.push({ oreId: 'steel', amount: rand(1, 2) })
   } else if (d === 'hard') {
     drops.push({ oreId: 'darksteel', amount: rand(2, 4) })
     if (Math.random() < 0.50) drops.push({ oreId: 'darksteel', amount: rand(1, 2) })
   } else if (d === 'nightmare') {
-    if (Math.random() < 0.75) drops.push({ oreId: 'mithril',  amount: rand(1, 2) })
+    drops.push({ oreId: 'mithril', amount: rand(2, 4) })
+    if (Math.random() < 0.60) drops.push({ oreId: 'mithril', amount: rand(1, 2) })
   }
 
   return drops
@@ -45,8 +47,55 @@ export function rollTrainingOreDrops(difficulty) {
     if (Math.random() < 0.70) drops.push({ oreId: 'tin',    amount: rand(2, 4) })
     if (Math.random() < 0.38) drops.push({ oreId: 'steel',  amount: rand(1, 2) })
   } else if (d === 'nightmare') {
-    if (Math.random() < 0.70) drops.push({ oreId: 'tin',   amount: rand(2, 3) })
-    if (Math.random() < 0.75) drops.push({ oreId: 'steel', amount: rand(2, 3) })
+    if (Math.random() < 0.70) drops.push({ oreId: 'tin',       amount: rand(2, 3) })
+    if (Math.random() < 0.75) drops.push({ oreId: 'steel',     amount: rand(2, 3) })
+    if (Math.random() < 0.20) drops.push({ oreId: 'darksteel', amount: 1 })
+  }
+
+  return drops
+}
+
+// Dungeon gathering drops — hides and fibers at the equivalent tier to the dungeon's ore tier.
+// These are bonus drops on top of ores; amounts are intentionally modest.
+export function rollDungeonGatheringDrops(difficulty) {
+  const d = difficulty?.toLowerCase() ?? 'easy'
+  const hides  = []
+  const fibers = []
+
+  if (d === 'easy') {
+    if (Math.random() < 0.35) hides.push({ id: 'rough',      amount: rand(1, 2) })
+    if (Math.random() < 0.25) fibers.push({ id: 'cotton',     amount: rand(1, 2) })
+  } else if (d === 'normal' || d === 'medium') {
+    if (Math.random() < 0.45) hides.push({ id: 'hardened',   amount: rand(1, 2) })
+    if (Math.random() < 0.40) fibers.push({ id: 'silkthread', amount: rand(1, 2) })
+  } else if (d === 'hard') {
+    if (Math.random() < 0.55) hides.push({ id: 'shadow',      amount: rand(1, 2) })
+    if (Math.random() < 0.50) fibers.push({ id: 'shadowthread', amount: rand(1, 2) })
+  } else if (d === 'nightmare') {
+    if (Math.random() < 0.65) hides.push({ id: 'celestial',   amount: rand(1, 2) })
+    if (Math.random() < 0.55) fibers.push({ id: 'starthread',  amount: rand(1, 2) })
+  }
+
+  return { hides, fibers }
+}
+
+// Training grounds key drops — each run has a chance to drop a dungeon key.
+// Easy TG → Copper Keys; Normal → Copper/Iron; Hard → Iron/Darksteel; Nightmare → Darksteel/Void.
+export function rollTrainingKeyDrops(difficulty) {
+  const drops = []
+  const d = difficulty?.toLowerCase() ?? 'easy'
+
+  if (d === 'easy') {
+    if (Math.random() < 0.50) drops.push({ tier: 'easy', amount: 1 })
+  } else if (d === 'normal') {
+    if (Math.random() < 0.60) drops.push({ tier: 'easy',   amount: 1 })
+    if (Math.random() < 0.25) drops.push({ tier: 'medium', amount: 1 })
+  } else if (d === 'hard') {
+    if (Math.random() < 0.65) drops.push({ tier: 'medium', amount: 1 })
+    if (Math.random() < 0.20) drops.push({ tier: 'hard',   amount: 1 })
+  } else if (d === 'nightmare') {
+    if (Math.random() < 0.55) drops.push({ tier: 'hard',      amount: 1 })
+    if (Math.random() < 0.18) drops.push({ tier: 'nightmare', amount: 1 })
   }
 
   return drops

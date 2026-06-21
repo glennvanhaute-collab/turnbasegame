@@ -159,6 +159,9 @@
                 <button class="upgrade-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeItem">
                   ⚒ ★{{ artisanItem.stars }} → ★{{ nextStar }}
                 </button>
+                <button class="upgrade-btn upgrade-max-btn" :class="{ ready: canUpgrade }" :disabled="!canUpgrade" @click="upgradeMax" title="Upgrade as many times as materials allow">
+                  Max
+                </button>
                 <span class="next-rarity-hint" v-if="nextRarity !== rarityForStars(artisanItem.stars)">↑ {{ nextRarity }}</span>
               </div>
             </div>
@@ -230,11 +233,15 @@
           </div>
         </div>
 
-        <!-- Right: Apply orb -->
+        <!-- Right: Apply orb / Potential -->
         <div class="orb-panel">
           <div class="panel-title-row">
-            <h3 class="panel-title">Apply Orb</h3>
+            <h3 class="panel-title">Potential</h3>
             <div class="orb-summary">
+              <span class="orb-summary-item" style="--orb-color: #ffd700; font-size: 0.7rem; gap: 4px;">
+                <span style="color:#ffd700">◈</span>
+                <span class="orb-summary-count">{{ forge.stamps }} stamp{{ forge.stamps !== 1 ? 's' : '' }}</span>
+              </span>
               <span v-for="(meta, id) in forge.ORBS" :key="id" class="orb-summary-item" :style="{ '--orb-color': meta.color }">
                 <OrbIcon :orbId="id" :size="28" />
                 <span class="orb-summary-count">{{ forge.orbs[id] }}</span>
@@ -242,23 +249,57 @@
             </div>
           </div>
           <div class="workspace">
+
+            <!-- Item picker -->
             <div class="ws-row">
               <label class="ws-label">Item</label>
               <select class="ws-select" v-model="selectedItemId">
-                <option value="">— Select Legendary / Mythical gear —</option>
+                <option value="">— Select a Legendary / Mythical item —</option>
                 <option v-for="item in orbableItems" :key="item.instanceId" :value="item.instanceId">
-                  {{ item.name }} ({{ item.rarity }}) · {{ item.lines.filter(l => l.type === 'discovery').length }} lines
+                  {{ item.name }}{{ item.potentialTier ? ' ◈' : '' }} ({{ item.rarity }})
                 </option>
               </select>
             </div>
-            <div class="lines-preview" v-if="selectedItem">
-              <div class="lines-label">Current lines</div>
+
+            <!-- Potential tier display + stamp -->
+            <template v-if="selectedItem">
+              <div v-if="selectedItem.potentialTier" class="potential-tier-badge" :style="{ '--pt-color': potentialColor(selectedItem.potentialTier) }">
+                <span class="pt-icon">◈</span>
+                <span class="pt-label">{{ potentialLabel(selectedItem.potentialTier) }}</span>
+                <span class="pt-lines">{{ (selectedItem.potentialLines ?? []).length }} lines</span>
+                <span class="pt-next" v-if="nextPotentialTier(selectedItem.potentialTier)">
+                  → <span :style="{ color: potentialColor(nextPotentialTier(selectedItem.potentialTier)) }">{{ potentialLabel(nextPotentialTier(selectedItem.potentialTier)) }}</span>
+                </span>
+                <span class="pt-max" v-else>✦ Max Tier</span>
+              </div>
+              <div v-else class="potential-unstamped">
+                <span class="pu-icon">◈</span>
+                <span class="pu-text">No Potential — use a Stamp to awaken this item's hidden power</span>
+                <button class="btn-stamp" :disabled="forge.stamps <= 0" @click="applyStamp">
+                  Apply Stamp ({{ forge.stamps }} left)
+                </button>
+              </div>
+            </template>
+
+            <!-- Current potential lines -->
+            <div class="lines-preview" v-if="selectedItem?.potentialTier">
+              <div class="lines-label">Current Potential Lines</div>
               <div class="lines-list">
-                <div v-for="(line, i) in selectedItem.lines.filter(l => l.type === 'discovery')" :key="i" class="line-chip">{{ line.label }}</div>
-                <div class="line-chip line-empty" v-if="!selectedItem.lines.some(l => l.type === 'discovery')">No discovery lines yet — orbing adds 1</div>
+                <div v-for="(line, i) in (selectedItem.potentialLines ?? [])" :key="i" class="line-chip potential-line">{{ line.label }}</div>
+                <div class="line-chip line-empty" v-if="!(selectedItem.potentialLines ?? []).length">No lines yet</div>
               </div>
             </div>
-            <div class="ws-row" v-if="selectedItem">
+
+            <!-- Legacy discovery lines (items predating potential system) -->
+            <div class="lines-preview" v-else-if="selectedItem && selectedItem.lines.some(l => l.type === 'discovery')">
+              <div class="lines-label">Discovery Lines <span class="lines-sublabel">(legacy — apply a stamp to get potential)</span></div>
+              <div class="lines-list">
+                <div v-for="(line, i) in selectedItem.lines.filter(l => l.type === 'discovery')" :key="i" class="line-chip">{{ line.label }}</div>
+              </div>
+            </div>
+
+            <!-- Orb picker (only shown when item has potential OR legacy lines) -->
+            <div class="ws-row" v-if="selectedItem && (selectedItem.potentialTier || selectedItem.lines.some(l => l.type === 'discovery'))">
               <label class="ws-label">Orb</label>
               <div class="orb-picker">
                 <button
@@ -272,26 +313,54 @@
                   <OrbIcon :orbId="id" :size="32" />
                   <span class="cp-name">{{ meta.label }}</span>
                   <span class="cp-count">×{{ forge.orbs[id] }}</span>
+                  <span class="cp-rankup" v-if="selectedItem?.potentialTier && nextPotentialTier(selectedItem.potentialTier)">
+                    {{ rankupChance(id) }}% rank-up
+                  </span>
                 </button>
               </div>
             </div>
-            <button class="btn-apply" v-if="selectedItem && selectedOrb" :disabled="forge.orbs[selectedOrb] === 0" @click="applySelectedOrb">
+
+            <button
+              class="btn-apply"
+              v-if="selectedItem && selectedOrb && (selectedItem.potentialTier || selectedItem.lines.some(l => l.type === 'discovery'))"
+              :disabled="forge.orbs[selectedOrb] === 0"
+              @click="applySelectedOrb"
+            >
               Apply {{ forge.ORBS[selectedOrb]?.label }}
             </button>
+
+            <!-- Astral Orb dark preview -->
             <div class="dark-preview" v-if="forge.darkPreview">
               <div class="dp-title">
                 <OrbIcon orbId="dark" :size="22" style="vertical-align:middle;margin-right:6px;" />
                 Astral Orb — Choose your lines
+                <span
+                  v-if="forge.darkPreview.ranked"
+                  class="dp-rankup-badge"
+                  :style="{ color: potentialColor(forge.darkPreview.newTier) }"
+                >
+                  ↑ Ranked up to {{ potentialLabel(forge.darkPreview.newTier) }}!
+                </span>
               </div>
               <div class="dp-compare">
                 <div class="dp-col">
-                  <div class="dp-col-label">Current</div>
+                  <div class="dp-col-label">
+                    Current
+                    <span v-if="forge.darkPreview.oldTier" :style="{ color: potentialColor(forge.darkPreview.oldTier), fontSize: '0.58rem' }">
+                      {{ potentialLabel(forge.darkPreview.oldTier) }}
+                    </span>
+                  </div>
                   <div class="line-chip" v-for="(l,i) in forge.darkPreview.oldLines" :key="'old'+i">{{ l.label }}</div>
                   <div class="line-chip line-empty" v-if="!forge.darkPreview.oldLines.length">No lines</div>
                 </div>
                 <div class="dp-arrow">→</div>
                 <div class="dp-col">
-                  <div class="dp-col-label new-label">New Roll</div>
+                  <div class="dp-col-label new-label">
+                    New Roll
+                    <span v-if="forge.darkPreview.newTier" :style="{ color: potentialColor(forge.darkPreview.newTier), fontSize: '0.58rem' }">
+                      {{ potentialLabel(forge.darkPreview.newTier) }}
+                    </span>
+                  </div>
                   <div class="line-chip line-new" v-for="(l,i) in forge.darkPreview.newLines" :key="'new'+i">{{ l.label }}</div>
                 </div>
               </div>
@@ -313,6 +382,7 @@ import { ref, computed } from 'vue'
 import { useForgeStore } from '../stores/useForgeStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useResourceStore } from '../stores/useResourceStore.js'
+import { POTENTIAL_TIER_COLORS, POTENTIAL_TIER_LABELS, POTENTIAL_LINE_COUNT, POTENTIAL_NEXT_TIER } from '../game/data/dungeons.js'
 import OrbIcon from './OrbIcon.vue'
 import { STAR_GATES, UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { RECIPE_TIERS, SLOT_ICONS, STAT_LABELS, formatStatValue, rarityForStars, STAR_BAR_COST, starMultiplier, TIER_MAX_STARS } from '../game/data/recipes.js'
@@ -372,9 +442,16 @@ const tab = ref('upgrade')
 const selectedItemId = ref('')
 const selectedOrb    = ref('')
 
-const orbableItems = computed(() =>
-  inventory.ownedInstances.filter(i => i.rarity === 'Legendary' || i.rarity === 'Mythical')
-)
+// Items that have potential (stamped) come first, then rest of crafted items
+const orbableItems = computed(() => {
+  const all = inventory.ownedInstances.filter(i =>
+    i.craftedAt && i.tier && (i.rarity === 'Legendary' || i.rarity === 'Mythical')
+  )
+  return [
+    ...all.filter(i => i.potentialTier),
+    ...all.filter(i => !i.potentialTier),
+  ]
+})
 const selectedItem = computed(() =>
   selectedItemId.value ? inventory.instanceById(selectedItemId.value) : null
 )
@@ -382,6 +459,15 @@ function applySelectedOrb() {
   if (!selectedItemId.value || !selectedOrb.value) return
   forge.applyOrb(selectedItemId.value, selectedOrb.value)
 }
+function applyStamp() {
+  if (!selectedItemId.value) return
+  forge.applyPotentialStamp(selectedItemId.value)
+}
+
+function potentialColor(tier) { return POTENTIAL_TIER_COLORS[tier] ?? '#888' }
+function potentialLabel(tier) { return POTENTIAL_TIER_LABELS[tier] ?? '' }
+function nextPotentialTier(tier) { return POTENTIAL_NEXT_TIER[tier] ?? null }
+function rankupChance(orbId) { return Math.round((forge.ORB_RANKUP[orbId] ?? 0) * 100) }
 
 // ── Upgrade tab state ─────────────────────────────────────────────
 const artisanItemId = ref(null)
@@ -511,6 +597,10 @@ function nextStatValue(key, baseStat) {
 
 function tierColorForItem(item) {
   return RECIPE_TIERS.find(t => t.id === item.tier)?.color ?? '#888'
+}
+
+function upgradeMax() {
+  while (canUpgrade.value) upgradeItem()
 }
 
 function upgradeItem() {
@@ -817,6 +907,7 @@ function upgradeItem() {
   background: color-mix(in srgb, var(--tier-color, #c9a227) 22%, rgba(5,3,1,0.85));
   border-color: var(--tier-color, var(--gold));
 }
+.upgrade-max-btn { flex: 0 0 56px; font-size: 0.72rem; letter-spacing: 1px; }
 .next-rarity-hint { font-family: var(--font-head); font-size: 0.6rem; color: rgba(255,200,100,0.6); letter-spacing: 1.5px; flex-shrink: 0; }
 
 .maxed-msg {
@@ -872,8 +963,47 @@ function upgradeItem() {
 .lines-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
 .lines-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .line-chip { font-size: 0.68rem; font-weight: 700; color: #cc88ff; background: #1a0828; border: 1px solid #44116655; border-radius: 6px; padding: 3px 10px; }
-.line-chip.line-empty { color: #443; background: #0e0805; border-color: #1a1008; font-weight: 400; font-style: italic; }
-.line-chip.line-new   { color: #44ffaa; background: #081a10; border-color: #114422; }
+.line-chip.line-empty     { color: #443; background: #0e0805; border-color: #1a1008; font-weight: 400; font-style: italic; }
+.line-chip.line-new       { color: #44ffaa; background: #081a10; border-color: #114422; }
+.line-chip.potential-line { color: #ffd700; background: rgba(255,215,0,0.06); border-color: rgba(255,215,0,0.25); }
+.lines-sublabel { font-size: 0.54rem; color: #443; font-style: italic; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+
+/* Potential tier badge */
+.potential-tier-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--pt-color) 35%, transparent);
+  background: color-mix(in srgb, var(--pt-color) 8%, rgba(0,0,0,0.4));
+}
+.pt-icon  { font-size: 1rem; color: var(--pt-color); }
+.pt-label { font-family: var(--font-head); font-size: 0.72rem; font-weight: 700; color: var(--pt-color); text-transform: uppercase; letter-spacing: 1px; }
+.pt-lines { font-size: 0.6rem; color: #665; margin-left: auto; }
+.pt-next  { font-size: 0.6rem; color: #665; flex-shrink: 0; }
+.pt-max   { font-size: 0.6rem; color: #ff88ff; flex-shrink: 0; }
+
+/* Unstamped state */
+.potential-unstamped {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 8px;
+  border: 1px dashed #2a1a08; background: rgba(0,0,0,0.3);
+}
+.pu-icon { font-size: 1rem; color: #443; flex-shrink: 0; }
+.pu-text { font-size: 0.66rem; color: #554; flex: 1; line-height: 1.5; }
+.btn-stamp {
+  padding: 6px 12px; border-radius: 6px; flex-shrink: 0;
+  border: 1px solid rgba(255,215,0,0.4); background: rgba(255,215,0,0.08);
+  color: #ffd700; font-family: var(--font-head); font-size: 0.64rem; font-weight: 700;
+  letter-spacing: 1px; cursor: pointer; white-space: nowrap; transition: background 0.15s;
+}
+.btn-stamp:hover:not(:disabled) { background: rgba(255,215,0,0.16); }
+.btn-stamp:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Dark orb rank-up badge */
+.dp-rankup-badge {
+  display: inline-block; margin-left: 10px;
+  font-size: 0.64rem; font-weight: 800;
+  letter-spacing: 0.5px;
+}
 .orb-picker { display: flex; gap: 8px; flex-wrap: wrap; }
 .orb-pick-btn { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; border: 1px solid #2a1a08; background: #0a0602; cursor: pointer; transition: border-color 0.15s, background 0.15s; flex: 1; }
 .orb-pick-btn:hover:not(.disabled):not(.selected) { border-color: var(--orb-color); }
@@ -881,6 +1011,7 @@ function upgradeItem() {
 .orb-pick-btn.disabled { opacity: 0.35; cursor: not-allowed; }
 .cp-name { font-size: 0.66rem; font-weight: 700; color: var(--orb-color); flex: 1; text-align: left; }
 .cp-count { font-size: 0.62rem; color: #554; }
+.cp-rankup { font-size: 0.54rem; color: #ffd700; background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.2); border-radius: 4px; padding: 1px 5px; white-space: nowrap; }
 .btn-apply { padding: 11px; border-radius: 8px; border: 1px solid var(--border-gold); background: #1c1208; color: var(--gold); font-family: var(--font-head); font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 .btn-apply:hover:not(:disabled) { background: #2a1c0a; border-color: var(--gold-bright); }
 .btn-apply:disabled { opacity: 0.35; cursor: not-allowed; }

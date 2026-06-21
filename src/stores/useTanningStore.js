@@ -101,6 +101,8 @@ export const useTanningStore = defineStore('tanning', () => {
 
   function cancelTan() {
     if (!job.value) return
+    tick()
+    if (!job.value) return
     const resources = useResourceStore()
     const leather = LEATHERS[job.value.leatherId]
     resources.addHide(leather.hideId, remainingCount.value * leather.hideCost)
@@ -108,11 +110,19 @@ export const useTanningStore = defineStore('tanning', () => {
     _persist()
   }
 
+  function instantFinish() {
+    if (!job.value) return
+    const t = Date.now() - job.value.totalStrips * job.value.timePerStrip - 1000
+    job.value.startedAt  = t
+    job.value.lastTickAt = t
+    tick()
+  }
+
   tick()
 
   return {
     job, isRunning,
     completedCount, remainingCount, currentProgress,
-    tick, startTan, addToQueue, cancelTan,
+    tick, startTan, addToQueue, cancelTan, instantFinish,
   }
 })

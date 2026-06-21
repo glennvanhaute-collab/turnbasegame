@@ -84,6 +84,7 @@ export const LineType = {
   USE:       'use',        // earned through battle use
   SLAYER:    'slayer',     // earned by defeating specific enemies
   DISCOVERY: 'discovery',  // found at hidden forges, blacksmiths, wells
+  POTENTIAL: 'potential',  // MapleStory-style potential lines (tiered, cube-rerollable)
 }
 
 let _instanceCounter = 0
@@ -131,12 +132,14 @@ export function createItemInstance(baseItem) {
     image:       baseItem.image      ?? null,
     frame:       baseItem.frame      ?? null,
     armorType:   baseItem.armorType  ?? null,
-    stars:       0,
-    craftedAt:   null,
-    crafted:     false,
-    lines:       [],
-    level:       0,
-    useCount:    0,
+    stars:         0,
+    craftedAt:     null,
+    crafted:       false,
+    lines:         [],
+    potentialTier: null,   // null | 'rare' | 'epic' | 'unique' | 'legendary'
+    potentialLines: [],    // rolled by orbs, separate from discovery lines
+    level:         0,
+    useCount:      0,
     fitsSlot(slot) { return SLOT_ALLOWED_TYPES[slot]?.includes(this.gearType) ?? false },
   }
 }

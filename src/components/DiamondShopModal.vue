@@ -48,6 +48,34 @@
         </div>
       </div>
 
+      <!-- Potential Stamps -->
+      <div class="shop-section-label" style="margin-top: 20px;">Potential</div>
+      <div class="shop-grid">
+        <div class="shop-card" style="--item-color: #ffd700">
+          <div class="stamp-icon-lg">◈</div>
+          <div class="shop-card-info">
+            <div class="shop-card-name">Potential Stamp</div>
+            <div class="shop-card-desc">Reveals the hidden potential of a piece of gear, awakening it to Rare Potential with 2 stat lines. Use orbs to re-roll lines and rank up to Epic → Unique → Legendary Potential.</div>
+          </div>
+          <div class="shop-card-buy">
+            <div class="shop-qty-row">
+              <button class="qty-btn" @click="stampQty > 1 && stampQty--">−</button>
+              <span class="qty-val">{{ stampQty }}</span>
+              <button class="qty-btn" @click="stampQty++">+</button>
+            </div>
+            <div class="shop-price">
+              <span class="price-icon">💎</span>
+              <span class="price-amount">{{ (80 * stampQty).toLocaleString() }}</span>
+            </div>
+            <button
+              class="btn-buy"
+              :disabled="!currencyStore.canAffordDiamonds(80 * stampQty)"
+              @click="buyStamp()"
+            >Buy</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Utility -->
       <div class="shop-section-label" style="margin-top: 20px;">Utility</div>
       <div class="shop-grid">
@@ -157,6 +185,7 @@ const ORB_ITEMS = reactive([
 
 const soulQty   = ref(1)
 const energyQty = ref(1)
+const stampQty  = ref(1)
 
 function buyOrb(item) {
   const total = item.price * item.qty
@@ -177,6 +206,13 @@ function buyEnergy() {
   if (!currencyStore.spendDiamonds(total)) return
   energyStore.add(30 * energyQty.value)
   energyQty.value = 1
+}
+
+function buyStamp() {
+  const total = 80 * stampQty.value
+  if (!currencyStore.spendDiamonds(total)) return
+  forgeStore.stamps += stampQty.value
+  stampQty.value = 1
 }
 </script>
 
@@ -385,5 +421,17 @@ function buyEnergy() {
   justify-content: center;
   flex-shrink: 0;
   filter: drop-shadow(0 0 8px #aaff4488);
+}
+
+.stamp-icon-lg {
+  font-size: 2rem;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffd700;
+  filter: drop-shadow(0 0 8px #ffd70066);
 }
 </style>

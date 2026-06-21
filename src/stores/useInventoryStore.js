@@ -53,9 +53,11 @@ function loadSoulData() {
 }
 
 function attachMethod(item) {
-  item.lines     = item.lines     ?? []
-  item.stars     = item.stars     ?? 0
-  item.baseStats = item.baseStats ?? { ...item.stats }
+  item.lines          = item.lines          ?? []
+  item.potentialLines = item.potentialLines ?? []
+  item.potentialTier  = item.potentialTier  ?? null
+  item.stars          = item.stars          ?? 0
+  item.baseStats      = item.baseStats      ?? { ...item.stats }
   item.fitsSlot  = function(slot) { return SLOT_ALLOWED_TYPES[slot]?.includes(this.gearType) ?? false }
   return item
 }
@@ -206,12 +208,12 @@ export const useInventoryStore = defineStore('inventory', () => {
     gearDisabled.value[heroKey] = isGearEnabled(heroKey) ? true : false
   }
 
-  const EMPTY_STATS = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0 }
+  const EMPTY_STATS = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0, siegeDmg: 0, raidDmg: 0 }
 
   function computeGearStats(heroKey) {
     if (!isGearEnabled(heroKey)) return { stats: { ...EMPTY_STATS }, damageReduction: 0 }
 
-    const totals = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0 }
+    const totals = { hp: 0, hpPct: 0, atk: 0, atkPct: 0, def: 0, defPct: 0, spd: 0, spdPct: 0, critRate: 0, critDmg: 0, resistance: 0, accuracy: 0, siegeDmg: 0, raidDmg: 0 }
     const loadout = getLoadout(heroKey)
 
     for (const slot of Object.values(GearSlot)) {
@@ -223,10 +225,18 @@ export const useInventoryStore = defineStore('inventory', () => {
         if (key in totals) totals[key] += val
       }
 
-      // Line bonuses
+      // Line bonuses (discovery / use / slayer)
       if (item.lines?.length) {
         const lineStats = computeLineStats(item.lines)
         for (const [key, val] of Object.entries(lineStats)) {
+          if (key in totals) totals[key] += val
+        }
+      }
+
+      // Potential line bonuses
+      if (item.potentialLines?.length) {
+        const potStats = computeLineStats(item.potentialLines)
+        for (const [key, val] of Object.entries(potStats)) {
           if (key in totals) totals[key] += val
         }
       }
@@ -274,6 +284,25 @@ export const useInventoryStore = defineStore('inventory', () => {
     const activePassives = new Set()
     for (const [armorType, count] of Object.entries(setPieces)) {
       if (count >= 6 && SET_PASSIVE_6[armorType]) activePassives.add(SET_PASSIVE_6[armorType].id)
+    }
+
+    // Role-based passives — base passive always active; boosted when gear matches role condition
+    const ROLE_TO_PASSIVE = { warrior: 'execute', tank: 'grit', mage: 'spellweave', healer: 'mending', ranger: 'mark', debuffer: 'lingering_curse' }
+    const heroRole = HERO_TEMPLATES[heroKey]?.()?.role ?? null
+    if (heroRole && ROLE_TO_PASSIVE[heroRole]) {
+      activePassives.add(ROLE_TO_PASSIVE[heroRole])
+      const mainHandItem = loadout[GearSlot.MAIN_HAND] ? instanceById(loadout[GearSlot.MAIN_HAND]) : null
+      const mwt = mainHandItem?.weaponType
+      const PLATE_WEAPONS = ['sword', 'axe', 'mace', 'spear']
+      const STAFF_WEAPONS = ['staff', 'wand']
+      let boosted = false
+      if      (heroRole === 'warrior')  boosted = isDualWielding(heroKey) && setPieces.plate >= 3
+      else if (heroRole === 'tank')     boosted = PLATE_WEAPONS.includes(mwt) && hasShield(heroKey) && setPieces.plate >= 3
+      else if (heroRole === 'mage')     boosted = STAFF_WEAPONS.includes(mwt) && setPieces.cloth >= 3
+      else if (heroRole === 'healer')   boosted = STAFF_WEAPONS.includes(mwt) && setPieces.cloth >= 3
+      else if (heroRole === 'ranger')   boosted = setPieces.leather >= 3
+      else if (heroRole === 'debuffer') boosted = setPieces.leather >= 3 || setPieces.cloth >= 3
+      if (boosted) activePassives.add(ROLE_TO_PASSIVE[heroRole] + '_boosted')
     }
 
     const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
@@ -342,6 +371,25 @@ export const useInventoryStore = defineStore('inventory', () => {
     return computeCP(hero)
   }
 
+  const RARITY_RANK = { Common: 0, Uncommon: 1, Rare: 2, Epic: 3, Legendary: 4, Mythical: 5, Ancient: 6 }
+  function _scoreItem(item) {
+    return (item.stars ?? 0) * 10 + (RARITY_RANK[item.rarity] ?? 0)
+  }
+
+  function quickEquip(heroKey) {
+    for (const slot of Object.values(GearSlot)) {
+      if (slot === GearSlot.OFF_HAND && isTwoHandedMainHand(heroKey)) continue
+      const currentItem  = getEquippedItem(heroKey, slot)
+      const currentScore = currentItem ? _scoreItem(currentItem) : -1
+      const candidates   = ownedInstances.value.filter(item =>
+        item.fitsSlot(slot) && !getEquippedBy(item.instanceId)
+      )
+      if (!candidates.length) continue
+      const best = candidates.reduce((a, b) => _scoreItem(a) >= _scoreItem(b) ? a : b)
+      if (_scoreItem(best) > currentScore) equip(heroKey, slot, best.instanceId)
+    }
+  }
+
   function getSetPieces(heroKey) {
     const loadout  = getLoadout(heroKey)
     const counts = { plate: 0, leather: 0, cloth: 0 }
@@ -371,6 +419,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     soulVessels, progressiveHeroKeys,
     awardSoulVessel, useSoulVessel, isProgressive,
     sellItem, sellAllByRarity,
-    getSetPieces,
+    getSetPieces, quickEquip,
   }
 })

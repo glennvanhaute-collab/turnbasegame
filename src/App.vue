@@ -14,6 +14,7 @@
           <button class="nav-btn" :class="{ active: view === 'summon' }" @click="navigate('summon')">Recruit</button>
           <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
+          <button class="nav-btn" :class="{ active: view === 'camp' }" @click="navigate('camp')">Stronghold</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }" @click="navigate('realm')">Realm</button>
           <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
             <img :src="collectionIcon" class="nav-icon-img" alt="Collection" />
@@ -164,7 +165,8 @@
         <RaidBattleArena
           v-if="showRaidBattle && activeRaidId"
           :raidId="activeRaidId"
-          @back="showRaidBattle = false"
+          :autoComplete="isAutoRaid"
+          @back="showRaidBattle = false; isAutoRaid = false"
         />
       </Transition>
     </Teleport>
@@ -202,16 +204,18 @@
       </div>
       <div v-else-if="view === 'dungeon'" class="gear-view exploration-view" :style="{ '--exploration-bg': `url(${explorationBg})` }">
         <div class="gear-tabs">
-          <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Exploration</button>
-          <button class="gear-tab" :class="{ active: expTab === 'exploration' }" @click="expTab = 'exploration'">Inventory</button>
+          <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Dungeons</button>
+          <button class="gear-tab" :class="{ active: expTab === 'explore' }" @click="expTab = 'explore'">Explore</button>
           <button class="gear-tab" :class="{ active: expTab === 'raids' }" @click="expTab = 'raids'">Raids</button>
           <button class="gear-tab" :class="{ active: expTab === 'sieges' }" @click="expTab = 'sieges'">Sieges</button>
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
-        <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" />
+        <ExploreView v-else-if="expTab === 'explore'" @enter-dungeon="startDungeonBattle" />
+        <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" @auto-raid="startAutoRaid" />
         <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
       </div>
+      <CampView v-else-if="view === 'camp'" />
       <RealmView v-else-if="view === 'realm'" />
     </main>
   </div>
@@ -250,6 +254,7 @@ import EquipmentView from './components/EquipmentView.vue'
 import SummonView from './components/SummonView.vue'
 import BattleArena from './components/BattleArena.vue'
 import DungeonView from './components/DungeonView.vue'
+import ExploreView from './components/ExploreView.vue'
 import RaidsView from './components/RaidsView.vue'
 import RaidBattleArena from './components/RaidBattleArena.vue'
 import SiegesView from './components/SiegesView.vue'
@@ -302,7 +307,16 @@ function closeAllPanels() {
   showCodex.value           = false
 }
 
+const isAutoRaid = ref(false)
+
 function startRaidBattle(raidId) {
+  isAutoRaid.value     = false
+  activeRaidId.value   = raidId
+  showRaidBattle.value = true
+}
+
+function startAutoRaid(raidId) {
+  isAutoRaid.value     = true
   activeRaidId.value   = raidId
   showRaidBattle.value = true
 }
@@ -415,6 +429,7 @@ function startBattle(encounterIndex) {
 function startDungeonBattle(dungeon) {
   const team = collectionStore.buildTeam()
   const encounter = buildDungeonEncounter(dungeon)
+  if (dungeon.batchCount > 1) battleStore.setupBatch(dungeon.batchCount)
   battleStore.initBattle(encounter, team)
   if (!battleStore.autoplay) battleStore.toggleAutoplay()
   showBattle.value = true

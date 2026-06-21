@@ -18,9 +18,11 @@
     <Transition name="end-fade">
       <div class="end-overlay" v-if="store.isOver">
         <div class="end-title" :class="store.state">
-          {{ store.state === 'victory' ? 'Raid Complete' : 'Defeated' }}
+          {{ store.state === 'victory' ? (store.lastReward?.isAutoComplete ? 'Quick Clear' : 'Raid Complete') : 'Defeated' }}
         </div>
-        <div class="end-sub" v-if="store.state === 'victory'">The Throne of Regret falls silent.</div>
+        <div class="end-sub" v-if="store.state === 'victory'">
+          {{ store.lastReward?.isAutoComplete ? 'Loot awarded — no battle required.' : encounter?.victoryText ?? 'The raid falls silent.' }}
+        </div>
         <div class="end-sub" v-else>The darkness was too great.</div>
         <div class="end-rewards" v-if="store.state === 'victory' && store.lastReward">
           <div class="reward-main-row">
@@ -34,8 +36,9 @@
               <span v-for="d in store.lastReward.raidDrops.logs"     :key="'l'+d.id"  class="reward-pill wood">🪵 {{ d.amount }}× Dragonwood</span>
               <span v-for="d in store.lastReward.raidDrops.hides"    :key="'h'+d.id"  class="reward-pill hide">🐉 {{ d.amount }}× Moonscale Hide</span>
               <span v-for="d in store.lastReward.raidDrops.fibers"   :key="'f'+d.id"  class="reward-pill fiber">🌙 {{ d.amount }}× Moonthread</span>
-              <span v-for="d in store.lastReward.raidDrops.leathers" :key="'lt'+d.id" class="reward-pill leather">🧶 {{ d.amount }}× Moonscale Strip</span>
-              <span v-for="d in store.lastReward.raidDrops.cloths"   :key="'c'+d.id"  class="reward-pill cloth">✨ {{ d.amount }}× Moonweave</span>
+              <span v-for="d in store.lastReward.raidDrops.leathers"   :key="'lt'+d.id" class="reward-pill leather">🧶 {{ d.amount }}× Moonscale Strip</span>
+              <span v-for="d in store.lastReward.raidDrops.cloths"     :key="'c'+d.id"  class="reward-pill cloth">✨ {{ d.amount }}× Moonweave</span>
+              <span v-for="d in store.lastReward.raidDrops.components" :key="'cmp'+d.id" class="reward-pill essence">✦ {{ d.amount }}× {{ UPGRADE_COMPONENTS[d.id]?.name ?? d.id }}</span>
             </div>
           </template>
         </div>
@@ -187,9 +190,13 @@ import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { getPortrait, PORTRAIT_MAP } from '../game/portraits.js'
 import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
+import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
 
-const props = defineProps({ raidId: { type: String, required: true } })
+const props = defineProps({
+  raidId:       { type: String,  required: true },
+  autoComplete: { type: Boolean, default: false },
+})
 defineEmits(['back'])
 
 const store      = useBattleStore()
@@ -363,8 +370,13 @@ function seClass(type) {
 
 // ── Init battle on mount ─────────────────────────────────────────
 onMounted(() => {
+  if (props.autoComplete) {
+    store.autoCompleteRaid(props.raidId)
+    return
+  }
   const team = collection.buildTeam()
   if (store.autoplay) store.toggleAutoplay()
+  store.currentRaidId = props.raidId
   store.initBattle(encounter, team)
   // Allow phase watcher to fire after first render
   nextTick(() => { phaseWatchReady = true })
@@ -868,6 +880,7 @@ onMounted(() => {
 .reward-pill.fiber   { background: rgba(187, 238, 255, 0.10); color: #bbeeff; border: 1px solid rgba(187, 238, 255, 0.25); }
 .reward-pill.leather { background: rgba(126, 232, 255, 0.08); color: #aaddf0; border: 1px solid rgba(126, 232, 255, 0.2); }
 .reward-pill.cloth   { background: rgba(136, 204, 255, 0.10); color: #88ccff; border: 1px solid rgba(136, 204, 255, 0.22); }
+.reward-pill.essence { background: rgba(153, 204, 255, 0.15); color: #99ccff; border: 1px solid rgba(153, 204, 255, 0.40); }
 
 .raid-drops-label {
   font-family: 'Cinzel', serif;

@@ -9,8 +9,8 @@ import { usePlayerHeroStore }  from './usePlayerHeroStore.js'
 import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
-import { rollOreDrops, rollTrainingOreDrops } from '../game/data/ores.js'
-import { rollRaidResourceDrops }  from '../game/data/raidEncounters.js'
+import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
+import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -26,6 +26,13 @@ export const useBattleStore = defineStore('battle', () => {
   const currentEncounterIndex = ref(0)
   const currentEncounter = ref(null)
   const lastReward = ref(null)   // { gold, diamonds, xp, levelsGained, oreDrops } shown after victory
+
+  const _savedClears = JSON.parse(localStorage.getItem('raid-clears') ?? '[]')
+  const clearedRaids  = ref(new Set(_savedClears))
+  const currentRaidId = ref(null)
+  function _persistClears() {
+    localStorage.setItem('raid-clears', JSON.stringify([...clearedRaids.value]))
+  }
 
   const lastAction = ref(null)
 
@@ -81,7 +88,7 @@ export const useBattleStore = defineStore('battle', () => {
       const hero = factory()
       hero.id = `${hero.id}_${i}`
       const scale = encounter.enemyScale ?? 1.0
-      if (scale > 1) hero.applyLevelScale(scale)
+      if (scale > 1) hero.applyLevelScale(scale, Math.sqrt(scale))
       return hero
     })
 
@@ -133,6 +140,13 @@ export const useBattleStore = defineStore('battle', () => {
           : rollOreDrops(enc.difficulty)
         const resources = useResourceStore()
         oreDrops.forEach(({ oreId, amount }) => resources.addOre(oreId, amount))
+        let gatherDrops = { hides: [], fibers: [] }
+        if (enc.isDungeon) {
+          const g = rollDungeonGatheringDrops(enc.difficulty)
+          gatherDrops = g
+          g.hides.forEach(({ id, amount })  => resources.addHide(id, amount))
+          g.fibers.forEach(({ id, amount }) => resources.addFiber(id, amount))
+        }
         let componentDrops = []
         let forgeUnlock    = null
         if (enc.isDungeon) {
@@ -140,6 +154,7 @@ export const useBattleStore = defineStore('battle', () => {
           componentDrops = dungeonResult?.componentDrops ?? []
           forgeUnlock    = dungeonResult?.forgeUnlock ?? null
         }
+        let keyDrops = []
         if (enc.isTraining) {
           const TRAINING_ESSENCE = {
             Hard:      [{ id: 'copper_essence', chance: 0.12 }, { id: 'tin_essence',   chance: 0.12 }],
@@ -151,18 +166,26 @@ export const useBattleStore = defineStore('battle', () => {
               componentDrops.push(id)
             }
           }
+          keyDrops = rollTrainingKeyDrops(enc.difficulty)
+          keyDrops.forEach(({ tier, amount }) => resources.addDungeonKey(tier, amount))
         }
         let raidDrops = null
         if (enc.isRaid) {
           raidDrops = rollRaidResourceDrops()
-          raidDrops.ores.forEach(({ id, amount })     => resources.addOre(id, amount))
-          raidDrops.logs.forEach(({ id, amount })     => resources.addLog(id, amount))
-          raidDrops.hides.forEach(({ id, amount })    => resources.addHide(id, amount))
-          raidDrops.fibers.forEach(({ id, amount })   => resources.addFiber(id, amount))
-          raidDrops.leathers.forEach(({ id, amount }) => resources.addLeather(id, amount))
-          raidDrops.cloths.forEach(({ id, amount })   => resources.addCloth(id, amount))
+          raidDrops.ores.forEach(({ id, amount })       => resources.addOre(id, amount))
+          raidDrops.logs.forEach(({ id, amount })       => resources.addLog(id, amount))
+          raidDrops.hides.forEach(({ id, amount })      => resources.addHide(id, amount))
+          raidDrops.fibers.forEach(({ id, amount })     => resources.addFiber(id, amount))
+          raidDrops.leathers.forEach(({ id, amount })   => resources.addLeather(id, amount))
+          raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
+          raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
+          componentDrops.push(...raidDrops.components.map(c => c.id))
+          if (currentRaidId.value) {
+            clearedRaids.value.add(currentRaidId.value)
+            _persistClears()
+          }
         }
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, componentDrops, raidDrops, forgeUnlock }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run
@@ -176,7 +199,22 @@ export const useBattleStore = defineStore('battle', () => {
             if (ex) ex.amount += drop.amount
             else br.oreDrops.push({ ...drop })
           }
+          for (const drop of (runReward.gatherDrops?.hides ?? [])) {
+            const ex = br.gatherDrops.hides.find(d => d.id === drop.id)
+            if (ex) ex.amount += drop.amount
+            else br.gatherDrops.hides.push({ ...drop })
+          }
+          for (const drop of (runReward.gatherDrops?.fibers ?? [])) {
+            const ex = br.gatherDrops.fibers.find(d => d.id === drop.id)
+            if (ex) ex.amount += drop.amount
+            else br.gatherDrops.fibers.push({ ...drop })
+          }
           br.componentDrops.push(...(runReward.componentDrops ?? []))
+          for (const drop of (runReward.keyDrops ?? [])) {
+            const ex = br.keyDrops.find(d => d.tier === drop.tier)
+            if (ex) ex.amount += drop.amount
+            else br.keyDrops.push({ ...drop })
+          }
           batchDone.value++
           if (batchDone.value < batchTotal.value) {
             setTimeout(() => _runBatchNext(), 250)
@@ -198,19 +236,58 @@ export const useBattleStore = defineStore('battle', () => {
     }
   }
 
+  // When the tab is hidden browsers throttle setTimeout heavily.
+  // Store the pending resolve so the visibilitychange handler can fire it
+  // immediately when the player returns to the tab.
+  let _pendingResolve = null
+  let _pendingTimeout = null
+
   async function _runAutoTurn() {
-    await new Promise(r => setTimeout(r, turnDelay.value))
+    await new Promise(r => {
+      _pendingResolve = r
+      _pendingTimeout = setTimeout(() => {
+        _pendingResolve = null
+        r()
+      }, turnDelay.value)
+    })
     if (!engine.value) return
     const result = runAI(engine.value)
     if (result) _applyResult(result)
   }
 
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        // Tab hidden while a batch is running — complete all remaining runs instantly
+        // so the player returns to a finished result screen, not a frozen mid-run.
+        if (isBatchRunning.value) devCompleteBatch()
+      } else {
+        // Tab visible again — fire any pending single-turn delay immediately
+        if (_pendingResolve) {
+          clearTimeout(_pendingTimeout)
+          const resolve = _pendingResolve
+          _pendingResolve = null
+          resolve()
+        }
+      }
+    })
+  }
+
   function startBatchRun(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], componentDrops: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
     _runBatchNext()
+  }
+
+  // Primes batch state without starting the first run — call initBattle afterwards.
+  // Used for dungeon key batches where the caller controls the encounter.
+  function setupBatch(n) {
+    batchTotal.value   = n
+    batchDone.value    = 0
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [] }
+    if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
   }
 
   function stopBatch() {
@@ -265,16 +342,46 @@ export const useBattleStore = defineStore('battle', () => {
     initBattle(enc, team)
   }
 
+  // ── Auto-complete a raid (already-cleared fast path) ─────────────
+  function autoCompleteRaid(raidId) {
+    const enc = RAID_ENCOUNTERS[raidId]
+    if (!enc || !clearedRaids.value.has(raidId)) return
+    const resources = useResourceStore()
+    currency.addGold(enc.rewards.gold ?? 0)
+    currency.addDiamonds(enc.rewards.diamonds ?? 0)
+    const raidDrops = rollRaidResourceDrops()
+    raidDrops.ores.forEach(({ id, amount })       => resources.addOre(id, amount))
+    raidDrops.logs.forEach(({ id, amount })       => resources.addLog(id, amount))
+    raidDrops.hides.forEach(({ id, amount })      => resources.addHide(id, amount))
+    raidDrops.fibers.forEach(({ id, amount })     => resources.addFiber(id, amount))
+    raidDrops.leathers.forEach(({ id, amount })   => resources.addLeather(id, amount))
+    raidDrops.cloths.forEach(({ id, amount })     => resources.addCloth(id, amount))
+    raidDrops.components.forEach(({ id, amount }) => resources.addUpgradeComponent(id, amount))
+    currentRaidId.value  = raidId
+    engine.value         = null
+    state.value          = BattleState.VICTORY
+    lastReward.value     = {
+      gold: enc.rewards.gold ?? 0,
+      diamonds: enc.rewards.diamonds ?? 0,
+      xp: 0, levelsGained: 0,
+      raidDrops,
+      componentDrops: raidDrops.components.map(c => c.id),
+      isAutoComplete: true,
+    }
+  }
+
   return {
     engine, state, activeHero, battleKey,
     playerTeam, enemyTeam, battleLog,
     selectedSkillIndex, currentEncounterIndex, currentEncounter,
     autoplay, battleSpeed, lastReward, lastAction,
     batchTotal, batchDone, isBatchRunning,
+    clearedRaids, currentRaidId,
     ENCOUNTERS,
     isPlayerTurn, canAct, isOver,
     initBattle, selectSkill, selectTarget,
     toggleAutoplay, setSpeed,
-    startBatchRun, stopBatch, devCompleteBatch,
+    startBatchRun, setupBatch, stopBatch, devCompleteBatch,
+    autoCompleteRaid,
   }
 })
