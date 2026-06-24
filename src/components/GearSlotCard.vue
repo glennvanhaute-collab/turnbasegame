@@ -4,7 +4,7 @@
 
     <div class="slot-content" v-if="item">
       <div class="item-icon">
-        <GameIcon :icon="slotIcon" :size="28" />
+        <GameIcon :icon="slotIcon" :size="44" />
       </div>
       <div class="item-info">
         <div class="item-name-row">
