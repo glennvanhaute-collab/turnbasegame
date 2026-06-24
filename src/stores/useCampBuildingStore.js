@@ -48,6 +48,9 @@ export const useCampBuildingStore = defineStore('campBuildings', () => {
     for (const [oreId, amount] of Object.entries(cost.ores ?? {})) {
       if ((resources.ores[oreId] ?? 0) < amount) return false
     }
+    for (const [plankId, amount] of Object.entries(cost.planks ?? {})) {
+      if ((resources.planks[plankId] ?? 0) < amount) return false
+    }
     return true
   }
 
@@ -60,6 +63,9 @@ export const useCampBuildingStore = defineStore('campBuildings', () => {
     currency.spendGold(cost.gold)
     for (const [oreId, amount] of Object.entries(cost.ores ?? {})) {
       resources.removeOre(oreId, amount)
+    }
+    for (const [plankId, amount] of Object.entries(cost.planks ?? {})) {
+      resources.removePlank(plankId, amount)
     }
     levels.value[id] = getLevel(id) + 1
     persist()
@@ -131,6 +137,21 @@ export const useCampBuildingStore = defineStore('campBuildings', () => {
     return 0
   })
 
+  // Lumber Hall: woodworking XP multiplier bonus (fraction, e.g. 0.20 = +20%)
+  const lumberXpBonus = computed(() => {
+    const bonuses = [0, 0.20, 0.35, 0.50, 0.65, 0.80]
+    return bonuses[getLevel('lumber_hall')] ?? 0
+  })
+
+  // Lumber Hall: DEF bonus for heroes (fraction)
+  const lumberDefBonus = computed(() => {
+    const tier = getLevel('lumber_hall')
+    if (tier >= 5) return 0.15
+    if (tier >= 4) return 0.10
+    if (tier >= 3) return 0.05
+    return 0
+  })
+
   return {
     levels,
     getLevel, getMaxTier, isMaxed,
@@ -139,5 +160,6 @@ export const useCampBuildingStore = defineStore('campBuildings', () => {
     idleRateMultiplier, idleCapHours,
     atkBonus, magicDmgBonus, magicResBonus,
     healerHpBonus, siegeRevives, vigilSpdBonus,
+    lumberXpBonus, lumberDefBonus,
   }
 })
