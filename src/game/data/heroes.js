@@ -369,7 +369,19 @@ export const HERO_TEMPLATES = {
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior',
     quote: 'For rice and honer.',
-    lore: 'A wandering warlord whose wisdom arrives uninvited, usually mid-battle. Kyver has declined lordships, refused fortunes, and once ended a siege by inviting both sides to dinner. His blade is flawless. His spelling is not. Those who underestimate him tend to lose. Those who share a meal with him tend to follow him anywhere.',
+    lore: `Nobody knows where Kyver came from. He has been asked many times, and the answer changes: a fishing village, a burned monastery, the road between two places he cannot name. He always says it with the same solemn nod, so it is unclear whether he is being honest or whether he has been answering this question long enough that it no longer matters.
+
+What is known: he is very good at war. Not the aggressive kind. The precise kind — the kind that ends things before they become expensive. He reads a battlefield the way a river reads a hillside, finding the one channel everything wants to flow down, and simply being there first.
+
+He has been offered three lordships. He declined all of them, once in the middle of accepting the second. He has refused fortunes, rejected titles, and once ended a six-week siege by inviting both sides to dinner. The meal was rice, salted fish, and vegetables chopped badly by soldiers who didn't know which side they were afraid of more. By morning, the besiegers had agreed to leave. He had written the peace treaty himself, which nobody questioned, though his spelling suggested he had learned to read from someone who had also learned to read from someone, many generations removed from anyone who knew how it was supposed to look.
+
+He carries a blade that has never chipped. His letters have never been correct. He considers neither of these things problems.
+
+Kyver says honour is like rice: plain until you need it, terrible when it's absent, and best when shared. He says this unprompted. He says it mid-battle sometimes, which opponents have described as disorienting.
+
+Those who underestimate him tend to lose. Those who share a meal with him tend to follow him anywhere — not because he demands it, but because whatever he is walking toward, he always seems to know which road to take, and he always brings enough for everyone.
+
+His battle cry is four words. The spelling is his own. He has never once questioned it.`,
   }),
 
   VORATH: () => new Hero({
