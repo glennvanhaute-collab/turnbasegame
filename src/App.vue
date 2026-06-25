@@ -224,6 +224,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useMusic } from './composables/useMusic.js'
+import { playBattleForTeam, playMain } from './game/music.js'
 import { useSmeltingTick } from './composables/useSmeltingTick.js'
 import { useTanningTick }  from './composables/useTanningTick.js'
 import { useWeavingTick }  from './composables/useWeavingTick.js'
@@ -423,6 +424,7 @@ function onHeroCreated() {
 function startBattle(encounterIndex) {
   const team = collectionStore.buildTeam()
   battleStore.initBattle(encounterIndex, team)
+  playBattleForTeam(team.map(h => h.id))
   showBattle.value = true
 }
 
@@ -431,9 +433,12 @@ function startDungeonBattle(dungeon) {
   const encounter = buildDungeonEncounter(dungeon)
   if (dungeon.batchCount > 1) battleStore.setupBatch(dungeon.batchCount)
   battleStore.initBattle(encounter, team)
+  playBattleForTeam(team.map(h => h.id))
   if (!battleStore.autoplay) battleStore.toggleAutoplay()
   showBattle.value = true
 }
+
+watch(showBattle, v => { if (!v) playMain() })
 </script>
 
 <style>
