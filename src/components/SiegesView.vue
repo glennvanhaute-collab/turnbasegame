@@ -46,9 +46,15 @@
             <span class="t-reward">💎 {{ tier.diamonds }}</span>
             <span class="t-reward mat" :style="{ color: active.color }">◆ {{ active.event.matReward }} ×{{ tier.matCount }}</span>
           </div>
-          <button class="tier-btn" @click="openSetup(tier)">
-            <span class="tier-btn-text">Besiege</span>
-          </button>
+          <button
+            v-if="campBuildings.hasUnlock(tier.unlock)"
+            class="tier-btn"
+            @click="openSetup(tier)"
+          >Besiege</button>
+          <div v-else class="tier-locked">
+            <span class="tier-lock-icon">🔒</span>
+            <span class="tier-lock-hint">{{ tier.unlockHint }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -93,6 +99,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import SiegeSetupScreen from './SiegeSetupScreen.vue'
+import { useCampBuildingStore } from '../stores/useCampBuildingStore.js'
+
+const campBuildings = useCampBuildingStore()
 import siegeAldric   from '../assets/lore/siege_aldric.png'
 import siegeValdris  from '../assets/lore/siege_Valdris.png'
 import siegeCaelwyn  from '../assets/lore/siege_caelwyn.png'
@@ -159,21 +168,29 @@ const TIERS = [
   {
     id: 'skirmish', name: 'Skirmish', sub: 'Outer garrison — weakened defenders',
     color: '#888', gold: 800, diamonds: 12, matCount: 1,
+    unlock: 'siege_easy',
+    unlockHint: "Requires Breachwright's Yard Tier 1",
     garrison: ['Militia conscripts ×8', 'Untrained archers ×4'],
   },
   {
     id: 'siege', name: 'Siege', sub: 'Main wall — organised resistance',
     color: '#c8962a', gold: 1800, diamonds: 25, matCount: 2,
+    unlock: 'siege_medium',
+    unlockHint: "Requires Breachwright's Yard Tier 2",
     garrison: ['Veteran soldiers ×10', 'Tower archers ×6', 'Wall ballista ×2'],
   },
   {
     id: 'assault', name: 'Full Assault', sub: 'Inner sanctum — elite guard',
     color: '#cc4444', gold: 3200, diamonds: 45, matCount: 4,
+    unlock: 'siege_hard',
+    unlockHint: "Requires Breachwright's Yard Tier 3",
     garrison: ['Elite guard ×8', 'Battlemage ×3', 'Siege artillery ×3', 'Captain of the Guard'],
   },
   {
     id: 'breach', name: 'The Breach', sub: 'The commander — ends the transgression',
     color: '#b44fff', gold: 5000, diamonds: 70, matCount: 7,
+    unlock: 'siege_nightmare',
+    unlockHint: "Requires Breachwright's Yard Tier 4",
     garrison: ['Full garrison ×20', 'Arcane constructs ×4', 'The Commander (Phase 2)'],
   },
 ]
@@ -447,6 +464,22 @@ onUnmounted(() => clearInterval(timerInterval))
 .tier-btn:hover {
   background: color-mix(in srgb, var(--tc) 18%, transparent);
   box-shadow: 0 0 16px -4px var(--tc);
+}
+
+.tier-locked {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.tier-lock-icon { font-size: 0.8rem; }
+.tier-lock-hint {
+  font-size: 0.58rem;
+  color: #666;
+  font-style: italic;
+  max-width: 140px;
+  line-height: 1.4;
 }
 
 /* ── Rotation Strip ───────────────────────────────────────────── */
