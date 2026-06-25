@@ -9,9 +9,10 @@ const FADE_STEPS = 22
 const STEP_MS    = 38   // ~830 ms total crossfade
 
 const _audio = {}
-let _current = null
-let _muted   = false
-let _timer   = null
+let _current  = null
+let _outgoing = null   // track being faded out — must be stopped if interrupted
+let _muted    = false
+let _timer    = null
 
 function _get(key, url) {
   if (!_audio[key]) {
@@ -29,13 +30,23 @@ function _vol(key) {
 
 function _crossfade(key, url) {
   if (_current === key) return
-  if (_timer) { clearInterval(_timer); _timer = null }
+  if (_timer) {
+    clearInterval(_timer)
+    _timer = null
+    // Stop any track that was mid-fade-out so it doesn't keep playing
+    if (_outgoing && _outgoing !== _audio[key]) {
+      _outgoing.pause()
+      _outgoing.volume = 0
+    }
+    _outgoing = null
+  }
 
   const prevKey  = _current
-  _current       = key          // ← update immediately so re-entrant calls are safe
+  _current       = key
 
   const incoming = _get(key, url)
   const outgoing = prevKey ? _audio[prevKey] : null
+  _outgoing      = outgoing
   const outStart = outgoing?.volume ?? 0
 
   incoming.play().catch(() => {})
@@ -48,6 +59,7 @@ function _crossfade(key, url) {
     incoming.volume = _vol(key) * t
     if (step >= FADE_STEPS) {
       clearInterval(_timer); _timer = null
+      _outgoing = null
       if (outgoing) { outgoing.pause(); outgoing.volume = 0 }
     }
   }, STEP_MS)
