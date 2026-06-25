@@ -60,7 +60,7 @@ The design philosophy comes from tabletop GMing: the goal is to make players hav
 ### Energy-gated content
 - **Dungeons** — cost energy, best loot, primary progression driver
 - **Raids** — team content
-- **Sieges** — large-scale castle assaults requiring a deep roster (more than 5 units)
+- **Sieges** — rotating faction events; heroes command unit armies; two-phase battles (breach → commander). See [docs/sieges.md](sieges.md) for full design.
 
 The energy system gates *speed* of progression, not access to the game. You can always do something meaningful when energy is dry.
 
