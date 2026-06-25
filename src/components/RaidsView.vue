@@ -41,6 +41,12 @@
         </div>
       </div>
 
+      <!-- Boss lore -->
+      <div class="lore-section" v-if="selected.lore">
+        <div class="lore-label">Chronicle</div>
+        <p class="boss-lore" v-for="(para, i) in selected.lore.split('\n\n')" :key="i">{{ para }}</p>
+      </div>
+
       <!-- Features -->
       <div class="lore-section">
         <div class="lore-label">Arena Features</div>
@@ -256,6 +262,12 @@ const selected = ref(RAIDS[0] ?? null)
   font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase;
   color: var(--gold-dim, #7a5228); margin-bottom: 12px; font-weight: 700;
 }
+
+.boss-lore {
+  font-size: 0.73rem; color: #c4b89a; line-height: 1.75;
+  margin: 0 0 10px; font-style: italic;
+}
+.boss-lore:last-child { margin-bottom: 0; }
 
 .feature-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
 .feature-item { font-size: 0.72rem; color: #bbb; display: flex; gap: 8px; align-items: flex-start; }
