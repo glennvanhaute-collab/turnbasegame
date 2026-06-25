@@ -90,7 +90,13 @@
       :faction="active"
       :tier="setupTier"
       @back="closeSetup"
-      @march="closeSetup"
+      @march="openBattle"
+    />
+    <SiegeBattleArena
+      v-if="battleOpen && battleTier"
+      :faction="active"
+      :tier="battleTier"
+      @back="closeBattle"
     />
   </Teleport>
 
@@ -98,7 +104,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import SiegeSetupScreen from './SiegeSetupScreen.vue'
+import SiegeSetupScreen  from './SiegeSetupScreen.vue'
+import SiegeBattleArena  from './SiegeBattleArena.vue'
 import { useCampBuildingStore } from '../stores/useCampBuildingStore.js'
 
 const campBuildings = useCampBuildingStore()
@@ -212,9 +219,22 @@ const nextIdx   = computed(() => (activeIdx.value + 1) % FACTIONS.length)
 const active    = computed(() => FACTIONS[activeIdx.value])
 
 // ── Setup screen state ────────────────────────────────────────────
-const setupTier = ref(null)
-function openSetup(tier) { setupTier.value = tier }
-function closeSetup()    { setupTier.value = null }
+const setupTier  = ref(null)
+const battleTier = ref(null)
+const battleOpen = ref(false)
+
+function openSetup(tier)  { setupTier.value = tier }
+function closeSetup()     { setupTier.value = null }
+
+function openBattle() {
+  battleTier.value = setupTier.value
+  setupTier.value  = null
+  battleOpen.value = true
+}
+function closeBattle() {
+  battleOpen.value = false
+  battleTier.value = null
+}
 
 // ── Countdown timer ───────────────────────────────────────────────
 const timeLeft = ref('')
