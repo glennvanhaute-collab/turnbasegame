@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useResourceStore } from './useResourceStore.js'
-import { useCurrencyStore } from './useCurrencyStore.js'
 import { UNIT_TYPES, UNIT_LIST } from '../game/data/siegeUnits.js'
 
 const STORAGE_KEY = 'raid-siege-army'
+const MAX_PER_LANE = 10
+const MAX_TOTAL    = 30
 
 function loadSaved() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') } catch { return null }
@@ -13,22 +14,96 @@ function loadSaved() {
 export const useSiegeStore = defineStore('siege', () => {
   const saved = loadSaved()
 
-  // Recruited unit pool — how many soldiers of each type you have
+  // Unit pool
   const army = ref(saved?.army ?? Object.fromEntries(UNIT_LIST.map(u => [u.id, 0])))
 
-  // Current setup — party of 3 heroKeys + which unit type each commands
-  const party       = ref(saved?.party       ?? [null, null, null])
-  const assignments = ref(saved?.assignments ?? {})   // { heroKey: unitTypeId }
+  // Phase 1 — 3 lanes, each is an array of heroKeys
+  const lanes = ref(saved?.lanes ?? { west: [], gate: [], east: [] })
+
+  // Phase 2 — 3 vanguard hero slots for the commander fight
+  const phase2Party = ref(saved?.phase2Party ?? [null, null, null])
+
+  // heroKey → unitTypeId (applies to Phase 1 lane commanders only)
+  const assignments = ref(saved?.assignments ?? {})
 
   function persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       army:        army.value,
-      party:       party.value,
+      lanes:       lanes.value,
+      phase2Party: phase2Party.value,
       assignments: assignments.value,
     }))
   }
 
-  // ── Recruitment ──────────────────────────────────────────────────
+  // ── Computed ──────────────────────────────────────────────────────
+  const allLaneHeroes = computed(() => [
+    ...lanes.value.west,
+    ...lanes.value.gate,
+    ...lanes.value.east,
+  ])
+
+  const totalDeployed = computed(() => allLaneHeroes.value.length)
+
+  const phase1Ready = computed(() =>
+    Object.values(lanes.value).every(l => l.length >= 1) &&
+    allLaneHeroes.value.every(k => !!assignments.value[k])
+  )
+
+  const phase2Ready = computed(() => phase2Party.value.every(k => k !== null))
+
+  const siegeReady = computed(() => phase1Ready.value && phase2Ready.value)
+
+  // ── Lane management ───────────────────────────────────────────────
+  function heroCurrentLane(heroKey) {
+    for (const [lane, heroes] of Object.entries(lanes.value)) {
+      if (heroes.includes(heroKey)) return lane
+    }
+    return null
+  }
+
+  function addToLane(lane, heroKey) {
+    if (!lanes.value[lane]) return
+    if (lanes.value[lane].length >= MAX_PER_LANE) return
+    if (totalDeployed.value >= MAX_TOTAL) return
+    const current = heroCurrentLane(heroKey)
+    if (current) {
+      const idx = lanes.value[current].indexOf(heroKey)
+      if (idx !== -1) lanes.value[current].splice(idx, 1)
+    }
+    lanes.value[lane].push(heroKey)
+    persist()
+  }
+
+  function removeFromLane(lane, heroKey) {
+    const idx = lanes.value[lane]?.indexOf(heroKey) ?? -1
+    if (idx !== -1) {
+      lanes.value[lane].splice(idx, 1)
+      delete assignments.value[heroKey]
+    }
+    persist()
+  }
+
+  // ── Phase 2 party ─────────────────────────────────────────────────
+  function setPhase2Slot(slotIndex, heroKey) {
+    const existing = phase2Party.value.indexOf(heroKey)
+    if (existing !== -1 && existing !== slotIndex) phase2Party.value[existing] = null
+    phase2Party.value[slotIndex] = heroKey
+    persist()
+  }
+
+  function clearPhase2Slot(slotIndex) {
+    phase2Party.value[slotIndex] = null
+    persist()
+  }
+
+  // ── Unit assignment (Phase 1 only) ────────────────────────────────
+  function assignUnit(heroKey, unitTypeId) {
+    if (!heroKey) return
+    assignments.value[heroKey] = unitTypeId
+    persist()
+  }
+
+  // ── Recruitment ───────────────────────────────────────────────────
   function canRecruit(unitId) {
     const unit = UNIT_TYPES[unitId]
     if (!unit) return false
@@ -60,35 +135,8 @@ export const useSiegeStore = defineStore('siege', () => {
     return true
   }
 
-  // ── Party management ─────────────────────────────────────────────
-  function setPartySlot(slotIndex, heroKey) {
-    // Remove from any existing slot first
-    const existing = party.value.indexOf(heroKey)
-    if (existing !== -1 && existing !== slotIndex) party.value[existing] = null
-    party.value[slotIndex] = heroKey
-    persist()
-  }
-
-  function clearPartySlot(slotIndex) {
-    const heroKey = party.value[slotIndex]
-    if (heroKey) delete assignments.value[heroKey]
-    party.value[slotIndex] = null
-    persist()
-  }
-
-  function assignUnit(heroKey, unitTypeId) {
-    if (!heroKey) return
-    assignments.value[heroKey] = unitTypeId
-    persist()
-  }
-
-  const partyReady = computed(() =>
-    party.value.every(k => k !== null) && party.value.every(k => assignments.value[k])
-  )
-
-  // ── Casualty reporting (called after a siege) ────────────────────
+  // ── Casualty reporting (called after battle) ──────────────────────
   function applyLosses(losses) {
-    // losses = { infantry: 12, archers: 5, siege_crew: 1 }
     for (const [unitId, dead] of Object.entries(losses)) {
       if (unitId in army.value) {
         army.value[unitId] = Math.max(0, army.value[unitId] - dead)
@@ -98,9 +146,14 @@ export const useSiegeStore = defineStore('siege', () => {
   }
 
   return {
-    army, party, assignments, partyReady,
+    army, lanes, phase2Party, assignments,
+    allLaneHeroes, totalDeployed,
+    phase1Ready, phase2Ready, siegeReady,
+    heroCurrentLane,
+    addToLane, removeFromLane,
+    setPhase2Slot, clearPhase2Slot,
+    assignUnit,
     canRecruit, recruit,
-    setPartySlot, clearPartySlot, assignUnit,
     applyLosses,
   }
 })
