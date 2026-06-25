@@ -14,6 +14,7 @@
           <button class="nav-btn" :class="{ active: view === 'summon' }" @click="navigate('summon')">Recruit</button>
           <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
+          <button class="nav-btn" :class="{ active: view === 'sieges' }" @click="navigate('sieges')">Sieges</button>
           <button class="nav-btn" :class="{ active: view === 'camp' }" @click="navigate('camp')">Stronghold</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }" @click="navigate('realm')">Realm</button>
           <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
@@ -207,14 +208,13 @@
           <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Dungeons</button>
           <button class="gear-tab" :class="{ active: expTab === 'explore' }" @click="expTab = 'explore'">Explore</button>
           <button class="gear-tab" :class="{ active: expTab === 'raids' }" @click="expTab = 'raids'">Raids</button>
-          <button class="gear-tab" :class="{ active: expTab === 'sieges' }" @click="expTab = 'sieges'">Sieges</button>
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
         <ExploreView v-else-if="expTab === 'explore'" @enter-dungeon="startDungeonBattle" />
         <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" @auto-raid="startAutoRaid" />
-        <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
       </div>
+      <SiegesView v-else-if="view === 'sieges'" />
       <CampView v-else-if="view === 'camp'" />
       <RealmView v-else-if="view === 'realm'" />
     </main>

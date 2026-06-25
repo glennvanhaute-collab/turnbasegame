@@ -120,7 +120,6 @@ export const CAMP_BUILDINGS = {
       { cost: { gold: 22000, ores: { mithril:   25 } }, bonus: 'Unlocks Legendary siege gear + unique weapons' },
     ],
   },
-}
 
   lumber_hall: {
     id:    'lumber_hall',
@@ -135,6 +134,7 @@ export const CAMP_BUILDINGS = {
       { cost: { gold: 12000, planks: { ironwood:   1000 } }, bonus: '+80% woodworking XP, +15% DEF, bows deal +10% in raids'  },
     ],
   },
+}
 
 // Helper: get bonus description for a given building at a given tier (1-indexed)
 export function getBuildingBonus(buildingId, tier) {
