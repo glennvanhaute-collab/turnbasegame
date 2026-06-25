@@ -269,6 +269,7 @@ import { UNIT_TYPES }          from '../game/data/siegeUnits.js'
 import { buildSiegeCommander, SIEGE_TIER_DATA, SIEGE_LOG } from '../game/data/siegeCommanders.js'
 import { TargetType }          from '../game/Skill.js'
 import { BattleState }         from '../game/BattleEngine.js'
+import { playSiegeBreach, playSiegeVanguard, playMain } from '../game/music.js'
 
 const props = defineProps({
   faction: { type: Object, required: true },
@@ -503,6 +504,7 @@ function buildVanguardTeam() {
 }
 
 function startPhase2() {
+  playSiegeVanguard()
   const commander = buildSiegeCommander(props.faction.id, props.tier.id)
   if (!commander) { siegeResult.value = 'victory'; return }
 
@@ -592,11 +594,13 @@ function seClass(type) {
 
 // ── Lifecycle ─────────────────────────────────────────────────────────
 onMounted(() => {
+  playSiegeBreach()
   initSimulation()
 })
 
 onUnmounted(() => {
   stopSim()
+  playMain()
 })
 </script>
 

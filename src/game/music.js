@@ -1,7 +1,9 @@
-import mainUrl   from '../assets/audio/main.ost?url'
-import battleUrl from '../assets/audio/battle.mp3?url'
+import mainUrl          from '../assets/audio/main.ost?url'
+import battleUrl        from '../assets/audio/battle.mp3?url'
+import siegeBreachUrl   from '../assets/audio/Siege of Mordaine - The Iron Thirst - Treblo.mp3?url'
+import siegeVanguardUrl from '../assets/audio/Siege of Mordaine - The Silent Pact - Treblo.mp3?url'
 
-const VOL = { main: 0.40, battle: 0.55 }
+const VOL = { main: 0.40, battle: 0.55, siege_breach: 0.55, siege_vanguard: 0.50 }
 const FADE_STEPS = 22
 const STEP_MS    = 38   // ~830 ms total crossfade
 
@@ -50,8 +52,10 @@ function _crossfade(key, url) {
   }, STEP_MS)
 }
 
-export function playMain()   { _crossfade('main',   mainUrl)   }
-export function playBattle() { _crossfade('battle', battleUrl) }
+export function playMain()         { _crossfade('main',           mainUrl)          }
+export function playBattle()       { _crossfade('battle',         battleUrl)        }
+export function playSiegeBreach()  { _crossfade('siege_breach',   siegeBreachUrl)   }
+export function playSiegeVanguard(){ _crossfade('siege_vanguard', siegeVanguardUrl) }
 
 export function setMuted(val) {
   _muted = val
