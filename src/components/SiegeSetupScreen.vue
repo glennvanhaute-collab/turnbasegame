@@ -232,7 +232,7 @@
             v-for="entry in availableHeroes"
             :key="entry.key"
             class="picker-hero"
-            :class="{ 'in-target': isInTarget(entry.key) }"
+            :class="{ 'in-target': isInTarget(entry.key), 'locked-out': isLockedOut(entry.key) }"
             @click="pickHero(entry.key)"
           >
             <HeroAvatar :hero="entry.hero" :size="52" />
@@ -319,14 +319,19 @@ function isInTarget(heroKey) {
   return siege.phase2Party[pickerFor.value.slot] === heroKey
 }
 
+function isLockedOut(heroKey) {
+  if (!pickerFor.value || pickerFor.value.type !== 'lane') return false
+  const current = siege.heroCurrentLane(heroKey)
+  return current !== null && current !== pickerFor.value.lane
+}
+
 function heroBadge(heroKey) {
   if (!pickerFor.value) return null
   if (pickerFor.value.type === 'lane') {
     const lane = siege.heroCurrentLane(heroKey)
-    if (lane && lane !== pickerFor.value.lane) return LANE_LABELS[lane]
+    if (lane) return LANE_LABELS[lane]
     return null
   }
-  // phase2
   const idx = siege.phase2Party.indexOf(heroKey)
   if (idx !== -1 && idx !== pickerFor.value.slot) return 'Vanguard'
   return null
@@ -334,6 +339,7 @@ function heroBadge(heroKey) {
 
 function pickHero(heroKey) {
   if (!pickerFor.value) return
+  if (isLockedOut(heroKey)) return
   if (pickerFor.value.type === 'lane') {
     siege.addToLane(pickerFor.value.lane, heroKey)
   } else {
@@ -920,8 +926,9 @@ function pickHero(heroKey) {
   transition: all 0.12s;
   position: relative;
 }
-.picker-hero:hover { border-color: #5a2810; background: #1a0d09; }
+.picker-hero:hover:not(.locked-out) { border-color: #5a2810; background: #1a0d09; }
 .picker-hero.in-target { border-color: #c8962a55; background: #1a1208; }
+.picker-hero.locked-out { opacity: 0.28; cursor: not-allowed; }
 
 .ph-name {
   font-size: 0.58rem;
