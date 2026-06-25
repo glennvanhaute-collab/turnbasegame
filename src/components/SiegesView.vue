@@ -44,7 +44,7 @@
           <div class="tier-rewards">
             <span class="t-reward">🪙 {{ tier.gold.toLocaleString() }}</span>
             <span class="t-reward">💎 {{ tier.diamonds }}</span>
-            <span class="t-reward mat" :style="{ color: active.color }">◆ {{ active.event.matReward }}</span>
+            <span class="t-reward mat" :style="{ color: active.color }">◆ {{ active.event.matReward }} ×{{ tier.matCount }}</span>
           </div>
           <button class="tier-btn" disabled>
             <span class="tier-btn-text">Besiege</span>
@@ -98,7 +98,7 @@ const FACTIONS = [
     event: {
       title:     'The Iron March',
       dispatch:  'House Aldric has marched past the Thornpass boundary stones for the third time this season. A forward camp has been established in contested land. They are not accepting envoys. The other houses cannot move without triggering open war. You can.',
-      matReward: 'Iron Sigil ×2',
+      matReward: 'Iron Sigil',
     },
   },
   {
@@ -111,7 +111,7 @@ const FACTIONS = [
     event: {
       title:     'The Mirror Incident',
       dispatch:  'Three Valdris scholars entered the Citadel of Mirrors six days ago. None have returned. The house has sealed the lower vaults and is refusing all investigation. Something is responding from beneath the Citadel. The other houses are afraid to find out what.',
-      matReward: 'Void Shard ×2',
+      matReward: 'Void Shard',
     },
   },
   {
@@ -124,7 +124,7 @@ const FACTIONS = [
     event: {
       title:     'The Coven Split',
       dispatch:  "House Caelwyn's eastern coven has stopped answering to the house banner. The rites they performed in the Thornwood summoned something that is no longer under their control. The house leadership will not admit this publicly. Settlements near the wood are already empty.",
-      matReward: 'Thornwood Rune ×2',
+      matReward: 'Thornwood Rune',
     },
   },
   {
@@ -137,17 +137,17 @@ const FACTIONS = [
     event: {
       title:     'The Greyveil Closure',
       dispatch:  'House Mordaine has invoked a century-old maritime charter to close the Greyveil trade route. Grain shipments to three houses have stopped. They insist it is legal. It is not wrong — they have the documentation. That does not make it acceptable.',
-      matReward: 'Privateer Seal ×2',
+      matReward: 'Privateer Seal',
     },
   },
 ]
 
 // ── Tier definitions ──────────────────────────────────────────────
 const TIERS = [
-  { id: 'skirmish',  name: 'Skirmish',        sub: 'Outer garrison — weakened defenders',   color: '#888',    gold: 800,   diamonds: 12 },
-  { id: 'siege',     name: 'Siege',            sub: 'Main wall — organised resistance',      color: '#c8962a', gold: 1800,  diamonds: 25 },
-  { id: 'assault',   name: 'Full Assault',     sub: 'Inner sanctum — elite guard',           color: '#cc4444', gold: 3200,  diamonds: 45 },
-  { id: 'breach',    name: 'The Breach',       sub: 'The commander — ends the transgression', color: '#b44fff', gold: 5000,  diamonds: 70 },
+  { id: 'skirmish', name: 'Skirmish',     sub: 'Outer garrison — weakened defenders',    color: '#888',    gold: 800,   diamonds: 12, matCount: 1 },
+  { id: 'siege',    name: 'Siege',        sub: 'Main wall — organised resistance',       color: '#c8962a', gold: 1800,  diamonds: 25, matCount: 2 },
+  { id: 'assault',  name: 'Full Assault', sub: 'Inner sanctum — elite guard',            color: '#cc4444', gold: 3200,  diamonds: 45, matCount: 4 },
+  { id: 'breach',   name: 'The Breach',   sub: 'The commander — ends the transgression', color: '#b44fff', gold: 5000,  diamonds: 70, matCount: 7 },
 ]
 
 // ── Active event — rotates every 7 days based on real time ───────
