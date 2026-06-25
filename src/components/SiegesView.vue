@@ -46,9 +46,8 @@
             <span class="t-reward">💎 {{ tier.diamonds }}</span>
             <span class="t-reward mat" :style="{ color: active.color }">◆ {{ active.event.matReward }} ×{{ tier.matCount }}</span>
           </div>
-          <button class="tier-btn" disabled>
+          <button class="tier-btn" @click="openSetup(tier)">
             <span class="tier-btn-text">Besiege</span>
-            <span class="tier-btn-soon">Coming Soon</span>
           </button>
         </div>
       </div>
@@ -77,10 +76,23 @@
     </div>
 
   </div>
+
+  <!-- Setup screen — full-screen overlay when a tier is clicked -->
+  <Teleport to="body">
+    <SiegeSetupScreen
+      v-if="setupTier"
+      :faction="active"
+      :tier="setupTier"
+      @back="closeSetup"
+      @march="closeSetup"
+    />
+  </Teleport>
+
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import SiegeSetupScreen from './SiegeSetupScreen.vue'
 import siegeAldric   from '../assets/lore/siege_aldric.png'
 import siegeValdris  from '../assets/lore/siege_Valdris.png'
 import siegeCaelwyn  from '../assets/lore/siege_caelwyn.png'
@@ -144,10 +156,26 @@ const FACTIONS = [
 
 // ── Tier definitions ──────────────────────────────────────────────
 const TIERS = [
-  { id: 'skirmish', name: 'Skirmish',     sub: 'Outer garrison — weakened defenders',    color: '#888',    gold: 800,   diamonds: 12, matCount: 1 },
-  { id: 'siege',    name: 'Siege',        sub: 'Main wall — organised resistance',       color: '#c8962a', gold: 1800,  diamonds: 25, matCount: 2 },
-  { id: 'assault',  name: 'Full Assault', sub: 'Inner sanctum — elite guard',            color: '#cc4444', gold: 3200,  diamonds: 45, matCount: 4 },
-  { id: 'breach',   name: 'The Breach',   sub: 'The commander — ends the transgression', color: '#b44fff', gold: 5000,  diamonds: 70, matCount: 7 },
+  {
+    id: 'skirmish', name: 'Skirmish', sub: 'Outer garrison — weakened defenders',
+    color: '#888', gold: 800, diamonds: 12, matCount: 1,
+    garrison: ['Militia conscripts ×8', 'Untrained archers ×4'],
+  },
+  {
+    id: 'siege', name: 'Siege', sub: 'Main wall — organised resistance',
+    color: '#c8962a', gold: 1800, diamonds: 25, matCount: 2,
+    garrison: ['Veteran soldiers ×10', 'Tower archers ×6', 'Wall ballista ×2'],
+  },
+  {
+    id: 'assault', name: 'Full Assault', sub: 'Inner sanctum — elite guard',
+    color: '#cc4444', gold: 3200, diamonds: 45, matCount: 4,
+    garrison: ['Elite guard ×8', 'Battlemage ×3', 'Siege artillery ×3', 'Captain of the Guard'],
+  },
+  {
+    id: 'breach', name: 'The Breach', sub: 'The commander — ends the transgression',
+    color: '#b44fff', gold: 5000, diamonds: 70, matCount: 7,
+    garrison: ['Full garrison ×20', 'Arcane constructs ×4', 'The Commander (Phase 2)'],
+  },
 ]
 
 // ── Active event — rotates every 7 days based on real time ───────
@@ -165,6 +193,11 @@ function getWeekEnd() {
 const activeIdx = computed(() => getActiveIndex())
 const nextIdx   = computed(() => (activeIdx.value + 1) % FACTIONS.length)
 const active    = computed(() => FACTIONS[activeIdx.value])
+
+// ── Setup screen state ────────────────────────────────────────────
+const setupTier = ref(null)
+function openSetup(tier) { setupTier.value = tier }
+function closeSetup()    { setupTier.value = null }
 
 // ── Countdown timer ───────────────────────────────────────────────
 const timeLeft = ref('')
@@ -396,7 +429,6 @@ onUnmounted(() => clearInterval(timerInterval))
 .t-reward.mat { }
 
 .tier-btn {
-  position: relative;
   padding: 8px 22px;
   border-radius: 6px;
   border: 1px solid var(--tc);
@@ -407,26 +439,15 @@ onUnmounted(() => clearInterval(timerInterval))
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  cursor: not-allowed;
-  overflow: hidden;
-  opacity: 0.55;
+  cursor: pointer;
   flex-shrink: 0;
   min-width: 110px;
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.tier-btn-text { display: block; transition: opacity 0.2s, transform 0.2s; }
-.tier-btn-soon {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.56rem;
-  letter-spacing: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
+.tier-btn:hover {
+  background: color-mix(in srgb, var(--tc) 18%, transparent);
+  box-shadow: 0 0 16px -4px var(--tc);
 }
-.tier-btn:hover .tier-btn-text { opacity: 0; transform: translateY(-4px); }
-.tier-btn:hover .tier-btn-soon  { opacity: 1; }
 
 /* ── Rotation Strip ───────────────────────────────────────────── */
 .rotation-section {
