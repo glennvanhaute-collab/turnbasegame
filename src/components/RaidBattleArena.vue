@@ -199,7 +199,7 @@ import { getPortrait, PORTRAIT_MAP } from '../game/portraits.js'
 import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
-import { playRaid, playMain } from '../game/music.js'
+import { playRaid, playVoidHeir, playMain } from '../game/music.js'
 import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
 
 const props = defineProps({
@@ -383,7 +383,7 @@ onMounted(() => {
     store.autoCompleteRaid(props.raidId)
     return
   }
-  playRaid()
+  props.raidId === 'void_heir' ? playVoidHeir() : playRaid()
   const team = collection.buildTeam()
   if (store.autoplay) store.toggleAutoplay()
   store.currentRaidId = props.raidId
