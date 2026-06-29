@@ -1,206 +1,269 @@
-# Gear Systems Design
+# Gear Systems — Design & Implementation Status
 
-*Living document — brainstorm in progress. TBD = not yet decided. Do not implement until marked LOCKED.*
+*Last audited: 2026-06-29*
+*Status icons: ✅ Built & wired | 🔴 Bug / mismatch | 🔲 Not yet implemented | 🔒 Locked design*
 
 ---
 
-## Core Philosophy
+## Core Philosophy — 🔒 LOCKED
 
 - Legendary is a state you **earn**, not a tier you craft. All gear starts Common (★0).
 - Gear becomes Legendary through star upgrades — not by material alone.
-- Each gear set should represent a distinct playstyle, not just a stat bundle.
+- Each gear set represents a distinct playstyle, not just a stat bundle.
 - Fusion sets reward players who invest in multiple artisan disciplines.
 - The journey from copper to endgame should feel fast and fun early, grindy and satisfying late.
 
 ---
 
-## Star Cap Per Tier — LOCKED
+## Recipes — What's Built
 
-Each material tier has a ceiling. You cannot grind copper to Mythical.
+All three armor types are fully crafted across six tiers:
 
-| Tier | Max Stars | Max Rarity | Feel |
-|------|-----------|------------|------|
-| Copper | ★3 | Uncommon | Starter, disposable — upgrade a little, move on |
-| Tin | ★4 | Rare | Early progression |
-| Steel | ★5 | Rare | Mid game |
-| Darksteel | ★6 | Epic | Late mid game |
-| Mithril | ★8 | Legendary | Pre-raid grind — first time you feel powerful |
-| Moonsilver / Moonscale / Moonweave | ★10 | Mythical | Endgame base — fully invested pure sets |
-| Special disciplines (elven/goblin/dwarf) | ★10 | Mythical | Ultimate endgame — requires forge unlock |
+### Plate (Blacksmith) — `src/game/data/recipes.js` ✅
+Full 9-slot sets (weapon/shield/helm/chest/legs/boots/gloves): copper → tin → steel → darksteel → mithril → moonsilver (elven)
 
-**Implication:** Remove hardcoded `rarity: 'Legendary'` from all mithril recipes. Rarity is always determined by star count.
+Weapon types per tier: Sword (ATK), Dagger (ATK + Crit Rate, `armorType: 'leather'`), Mace (ATK + DEF%), Spear (ATK + SPD)
+Moonsilver is `craftDiscipline: 'elven'` — gated behind elven forge unlock.
 
----
+### Leather (Leatherworking) — `src/game/data/leatherRecipes.js` ✅
+5-slot sets (head/chest/legs/boots/gloves): rough (copper) → thick (tin) → hardened (steel) → shadow (darksteel) → celestial (mithril) → moonscale (moonsilver)
+Daggers and bows are in `recipes.js` and `woodworkingRecipes.js` respectively.
 
-## Star Gates — LOCKED (structure), TBD (values)
-
-Gates exist at ★5 (essence) and ★6 (core). Gates ★7–10 use higher quantities of the same materials.
-
-| Star | Gate material | Qty (TBD — balance later) |
-|------|---------------|--------------------------|
-| ★5 | `<tier>_essence` × 1 | — |
-| ★6 | `<tier>_core` × 1 + smithing lvl 3 | — |
-| ★7 | `<tier>_essence` × 2 | TBD |
-| ★8 | `<tier>_core` × 2 | TBD (Legendary gate) |
-| ★9 | `<tier>_essence` × 3 | TBD |
-| ★10 | `<tier>_core` × 3 | TBD (Mythical gate) |
-
-**Mithril and moonsilver essences/cores drop from raids** — this makes raids the gateway to pushing mithril gear to Legendary, not just optional content.
+### Cloth (Tailoring) — `src/game/data/tailoringRecipes.js` ✅
+5-slot sets (head/chest/legs/boots/gloves): cotton (copper) → wool (tin) → silkweave (steel) → shadowcloth (darksteel) → starweave (mithril) → moonweave (moonsilver)
+Staves are in `recipes.js`.
 
 ---
 
-## Pure Set Identities — LOCKED
+## Star Cap Per Tier
+
+### Design spec — 🔒 LOCKED
+| Tier | Max ★ | Max Rarity |
+|------|-------|------------|
+| Copper | ★3 | Uncommon |
+| Tin | ★4 | Rare |
+| Steel | ★5 | Rare |
+| Darksteel | ★6 | Epic |
+| Mithril | ★8 | Legendary |
+| Moonsilver | ★10 | Mythical |
+
+### Code — 🔴 MISMATCH (`src/game/data/recipes.js` line 507)
+```
+TIER_MAX_STARS = { copper: 4, tin: 6, steel: 6, darksteel: 6, mithril: 10, moonsilver: 10 }
+```
+Early tiers are too generous. Copper can reach Rare (★4), Tin/Steel can reach Epic (★6), Mithril can reach Mythical (★10).
+**Fix needed:** Update to `{ copper: 3, tin: 4, steel: 5, darksteel: 6, mithril: 8, moonsilver: 10 }`.
+
+---
+
+## Star Gates
+
+### ★5 and ★6 gates — ✅ Built & wired
+Defined in `src/game/data/upgradeComponents.js`, enforced in `src/components/ForgeView.vue`.
+- ★5: `<tier>_essence` × 1
+- ★6: `<tier>_core` × 1 + Smithing Lv. 3
+
+### ★7–10 gates — 🔲 Not defined
+Structure exists in `STAR_GATES` but these stars have no extra requirement beyond bar cost.
+Design intent: higher quantities of existing essence/core (TBD during balance pass).
+
+---
+
+## Hardcoded Rarity Bug — 🔴 All Three Files
+
+All gear starts with `rarity` set at craft time from the recipe definition. The upgrade function (ForgeView.vue:623) only ever **increases** rarity — it never starts from Common. This means:
+
+| Recipes | Tier | Hardcoded rarity | Correct rarity at ★0 |
+|---------|------|-----------------|----------------------|
+| `recipes.js` | mithril | `'Legendary'` | `'Common'` |
+| `recipes.js` | moonsilver | `'Epic'` | `'Common'` |
+| `leatherRecipes.js` | celestial (mithril) | `'Legendary'` | `'Common'` |
+| `leatherRecipes.js` | moonscale (moonsilver) | `'Epic'` | `'Common'` |
+| `tailoringRecipes.js` | starweave (mithril) | `'Legendary'` | `'Common'` |
+| `tailoringRecipes.js` | moonweave (moonsilver) | `'Epic'` | `'Common'` |
+
+All other tiers (copper→darksteel) are already correct — they start at their crafted rarity and upgrade from there.
+**Fix needed:** Set all mithril and moonsilver recipe entries to `rarity: 'Common'`.
+
+---
+
+## Rarity-by-Stars Function — ✅ Built
+
+`rarityForStars(stars)` in `recipes.js:494`:
+```
+★0 = Common | ★2 = Uncommon | ★4 = Rare | ★6 = Epic | ★8 = Legendary | ★10 = Mythical
+```
+`STAR_BAR_COST = [0, 1, 1, 2, 2, 3, 3, 5, 7, 9, 12]` — bar cost to upgrade to each star.
+`starMultiplier(stars)` — stat multiplier at a given star count (+5%/star for ★1–4, +8%/star for ★5–6, +6%/star for ★7–10).
+
+---
+
+## Pure Set Bonuses — `src/game/data/setBonus.js`
+
+### Flat bonuses — ✅ Defined (wired in collection/combat stores)
+```
+plate:   2pc +8% DEF | 4pc +12% HP | 6pc +5% DEF +8% HP
+leather: 2pc +8% SPD | 4pc +10% Crit Rate | 6pc +8% ATK
+cloth:   2pc +12% ATK | 4pc +10% Crit DMG | 6pc +8% HP
+```
+
+### 6pc passives — 🔴 Stubs only, not wired in BattleEngine
+Code stubs (`SET_PASSIVE_6`):
+- plate: `steadfast` — "When HP drops below 30%, gain a shield equal to 10% max HP (once per battle)."
+- leather: `opener` — "First action each battle deals 25% bonus damage."
+- cloth: `aoe_amplify` — "Skills that hit all enemies deal 15% increased damage."
+
+**Design conflict — leather passive:**
+- Code has: `opener` (first action +25% damage) — offensive
+- Design doc says: `Shroud` (untargetable turn 1) — defensive/evasive
+These are different identities. **Decision needed** before implementing.
+
+---
+
+## Set Identities — 🔒 LOCKED (design)
 
 ### Plate — "The Last Stand"
-- **2pc:** +8% DEF
-- **4pc:** +12% HP
-- **6pc flat:** +5% DEF, +8% HP
-- **6pc passive — Steadfast:** When HP drops below 30%, gain a shield equal to 10% max HP (once per battle).
-- **Fantasy:** The immovable wall. You don't dodge — you endure.
+Immovable wall. You don't dodge — you endure.
+6pc passive **Steadfast**: When HP drops below 30%, gain a shield equal to 10% max HP (once per battle).
 
 ### Leather — "The Ghost"
-- **2pc:** +8% SPD
-- **4pc:** +10% Crit Rate
-- **6pc flat:** +8% ATK
-- **6pc passive — Shroud:** At battle start, become untargetable for 1 turn. Enemies cannot select this hero.
-- **Fantasy:** Strike first, disappear. Inspired by PoE2's evasion — dodge should feel impactful, not like a small % rounding error.
-- **Note:** Dodge as a substat on leather gear (% chance to fully evade a hit) — TBD system below.
+Strike first, disappear.
+6pc passive **Shroud**: At battle start, become untargetable for 1 turn. *(code currently has 'opener' — see conflict above)*
 
 ### Cloth — "The Storm"
-- **2pc:** +12% ATK
-- **4pc:** +10% Crit DMG
-- **6pc flat:** +8% HP
-- **6pc passive — AOE Amplify:** Skills that hit all enemies deal +15% increased damage.
-- **Fantasy:** Glass cannon. Fragile, devastating, lights up the whole field.
+Glass cannon. Fragile, devastating, lights up the whole field.
+6pc passive **AOE Amplify**: Skills that hit all enemies deal +15% increased damage.
 
 ---
 
-## Fusion Sets — LOCKED (concept), TBD (stats + passives)
+## Fusion Sets — `src/components/FusionWorkshopView.vue`
 
-**Gate:** Requires BOTH artisan disciplines to be levelled. Available from the start of the game — not a post-endgame tier. The gate is artisan investment, not content progression.
+### UI — ✅ Built (placeholder data)
+Three ateliers with per-atelier backgrounds (Arcane/Shadow Loom/Iron Tannery), recipe lists, stat display, artisan requirement display.
 
-**Design intent:** Fusion sets reward players who think long-term about what they farm. A player who splits investment between two disciplines unlocks something with a unique identity that neither pure set has.
+### Crafting backend — 🔲 Not implemented
+No material consumption, no artisan level checks, no gear instance creation. Craft button shows "Coming Soon".
 
-### Cloth + Plate — "Arcane Knight"
-- **Requires:** Blacksmithing + Tailoring
-- **Fantasy:** The enchanted warrior. Magic woven into steel. A mage who wears a greatsword. DEF that feeds into spell power.
-- **2pc:** TBD
-- **4pc:** TBD
-- **6pc passive — TBD:** Something like: taking a hit builds Arcane Charge; at 3 stacks, next skill deals +50% damage.
+### Set bonuses — 🔲 Not in setBonus.js
 
-### Leather + Cloth — "Shadowweave"
-- **Requires:** Leatherworking + Tailoring
-- **Fantasy:** The spellblade. Fast and magical. On dodge/shroud, empower next skill.
-- **2pc:** TBD
-- **4pc:** TBD
-- **6pc passive — Phase Strike (TBD):** On dodge or Shroud proc, next skill deals bonus damage.
+| Atelier | Requires | 6pc passive |
+|---------|----------|-------------|
+| Arcane Atelier (cloth+plate) | Blacksmithing + Tailoring | Arcane Charge: 3 hits → next skill +50% damage |
+| Shadow Loom (leather+cloth) | Leatherworking + Tailoring | Phase Strike: on dodge, next skill +40% damage |
+| Iron Tannery (leather+plate) | Blacksmithing + Leatherworking | Iron Reflex: % evade; on evade, next attack +25% ATK |
 
-### Leather + Plate — "Ironveil"
-- **Requires:** Blacksmithing + Leatherworking
-- **Fantasy:** The armored predator. A tank who punishes attackers. Dodge that scales with DEF.
-- **2pc:** TBD
-- **4pc:** TBD
-- **6pc passive — Iron Reflex (TBD):** Chance to fully evade a hit; on evade, next attack gains ATK bonus.
+**Hero champion gap:** No hero currently has the artisan combos for Shadow Loom (Leatherworking + Tailoring) or Iron Tannery (Blacksmithing + Leatherworking). Only Arcane Atelier has natural champions (Lord Aldric, Aurelan Dawnspire, Hilda).
 
 ---
 
-## Special Discipline Sets — TBD
+## Special Discipline Sets — 🔲 Not implemented
 
-Three forge unlocks discovered through rare exploration rewards. Each represents a culture with a unique gear identity and is tied to **one armor type**.
+Three forge unlocks (elven/goblin/dwarf) discovered through exploration rewards.
 
-| Discipline | Material | Armor type | Culture identity |
-|------------|----------|------------|-----------------|
-| Elven | Moonsilver+ | TBD | Ancient, precise, magical |
-| Goblin | Vaultmetal | TBD | Steampunk, buff-enhancing, overclock |
-| Dwarf | Runeite | TBD | Runic, immovable, retaliatory |
+| Discipline | Material | Armor type | Identity |
+|------------|----------|------------|----------|
+| Elven | Moonsilver+ | TBD by user | Ancient, precise, moonlit |
+| Goblin | Vaultmetal | TBD by user | Steampunk, buff-enhancing — **Overclock** |
+| Dwarf | Runeite | TBD by user | Runic, immovable, retaliatory |
 
-### Goblin / Vaultmetal — "Overclock" — LOCKED (concept), TBD (stats)
-- **Identity:** Enhances buffs. Completely underrepresented in games. The set rewards heroes who use buff skills — turning a "wasted" buff turn into an investment.
-- **2pc:** Each active buff on self increases ATK by 8% (stacks per buff)
-- **4pc:** Buffs you cast last 1 additional turn
-- **6pc passive — Steam Surge:** The turn after you use a buff skill, your next damaging skill deals +35% bonus damage.
-- **Note:** Also addresses the combat balance problem where basic attack spam clears raids more effectively than using buff skills. Vaultmetal makes the buff → attack loop dominant.
+### Goblin / Vaultmetal — "Overclock" — 🔒 Concept locked, 🔲 not implemented
+- 2pc: Each active buff on self → +8% ATK (stacks)
+- 4pc: Buffs you cast last 1 additional turn
+- 6pc passive **Steam Surge**: Turn after using a buff skill, next damaging skill +35% damage
+- Addresses basic-attack-spam-clears-raids problem — buffs become the dominant loop
 
-### Elven / Moonsilver — TBD
-- **Armor type:** TBD (swift + magical suggests leather or cloth)
-- **Identity:** Grace, precision, moonlit evasion
-- **Set bonuses:** TBD
+### Elven / Moonsilver+ — 🔲 TBD
+- Identity: grace, precision, moonlit evasion
+- Set bonuses: TBD
 
-### Dwarf / Runeite — TBD
-- **Armor type:** TBD (runic tank suggests plate)
-- **Identity:** Runic retaliator — slow, devastating counter-puncher
-- **6pc passive idea — Rune Retaliation:** When hit above X% max HP, next attack deals massive bonus damage
-- **Set bonuses:** TBD
+### Dwarf / Runeite — 🔲 TBD
+- Identity: runic retaliator, slow but devastating counter-puncher
+- 6pc passive idea — Rune Retaliation: when hit above X% max HP, next attack deals massive bonus damage
 
 ---
 
-## Dodge / Evasion System — TBD
+## Dodge / Evasion System — 🔲 Not implemented
 
-Inspired by Path of Exile 2 — dodge should feel impactful, not a rounding error.
+Inspired by Path of Exile 2 — dodge feels impactful, not a rounding error.
 
-- **Dodge** as a substat on leather gear — % chance to fully evade a hit (complete miss, no damage)
-- Distinct from DEF (reduces damage) — dodge is binary: you either take the hit or you don't
-- Leather 6pc Shroud guarantees dodge for turn 1 — the stat extends that feeling throughout a fight
-- Interaction with Shadowweave fusion passive: on dodge, empower next skill
-- **TBD:** Dodge cap, how AI handles high-dodge heroes, whether enemies can have accuracy stats
-
----
-
-## Ore / Component Drop Sources — LOCKED (structure), TBD (exact rates)
-
-| Material | Ore source | Essence/Core source |
-|----------|-----------|---------------------|
-| Copper | Campaign / Training (Easy) | Dungeons Hard |
-| Tin | Campaign / Training (Normal) | Dungeons Hard–Nightmare |
-| Steel | Campaign / Dungeons (Medium) | Dungeons Nightmare |
-| Darksteel | Dungeons Hard | TBD — possibly Nightmare dungeons or siege |
-| Mithril | Dungeons Nightmare | **Raids** |
-| Moonsilver | **Raids** | **Raids** |
+- Dodge% as a substat on leather gear (Darksteel tier and above) — full miss chance, binary
+- Distinct from DEF (which reduces damage)
+- Leather 6pc Shroud guarantees dodge turn 1 — the substat extends that feeling
+- Interaction with Shadow Loom fusion passive: on dodge, empower next skill
+- TBD: dodge cap, how AI handles high-dodge heroes, accuracy counter-stat
 
 ---
 
-## Raid Gear — LOCKED (Regret set), TBD (Void Heir set)
+## Drop Sources — Structure locked, quantities TBD
 
-Raid gear is pre-built Legendary — it drops as Legendary, does not follow the star cap system. These are exceptional items from exceptional content.
+| Material | Ore source | Essence source | Core source |
+|----------|-----------|----------------|-------------|
+| Copper | Campaign / Training Easy | Dungeons Hard (12%) ✅ | *(TBD)* |
+| Tin | Campaign / Training Normal | Dungeons Hard (12%) / Nightmare (15%) ✅ | *(TBD)* |
+| Steel | Campaign / Dungeons Medium | Dungeons Nightmare (10%) ✅ | *(TBD)* |
+| Darksteel | Dungeons Hard | 🔲 Not defined | 🔲 Not defined |
+| Mithril | Dungeons Nightmare | 🔲 Not defined | 🔲 Not defined |
+| Moonsilver | **Raids** ✅ | **Raids** (always 1-2) ✅ | **Raids** (30% chance) ✅ |
 
-### Regalia of Regret (Throne of Regret) — LOCKED
-- Full 7-piece Legendary plate set
-- Stats ~50% above moonsilver Epic equivalents
-- Named set bonus: `regret` — 2pc: +15% Raid DMG / +10% Siege DMG; 4pc: +20% ATK / +20% Crit DMG; 6pc: +15% Raid DMG
-- 6pc passive — Throne Judgment: First skill each turn surges with void energy, +50% bonus damage
-
-### Void Heir Set (The Void Heir) — TBD
-- Theme: void, eclipse, cosmic annihilation
-- Set identity TBD — probably cloth/caster-focused to contrast Regret's plate identity
-- Stats, set bonuses, passive: TBD
-
----
-
-## Substats — TBD (post-progression)
-
-Legendary+ gear rolls secondary stats. Raid gear has substats by default.
-
-Ideas:
-- Stats: Crit Rate, Crit DMG, HP%, ATK%, DEF%, SPD, Dodge%, Resistance
-- Leather gear substats lean toward Dodge%, SPD, Crit Rate
-- Plate gear substats lean toward HP%, DEF%, Resistance
-- Cloth gear substats lean toward ATK%, Crit DMG, SPD
-
-Inspired loosely by RSL substat hunting, but **not gated by stat thresholds** — TBD whether to add any gate mechanic.
+**Gap:** Steel core, darksteel essence/core, mithril essence/core have no drop source assigned.
+Design intent: darksteel from Nightmare dungeons or siege; mithril from raids.
 
 ---
 
-## Hero Roles → Gear Affinities — TBD
+## Raid Gear — `src/game/data/setBonus.js` + `raidGear.js`
 
-Map each hero to their natural set affinity. To be done once full set list is locked.
+### Regalia of Regret (Throne of Regret) — ✅ Built
+Full 7-piece Legendary plate set. Named set bonuses in `NAMED_SET_BONUSES.regret`.
+- 2pc: +15% Raid DMG, +10% Siege DMG
+- 4pc: +20% ATK, +20% Crit DMG
+- 6pc: additional +15% Raid DMG
+- 6pc passive **Throne Judgment**: First skill each turn deals +50% bonus damage.
+Drops from `rollThroneGear()` in `raidEncounters.js`.
+
+### Void Heir Set — 🔲 Not designed or implemented
+Theme: void, eclipse, cosmic annihilation. Likely cloth/caster-focused (contrast with Regret's plate identity).
+
+---
+
+## Substats — 🔲 Not implemented
+
+Legendary+ gear to roll secondary stats. Raid gear gets substats by default.
+
+- Leather substats lean toward: Dodge%, SPD, Crit Rate
+- Plate substats lean toward: HP%, DEF%, Resistance
+- Cloth substats lean toward: ATK%, Crit DMG, SPD
+
+---
+
+## Hero Gear Affinity — See `docs/gear_mapping.md`
+
+Gear type is determined by **class role**, not artisan skill.
+Artisan skill determines crafting bonus (XP/cost discount), not what the hero should wear.
+
+---
+
+## Implementation Priority (suggested order)
+
+1. **🔴 Fix hardcoded rarities** — mithril/moonsilver recipes start at `'Common'`, not `'Legendary'`/`'Epic'`
+2. **🔴 Fix TIER_MAX_STARS** — update to design spec values
+3. **🔲 Leather 6pc decision** — choose between `Shroud` (design) vs `opener` (code stub), then wire all 3 in BattleEngine
+4. **🔲 ★7-10 gates** — define quantities during balance pass
+5. **🔲 Darksteel/mithril drop sources** — wire essence/core drops into dungeon and siege reward tables
+6. **🔲 Fusion crafting backend** — material checks, artisan level gates, gear instance creation
+7. **🔲 Goblin/Vaultmetal Overclock** — add to setBonus.js, wire Steam Surge in BattleEngine
+8. **🔲 Dodge% stat** — add to leather substats, wire evasion roll in BattleEngine
+9. **🔲 Void Heir gear set** — design and implement
+10. **🔲 Substats system** — substat rolling on Legendary+ gear and raid drops
+11. **🔲 Elven/Dwarf special sets** — design then implement
 
 ---
 
 ## Open Questions
 
-1. Which armor type does each special discipline own? (Elven → cloth? Goblin → leather? Dwarf → plate?)
-2. Fusion set stats and passives (2pc/4pc/6pc for all three)
-3. Dodge stat: cap, AI behaviour, accuracy counter-stat?
-4. Void Heir gear set identity
-5. Darksteel essence/core source (raids? hard content? siege?)
-6. Do fusion sets use a mixed piece count (e.g. 3 plate + 3 cloth = 6pc bonus) or do fusion pieces count as both types?
+1. **Leather 6pc passive**: Shroud (design intent) or opener (current stub)?
+2. **Special discipline armor types**: which of Elven/Goblin/Dwarf owns plate/leather/cloth?
+3. **Fusion piece counting**: does 3 plate + 3 cloth = 6pc Arcane bonus, or do fusion pieces count as a third type?
+4. **Dodge cap**: what's the max dodge % a hero can reach? Does accuracy exist as a counter-stat?
+5. **Void Heir set identity**: cloth/caster theme confirmed? Stats and passives?
+6. **Darksteel essence/core source**: Nightmare dungeons, siege, or something else?
+7. **★7-10 gate quantities**: to be defined during balance pass
