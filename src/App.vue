@@ -130,6 +130,21 @@
       </Transition>
     </Teleport>
 
+    <!-- Fusion Workshop modal -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showFusionWorkshop">
+          <div class="coll-modal-backdrop" @click="showFusionWorkshop = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showFusionWorkshop = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <FusionWorkshopView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Market modal — floats over the homepage map -->
     <Teleport to="body">
       <Transition name="coll-modal">
@@ -181,6 +196,7 @@
         @open-leatherworking="showLeatherworking = true"
         @open-tailoring="showTailoring = true"
         @open-woodworking="showWoodworking = true"
+        @open-fusion-workshop="showFusionWorkshop = true"
         @open-market="showMarket = true"
         @open-codex="showCodex = true"
       />
@@ -249,6 +265,7 @@ import BlacksmithView from './components/BlacksmithView.vue'
 import LeatherworkingView from './components/LeatherworkingView.vue'
 import TailoringView from './components/TailoringView.vue'
 import WoodworkingView from './components/WoodworkingView.vue'
+import FusionWorkshopView from './components/FusionWorkshopView.vue'
 import MarketView from './components/MarketView.vue'
 import InventoryView from './components/InventoryView.vue'
 import EquipmentView from './components/EquipmentView.vue'
@@ -290,6 +307,7 @@ const showBlacksmith      = ref(false)
 const showLeatherworking  = ref(false)
 const showTailoring       = ref(false)
 const showWoodworking     = ref(false)
+const showFusionWorkshop  = ref(false)
 const showMarket          = ref(false)
 const showBattle      = ref(false)
 const showRaidBattle  = ref(false)

@@ -318,6 +318,7 @@
         @open-leatherworking="$emit('open-leatherworking')"
         @open-tailoring="$emit('open-tailoring')"
         @open-woodworking="$emit('open-woodworking')"
+        @open-fusion-workshop="$emit('open-fusion-workshop')"
       />
     </div>
 
@@ -336,7 +337,7 @@ import GameIcon               from '../ui/GameIcon.vue'
 import HuntsView              from '../HuntsView.vue'
 import ArtisanZoneView        from '../ArtisanZoneView.vue'
 
-const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring', 'open-woodworking'])
+const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop'])
 
 const {
   activeHomeTab,

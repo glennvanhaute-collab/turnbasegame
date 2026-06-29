@@ -26,12 +26,15 @@
           <div class="az-card-info">
             <div class="az-card-name">{{ shop.name }}</div>
             <div class="az-card-desc">{{ shop.desc }}</div>
-            <div class="az-card-level">
+            <div class="az-card-level" v-if="shop.level !== null">
               <span class="az-card-lv-label">Lv.</span>
               <span class="az-card-lv-val">{{ shop.level }}</span>
               <div class="az-card-xp-track">
                 <div class="az-card-xp-fill" :style="{ width: (shop.progress * 100) + '%' }" />
               </div>
+            </div>
+            <div class="az-card-level" v-else>
+              <span class="az-card-lv-label" style="color: #9955ff; letter-spacing: 1px;">✦ Multi-discipline</span>
             </div>
           </div>
           <div class="az-card-enter">Enter →</div>
@@ -49,7 +52,7 @@ import GameIcon from './ui/GameIcon.vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import zoneBg from '../assets/backgrounds/artisan-zone_bg.png'
 
-defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking'])
+defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop'])
 
 const resources = useResourceStore()
 
@@ -93,6 +96,16 @@ const SHOPS = computed(() => [
     color:    '#6bba4a',
     level:    resources.woodworkingLevel,
     progress: resources.woodworkingProgress,
+  },
+  {
+    id:       'fusion_workshop',
+    event:    'open-fusion-workshop',
+    name:     'Fusion Workshop',
+    desc:     'Combine two disciplines to craft hybrid gear sets',
+    icon:     'skill_blacksmithing',
+    color:    '#9955ff',
+    level:    null,
+    progress: 0,
   },
 ])
 </script>
