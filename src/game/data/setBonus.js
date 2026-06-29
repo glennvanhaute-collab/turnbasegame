@@ -23,7 +23,7 @@ export const SET_BONUSES = {
 // Stub: combat hooks not yet implemented.
 export const SET_PASSIVE_6 = {
   plate:   { id: 'steadfast',   desc: 'When HP drops below 30%, gain a shield equal to 10% max HP (once per battle).' },
-  leather: { id: 'opener',      desc: 'First action each battle deals 25% bonus damage.' },
+  leather: { id: 'shroud',      desc: 'At battle start, become untargetable for 1 turn. Enemies cannot select this hero as a single target.' },
   cloth:   { id: 'aoe_amplify', desc: 'Skills that hit all enemies deal 15% increased damage.' },
 }
 

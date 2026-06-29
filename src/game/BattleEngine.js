@@ -25,6 +25,7 @@ export class BattleEngine {
     this.revivedIds        = new Set()
     this._openerUsed       = new Set()  // hero IDs that have consumed their opener bonus
     this._steadfastTriggered = new Set() // hero IDs that have triggered steadfast this battle
+    this._shroudActive     = new Set()  // hero IDs currently untargetable (leather 6pc Shroud)
   }
 
   get allHeroes() {
@@ -56,10 +57,19 @@ export class BattleEngine {
     }
   }
 
+  get shroudActive() { return this._shroudActive }
+
   startBattle() {
     this.log = []
     this.state = BattleState.IDLE
     this.logMessage('⚔️ Battle started!')
+    // Shroud: leather 6pc — apply untargetable status to qualifying player heroes
+    for (const hero of this.playerTeam) {
+      if (hero.passives?.has('shroud')) {
+        this._shroudActive.add(hero.id)
+        this.logMessage(`🌑 ${hero.name} fades into shadow — untargetable this turn.`)
+      }
+    }
     return this.nextTurn()
   }
 
@@ -69,6 +79,9 @@ export class BattleEngine {
 
     this.turn++
     this.activeHero = hero
+
+    // Shroud: hero steps out of shadow when they take their own turn
+    this._shroudActive.delete(hero.id)
 
     // Undead Regen: enemies recover 4% max HP each turn
     if (!hero.isPlayer && this.mechanics.includes('undead_regen')) {
@@ -305,11 +318,22 @@ export class BattleEngine {
         if (!caster.isPlayer) {
           const provoked = enemies.find(e => e.hasStatus(StatusEffect.PROVOKE))
           if (provoked) return [provoked]
+          // Shroud: exclude untargetable heroes; fall back to full pool if all are shrouded
+          const targetable = enemies.filter(e => !this._shroudActive.has(e.id))
+          const pool = targetable.length > 0 ? targetable : enemies
+          return [pool.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp ? a : b))]
         }
         return [enemies[0]]
       }
       case TargetType.ALL_ENEMIES:    return enemies
-      case TargetType.RANDOM_ENEMY:   return [enemies[Math.floor(Math.random() * enemies.length)]]
+      case TargetType.RANDOM_ENEMY: {
+        if (!caster.isPlayer) {
+          const targetable = enemies.filter(e => !this._shroudActive.has(e.id))
+          const pool = targetable.length > 0 ? targetable : enemies
+          return [pool[Math.floor(Math.random() * pool.length)]]
+        }
+        return [enemies[Math.floor(Math.random() * enemies.length)]]
+      }
       case TargetType.SINGLE_ALLY:    return explicitTarget ? [explicitTarget] : [allies[0]]
       case TargetType.ALL_ALLIES:     return allies
       case TargetType.SELF:           return [caster]

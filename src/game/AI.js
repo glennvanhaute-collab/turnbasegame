@@ -14,11 +14,15 @@ function scoreSkill(skill, caster, allies, enemies) {
   return score
 }
 
-function pickTarget(skill, caster, allies, enemies) {
+function pickTarget(skill, caster, allies, enemies, shroudActive = new Set()) {
   switch (skill.targetType) {
-    case TargetType.SINGLE_ENEMY:
+    case TargetType.SINGLE_ENEMY: {
+      // Shroud: exclude untargetable heroes; fall back to full pool if all are shrouded
+      const targetable = enemies.filter(e => !shroudActive.has(e.id))
+      const pool = targetable.length > 0 ? targetable : enemies
       // Target lowest HP enemy (focus fire)
-      return enemies.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp ? a : b))
+      return pool.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp ? a : b))
+    }
 
     case TargetType.SINGLE_ALLY:
       // Heal the most wounded ally
@@ -46,7 +50,7 @@ export function runAI(engine) {
   if (scoredSkills.length === 0) return engine.nextTurn()
 
   const chosen = scoredSkills[0]
-  const target = pickTarget(chosen.skill, caster, allies, enemies)
+  const target = pickTarget(chosen.skill, caster, allies, enemies, engine._shroudActive)
 
   return engine.executeSkill(caster, chosen.skill, target, chosen.index)
 }
