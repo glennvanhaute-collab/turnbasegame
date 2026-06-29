@@ -21,7 +21,8 @@
         >
           <div class="az-card-glow" />
           <div class="az-card-icon-wrap">
-            <GameIcon :icon="shop.icon" :size="52" class="az-card-icon" />
+            <img v-if="shop.imgUrl" :src="shop.imgUrl" class="az-card-img-icon" alt="" />
+            <GameIcon v-else :icon="shop.icon" :size="52" class="az-card-icon" />
           </div>
           <div class="az-card-info">
             <div class="az-card-name">{{ shop.name }}</div>
@@ -50,7 +51,8 @@
 import { computed } from 'vue'
 import GameIcon from './ui/GameIcon.vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
-import zoneBg from '../assets/backgrounds/artisan-zone_bg.png'
+import zoneBg          from '../assets/backgrounds/artisan-zone_bg.png'
+import fusionIcon      from '../assets/ui/fusion_worshop_icon.png'
 
 defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop'])
 
@@ -102,7 +104,7 @@ const SHOPS = computed(() => [
     event:    'open-fusion-workshop',
     name:     'Fusion Workshop',
     desc:     'Combine two disciplines to craft hybrid gear sets',
-    icon:     'skill_blacksmithing',
+    imgUrl:   fusionIcon,
     color:    '#9955ff',
     level:    null,
     progress: 0,
@@ -217,6 +219,7 @@ const SHOPS = computed(() => [
   box-shadow: 0 0 16px color-mix(in srgb, var(--card-color) 25%, transparent);
 }
 .az-card-icon { image-rendering: pixelated; }
+.az-card-img-icon { width: 52px; height: 52px; object-fit: contain; }
 
 .az-card-info {
   flex: 1; min-width: 0;
