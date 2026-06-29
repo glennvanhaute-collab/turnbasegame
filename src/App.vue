@@ -231,7 +231,7 @@
         <ExplorationView v-else />
       </div>
       <SiegesView v-else-if="view === 'sieges'" />
-      <CampView v-else-if="view === 'camp'" />
+      <CampView v-else-if="view === 'camp'" @open-fusion-workshop="showFusionWorkshop = true" />
       <RealmView v-else-if="view === 'realm'" />
     </main>
   </div>
