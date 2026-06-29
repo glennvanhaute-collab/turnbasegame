@@ -142,78 +142,97 @@ Weapons (cloth): Staves (ATK + Crit DMG or ATK + SPD)
 
 ## Hero Roster — Gear Affinity Mapping
 
-*Role / Artisan skills listed. Right column for user to fill in natural gear set.*
+> **Two separate axes — do not conflate them:**
+> - **Gear type** = what they *wear* — derived from class role, determines which stat profile suits them.
+> - **Artisan skills** = what they can *craft* — discipline level feeds XP bonus or cost discount.
+> A blacksmith warrior can absolutely wear leather if their kit favours speed over DEF.
+
+*"Natural set" column is for you to fill in once you decide which named set fits the hero.*
+*Fusion candidates are flagged — their artisan combo already matches a workshop.*
+
+---
 
 ### Warriors
-| Hero | Rarity | Artisan skills | Natural set |
-|------|--------|---------------|-------------|
-| Garrett the Unbroken | Rare | Blacksmithing | |
-| Ser Roland | Epic | Blacksmithing | |
-| Gwendal Ironvow | Epic | Blacksmithing | |
-| Brenna Shieldmaiden | Epic | Leatherworking | |
-| Lord Aldric | Legendary | Blacksmithing + Tailoring | |
-| Kyver | Legendary | Blacksmithing | |
-| Serix the Wretched | Epic | Blacksmithing | |
-| Borrik Stormcog | Epic | Blacksmithing | |
-| Zwierls | Legendary | Blacksmithing | |
-| Aurelan Dawnspire | Epic | Blacksmithing + Tailoring | |
-| Jade Dragonforge | Legendary | Blacksmithing | |
-| Arne Frostbound | Epic | Leatherworking | |
+| Hero | Rarity | Gear type | Artisan skills | Natural set |
+|------|--------|-----------|---------------|-------------|
+| Garrett the Unbroken | Rare | Plate | Blacksmithing | |
+| Ser Roland | Epic | Plate | Blacksmithing | |
+| Gwendal Ironvow | Epic | Plate | Blacksmithing | |
+| Brenna Shieldmaiden | Epic | Plate | Leatherworking | |
+| Lord Aldric | Legendary | Plate | Blacksmithing + Tailoring | ★ Arcane Atelier candidate |
+| Kyver | Legendary | **Leather** | Blacksmithing | *(striker — SPD + Crit + Dodge)* |
+| Serix the Wretched | Epic | **Leather** | Blacksmithing | *(dark berserker feel)* |
+| Borrik Stormcog | Epic | Plate | Blacksmithing | *(Vaultmetal/Goblin candidate)* |
+| Zwierls | Legendary | Plate | Blacksmithing | |
+| Aurelan Dawnspire | Epic | Plate | Blacksmithing + Tailoring | ★ Arcane Atelier candidate |
+| Jade Dragonforge | Legendary | Plate | Blacksmithing | |
+| Arne Frostbound | Epic | **Leather** | Leatherworking | *(ranger-adjacent warrior)* |
+
+---
 
 ### Tanks
-| Hero | Rarity | Artisan skills | Natural set |
-|------|--------|---------------|-------------|
-| Sir Hadvar | Rare | Blacksmithing | |
-| Durwald the Immovable | Rare | Blacksmithing | |
-| Zareth the Hollow | Epic | Blacksmithing | |
-| Thalric Vaelorian | Legendary | Blacksmithing | |
-| Helga | Legendary | Blacksmithing + Apothecary | |
-| Hilda the Shieldmaiden | Epic | Blacksmithing + Tailoring + Apothecary + Herbalism | |
+| Hero | Rarity | Gear type | Artisan skills | Natural set |
+|------|--------|-----------|---------------|-------------|
+| Sir Hadvar | Rare | Plate | Blacksmithing | |
+| Durwald the Immovable | Rare | Plate | Blacksmithing | *(Dwarf/Runeite candidate)* |
+| Zareth the Hollow | Epic | Plate | Blacksmithing | |
+| Thalric Vaelorian | Legendary | Plate | Blacksmithing | |
+| Helga | Legendary | Plate | Blacksmithing + Apothecary | |
+| Hilda the Shieldmaiden | Epic | Plate | Blacksmithing + Tailoring + Apothecary + Herbalism | ★ Arcane Atelier candidate |
+
+---
 
 ### Mages
-| Hero | Rarity | Artisan skills | Natural set |
-|------|--------|---------------|-------------|
-| Lyra of the Crescent | Rare | Apothecary *(no gear artisan)* | |
-| Seraphel | Legendary | Tailoring + Apothecary | |
-| Draven Spellblade | Rare | Blacksmithing | |
-| Elara Frostweaver | Rare | Apothecary *(no gear artisan)* | |
-| Mirena Ashveil | Rare | Tailoring | |
-| Caius Stormbinder | Epic | Tailoring | |
-| Archmage Kelvar | Legendary | Tailoring + Apothecary | |
-| Vorath the Undying | Mythical | Apothecary + Blacksmithing | |
-| Gribzak Gearvein | Epic | Blacksmithing | |
-| Valerius Dawnchaser | Legendary | Apothecary + Tailoring | |
+| Hero | Rarity | Gear type | Artisan skills | Natural set |
+|------|--------|-----------|---------------|-------------|
+| Lyra of the Crescent | Rare | Cloth | *(no gear artisan)* | |
+| Seraphel | Legendary | Cloth | Tailoring + Apothecary | |
+| Draven Spellblade | Rare | **Cloth** | Blacksmithing | ★ Arcane Atelier candidate *(needs Tailoring)* |
+| Elara Frostweaver | Rare | Cloth | *(no gear artisan)* | |
+| Mirena Ashveil | Rare | Cloth | Tailoring | |
+| Caius Stormbinder | Epic | Cloth | Tailoring | |
+| Archmage Kelvar | Legendary | Cloth | Tailoring + Apothecary | |
+| Vorath the Undying | Mythical | Cloth | Apothecary + Blacksmithing | |
+| Gribzak Gearvein | Epic | Cloth | Blacksmithing | *(Vaultmetal natural — buff-enhancing mage)* |
+| Valerius Dawnchaser | Legendary | Cloth | Apothecary + Tailoring | |
+
+---
 
 ### Rangers
-| Hero | Rarity | Artisan skills | Natural set |
-|------|--------|---------------|-------------|
-| Aldric Marksman | Rare | Leatherworking | |
-| Velmorn the Shadow | Epic | Leatherworking | |
-| Lyreth Moondrift | Rare | Herbalism *(no gear artisan)* | |
-| Mord the Forsaken | Epic | Leatherworking | |
+| Hero | Rarity | Gear type | Artisan skills | Natural set |
+|------|--------|-----------|---------------|-------------|
+| Aldric Marksman | Rare | Leather | Leatherworking | |
+| Velmorn the Shadow | Epic | Leather | Leatherworking | |
+| Lyreth Moondrift | Rare | Leather | *(no gear artisan)* | *(Elven/Moonsilver candidate)* |
+| Mord the Forsaken | Epic | Leather | Leatherworking | |
+
+---
 
 ### Healers
-| Hero | Rarity | Artisan skills | Natural set |
-|------|--------|---------------|-------------|
-| Rowan the Wandering | Rare | Herbalism *(no gear artisan)* | |
-| Mira of Caelwyn | Rare | Apothecary *(no gear artisan)* | |
-| Caelwyn Warden | Rare | Leatherworking | |
-| Caelwyn Herbalist | Rare | Herbalism *(no gear artisan)* | |
-| Sylara the Reviver | Epic | Apothecary *(no gear artisan)* | |
-| Theron Greenmarch | Legendary | Herbalism + Apothecary *(no gear artisan)* | |
+| Hero | Rarity | Gear type | Artisan skills | Natural set |
+|------|--------|-----------|---------------|-------------|
+| Rowan the Wandering | Rare | Cloth | *(no gear artisan)* | |
+| Mira of Caelwyn | Rare | Cloth | *(no gear artisan)* | |
+| Caelwyn Warden | Rare | **Leather** | Leatherworking | *(active warden, outdoors — SPD suits)* |
+| Caelwyn Herbalist | Rare | Cloth | *(no gear artisan)* | |
+| Sylara the Reviver | Epic | Cloth | *(no gear artisan)* | |
+| Theron Greenmarch | Legendary | Cloth | *(no gear artisan)* | |
+
+---
 
 ### Debuffers
-| Hero | Rarity | Artisan skills | Natural set |
-|------|--------|---------------|-------------|
-| Nyxara Voidwalker | Epic | Leatherworking | |
-| Arri the Witch | Epic | Herbalism + Apothecary *(no gear artisan)* | |
-| Vaeric Corvayne | Legendary | Blacksmithing + Apothecary | |
+| Hero | Rarity | Gear type | Artisan skills | Natural set |
+|------|--------|-----------|---------------|-------------|
+| Nyxara Voidwalker | Epic | Leather | Leatherworking | *(shadow archetype — Shroud fits perfectly)* |
+| Arri the Witch | Epic | Cloth | *(no gear artisan)* | |
+| Vaeric Corvayne | Legendary | **Leather** | Blacksmithing + Apothecary | *(dark noble debuffer — speed + poison)* |
 
 ---
 
 ## Notes
 
-- **Dual artisan heroes** (Lord Aldric, Aurelan, Vorath, Hilda, Vaeric…) are natural fusion set users — their artisan combo often matches a fusion workshop directly.
-- **Draven Spellblade** (mage + blacksmithing) is the poster child for Arcane Atelier.
-- **Gribzak** (goblin-themed mage + blacksmithing) could have a natural affinity to the Goblin/Vaultmetal discipline.
-- **Apothecary/Herbalism-only heroes** have no gear affinity by artisan — either give them a passive bonus with a specific set, or they become flexible (good in any set, mastered in none).
+- **Artisan gap — no hero currently has Leatherworking + Tailoring** (Shadow Loom) or **Leatherworking + Blacksmithing** (Iron Tannery) as their combo. These fusion workshops have no natural hero champion yet — worth designing one, or giving an existing hero a second artisan skill.
+- **Apothecary/Herbalism-only heroes** (Lyra, Elara, Lyreth, Rowan, Mira, Arri, Theron…) have no crafting affinity — treat them as flexible: stronger in any set they're fully built into, but no discount/bonus. Could give them a passive bonus with one set as flavour.
+- **Bolded gear types** are the "surprising" picks — heroes whose artisan skill and gear type don't match. These are worth double-checking against each hero's actual kit and playstyle.
+- **Draven Spellblade** wears cloth for the ATK/Crit stats, but his blacksmithing means he can self-craft plate if you want the Arcane Atelier hybrid — he's the poster child for that fusion.
+- **Gribzak Gearvein** (goblin mage + blacksmithing) is the natural Vaultmetal test case — buff-loop identity matches the Overclock passive perfectly.

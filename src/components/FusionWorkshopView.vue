@@ -1,7 +1,7 @@
 <template>
   <div class="fusion-workshop">
 
-    <div class="fw-bg" :style="{ backgroundImage: `url(${workshopBg})` }" />
+    <div class="fw-bg" :style="{ backgroundImage: `url(${activeAtelier.bg})` }" />
     <div class="fw-tint" :style="{ background: activeAtelier.tint }" />
     <div class="fw-overlay" />
 
@@ -118,7 +118,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import workshopBg from '../assets/backgrounds/fusion_workshop.png'
+import arcaneBg   from '../assets/backgrounds/fusion_workshop.png'
+import shadowBg   from '../assets/backgrounds/shadow_loom_background.png'
+import tanneryBg  from '../assets/backgrounds/iron_loom_background.png'
 
 const activeAtelierId = ref('arcane')
 const selectedRecipe  = ref(null)
@@ -140,6 +142,7 @@ const ATELIERS = [
     name:    'Arcane Atelier',
     icon:    '✦',
     color:   '#9955ff',
+    bg:      arcaneBg,
     tint:    'linear-gradient(135deg, rgba(80,20,140,0.18) 0%, transparent 60%)',
     req1:    'Blacksmithing',
     req2:    'Tailoring',
@@ -187,6 +190,7 @@ const ATELIERS = [
     name:    'Shadow Loom',
     icon:    '◈',
     color:   '#44bbaa',
+    bg:      shadowBg,
     tint:    'linear-gradient(135deg, rgba(10,80,80,0.22) 0%, transparent 60%)',
     req1:    'Leatherworking',
     req2:    'Tailoring',
@@ -234,6 +238,7 @@ const ATELIERS = [
     name:    'Iron Tannery',
     icon:    '⬡',
     color:   '#cc7733',
+    bg:      tanneryBg,
     tint:    'linear-gradient(135deg, rgba(100,50,10,0.22) 0%, transparent 60%)',
     req1:    'Blacksmithing',
     req2:    'Leatherworking',
