@@ -107,6 +107,23 @@ The lore entries are **per weapon-type × tier**, not player-authored — but th
 
 ---
 
+## Starter Weapons — The Four Chosen
+
+The four starters are a special case. Regardless of their technical rarity, the player *chose* them — that choice is the soulbinding event. Starter weapons are treated identically to Legendary weapons: permanently bound, never swappable, part of the hero's identity before the Chronicle even begins.
+
+Each starter arrives with a named weapon at Tier I, a Chronicle entry already written, and a weapon type locked to their class.
+
+| Hero | Weapon Name | Type | Voice of the Chronicle |
+|---|---|---|---|
+| **Ser Roland** | *Oathkeeper* | Sword (1H) | Honor, discipline, the weight of the vow taken before the first battle |
+| **Seraphel** | *The Weaving* | Wand | The three schools — fire, ice, arcane — and the cost of wielding all three |
+| **Mira of Caelwyn** | *Caelwyn's Hymn* | Staff | Life poured outward, the river that keeps others afloat, the healer's quiet exhaustion |
+| **Velmorn the Shadow** | *Whisper* | Dagger | Silence, the void between strikes, a name nobody says aloud |
+
+The player sees this weapon Chronicle entry the first time they open the Forge for that starter — an immediate signal that this hero already has a history, and that history is about to grow.
+
+---
+
 ## Unique Weapons — Legendary+ Heroes
 
 Heroes of Legendary rarity and above arrive with their **signature weapon** already conceived. Their weapon type is locked, and when first forged it receives a unique name prefix and a unique Tier I chronicle entry written specifically for that hero.
