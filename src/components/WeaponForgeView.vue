@@ -77,6 +77,7 @@
             maxlength="32"
             spellcheck="false"
           />
+          <button class="wfc-roll-btn" title="Generate a name" @click="generateWeaponName">⚄</button>
         </div>
 
         <button
@@ -234,6 +235,46 @@ const newWeaponName = ref('')
 
 // Placeholder weapon store — will be replaced by useWeaponStore
 const weapons = ref({})
+
+// ── Name generator ────────────────────────────────────────────────────
+const GEN_NOUNS = {
+  sword:      ['Fang', 'Edge', 'Vow', 'Oath', 'Talon', 'Resolve', 'Verdict', 'Rite', 'Sorrow'],
+  greatsword: ['Ruin', 'Verdict', 'Wrath', 'Mandate', 'Dominion', 'Toll', 'Requiem', 'Colossus'],
+  mace:       ['Judgment', 'Weight', 'Toll', 'Warrant', 'Bastion', 'Verdict', 'Sentence'],
+  warhammer:  ['Thunder', 'Tremor', 'Fury', 'Ruination', 'Quake', 'Knell', 'Downfall'],
+  dagger:     ['Whisper', 'Spite', 'Needle', 'Veil', 'Umbra', 'Thorn', 'Fang', 'Sliver'],
+  bow:        ['Song', 'Drift', 'Echo', 'Silence', 'Current', 'Lull', 'Stillness'],
+  crossbow:   ['Mark', 'Reckoning', 'Verdict', 'Precision', 'Aim', 'Last Word'],
+  staff:      ['Hymn', 'Lament', 'Resonance', 'Weaving', 'Vigil', 'Chronicle', 'Oration'],
+  wand:       ['Thread', 'Murmur', 'Flicker', 'Tendril', 'Spark', 'Refrain', 'Mote'],
+}
+const GEN_PREFIXES = {
+  Force:  ['Iron', 'Unyielding', 'Stone', 'Bronze', 'Steadfast', 'Unbroken', 'Bulwark'],
+  Magic:  ['Arcane', 'Runic', 'Crystal', 'Storm', 'Azure', 'Ember', 'Prismatic'],
+  Spirit: ['Silver', 'Moon', 'Dawn', 'Sacred', 'Hallowed', 'Verdant', 'Gilded'],
+  Void:   ['Void', 'Shadow', 'Hollow', 'Dusk', 'Ashen', 'Forsaken', 'Pale'],
+  Blood:  ['Crimson', 'Sanguine', 'Scarlet', 'Fell', 'Bleeding', 'Dark'],
+  Astral: ['Stellar', 'Astral', 'Celestial', 'Ancient', 'Eternal', 'Pale'],
+}
+const GEN_GENERAL = ['Forgotten', 'Last', 'First', 'Undying', 'Shattered', 'Crimson', 'Ashen', 'Gilded']
+
+function generateWeaponName() {
+  const hero   = selectedHero.value
+  const type   = hero?.weaponType ?? 'sword'
+  const nouns  = GEN_NOUNS[type] ?? GEN_NOUNS.sword
+  const prefixes = [...(GEN_PREFIXES[hero?.affinity] ?? []), ...GEN_GENERAL]
+  const noun   = nouns[Math.floor(Math.random() * nouns.length)]
+
+  // 20% chance: "FirstName's Noun"
+  if (Math.random() < 0.2 && hero?.name) {
+    const first = hero.name.split(' ')[0]
+    newWeaponName.value = `${first}'s ${noun}`
+    return
+  }
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
+  // 30% chance: "The Prefix Noun"
+  newWeaponName.value = Math.random() < 0.3 ? `The ${prefix} ${noun}` : `${prefix} ${noun}`
+}
 
 // ── Computed ──────────────────────────────────────────────────────────
 const selectedHero = computed(() =>
@@ -484,9 +525,12 @@ function nextTierCost(heroKey) {
   letter-spacing: 1px;
 }
 
-.wfc-name-row { width: 100%; max-width: 420px; margin-bottom: 20px; }
+.wfc-name-row {
+  width: 100%; max-width: 420px; margin-bottom: 20px;
+  display: flex; gap: 8px; align-items: stretch;
+}
 .wfc-name-input {
-  width: 100%; background: rgba(255,255,255,0.04);
+  flex: 1; background: rgba(255,255,255,0.04);
   border: 1px solid rgba(212,175,55,0.2);
   border-radius: 6px; padding: 12px 16px;
   font-family: var(--font-head, serif);
@@ -496,6 +540,20 @@ function nextTierCost(heroKey) {
 }
 .wfc-name-input::placeholder { color: #3a3a3a; font-style: italic; }
 .wfc-name-input:focus { border-color: rgba(212,175,55,0.55); }
+.wfc-roll-btn {
+  flex-shrink: 0;
+  background: rgba(212,175,55,0.07);
+  border: 1px solid rgba(212,175,55,0.22);
+  border-radius: 6px; padding: 0 14px;
+  font-size: 1.2rem; color: #b8960a;
+  cursor: pointer; transition: all 0.12s;
+  line-height: 1;
+}
+.wfc-roll-btn:hover {
+  background: rgba(212,175,55,0.16);
+  border-color: rgba(212,175,55,0.5);
+  color: #d4af37;
+}
 
 .wfc-begin-btn {
   padding: 13px 40px;
