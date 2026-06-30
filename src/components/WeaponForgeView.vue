@@ -238,42 +238,156 @@ const weapons = ref({})
 
 // ── Name generator ────────────────────────────────────────────────────
 const GEN_NOUNS = {
-  sword:      ['Fang', 'Edge', 'Vow', 'Oath', 'Talon', 'Resolve', 'Verdict', 'Rite', 'Sorrow'],
-  greatsword: ['Ruin', 'Verdict', 'Wrath', 'Mandate', 'Dominion', 'Toll', 'Requiem', 'Colossus'],
-  mace:       ['Judgment', 'Weight', 'Toll', 'Warrant', 'Bastion', 'Verdict', 'Sentence'],
-  warhammer:  ['Thunder', 'Tremor', 'Fury', 'Ruination', 'Quake', 'Knell', 'Downfall'],
-  dagger:     ['Whisper', 'Spite', 'Needle', 'Veil', 'Umbra', 'Thorn', 'Fang', 'Sliver'],
-  bow:        ['Song', 'Drift', 'Echo', 'Silence', 'Current', 'Lull', 'Stillness'],
-  crossbow:   ['Mark', 'Reckoning', 'Verdict', 'Precision', 'Aim', 'Last Word'],
-  staff:      ['Hymn', 'Lament', 'Resonance', 'Weaving', 'Vigil', 'Chronicle', 'Oration'],
-  wand:       ['Thread', 'Murmur', 'Flicker', 'Tendril', 'Spark', 'Refrain', 'Mote'],
+  sword: [
+    'Fang','Edge','Vow','Oath','Talon','Resolve','Verdict','Rite','Sorrow',
+    'Pact','Promise','Burden','Reckoning','Testament','Covenant','Memory',
+    'Toll','Justice','Mandate','Sovereign','Name','Honour','Strike','Lament',
+    'Weal','Ruin','Scar','Mercy','Silence','Wrath','Vigil','Witness',
+  ],
+  greatsword: [
+    'Ruin','Verdict','Wrath','Mandate','Dominion','Toll','Requiem','Colossus',
+    'Doom','Bane','Calamity','Undoing','Sentence','Sundering','Omen','Harbinger',
+    'Titan','Dread','Fall','Edict','Reckoning','Desolation','Last Word','Atonement',
+    'Cleaver','Severance','Absolution','Behemoth','Overthrow','Conquest',
+  ],
+  mace: [
+    'Judgment','Weight','Toll','Warrant','Bastion','Verdict','Sentence',
+    'Reckoning','Authority','Decree','Burden','Gospel','Canon','Writ',
+    'Gavel','Compulsion','Doctrine','Ordinance','Edict','Levy','Sanction',
+    'Mandate','Conviction','Ruling','Penalty','Reprisal',
+  ],
+  warhammer: [
+    'Thunder','Tremor','Fury','Ruination','Quake','Knell','Downfall',
+    'Avalanche','Fissure','Collapse','Upheaval','Shatter','Earthfall',
+    'Bellow','Obliteration','Landfall','Cataclysm','Crater','Impact',
+    'Detonation','Concussion','Resound','Percussion','Toll','Crescendo',
+    'Reverberation','Cascade','Surge','Rupture','Torrent',
+  ],
+  dagger: [
+    'Whisper','Spite','Needle','Veil','Umbra','Thorn','Fang','Sliver',
+    'Quiet','Hiss','Malice','Sting','Catch','Lace','Prick','Hex',
+    'Murmur','Rumour','Gossip','Lilt','Sigh','Flicker','Stitch',
+    'Trace','Scratch','Graze','Kiss','Nip','Secret','Aside','Confession',
+  ],
+  bow: [
+    'Song','Drift','Echo','Silence','Current','Lull','Stillness',
+    'Breath','Release','Sigh','Hum','Draw','Tension','Last Breath',
+    'Resonance','Pull','Refrain','Chord','Note','Verse','Aria',
+    'Cadence','Melody','Interval','Pause','Rest','Suspension','Passage',
+  ],
+  crossbow: [
+    'Mark','Reckoning','Verdict','Precision','Aim','Last Word',
+    'Levy','Edict','Toll','Decree','Sentence','Point','Period',
+    'Conclusion','Finality','Closure','End','Resolution','Statement',
+    'Proclamation','Notice','Writ','Warrant','Summons',
+  ],
+  staff: [
+    'Hymn','Lament','Resonance','Weaving','Vigil','Chronicle','Oration',
+    'Sermon','Invocation','Codex','Accord','Witness','Verse','Recitation',
+    'Utterance','Pillar','Pilgrimage','Testament','Canon','Gospel',
+    'Scripture','Revelation','Prophecy','Augury','Omen','Portent',
+    'Foretelling','Vision','Mandate','Word','Covenant','Decree',
+  ],
+  wand: [
+    'Thread','Murmur','Flicker','Tendril','Spark','Refrain','Mote',
+    'Wisp','Trace','Filament','Stitch','Flourish','Hum','Cantrip',
+    'Tremor','Shiver','Quiver','Flutter','Drift','Curl','Coil',
+    'Loop','Spiral','Arc','Ripple','Shimmer','Gleam','Pulse','Tick',
+  ],
 }
+
 const GEN_PREFIXES = {
-  Force:  ['Iron', 'Unyielding', 'Stone', 'Bronze', 'Steadfast', 'Unbroken', 'Bulwark'],
-  Magic:  ['Arcane', 'Runic', 'Crystal', 'Storm', 'Azure', 'Ember', 'Prismatic'],
-  Spirit: ['Silver', 'Moon', 'Dawn', 'Sacred', 'Hallowed', 'Verdant', 'Gilded'],
-  Void:   ['Void', 'Shadow', 'Hollow', 'Dusk', 'Ashen', 'Forsaken', 'Pale'],
-  Blood:  ['Crimson', 'Sanguine', 'Scarlet', 'Fell', 'Bleeding', 'Dark'],
-  Astral: ['Stellar', 'Astral', 'Celestial', 'Ancient', 'Eternal', 'Pale'],
+  Force: [
+    'Iron','Unyielding','Stone','Bronze','Steadfast','Unbroken','Bulwark',
+    'Granite','Steel','Ironclad','Tempered','Immovable','Resolute','Enduring',
+    'Stoic','Forged','Bastion','Fortified','Hardened','Stalwart','Graven',
+    'Solid','Immense','Heavy','Unbending','Unmoved','Unflinching','Steadied',
+    'Anchored','Grounded','Rooted','Planted',
+  ],
+  Magic: [
+    'Arcane','Runic','Crystal','Storm','Azure','Ember','Prismatic',
+    'Spellbound','Sigil','Glyphic','Ether','Chromatic','Spectral','Eldritch',
+    'Resonant','Mystic','Flux','Weaving','Bound','Traced','Woven',
+    'Scribed','Inscribed','Etched','Branded','Marked','Sealed','Locked',
+    'Threaded','Stitched','Knotted','Laced',
+  ],
+  Spirit: [
+    'Silver','Moon','Sacred','Hallowed','Verdant','Gilded','Celestial',
+    'Blessed','Sanctified','Anointed','Revered','Faithful','Pure','Luminous',
+    'Radiant','Dawn','Twilight','Devoted','Consecrated','Holy','Ordained',
+    'Vowed','Pledged','Sworn','Bound','Called','Chosen','Marked','Named',
+    'Known','Remembered','Honoured','Kept',
+  ],
+  Void: [
+    'Void','Shadow','Hollow','Dusk','Ashen','Forsaken','Pale','Blighted',
+    'Cursed','Withered','Wretched','Sunken','Charred','Corrupted','Fractured',
+    'Fading','Dimmed','Nameless','Doomed','Lost','Ruined','Fallen','Broken',
+    'Shattered','Cracked','Split','Torn','Severed','Cut','Cleaved','Rent',
+    'Divided','Scattered',
+  ],
+  Blood: [
+    'Crimson','Sanguine','Scarlet','Fell','Dark','Vital','Visceral',
+    'Draining','Thirsting','Hungering','Deathly','Ravenous','Fevered',
+    'Flushed','Feverish','Burning','Boiling','Seething','Raging','Livid',
+    'Frenzied','Manic','Rabid','Wild','Unbridled','Unbound','Unchained',
+  ],
+  Astral: [
+    'Stellar','Astral','Celestial','Ancient','Eternal','Pale','Cosmic',
+    'Timeless','Boundless','Infinite','Ageless','Distant','Wandering',
+    'Drifting','Floating','Suspended','Weightless','Endless','Vast','Deep',
+    'High','Far','Wide','Long','Old','Still','Quiet','Cold','Clear','Sharp',
+  ],
 }
-const GEN_GENERAL = ['Forgotten', 'Last', 'First', 'Undying', 'Shattered', 'Crimson', 'Ashen', 'Gilded']
+
+const GEN_GENERAL = [
+  'Forgotten','Last','First','Undying','Shattered','Crimson','Ashen','Gilded',
+  'Broken','Sundered','Mended','Tempered','Weeping','Silent','Patient',
+  'Hungry','Scarred','Nameless','Wandering','Exiled','Remnant','Buried',
+  'Ancient','Hidden','Saved','Kept','Held','Carried','Worn','Battered',
+  'Faithful','Loyal','True','Honest','Plain','Simple','Quiet','Steady',
+  'Tired','Old','Weathered','Tested','Proven','Known','Sure','Certain',
+]
+
+const GEN_CONCEPTS = [
+  'Ruin','Ash','Sorrow','the Fallen','the Abyss','the First Dawn','the Last Age',
+  'Silence','Blood','Embers','Thorns','Shadows','the Void','the Crown','the Pyre',
+  'Last Light','Grief','Regret','the Deep','Winter','Dust','Old Wars','the Veil',
+  'Mourning','the Forsaken','the Undying','Exile','the Long Road','Hunger',
+  'the Final Hour','Broken Oaths','Forgotten Names','Lost Kings','the Pale Shore',
+  'Old Debts','the Long Dark','Weeping Fields','the Second Death','Stillwater',
+  'Thorn & Ember','the Unmarked Grave','Bitter Hours','the Weight of Years',
+  'Fading Light','the Cold Shore','Unfinished Wars','Every Name I Carry',
+]
+
+const pick = arr => arr[Math.floor(Math.random() * arr.length)]
 
 function generateWeaponName() {
-  const hero   = selectedHero.value
-  const type   = hero?.weaponType ?? 'sword'
-  const nouns  = GEN_NOUNS[type] ?? GEN_NOUNS.sword
-  const prefixes = [...(GEN_PREFIXES[hero?.affinity] ?? []), ...GEN_GENERAL]
-  const noun   = nouns[Math.floor(Math.random() * nouns.length)]
+  const hero     = selectedHero.value
+  const type     = hero?.weaponType ?? 'sword'
+  const nouns    = GEN_NOUNS[type] ?? GEN_NOUNS.sword
+  const affPfx   = GEN_PREFIXES[hero?.affinity] ?? []
+  const prefixes = [...affPfx, ...GEN_GENERAL]
+  const noun     = pick(nouns)
+  const r        = Math.random()
 
-  // 20% chance: "FirstName's Noun"
-  if (Math.random() < 0.2 && hero?.name) {
+  // 15%: "FirstName's Noun"
+  if (r < 0.15 && hero?.name) {
     const first = hero.name.split(' ')[0]
     newWeaponName.value = `${first}'s ${noun}`
     return
   }
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)]
-  // 30% chance: "The Prefix Noun"
-  newWeaponName.value = Math.random() < 0.3 ? `The ${prefix} ${noun}` : `${prefix} ${noun}`
+  // 20%: "Noun of [Concept]"
+  if (r < 0.35) {
+    newWeaponName.value = `${noun} of ${pick(GEN_CONCEPTS)}`
+    return
+  }
+  // 20%: "The Prefix Noun"
+  if (r < 0.55) {
+    newWeaponName.value = `The ${pick(prefixes)} ${noun}`
+    return
+  }
+  // 45%: "Prefix Noun"
+  newWeaponName.value = `${pick(prefixes)} ${noun}`
 }
 
 // ── Computed ──────────────────────────────────────────────────────────
