@@ -52,7 +52,8 @@ import { computed } from 'vue'
 import GameIcon from './ui/GameIcon.vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
 import zoneBg          from '../assets/backgrounds/artisan-zone_bg.png'
-import fusionIcon      from '../assets/ui/fusion_worshop_icon.png'
+import fusionIcon        from '../assets/ui/fusion_worshop_icon.png'
+import weaponsmithIcon  from '../assets/ui/weaponsmith_icon.png'
 
 defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop', 'open-weapon-forge'])
 
@@ -114,7 +115,7 @@ const SHOPS = computed(() => [
     event:    'open-weapon-forge',
     name:     'Weapon Forge',
     desc:     'Forge a weapon and write its chronicle',
-    icon:     'skill_blacksmithing',
+    imgUrl:   weaponsmithIcon,
     color:    '#d4af37',
     level:    null,
     progress: 0,

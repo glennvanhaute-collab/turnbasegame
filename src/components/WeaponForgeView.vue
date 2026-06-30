@@ -84,6 +84,7 @@
           class="wfc-begin-btn"
           :class="{ ready: !!newWeaponName.trim() }"
           :disabled="!newWeaponName.trim()"
+          @click="beginChronicle"
         >
           ✦ Begin the Chronicle
         </button>
@@ -132,11 +133,20 @@
         <div v-if="getWeapon(selectedKey).tier < 6" class="wfw-next-tier">
           <div class="wfnt-label">Next — {{ TIERS[getWeapon(selectedKey).tier]?.name }}</div>
           <div class="wfnt-mats">
-            <span v-for="mat in nextTierCost(selectedKey)" :key="mat.id" class="wfnt-mat">
+            <span
+              v-for="mat in nextTierCost(selectedKey)" :key="mat.id"
+              class="wfnt-mat"
+              :class="{ unaffordable: !resourceQty(mat) }"
+            >
               {{ mat.qty }}× {{ mat.name }}
             </span>
           </div>
-          <button class="wfw-forge-btn">⚒ Forge Next Tier</button>
+          <button
+            class="wfw-forge-btn"
+            :class="{ unaffordable: !canAfford(selectedKey) }"
+            :disabled="!canAfford(selectedKey)"
+            @click="forgeTier"
+          >⚒ Forge Next Tier</button>
         </div>
         <div v-else class="wfw-eternal">
           <div class="wfe-sigil">✦</div>
@@ -188,8 +198,12 @@
 import { ref, computed } from 'vue'
 import forgeBg from '../assets/backgrounds/weaponsmith_background.png'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { useWeaponStore, TIER_COSTS } from '../stores/useWeaponStore.js'
+import { useResourceStore } from '../stores/useResourceStore.js'
 
-const collection = useCollectionStore()
+const collection  = useCollectionStore()
+const weaponStore = useWeaponStore()
+const resources   = useResourceStore()
 
 // ── Constants ─────────────────────────────────────────────────────────
 const WEAPON_TYPES = [
@@ -233,8 +247,6 @@ const activeFilter  = ref('all')
 const nameSearch    = ref('')
 const newWeaponName = ref('')
 
-// Placeholder weapon store — will be replaced by useWeaponStore
-const weapons = ref({})
 
 // ── Name generator ────────────────────────────────────────────────────
 const GEN_NOUNS = {
@@ -422,35 +434,30 @@ const filteredRoster = computed(() => {
 })
 
 // ── Helpers ───────────────────────────────────────────────────────────
-function getWeapon(heroKey) {
-  return weapons.value[heroKey] ?? null
-}
+function getWeapon(heroKey)    { return weaponStore.getWeapon(heroKey) }
+function resourceQty(mat)      { return (resources[mat.store]?.[mat.id] ?? 0) >= mat.qty }
+function currentStats(heroKey) { const w = getWeapon(heroKey); return w ? weaponStore.weaponStats(w.type, w.tier) : {} }
+function nextTierCost(heroKey) { const w = getWeapon(heroKey); return w ? weaponStore.tierCost(w.tier) : [] }
+function canAfford(heroKey)    { const w = getWeapon(heroKey); return w ? weaponStore.canAffordTier(w.tier) : false }
 
 function selectHero(key) {
   selectedKey.value   = key
   newWeaponName.value = ''
 }
 
-// Placeholder stat/cost functions — will come from store logic
-function currentStats(heroKey) {
-  const w = getWeapon(heroKey)
-  if (!w) return {}
-  const base = { sword: { atk: 380 }, greatsword: { atk: 520 }, mace: { atk: 360 }, warhammer: { atk: 480 }, dagger: { atk: 320, critRate: 0.04 }, bow: { atk: 310, critDmg: 0.10 }, crossbow: { atk: 340 }, staff: { atk: 400 }, wand: { atk: 290, critRate: 0.05 } }
-  return base[w.type] ?? { atk: 350 }
+function beginChronicle() {
+  if (!selectedKey.value || !newWeaponName.value.trim()) return
+  const hero      = selectedHero.value
+  const firstName = hero?.name?.split(' ')[0] ?? hero?.name ?? 'Unknown'
+  weaponStore.createWeapon(selectedKey.value, firstName, hero.weaponType, newWeaponName.value.trim())
+  newWeaponName.value = ''
 }
 
-function nextTierCost(heroKey) {
-  const w = getWeapon(heroKey)
-  if (!w) return []
-  const tier = w.tier
-  const costs = [
-    [{ id: 'steel',      qty: 3, name: 'Steel Bars'       }, { id: 'leather', qty: 1, name: 'Leather Scraps' }],
-    [{ id: 'steel',      qty: 5, name: 'Steel Bars'       }, { id: 'leather', qty: 2, name: 'Leather Scraps' }, { id: 'wood',    qty: 1, name: 'Wood Planks'    }],
-    [{ id: 'darksteel',  qty: 4, name: 'Darksteel Bars'   }, { id: 'hide',    qty: 2, name: 'Thick Hide'      }, { id: 'wood',    qty: 2, name: 'Wood Planks'    }],
-    [{ id: 'mithril',    qty: 5, name: 'Mithril Bars'     }, { id: 'shadow',  qty: 3, name: 'Shadow Hide'     }, { id: 'crystal', qty: 1, name: 'Arcane Crystal' }],
-    [{ id: 'moonsilver', qty: 4, name: 'Moonsilver Bars'  }, { id: 'void',    qty: 2, name: 'Void Essence'    }, { id: 'crystal', qty: 2, name: 'Arcane Crystal' }],
-  ]
-  return costs[tier - 1] ?? []
+function forgeTier() {
+  if (!selectedKey.value) return
+  const hero      = selectedHero.value
+  const firstName = hero?.name?.split(' ')[0] ?? hero?.name ?? 'Unknown'
+  weaponStore.forgeTierFor(selectedKey.value, firstName)
 }
 </script>
 
@@ -773,6 +780,7 @@ function nextTierCost(heroKey) {
   font-size: 0.65rem; color: #888;
 }
 .wfnt-qty { color: #d4af37; margin-right: 3px; }
+.wfnt-mat.unaffordable { color: #883333; border-color: rgba(180,40,40,0.25); background: rgba(180,40,40,0.05); }
 
 .wfw-forge-btn {
   padding: 12px 36px;
@@ -784,9 +792,13 @@ function nextTierCost(heroKey) {
   text-transform: uppercase; cursor: pointer;
   transition: all 0.15s;
 }
-.wfw-forge-btn:hover {
+.wfw-forge-btn:hover:not(:disabled) {
   background: rgba(212,175,55,0.20);
   border-color: rgba(212,175,55,0.7);
+}
+.wfw-forge-btn.unaffordable {
+  color: #555; border-color: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02); cursor: not-allowed;
 }
 
 /* Eternal */
