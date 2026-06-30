@@ -21,7 +21,7 @@ export const HERO_TEMPLATES = {
     baseHp: 16000, baseAtk: 1050, baseDef: 950, baseSpd: 82,
     critRate: 0.12, critDmg: 0.50,
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.BATTLE_CRY],
-    artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring],
+    artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior',
   }),
 
@@ -82,7 +82,7 @@ export const HERO_TEMPLATES = {
     baseHp: 13500, baseAtk: 1600, baseDef: 650, baseSpd: 115,
     critRate: 0.35, critDmg: 0.80,
     skills: [SKILLS.BACKSTAB, SKILLS.MULTI_STAB],
-    artisanSkills: [ARTISAN.leatherworking, ARTISAN.tailoring],
+    artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'ranger',
   }),
 
@@ -113,7 +113,7 @@ export const HERO_TEMPLATES = {
     baseHp: 15000, baseAtk: 1200, baseDef: 600, baseSpd: 96,
     critRate: 0.22, critDmg: 0.58,
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
-    artisanSkills: [ARTISAN.leatherworking, ARTISAN.blacksmithing],
+    artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'ranger',
   }),
 
@@ -133,7 +133,7 @@ export const HERO_TEMPLATES = {
     baseHp: 16000, baseAtk: 1350, baseDef: 850, baseSpd: 97,
     critRate: 0.20, critDmg: 0.60,
     skills: [SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
-    artisanSkills: [ARTISAN.leatherworking, ARTISAN.blacksmithing],
+    artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'warrior',
   }),
 
