@@ -476,7 +476,6 @@ const hideMaxed   = ref(true)
 const filterSlot  = ref('')
 
 const SLOT_FILTERS = [
-  { slot: GearSlot.MAIN_HAND, icon: SLOT_TO_ICON[GearSlot.MAIN_HAND] ?? 'sword'   },
   { slot: GearSlot.OFF_HAND,  icon: SLOT_TO_ICON[GearSlot.OFF_HAND]  ?? 'shield'  },
   { slot: GearSlot.HEAD,      icon: SLOT_TO_ICON[GearSlot.HEAD]      ?? 'helmet'  },
   { slot: GearSlot.CHEST,     icon: SLOT_TO_ICON[GearSlot.CHEST]     ?? 'chest'   },

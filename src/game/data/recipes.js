@@ -1,35 +1,9 @@
-import { GearType, GearSlot, WeaponType, SLOT_LABELS } from '../Gear.js'
+import { GearType, GearSlot, SLOT_LABELS } from '../Gear.js'
 import { ORES } from './ores.js'
 import { BARS } from './bars.js'
 
 export const RECIPES = [
   // ── Copper tier ──────────────────────────────────────────────────────
-  {
-    id: 'copper_sword',
-    name: 'Copper Sword',
-    tier: 'copper',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.SWORD,
-    armorType: 'plate',
-    desc: 'A serviceable blade smelted from raw copper.',
-    barCost: { copper: 2 },
-    baseStats: { atk: 120 },
-    rarity: 'Common',
-  },
-  {
-    id: 'copper_dagger',
-    name: 'Copper Dagger',
-    tier: 'copper',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.DAGGER,
-    armorType: 'leather',
-    desc: 'A light blade favored by scouts and those who strike first.',
-    barCost: { copper: 1 },
-    baseStats: { atk: 90, critRate: 0.02 },
-    rarity: 'Common',
-  },
   {
     id: 'copper_shield',
     name: 'Copper Shield',
@@ -105,45 +79,6 @@ export const RECIPES = [
 
   // ── Tin tier ─────────────────────────────────────────────────────────
   {
-    id: 'tin_sword',
-    name: 'Tin Sword',
-    tier: 'tin',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.SWORD,
-    armorType: 'plate',
-    desc: 'A sturdier blade than copper. Holds an edge longer and bites deeper.',
-    barCost: { tin: 2 },
-    baseStats: { atk: 162 },
-    rarity: 'Uncommon',
-  },
-  {
-    id: 'tin_dagger',
-    name: 'Tin Dagger',
-    tier: 'tin',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.DAGGER,
-    armorType: 'leather',
-    desc: 'Lighter than iron, sharper than copper. A quick draw and a clean cut.',
-    barCost: { tin: 2 },
-    baseStats: { atk: 120, critRate: 0.03 },
-    rarity: 'Uncommon',
-  },
-  {
-    id: 'tin_mace',
-    name: 'Tin Mace',
-    tier: 'tin',
-    slot: GearSlot.MAIN_HAND,
-    gearType: GearType.WEAPON,
-    weaponType: WeaponType.MACE,
-    armorType: 'plate',
-    desc: 'A weighted bludgeon. Slower than a sword, but armor means nothing to it.',
-    barCost: { tin: 2 },
-    baseStats: { atk: 140, defPct: 0.04 },
-    rarity: 'Uncommon',
-  },
-  {
     id: 'tin_shield',
     name: 'Tin Shield',
     tier: 'tin',
@@ -218,24 +153,6 @@ export const RECIPES = [
 
   // ── Steel tier ───────────────────────────────────────────────────────
   {
-    id: 'steel_sword',      name: 'Steel Sword',
-    tier: 'steel', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD, armorType: 'plate',
-    desc: 'Forged under pressure and quenched in ice. A blade that doesn\'t bend.',
-    barCost: { steel: 3 }, baseStats: { atk: 219 }, rarity: 'Rare',
-  },
-  {
-    id: 'steel_dagger',     name: 'Steel Dagger',
-    tier: 'steel', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.DAGGER, armorType: 'leather',
-    desc: 'Cold and precise. Steel holds a finer edge than tin ever could.',
-    barCost: { steel: 2 }, baseStats: { atk: 162, critRate: 0.04 }, rarity: 'Rare',
-  },
-  {
-    id: 'steel_mace',       name: 'Steel Mace',
-    tier: 'steel', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.MACE, armorType: 'plate',
-    desc: 'Every swing carries enough weight to end arguments through plate armor.',
-    barCost: { steel: 2 }, baseStats: { atk: 189, defPct: 0.05 }, rarity: 'Rare',
-  },
-  {
     id: 'steel_shield',     name: 'Steel Shield',
     tier: 'steel', slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD, armorType: 'plate',
     desc: 'The first shield that actually makes an attacker reconsider.',
@@ -273,24 +190,6 @@ export const RECIPES = [
   },
 
   // ── Darksteel tier ───────────────────────────────────────────────────
-  {
-    id: 'darksteel_sword',      name: 'Darksteel Sword',
-    tier: 'darksteel', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD, armorType: 'plate',
-    desc: 'Smelted from ore pulled from cursed veins. It drinks in light and returns nothing.',
-    barCost: { darksteel: 3 }, baseStats: { atk: 296 }, rarity: 'Epic',
-  },
-  {
-    id: 'darksteel_dagger',     name: 'Darksteel Dagger',
-    tier: 'darksteel', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.DAGGER, armorType: 'leather',
-    desc: 'Thin as a whisper, dark as a secret. Strikes before the eye can follow.',
-    barCost: { darksteel: 2 }, baseStats: { atk: 219, critRate: 0.05 }, rarity: 'Epic',
-  },
-  {
-    id: 'darksteel_mace',       name: 'Darksteel Mace',
-    tier: 'darksteel', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.MACE, armorType: 'plate',
-    desc: 'The weight of it feels wrong — like it wants to fall faster than gravity allows.',
-    barCost: { darksteel: 3 }, baseStats: { atk: 255, defPct: 0.06 }, rarity: 'Epic',
-  },
   {
     id: 'darksteel_shield',     name: 'Darksteel Shield',
     tier: 'darksteel', slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD, armorType: 'plate',
@@ -330,24 +229,6 @@ export const RECIPES = [
 
   // ── Mithril tier ─────────────────────────────────────────────────────
   {
-    id: 'mithril_sword',      name: 'Mithril Blade',
-    tier: 'mithril', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD, armorType: 'plate',
-    desc: 'Lighter than steel, stronger than any ore known to mortal smiths. Legends are made with blades like this.',
-    barCost: { mithril: 3 }, baseStats: { atk: 400 }, rarity: 'Common',
-  },
-  {
-    id: 'mithril_dagger',     name: 'Mithril Fang',
-    tier: 'mithril', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.DAGGER, armorType: 'leather',
-    desc: 'So sharp it barely makes a sound. By the time they feel it, the fight is already over.',
-    barCost: { mithril: 2 }, baseStats: { atk: 296, critRate: 0.06 }, rarity: 'Common',
-  },
-  {
-    id: 'mithril_mace',       name: 'Mithril Warhammer',
-    tier: 'mithril', slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.MACE, armorType: 'plate',
-    desc: 'A mithril head on an ironwood haft. The impact carries for a hundred paces.',
-    barCost: { mithril: 3 }, baseStats: { atk: 344, defPct: 0.07 }, rarity: 'Common',
-  },
-  {
     id: 'mithril_shield',     name: 'Mithril Bulwark',
     tier: 'mithril', slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD, armorType: 'plate',
     desc: 'Mithril doesn\'t dent. Mithril doesn\'t crack. Mithril doesn\'t fail.',
@@ -385,22 +266,6 @@ export const RECIPES = [
   },
 
   // ── Moonsilver tier (Elven Forge) ────────────────────────────────────
-  {
-    id: 'elven_sword', name: 'Elven Blade', tier: 'moonsilver', craftDiscipline: 'elven',
-    slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD,
-    armorType: 'plate',
-    desc: 'A blade of moonsilver that hums with elven enchantment. Strikes true even in darkness.',
-    barCost: { moonsilver: 4 }, baseStats: { atk: 420, critRate: 0.06 },
-    rarity: 'Common',
-  },
-  {
-    id: 'elven_spear', name: 'Elven Spear', tier: 'moonsilver', craftDiscipline: 'elven',
-    slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SPEAR,
-    armorType: 'plate',
-    desc: 'Swift as moonlight, this spear finds every gap in armor before the eye can follow.',
-    barCost: { moonsilver: 3 }, baseStats: { atk: 360, spd: 18 },
-    rarity: 'Common',
-  },
   {
     id: 'elven_shield', name: 'Elven Shield', tier: 'moonsilver', craftDiscipline: 'elven',
     slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD,
@@ -455,13 +320,12 @@ export const RECIPE_TIERS = [
 
 // Slot display helpers
 export const SLOT_ICONS = {
-  [GearSlot.MAIN_HAND]: '⚔',
-  [GearSlot.OFF_HAND]:  '🛡',
-  [GearSlot.HEAD]:      '⬡',
-  [GearSlot.CHEST]:     '◈',
-  [GearSlot.LEGS]:      '▽',
-  [GearSlot.BOOTS]:     '▾',
-  [GearSlot.GLOVES]:    '◇',
+  [GearSlot.OFF_HAND]: '🛡',
+  [GearSlot.HEAD]:     '⬡',
+  [GearSlot.CHEST]:    '◈',
+  [GearSlot.LEGS]:     '▽',
+  [GearSlot.BOOTS]:    '▾',
+  [GearSlot.GLOVES]:   '◇',
 }
 
 // Human-readable stat labels + formatter

@@ -179,7 +179,7 @@ const activeAtelierId = ref('arcane')
 const selectedRecipe  = ref(null)
 
 const SLOT_LABELS = {
-  main_hand: 'Weapon', off_hand: 'Off-Hand',
+  off_hand: 'Shield',
   head: 'Helm', chest: 'Chest', legs: 'Legs', boots: 'Boots', gloves: 'Gloves',
 }
 

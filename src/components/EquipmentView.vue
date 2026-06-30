@@ -104,8 +104,8 @@
           :slot-id="slot"
           :item="inventory.getEquippedItem(selectedKey, slot)"
           :heroKey="selectedKey"
-          :blocked="slot === 'off_hand' && inventory.isTwoHandedMainHand(selectedKey)"
-          @click="slot === 'off_hand' && inventory.isTwoHandedMainHand(selectedKey) ? null : inventory.openPicker(selectedKey, slot)"
+          :blocked="false"
+          @click="inventory.openPicker(selectedKey, slot)"
         />
       </div>
 
@@ -123,9 +123,6 @@
         </div>
         <div class="dr-note" v-if="inventory.hasShield(selectedKey)">
           🛡 Passive: 12% of all incoming damage is blocked
-        </div>
-        <div class="dw-note" v-if="inventory.isDualWielding(selectedKey)">
-          ⚔ Passive: Dual Wield bonus applied to ATK and Crit Rate above
         </div>
         <div class="set-bonus-section" v-if="setBonusSummary.length > 0">
           <div class="set-group" v-for="set in setBonusSummary" :key="set.type">
@@ -243,9 +240,7 @@ const selectedKey  = ref(collection.ownedKeys[0])
 const selectedHero = computed(() => roster.value.find(r => r.key === selectedKey.value)?.hero)
 
 const offhandMode = computed(() => {
-  if (inventory.isTwoHandedMainHand(selectedKey.value)) return 'twohanded'
-  if (inventory.isDualWielding(selectedKey.value))      return 'dual'
-  if (inventory.hasShield(selectedKey.value))           return 'board'
+  if (inventory.hasShield(selectedKey.value)) return 'board'
   return 'empty'
 })
 

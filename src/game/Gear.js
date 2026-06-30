@@ -1,15 +1,14 @@
 export const GearSlot = {
-  MAIN_HAND: 'main_hand',
-  OFF_HAND:  'off_hand',   // accepts weapon OR shield — the player's choice
-  HEAD:      'head',
-  CHEST:     'chest',
-  LEGS:      'legs',
-  BOOTS:     'boots',
-  GLOVES:    'gloves',
+  OFF_HAND: 'off_hand',  // shields only — no weapons
+  HEAD:     'head',
+  CHEST:    'chest',
+  LEGS:     'legs',
+  BOOTS:    'boots',
+  GLOVES:   'gloves',
 }
 
 export const GearType = {
-  WEAPON:  'weapon',
+  WEAPON:  'weapon',  // kept for legacy save compatibility — no longer used in UI
   SHIELD:  'shield',
   HELMET:  'helmet',
   ARMOR:   'armor',
@@ -18,16 +17,7 @@ export const GearType = {
   GLOVES:  'gloves',
 }
 
-export const WeaponType = {
-  SWORD:   'sword',
-  AXE:     'axe',
-  DAGGER:  'dagger',
-  STAFF:   'staff',
-  MACE:    'mace',
-  SPEAR:   'spear',
-  BOW:     'bow',
-  WAND:    'wand',
-}
+export const WeaponType = {}   // legacy — weapon type identity now lives on Hero.weaponType
 
 export const ArmorType = {
   PLATE:   'plate',
@@ -35,47 +25,29 @@ export const ArmorType = {
   CLOTH:   'cloth',
 }
 
-// Which armor type a weapon contributes toward for set bonus counting
-export const WEAPON_ARMOR_TYPE = {
-  sword:  'plate',
-  axe:    'plate',
-  mace:   'plate',
-  spear:  'plate',
-  dagger: 'leather',
-  bow:    'leather',
-  staff:  'cloth',
-  wand:   'cloth',
-}
+export const WEAPON_ARMOR_TYPE = {}  // legacy stub — no weapons in gear slots
 
 // Which gear types are allowed in each slot
 export const SLOT_ALLOWED_TYPES = {
-  [GearSlot.MAIN_HAND]: [GearType.WEAPON],
-  [GearSlot.OFF_HAND]:  [GearType.WEAPON, GearType.SHIELD],
-  [GearSlot.HEAD]:      [GearType.HELMET],
-  [GearSlot.CHEST]:     [GearType.ARMOR],
-  [GearSlot.LEGS]:      [GearType.LEGS],
-  [GearSlot.BOOTS]:     [GearType.BOOTS],
-  [GearSlot.GLOVES]:    [GearType.GLOVES],
+  [GearSlot.OFF_HAND]: [GearType.SHIELD],
+  [GearSlot.HEAD]:     [GearType.HELMET],
+  [GearSlot.CHEST]:    [GearType.ARMOR],
+  [GearSlot.LEGS]:     [GearType.LEGS],
+  [GearSlot.BOOTS]:    [GearType.BOOTS],
+  [GearSlot.GLOVES]:   [GearType.GLOVES],
 }
 
 export const SLOT_LABELS = {
-  [GearSlot.MAIN_HAND]: 'Main Hand',
-  [GearSlot.OFF_HAND]:  'Off Hand',
-  [GearSlot.HEAD]:      'Helmet',
-  [GearSlot.CHEST]:     'Armor',
-  [GearSlot.LEGS]:      'Legs',
-  [GearSlot.BOOTS]:     'Boots',
-  [GearSlot.GLOVES]:    'Gloves',
+  [GearSlot.OFF_HAND]: 'Shield',
+  [GearSlot.HEAD]:     'Helmet',
+  [GearSlot.CHEST]:    'Armor',
+  [GearSlot.LEGS]:     'Legs',
+  [GearSlot.BOOTS]:    'Boots',
+  [GearSlot.GLOVES]:   'Gloves',
 }
 
-// Weapon types that occupy both hands — off-hand is blocked while one is equipped
-export const TWO_HANDED_WEAPON_TYPES = new Set(['staff'])
-
-// Bonus applied when both hands hold weapons
-export const DUAL_WIELD_BONUS = {
-  atkPct:   0.15,  // +15% ATK
-  critRate: 0.05,  // +5% crit rate
-}
+export const TWO_HANDED_WEAPON_TYPES = new Set()  // legacy stub
+export const DUAL_WIELD_BONUS = {}                  // legacy stub
 
 // Passive damage reduction when off-hand is a shield
 export const SHIELD_PASSIVE_DR = 0.12   // 12% damage reduction

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { GearSlot, GearType, SLOT_ALLOWED_TYPES, DUAL_WIELD_BONUS, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, TWO_HANDED_WEAPON_TYPES, createItemInstance, computeLineStats } from '../game/Gear.js'
+import { GearSlot, GearType, SLOT_ALLOWED_TYPES, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, createItemInstance, computeLineStats } from '../game/Gear.js'
 import { SET_BONUSES, SET_PASSIVE_6, NAMED_SET_BONUSES, NAMED_SET_PASSIVE_6 } from '../game/data/setBonus.js'
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
@@ -139,20 +139,10 @@ export const useInventoryStore = defineStore('inventory', () => {
     return iid ? instanceById(iid) : null
   }
 
-  function isTwoHanded(item) {
-    return item?.gearType === GearType.WEAPON && TWO_HANDED_WEAPON_TYPES.has(item.weaponType)
-  }
-
-  function isTwoHandedMainHand(heroKey) {
-    return isTwoHanded(getEquippedItem(heroKey, GearSlot.MAIN_HAND))
-  }
-
   function equip(heroKey, slot, instanceId) {
     const item = instanceById(instanceId)
     if (!item) return
     if (!item.fitsSlot(slot)) return
-    // Block off_hand while a two-handed weapon occupies main_hand
-    if (slot === GearSlot.OFF_HAND && isTwoHandedMainHand(heroKey)) return
     // Remove from any other slot first (one item, one hero)
     for (const key of Object.keys(loadouts.value)) {
       for (const s of Object.values(GearSlot)) {
@@ -160,10 +150,6 @@ export const useInventoryStore = defineStore('inventory', () => {
       }
     }
     getLoadout(heroKey)[slot] = instanceId
-    // Two-handed weapon in main_hand → clear off_hand
-    if (slot === GearSlot.MAIN_HAND && isTwoHanded(item)) {
-      getLoadout(heroKey)[GearSlot.OFF_HAND] = null
-    }
   }
 
   function getEquippedBy(instanceId) {
@@ -189,13 +175,6 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   function unequip(heroKey, slot) {
     getLoadout(heroKey)[slot] = null
-  }
-
-  function isDualWielding(heroKey) {
-    const loadout = getLoadout(heroKey)
-    const mh = loadout[GearSlot.MAIN_HAND] ? instanceById(loadout[GearSlot.MAIN_HAND]) : null
-    const oh = loadout[GearSlot.OFF_HAND]  ? instanceById(loadout[GearSlot.OFF_HAND])  : null
-    return mh?.gearType === GearType.WEAPON && oh?.gearType === GearType.WEAPON && !isTwoHanded(mh)
   }
 
   function hasShield(heroKey) {
@@ -262,11 +241,6 @@ export const useInventoryStore = defineStore('inventory', () => {
       }
     }
 
-    if (isDualWielding(heroKey)) {
-      totals.atkPct   += DUAL_WIELD_BONUS.atkPct
-      totals.critRate += DUAL_WIELD_BONUS.critRate
-    }
-
     // Forge affinity bonus — +6% ATK and DEF per matching forge-tier piece
     const forgeAffinities = HERO_TEMPLATES[heroKey]?.()?.forgeAffinities ?? []
     let forgeAffinityCount = 0
@@ -308,20 +282,16 @@ export const useInventoryStore = defineStore('inventory', () => {
       if (count >= 6 && NAMED_SET_PASSIVE_6[setId]) activePassives.add(NAMED_SET_PASSIVE_6[setId].id)
     }
 
-    // Role-based passives — base passive always active; boosted when gear matches role condition
+    // Role-based passives — base passive always active; boosted by gear set alignment
     const ROLE_TO_PASSIVE = { warrior: 'execute', tank: 'grit', mage: 'spellweave', healer: 'mending', ranger: 'mark', debuffer: 'lingering_curse' }
     const heroRole = HERO_TEMPLATES[heroKey]?.()?.role ?? null
     if (heroRole && ROLE_TO_PASSIVE[heroRole]) {
       activePassives.add(ROLE_TO_PASSIVE[heroRole])
-      const mainHandItem = loadout[GearSlot.MAIN_HAND] ? instanceById(loadout[GearSlot.MAIN_HAND]) : null
-      const mwt = mainHandItem?.weaponType
-      const PLATE_WEAPONS = ['sword', 'axe', 'mace', 'spear']
-      const STAFF_WEAPONS = ['staff', 'wand']
       let boosted = false
-      if      (heroRole === 'warrior')  boosted = isDualWielding(heroKey) && setPieces.plate >= 3
-      else if (heroRole === 'tank')     boosted = PLATE_WEAPONS.includes(mwt) && hasShield(heroKey) && setPieces.plate >= 3
-      else if (heroRole === 'mage')     boosted = STAFF_WEAPONS.includes(mwt) && setPieces.cloth >= 3
-      else if (heroRole === 'healer')   boosted = STAFF_WEAPONS.includes(mwt) && setPieces.cloth >= 3
+      if      (heroRole === 'warrior')  boosted = setPieces.plate >= 3
+      else if (heroRole === 'tank')     boosted = hasShield(heroKey) && setPieces.plate >= 3
+      else if (heroRole === 'mage')     boosted = setPieces.cloth >= 3
+      else if (heroRole === 'healer')   boosted = setPieces.cloth >= 3
       else if (heroRole === 'ranger')   boosted = setPieces.leather >= 3
       else if (heroRole === 'debuffer') boosted = setPieces.leather >= 3 || setPieces.cloth >= 3
       if (boosted) activePassives.add(ROLE_TO_PASSIVE[heroRole] + '_boosted')
@@ -400,7 +370,6 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   function quickEquip(heroKey) {
     for (const slot of Object.values(GearSlot)) {
-      if (slot === GearSlot.OFF_HAND && isTwoHandedMainHand(heroKey)) continue
       const currentItem  = getEquippedItem(heroKey, slot)
       const currentScore = currentItem ? _scoreItem(currentItem) : -1
       const candidates   = ownedInstances.value.filter(item =>
@@ -432,7 +401,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     instanceById,
     getLoadout, getEquippedItem,
     equip, unequip,
-    isDualWielding, hasShield, isTwoHandedMainHand,
+    hasShield,
     isGearEnabled, toggleGearEnabled,
     computeGearStats, availableForSlot,
     getEquippedBy, equipTargets,

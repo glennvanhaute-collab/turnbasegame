@@ -328,7 +328,6 @@ const HERO_NAMES = Object.fromEntries(
 
 const typeFilters = [
   { value: '',               icon: null,      label: 'All' },
-  { value: GearType.WEAPON,  icon: 'sword',   label: 'Weapons' },
   { value: GearType.SHIELD,  icon: 'shield',  label: 'Shields' },
   { value: GearType.HELMET,  icon: 'helmet',  label: 'Helmets' },
   { value: GearType.ARMOR,   icon: 'chest',   label: 'Armor' },
