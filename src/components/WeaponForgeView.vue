@@ -16,6 +16,12 @@
             @click="activeFilter = f.id"
           >{{ f.label }}</button>
         </div>
+        <input
+          v-model="nameSearch"
+          class="wfr-search"
+          placeholder="Search heroes…"
+          spellcheck="false"
+        />
       </div>
 
       <div class="wfr-list">
@@ -230,6 +236,7 @@ const STAT_LABELS = {
 // ── State ─────────────────────────────────────────────────────────────
 const selectedKey   = ref(null)
 const activeFilter  = ref('all')
+const nameSearch    = ref('')
 const chosenType    = ref(null)
 const newWeaponName = ref('')
 
@@ -241,19 +248,30 @@ const selectedHero = computed(() =>
   collection.roster.find(e => e.key === selectedKey.value)?.hero ?? null
 )
 
+const RARITY_ORDER = ['ancient', 'mythical', 'legendary', 'epic', 'rare', 'uncommon', 'common']
+const rarityRank = r => { const i = RARITY_ORDER.indexOf(r?.toLowerCase() ?? ''); return i === -1 ? 99 : i }
+
 const filteredRoster = computed(() => {
-  const roster = collection.roster
-  if (activeFilter.value === 'all')    return roster
-  if (activeFilter.value === 'none')   return roster.filter(e => !getWeapon(e.key))
-  return roster.filter(e => {
-    const w = getWeapon(e.key)
-    if (!w) return false
-    const hands = WEAPON_TYPE_MAP[w.type]?.hands ?? ''
-    if (activeFilter.value === '1h')     return hands === '1H'
-    if (activeFilter.value === '2h')     return hands === '2H'
-    if (activeFilter.value === 'ranged') return hands === 'Ranged'
-    return true
-  })
+  const q = nameSearch.value.trim().toLowerCase()
+  let list = collection.roster
+
+  if (q) list = list.filter(e => e.hero.name.toLowerCase().includes(q))
+
+  if (activeFilter.value === 'none') {
+    list = list.filter(e => !getWeapon(e.key))
+  } else if (activeFilter.value !== 'all') {
+    list = list.filter(e => {
+      const w = getWeapon(e.key)
+      if (!w) return false
+      const hands = WEAPON_TYPE_MAP[w.type]?.hands ?? ''
+      if (activeFilter.value === '1h')     return hands === '1H'
+      if (activeFilter.value === '2h')     return hands === '2H'
+      if (activeFilter.value === 'ranged') return hands === 'Ranged'
+      return true
+    })
+  }
+
+  return [...list].sort((a, b) => rarityRank(a.hero.rarity) - rarityRank(b.hero.rarity))
 })
 
 // ── Helpers ───────────────────────────────────────────────────────────
@@ -350,6 +368,17 @@ function nextTierCost(heroKey) {
   border-color: rgba(212,175,55,0.4);
   color: #b8960a;
 }
+.wfr-search {
+  display: block; width: 100%; margin-top: 8px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 3px; padding: 5px 9px;
+  font-size: 0.6rem; color: #aaa;
+  outline: none; transition: border-color 0.12s;
+  box-sizing: border-box;
+}
+.wfr-search::placeholder { color: #3a3a3a; }
+.wfr-search:focus { border-color: rgba(212,175,55,0.35); }
 
 .wfr-list {
   flex: 1; overflow-y: auto; padding: 8px;
