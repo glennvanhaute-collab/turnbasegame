@@ -91,6 +91,25 @@
               <section class="section">
                 <h3 class="section-title">Equipped Gear</h3>
                 <div class="equipped-list">
+                  <!-- Forged weapon / shield -->
+                  <div class="eq-row eq-weapon-row" :class="forgedWeapon ? 'weapon-forged' : 'empty'">
+                    <img :src="weaponsIcon" class="eq-icon eq-weapon-icon" alt="" />
+                    <template v-if="forgedWeapon">
+                      <div class="eq-details">
+                        <div class="eq-name-row">
+                          <span class="eq-name">{{ forgedWeapon.name }}</span>
+                          <span class="eq-weapon-tier">{{ TIER_NAMES[forgedWeapon.tier - 1] }}</span>
+                        </div>
+                        <span class="eq-weapon-type">{{ forgedWeapon.type }}</span>
+                      </div>
+                      <div class="eq-stats">
+                        <span v-for="s in weaponStatChips(forgedWeapon)" :key="s" class="eq-stat-chip">{{ s }}</span>
+                      </div>
+                    </template>
+                    <span v-else class="eq-empty">Weapon — not yet forged</span>
+                  </div>
+
+                  <!-- Armor slots -->
                   <div
                     v-for="slot in SLOTS"
                     :key="slot"
@@ -239,6 +258,8 @@ import HeroAvatar from './HeroAvatar.vue'
 import ValdrisBg  from '../assets/lore/Valdris.png'
 import AldricBg   from '../assets/lore/Aldric.png'
 import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
+import { useWeaponStore } from '../stores/useWeaponStore.js'
+import weaponsIcon from '../assets/ui/weapons_icon.png'
 const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 const PLAYER_AVATARS = Object.fromEntries(
   Object.entries(_avatarModules).map(([path, mod]) => {
@@ -266,6 +287,31 @@ const store = useCollectionStore()
 const collectionStore = store
 const inventory   = useInventoryStore()
 const playerHero  = usePlayerHeroStore()
+const weaponStore = useWeaponStore()
+
+const TIER_NAMES = ['First Light', 'Tempered', 'Bound', 'Hallowed', 'Ascendant', 'Eternal']
+
+const forgedWeapon = computed(() => {
+  const key = entry.value?.key
+  if (!key) return null
+  return weaponStore.getWeapon(key) ?? null
+})
+
+const WEAPON_STAT_LABELS = {
+  atk: v => `+${v} ATK`,
+  critRate: v => `+${Math.round(v * 100)}% CR`,
+  critDmg: v => `+${Math.round(v * 100)}% CD`,
+  def: v => `+${v} DEF`,
+  hp: v => `+${v} HP`,
+  damageReduction: v => `${Math.round(v * 100)}% Block`,
+}
+
+function weaponStatChips(weapon) {
+  if (!weapon?.stats) return []
+  return Object.entries(weapon.stats)
+    .filter(([, v]) => v > 0)
+    .map(([k, v]) => WEAPON_STAT_LABELS[k]?.(v) ?? `+${v}`)
+}
 
 const rarityThresholds = [
   { level: 1,   label: 'Rare' },
@@ -559,6 +605,12 @@ const stats = computed(() => {
 .eq-row.uncommon  { border-left-color: #4dff88; }
 .eq-row.common    { border-left-color: #555; }
 .eq-row.empty     { border-left-color: #2a1008; opacity: 0.5; }
+
+.eq-weapon-row { border-left-color: #8a6020; }
+.eq-weapon-row.weapon-forged { border-left-color: #c9a227; }
+.eq-weapon-icon { width: 20px; height: 20px; object-fit: contain; flex-shrink: 0; filter: brightness(0.85) sepia(0.3); }
+.eq-weapon-tier { font-size: 0.58rem; font-weight: 700; color: #c9a227; background: #2a1a00; border: 1px solid #5a3800; border-radius: 4px; padding: 1px 5px; white-space: nowrap; flex-shrink: 0; }
+.eq-weapon-type { font-size: 0.6rem; color: #888; text-transform: capitalize; }
 
 .eq-icon     { flex-shrink: 0; }
 .eq-details  { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
