@@ -167,9 +167,19 @@ This is intentional design. You will not want to retire a hero who carries a Tie
 
 ---
 
-## Open Questions (decide before building)
+## Decisions
 
-1. Can a hero have multiple weapons stored (switching between them), or is it strictly one active weapon?
-2. Do weapon upgrades happen instantly, or is there a time cost like other crafting?
-3. Should the player be able to rename a weapon after creation?
-4. At Tier VI, does the weapon unlock a passive combat effect, or is it purely stat-based?
+### Weapon ownership model
+- **Non-legendary heroes**: weapons are interchangeable. You can craft multiple weapons and swap them between heroes of the same type. This enables roster flexibility — swap an Epic to counter different content.
+- **Legendary+ heroes**: their weapon is permanently bound. It was forged for them. It carries their name in the Chronicle. There is no swap. This is intentional and permanent.
+
+### Nice-to-have (post gear+weapon progression tuning)
+- **Tier VI passive**: each weapon type unlocks a unique combat passive at Eternal tier (e.g. Sword → execute chance, War Hammer → armor shatter, Bow → counter-shot on dodge). Design the passives per type before implementing.
+- **Bow off-hand mechanic**: rangers with a bow also have access to a melee skill option (using their off-hand dagger/shortsword). Keep as flavor until skills phase.
+
+---
+
+## Build Priority
+
+> **Gear progression and weapon progression must be fully designed and tuned before touching unit skills.**
+> The weapon forge is the next major build target after current gear systems are stable.
