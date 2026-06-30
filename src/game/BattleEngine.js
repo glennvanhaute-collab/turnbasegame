@@ -22,10 +22,12 @@ export class BattleEngine {
     this.pendingSkill = null
     this._actionSeq = 0
     this.mechanics  = options.mechanics ?? []
-    this.revivedIds        = new Set()
-    this._openerUsed       = new Set()  // hero IDs that have consumed their opener bonus
-    this._steadfastTriggered = new Set() // hero IDs that have triggered steadfast this battle
-    this._shroudActive     = new Set()  // hero IDs currently untargetable (leather 6pc Shroud)
+    this.revivedIds           = new Set()
+    this._openerUsed          = new Set()  // hero IDs that have consumed their opener bonus
+    this._steadfastTriggered  = new Set()  // hero IDs that have triggered steadfast this battle
+    this._shroudActive        = new Set()  // hero IDs currently untargetable (leather 6pc Shroud)
+    this._phaseStrikeReady    = new Set()  // hero IDs with phase_strike buff queued (shadow 6pc)
+    this._throneJudgmentUsed  = new Set()  // hero IDs that consumed throne_judgment this turn (regret 6pc)
   }
 
   get allHeroes() {
@@ -82,6 +84,8 @@ export class BattleEngine {
 
     // Shroud: hero steps out of shadow when they take their own turn
     this._shroudActive.delete(hero.id)
+    // Throne Judgment (regret 6pc): reset so first skill this turn gets the bonus
+    this._throneJudgmentUsed.delete(hero.id)
 
     // Undead Regen: enemies recover 4% max HP each turn
     if (!hero.isPlayer && this.mechanics.includes('undead_regen')) {
@@ -150,8 +154,13 @@ export class BattleEngine {
           const result = this._applyEffect(caster, target, effect, isAoe, skill)
           results.push({ target, ...result })
 
+          if (result.dodged) {
+            this.logMessage(`${target.name} evades ${caster.name}'s ${skill.name}!`)
+          }
           if (result.damage) {
-            this.logMessage(`${caster.name} uses ${skill.name} on ${target.name} for ${result.damage} damage${result.crit ? ' (CRIT!)' : ''}.`)
+            const phaseLog = result.phaseStrikeConsumed ? ' ⚡ Phase Strike!' : ''
+            const throneLog = result.throneJudgmentConsumed ? ' 👑 Throne Judgment!' : ''
+            this.logMessage(`${caster.name} uses ${skill.name} on ${target.name} for ${result.damage} damage${result.crit ? ' (CRIT!)' : ''}${phaseLog}${throneLog}.`)
           }
           if (result.heal) {
             this.logMessage(`${caster.name} heals ${target.name} for ${result.heal} HP.`)
@@ -199,6 +208,32 @@ export class BattleEngine {
       hits:           actionHits,
     }
 
+    // Process dodge outcomes
+    for (const r of results) {
+      if (!r.dodged) continue
+      if (r.ironReflexDodge) {
+        r.target.applyStatus(StatusEffect.INCREASE_ATK, 1, 0.25)
+        this.logMessage(`🛡 ${r.target.name}'s Iron Reflex — evaded! ATK surges for 1 turn.`)
+      }
+      if (r.phaseStrikeDodge) {
+        this._phaseStrikeReady.add(r.target.id)
+        this.logMessage(`💨 ${r.target.name} phases through — next strike surges!`)
+      }
+    }
+
+    // Runic Resonance (arcane 6pc): heal caster for 6% of total damage dealt this skill
+    if (caster.passives?.has('runic_resonance')) {
+      const totalDmg = results.reduce((sum, r) => sum + (r.damage ?? 0), 0)
+      if (totalDmg > 0) {
+        const healAmt = Math.floor(totalDmg * 0.06)
+        const actualHeal = caster.heal(healAmt)
+        if (actualHeal > 0) {
+          actionHits.push({ targetId: caster.id, damage: 0, heal: actualHeal, crit: false, died: false })
+          this.logMessage(`✨ ${caster.name}'s Runic Resonance — restored ${actualHeal} HP.`)
+        }
+      }
+    }
+
     // Steadfast: plate 6pc — shield triggers when a player hero drops below 30% HP (once per battle)
     for (const hero of this.livingPlayers) {
       if (hero.passives?.has('steadfast') && !this._steadfastTriggered.has(hero.id) && hero.hp < hero.maxHp * 0.30) {
@@ -225,6 +260,19 @@ export class BattleEngine {
     const result = {}
 
     if (effect.type === EffectType.DAMAGE) {
+      // Dodge checks — single-target only; iron_reflex (tannery 6pc, 20%) and phase_strike (shadow 6pc, 15%)
+      if (!isAoe) {
+        const ironReflex  = target.passives?.has('iron_reflex')  && Math.random() < 0.20
+        const phaseStrike = target.passives?.has('phase_strike') && Math.random() < 0.15
+        if (ironReflex || phaseStrike) {
+          result.damage          = 0
+          result.dodged          = true
+          result.ironReflexDodge  = ironReflex
+          result.phaseStrikeDodge = phaseStrike
+          return result
+        }
+      }
+
       const affinityMult = getAffinityMultiplier(caster.affinity, target.affinity)
       const isCrit = Math.random() < caster.critRate
       const critMult = isCrit ? (1 + caster.critDmg) : 1
@@ -241,8 +289,14 @@ export class BattleEngine {
         ? (caster.passives.has('spellweave_boosted') ? 1.20 : 1.12) : 1
       // Mark: target takes bonus damage when marked
       const markMult = target.hasStatus(StatusEffect.MARKED) ? (caster.passives?.has('mark_boosted') ? 1.20 : 1.15) : 1
+      // Phase Strike (shadow 6pc): next skill after a dodge deals +40%
+      const phaseStrikeMult = (caster.passives?.has('phase_strike') && this._phaseStrikeReady.has(caster.id)) ? 1.40 : 1
+      if (phaseStrikeMult > 1) { this._phaseStrikeReady.delete(caster.id); result.phaseStrikeConsumed = true }
+      // Throne Judgment (regret 6pc): first skill each turn deals +50%
+      const throneJudgmentMult = (caster.passives?.has('throne_judgment') && !this._throneJudgmentUsed.has(caster.id)) ? 1.50 : 1
+      if (throneJudgmentMult > 1) { this._throneJudgmentUsed.add(caster.id); result.throneJudgmentConsumed = true }
       // Damage formula
-      const raw = caster.atk * effect.multiplier * affinityMult * critMult * slayerMult * openerMult * aoeMult * spellweaveMult * markMult
+      const raw = caster.atk * effect.multiplier * affinityMult * critMult * slayerMult * openerMult * aoeMult * spellweaveMult * markMult * phaseStrikeMult * throneJudgmentMult
       const mitigated = raw / (1 + target.def / 1000)
       // Grit: tank passive — reduce large incoming hits
       let damage = Math.floor(mitigated)
