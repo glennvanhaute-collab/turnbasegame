@@ -129,7 +129,6 @@ export const RECIPES = [
 
   // ── Steel tier ───────────────────────────────────────────────────────
   {
-  {
     id: 'steel_helmet',     name: 'Steel Helmet',
     tier: 'steel', slot: GearSlot.HEAD, gearType: GearType.HELMET, armorType: 'plate',
     desc: 'Solid protection with a visor that narrows the world to what matters.',
@@ -161,7 +160,6 @@ export const RECIPES = [
   },
 
   // ── Darksteel tier ───────────────────────────────────────────────────
-  {
   {
     id: 'darksteel_helmet',     name: 'Darksteel Helm',
     tier: 'darksteel', slot: GearSlot.HEAD, gearType: GearType.HELMET, armorType: 'plate',
@@ -195,7 +193,6 @@ export const RECIPES = [
 
   // ── Mithril tier ─────────────────────────────────────────────────────
   {
-  {
     id: 'mithril_helmet',     name: 'Mithril Helm',
     tier: 'mithril', slot: GearSlot.HEAD, gearType: GearType.HELMET, armorType: 'plate',
     desc: 'Worn by commanders who intend to return. The metal hums faintly in the presence of magic.',
@@ -227,7 +224,6 @@ export const RECIPES = [
   },
 
   // ── Moonsilver tier (Elven Forge) ────────────────────────────────────
-  {
   {
     id: 'elven_helm', name: 'Elven Helm', tier: 'moonsilver', craftDiscipline: 'elven',
     slot: GearSlot.HEAD, gearType: GearType.HELMET,
