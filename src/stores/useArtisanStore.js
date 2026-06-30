@@ -11,18 +11,24 @@ export const useArtisanStore = defineStore('artisan', () => {
 
   // { [heroKey]: { [skillId]: { level: number, xp: number } } }
   const skillData             = ref(saved?.skillData ?? {})
-  const assignedForgeSmithKey = ref(saved?.assignedForgeSmithKey ?? null)
-  const assignedTannerKey     = ref(saved?.assignedTannerKey     ?? null)
-  const assignedTailorKey     = ref(saved?.assignedTailorKey     ?? null)
-  const assignedCarpenterKey  = ref(saved?.assignedCarpenterKey  ?? null)
+  const assignedForgeSmithKey    = ref(saved?.assignedForgeSmithKey    ?? null)
+  const assignedTannerKey        = ref(saved?.assignedTannerKey        ?? null)
+  const assignedTailorKey        = ref(saved?.assignedTailorKey        ?? null)
+  const assignedCarpenterKey     = ref(saved?.assignedCarpenterKey     ?? null)
+  const assignedFusionArcaneKey  = ref(saved?.assignedFusionArcaneKey  ?? null)
+  const assignedFusionShadowKey  = ref(saved?.assignedFusionShadowKey  ?? null)
+  const assignedFusionTanneryKey = ref(saved?.assignedFusionTanneryKey ?? null)
 
   function _persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      skillData:             skillData.value,
-      assignedForgeSmithKey: assignedForgeSmithKey.value,
-      assignedTannerKey:     assignedTannerKey.value,
-      assignedTailorKey:     assignedTailorKey.value,
-      assignedCarpenterKey:  assignedCarpenterKey.value,
+      skillData:                skillData.value,
+      assignedForgeSmithKey:    assignedForgeSmithKey.value,
+      assignedTannerKey:        assignedTannerKey.value,
+      assignedTailorKey:        assignedTailorKey.value,
+      assignedCarpenterKey:     assignedCarpenterKey.value,
+      assignedFusionArcaneKey:  assignedFusionArcaneKey.value,
+      assignedFusionShadowKey:  assignedFusionShadowKey.value,
+      assignedFusionTanneryKey: assignedFusionTanneryKey.value,
     }))
   }
 
@@ -59,8 +65,15 @@ export const useArtisanStore = defineStore('artisan', () => {
   function assignTailor(heroKey) { assignedTailorKey.value = heroKey; _persist() }
   function unassignTailor()      { assignedTailorKey.value = null;    _persist() }
 
-  function assignCarpenter(heroKey) { assignedCarpenterKey.value = heroKey; _persist() }
-  function unassignCarpenter()      { assignedCarpenterKey.value = null;    _persist() }
+  function assignCarpenter(heroKey)      { assignedCarpenterKey.value = heroKey;     _persist() }
+  function unassignCarpenter()           { assignedCarpenterKey.value = null;         _persist() }
+
+  function assignFusionArcane(heroKey)   { assignedFusionArcaneKey.value  = heroKey; _persist() }
+  function unassignFusionArcane()        { assignedFusionArcaneKey.value  = null;    _persist() }
+  function assignFusionShadow(heroKey)   { assignedFusionShadowKey.value  = heroKey; _persist() }
+  function unassignFusionShadow()        { assignedFusionShadowKey.value  = null;    _persist() }
+  function assignFusionTannery(heroKey)  { assignedFusionTanneryKey.value = heroKey; _persist() }
+  function unassignFusionTannery()       { assignedFusionTanneryKey.value = null;    _persist() }
 
   // Speed multipliers: flat +5% base, +3% per relevant skill level
   function smithSpeedMultiplier(heroKey)     { return 1 + 0.05 + getSkillLevel(heroKey, 'blacksmithing')  * 0.03 }
@@ -71,11 +84,15 @@ export const useArtisanStore = defineStore('artisan', () => {
   return {
     skillData,
     assignedForgeSmithKey, assignedTannerKey, assignedTailorKey, assignedCarpenterKey,
+    assignedFusionArcaneKey, assignedFusionShadowKey, assignedFusionTanneryKey,
     xpForLevel, getSkillLevel, getSkillXp, addSkillXp,
     assignForgeSmith, unassignForgeSmith,
     assignTanner, unassignTanner,
     assignTailor, unassignTailor,
     assignCarpenter, unassignCarpenter,
+    assignFusionArcane, unassignFusionArcane,
+    assignFusionShadow, unassignFusionShadow,
+    assignFusionTannery, unassignFusionTannery,
     smithSpeedMultiplier, tannerSpeedMultiplier, tailorSpeedMultiplier, carpenterSpeedMultiplier,
   }
 })

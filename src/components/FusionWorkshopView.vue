@@ -56,6 +56,33 @@
         </div>
       </div>
 
+      <!-- Artisan assignment -->
+      <div class="fw-artisan">
+        <div class="fwa-label">Artisan</div>
+        <div v-if="assignedArtisan" class="fwa-assigned">
+          <div class="fwa-hero-name">{{ assignedArtisan.hero.name }}</div>
+          <div class="fwa-skills">
+            <span class="fwa-skill">{{ activeAtelier.req1 }} Lv.{{ artisanSkillLevel(assignedKey, activeAtelier.req1) }}</span>
+            <span class="fwa-skill">{{ activeAtelier.req2 }} Lv.{{ artisanSkillLevel(assignedKey, activeAtelier.req2) }}</span>
+          </div>
+          <button class="fwa-unassign" @click="unassignArtisan">×</button>
+        </div>
+        <template v-else>
+          <button
+            v-for="e in eligibleArtisans"
+            :key="e.key"
+            class="fwa-pick-btn"
+            @click="assignArtisan(e.key)"
+          >
+            <span class="fwa-pick-name">{{ e.hero.name }}</span>
+            <span class="fwa-pick-lvs">{{ activeAtelier.req1 }} Lv.{{ artisanSkillLevel(e.key, activeAtelier.req1) }} · {{ activeAtelier.req2 }} Lv.{{ artisanSkillLevel(e.key, activeAtelier.req2) }}</span>
+          </button>
+          <div v-if="!eligibleArtisans.length" class="fwa-none">
+            No hero has both {{ activeAtelier.req1 }} &amp; {{ activeAtelier.req2 }}
+          </div>
+        </template>
+      </div>
+
     </aside>
 
     <!-- ── Center: Detail panel ──────────────────────────────────── -->
@@ -94,20 +121,34 @@
           </div>
         </div>
 
+        <!-- Artisan level requirement -->
         <div class="detail-reqs">
           <div class="ds-label">Requires</div>
           <div class="req-row">
             <span class="req-chip" :style="{ '--ac': activeAtelier.color }">{{ activeAtelier.req1 }}</span>
-            <span class="req-lv">Lv. {{ selectedRecipe.reqLevel }}</span>
+            <span class="req-lv" :class="{ unmet: assignedKey && artisanSkillLevel(assignedKey, activeAtelier.req1) < selectedRecipe.reqLevel }">
+              Lv. {{ selectedRecipe.reqLevel }}
+            </span>
           </div>
           <div class="req-row">
             <span class="req-chip" :style="{ '--ac': activeAtelier.color }">{{ activeAtelier.req2 }}</span>
-            <span class="req-lv">Lv. {{ selectedRecipe.reqLevel }}</span>
+            <span class="req-lv" :class="{ unmet: assignedKey && artisanSkillLevel(assignedKey, activeAtelier.req2) < selectedRecipe.reqLevel }">
+              Lv. {{ selectedRecipe.reqLevel }}
+            </span>
           </div>
         </div>
 
-        <button class="craft-btn" disabled>
-          ✦ Coming Soon
+        <button
+          class="craft-btn"
+          :class="{ ready: canCraft(selectedRecipe), flash: !!craftResult }"
+          :disabled="!canCraft(selectedRecipe)"
+          @click="craft"
+        >
+          <span v-if="craftResult">✓ {{ craftResult }}</span>
+          <span v-else-if="!assignedKey">Assign an artisan first</span>
+          <span v-else-if="!artisanMeetsLevel(selectedRecipe)">Artisan level too low</span>
+          <span v-else-if="!canAfford(selectedRecipe)">Not enough {{ selectedRecipe.barName }}</span>
+          <span v-else>✦ Craft {{ selectedRecipe.name }}</span>
         </button>
       </template>
 
@@ -300,6 +341,121 @@ const activeTierName = computed(() => {
   }
   return ''
 })
+
+// ── Stores ────────────────────────────────────────────────────────────
+import { useArtisanStore }    from '../stores/useArtisanStore.js'
+import { useInventoryStore }  from '../stores/useInventoryStore.js'
+import { useResourceStore }   from '../stores/useResourceStore.js'
+import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { createItemInstance } from '../game/Gear.js'
+
+const artisan    = useArtisanStore()
+const inventory  = useInventoryStore()
+const resources  = useResourceStore()
+const collection = useCollectionStore()
+
+// ── Constants ─────────────────────────────────────────────────────────
+const SKILL_IDS = {
+  'Blacksmithing':  'blacksmithing',
+  'Leatherworking': 'leatherworking',
+  'Tailoring':      'tailoring',
+}
+
+const SLOT_TO_GEARTYPE = {
+  chest: 'armor', head: 'helmet', legs: 'legs', boots: 'boots', gloves: 'gloves',
+}
+
+const FUSION_XP_PER_TIER = { steel: 20, mithril: 45, moonsilver: 90 }
+
+// ── Artisan helpers ───────────────────────────────────────────────────
+const assignedKey = computed(() => {
+  if (activeAtelierId.value === 'arcane')   return artisan.assignedFusionArcaneKey
+  if (activeAtelierId.value === 'shadow')   return artisan.assignedFusionShadowKey
+  if (activeAtelierId.value === 'tannery')  return artisan.assignedFusionTanneryKey
+  return null
+})
+
+function artisanSkillLevel(heroKey, reqName) {
+  return artisan.getSkillLevel(heroKey, SKILL_IDS[reqName])
+}
+
+const eligibleArtisans = computed(() => {
+  const s1 = SKILL_IDS[activeAtelier.value.req1]
+  const s2 = SKILL_IDS[activeAtelier.value.req2]
+  return collection.roster.filter(({ hero }) =>
+    hero.artisanSkills?.some(s => s.id === s1) &&
+    hero.artisanSkills?.some(s => s.id === s2)
+  )
+})
+
+const assignedArtisan = computed(() => {
+  const key = assignedKey.value
+  if (!key) return null
+  return eligibleArtisans.value.find(e => e.key === key) ?? null
+})
+
+function assignArtisan(heroKey) {
+  if (activeAtelierId.value === 'arcane')   artisan.assignFusionArcane(heroKey)
+  if (activeAtelierId.value === 'shadow')   artisan.assignFusionShadow(heroKey)
+  if (activeAtelierId.value === 'tannery')  artisan.assignFusionTannery(heroKey)
+}
+
+function unassignArtisan() {
+  if (activeAtelierId.value === 'arcane')   artisan.unassignFusionArcane()
+  if (activeAtelierId.value === 'shadow')   artisan.unassignFusionShadow()
+  if (activeAtelierId.value === 'tannery')  artisan.unassignFusionTannery()
+}
+
+// ── Crafting logic ────────────────────────────────────────────────────
+function canAfford(recipe) {
+  return (resources.bars[recipe.tier] ?? 0) >= recipe.barCost
+}
+
+function artisanMeetsLevel(recipe) {
+  const key = assignedKey.value
+  if (!key) return false
+  return artisanSkillLevel(key, activeAtelier.value.req1) >= recipe.reqLevel &&
+         artisanSkillLevel(key, activeAtelier.value.req2) >= recipe.reqLevel
+}
+
+function canCraft(recipe) {
+  return !!recipe && canAfford(recipe) && !!assignedKey.value && artisanMeetsLevel(recipe)
+}
+
+const craftResult = ref(null)
+let _flashTimer = null
+
+function craft() {
+  if (!selectedRecipe.value || !canCraft(selectedRecipe.value)) return
+  const recipe = selectedRecipe.value
+  resources.removeBar(recipe.tier, recipe.barCost)
+
+  const instance = createItemInstance({
+    id:        recipe.id,
+    name:      recipe.name,
+    gearType:  SLOT_TO_GEARTYPE[recipe.slot],
+    weaponType: null,
+    rarity:    'Common',
+    stats:     { ...recipe.baseStats },
+    baseStats: { ...recipe.baseStats },
+    tier:      recipe.tier,
+    slot:      recipe.slot,
+    armorType: activeAtelierId.value,
+  })
+  instance.craftedAt       = Date.now()
+  instance.crafted         = true
+  instance.craftDiscipline = 'fusion'
+  inventory.addInstance(instance)
+
+  const xp  = FUSION_XP_PER_TIER[recipe.tier] ?? 20
+  const key = assignedKey.value
+  artisan.addSkillXp(key, SKILL_IDS[activeAtelier.value.req1], xp)
+  artisan.addSkillXp(key, SKILL_IDS[activeAtelier.value.req2], xp)
+
+  craftResult.value = recipe.name
+  clearTimeout(_flashTimer)
+  _flashTimer = setTimeout(() => { craftResult.value = null }, 3000)
+}
 </script>
 
 <style scoped>
@@ -490,15 +646,81 @@ const activeTierName = computed(() => {
   margin-bottom: 8px;
 }
 .req-lv { font-size: 0.68rem; color: #666; }
+.req-lv.unmet { color: #e05050; }
 
 .craft-btn {
-  margin-top: 8px;
-  padding: 12px 32px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.12);
+  margin-top: 8px; width: 100%;
+  padding: 13px 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 6px;
-  color: #555; font-family: var(--font-head);
-  font-size: 0.75rem; letter-spacing: 2px;
-  cursor: not-allowed;
+  color: #444; font-family: var(--font-head);
+  font-size: 0.74rem; letter-spacing: 2px; text-transform: uppercase;
+  cursor: not-allowed; transition: all 0.15s;
 }
+.craft-btn.ready {
+  background: rgba(153,85,255,0.12);
+  border-color: rgba(153,85,255,0.5);
+  color: #bb88ff; cursor: pointer;
+}
+.craft-btn.ready:hover {
+  background: rgba(153,85,255,0.22);
+  border-color: #9955ff;
+  box-shadow: 0 0 20px rgba(153,85,255,0.2);
+}
+.craft-btn.flash {
+  background: rgba(80,200,120,0.15);
+  border-color: rgba(80,200,120,0.5);
+  color: #88ddaa; cursor: default;
+}
+
+/* ── Artisan panel ──────────────────────────────────── */
+.fw-artisan {
+  margin-top: auto;
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.fwa-label {
+  font-family: var(--font-head); font-size: 0.52rem;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #555; margin-bottom: 8px;
+}
+.fwa-assigned {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px; padding: 8px 10px;
+}
+.fwa-hero-name {
+  font-family: var(--font-head); font-size: 0.7rem;
+  color: #ddd; font-weight: 700; flex: 1;
+}
+.fwa-skills {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.fwa-skill {
+  font-size: 0.56rem; color: #777; letter-spacing: 0.5px;
+}
+.fwa-unassign {
+  background: none; border: none; color: #555;
+  font-size: 1rem; cursor: pointer; padding: 0 4px;
+  line-height: 1; flex-shrink: 0;
+}
+.fwa-unassign:hover { color: #e05050; }
+.fwa-pick-btn {
+  display: flex; flex-direction: column; gap: 2px;
+  width: 100%; text-align: left;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 5px; padding: 7px 10px;
+  cursor: pointer; transition: all 0.12s;
+  margin-bottom: 4px;
+}
+.fwa-pick-btn:hover {
+  background: rgba(153,85,255,0.08);
+  border-color: rgba(153,85,255,0.3);
+}
+.fwa-pick-name { font-family: var(--font-head); font-size: 0.68rem; color: #ccc; }
+.fwa-pick-lvs  { font-size: 0.55rem; color: #666; }
+.fwa-none { font-size: 0.63rem; color: #555; font-style: italic; }
 </style>
