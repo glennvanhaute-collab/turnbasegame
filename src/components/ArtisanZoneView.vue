@@ -54,7 +54,7 @@ import { useResourceStore } from '../stores/useResourceStore.js'
 import zoneBg          from '../assets/backgrounds/artisan-zone_bg.png'
 import fusionIcon      from '../assets/ui/fusion_worshop_icon.png'
 
-defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop'])
+defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop', 'open-weapon-forge'])
 
 const resources = useResourceStore()
 
@@ -106,6 +106,16 @@ const SHOPS = computed(() => [
     desc:     'Combine two disciplines to craft hybrid gear sets',
     imgUrl:   fusionIcon,
     color:    '#9955ff',
+    level:    null,
+    progress: 0,
+  },
+  {
+    id:       'weapon_forge',
+    event:    'open-weapon-forge',
+    name:     'Weapon Forge',
+    desc:     'Forge a weapon and write its chronicle',
+    icon:     'skill_blacksmithing',
+    color:    '#d4af37',
     level:    null,
     progress: 0,
   },

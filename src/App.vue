@@ -145,6 +145,21 @@
       </Transition>
     </Teleport>
 
+    <!-- Weapon Forge modal -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showWeaponForge">
+          <div class="coll-modal-backdrop" @click="showWeaponForge = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showWeaponForge = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <WeaponForgeView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Market modal — floats over the homepage map -->
     <Teleport to="body">
       <Transition name="coll-modal">
@@ -197,6 +212,7 @@
         @open-tailoring="showTailoring = true"
         @open-woodworking="showWoodworking = true"
         @open-fusion-workshop="showFusionWorkshop = true"
+        @open-weapon-forge="showWeaponForge = true"
         @open-market="showMarket = true"
         @open-codex="showCodex = true"
       />
@@ -266,6 +282,7 @@ import LeatherworkingView from './components/LeatherworkingView.vue'
 import TailoringView from './components/TailoringView.vue'
 import WoodworkingView from './components/WoodworkingView.vue'
 import FusionWorkshopView from './components/FusionWorkshopView.vue'
+import WeaponForgeView from './components/WeaponForgeView.vue'
 import MarketView from './components/MarketView.vue'
 import InventoryView from './components/InventoryView.vue'
 import EquipmentView from './components/EquipmentView.vue'
@@ -308,6 +325,7 @@ const showLeatherworking  = ref(false)
 const showTailoring       = ref(false)
 const showWoodworking     = ref(false)
 const showFusionWorkshop  = ref(false)
+const showWeaponForge     = ref(false)
 const showMarket          = ref(false)
 const showBattle      = ref(false)
 const showRaidBattle  = ref(false)
@@ -319,6 +337,8 @@ function closeAllPanels() {
   showLeatherworking.value  = false
   showTailoring.value       = false
   showWoodworking.value     = false
+  showFusionWorkshop.value  = false
+  showWeaponForge.value     = false
   showMarket.value          = false
   showBattle.value          = false
   showRaidBattle.value      = false
