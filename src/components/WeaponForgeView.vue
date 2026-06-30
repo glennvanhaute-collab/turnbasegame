@@ -62,18 +62,11 @@
       <template v-else-if="!getWeapon(selectedKey)">
         <div class="wfc-hero-name">{{ selectedHero?.name }}</div>
         <div class="wfc-headline">Forge a Weapon</div>
-        <div class="wfc-deck">Choose its nature. Give it a name. Begin the chronicle.</div>
+        <div class="wfc-deck">Give it a name. Begin the chronicle.</div>
 
-        <div class="wfc-type-grid">
-          <button
-            v-for="wt in WEAPON_TYPES" :key="wt.id"
-            class="wfc-type"
-            :class="{ chosen: chosenType === wt.id }"
-            @click="chosenType = wt.id"
-          >
-            <span class="wfct-hand">{{ wt.hands }}</span>
-            <span class="wfct-name">{{ wt.name }}</span>
-          </button>
+        <div class="wfc-preset-type">
+          <span class="wfpt-hand">{{ WEAPON_TYPE_MAP[selectedHero?.weaponType]?.hands }}</span>
+          <span class="wfpt-name">{{ WEAPON_TYPE_MAP[selectedHero?.weaponType]?.name }}</span>
         </div>
 
         <div class="wfc-name-row">
@@ -88,8 +81,8 @@
 
         <button
           class="wfc-begin-btn"
-          :class="{ ready: chosenType && newWeaponName.trim() }"
-          :disabled="!chosenType || !newWeaponName.trim()"
+          :class="{ ready: !!newWeaponName.trim() }"
+          :disabled="!newWeaponName.trim()"
         >
           ✦ Begin the Chronicle
         </button>
@@ -237,7 +230,6 @@ const STAT_LABELS = {
 const selectedKey   = ref(null)
 const activeFilter  = ref('all')
 const nameSearch    = ref('')
-const chosenType    = ref(null)
 const newWeaponName = ref('')
 
 // Placeholder weapon store — will be replaced by useWeaponStore
@@ -281,7 +273,6 @@ function getWeapon(heroKey) {
 
 function selectHero(key) {
   selectedKey.value   = key
-  chosenType.value    = null
   newWeaponName.value = ''
 }
 
@@ -472,36 +463,26 @@ function nextTierCost(heroKey) {
 }
 .wfc-deck { font-size: 0.75rem; color: #555; margin-bottom: 28px; }
 
-.wfc-type-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 8px; width: 100%; max-width: 420px;
-  margin-bottom: 24px;
-}
-.wfc-type {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 4px; padding: 12px 8px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 6px; cursor: pointer;
-  transition: all 0.12s;
-}
-.wfc-type:hover {
+.wfc-preset-type {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 28px;
+  padding: 10px 24px;
   background: rgba(212,175,55,0.06);
-  border-color: rgba(212,175,55,0.25);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 6px;
 }
-.wfc-type.chosen {
-  background: rgba(212,175,55,0.10);
-  border-color: rgba(212,175,55,0.55);
+.wfpt-hand {
+  font-size: 0.52rem; color: #888;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 3px;
 }
-.wfct-hand {
-  font-size: 0.48rem; color: #666;
-  letter-spacing: 1px; text-transform: uppercase;
-}
-.wfct-name {
+.wfpt-name {
   font-family: var(--font-head, serif);
-  font-size: 0.75rem; color: #bbb;
+  font-size: 1rem; color: #d4af37;
+  letter-spacing: 1px;
 }
-.wfc-type.chosen .wfct-name { color: #d4af37; }
 
 .wfc-name-row { width: 100%; max-width: 420px; margin-bottom: 20px; }
 .wfc-name-input {
