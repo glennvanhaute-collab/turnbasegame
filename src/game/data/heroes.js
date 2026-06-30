@@ -134,7 +134,7 @@ export const HERO_TEMPLATES = {
     critRate: 0.20, critDmg: 0.60,
     skills: [SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.leatherworking],
-    isPlayer: true, role: 'warrior', weaponType: 'sword',
+    isPlayer: true, role: 'warrior', weaponType: 'shield',
   }),
 
   LORD_ALDRIC: () => new Hero({
@@ -436,7 +436,7 @@ His battle cry is four words. The spelling is his own. He has never once questio
     critRate: 0.12, critDmg: 0.45,
     skills: [SKILLS.PROVOKE, SKILLS.IRON_BASTION, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring, ARTISAN.apothecary, ARTISAN.herbalism],
-    isPlayer: true, role: 'tank', weaponType: 'mace',
+    isPlayer: true, role: 'tank', weaponType: 'shield',
     quote: 'He fights to conquer. I fight so that the people behind me never have to.',
     lore: 'Hilda did not become a shieldmaiden because she was told to. She became one because nobody else was doing it well enough. Born in a raided village on the western edge of Ignar territory, she rebuilt it herself, trained its defenders herself, and held it against three separate incursions before anyone in Ignar command even knew her name. When Arne came with his warband, she met him at the gate alone. He expected a battle. What he got was a negotiation — and he lost. She has never let him forget it, and he has never wanted to.',
   }),

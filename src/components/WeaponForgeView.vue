@@ -216,6 +216,7 @@ const WEAPON_TYPES = [
   { id: 'crossbow',   name: 'Crossbow',   hands: 'Ranged' },
   { id: 'staff',      name: 'Staff',      hands: '2H'     },
   { id: 'wand',       name: 'Wand',       hands: '1H'     },
+  { id: 'shield',     name: 'Shield',     hands: 'Shield' },
 ]
 const WEAPON_TYPE_MAP = Object.fromEntries(WEAPON_TYPES.map(w => [w.id, w]))
 
@@ -234,11 +235,13 @@ const FILTERS = [
   { id: '1h',     label: '1H'        },
   { id: '2h',     label: '2H'        },
   { id: 'ranged', label: 'Ranged'    },
+  { id: 'shield', label: 'Shield'    },
 ]
 
 const STAT_LABELS = {
   atk: 'ATK', atkPct: 'ATK %', critRate: 'Crit Rate',
   critDmg: 'Crit DMG', def: 'DEF', hp: 'HP', spd: 'SPD',
+  damageReduction: 'Dmg Block',
 }
 
 // ── State ─────────────────────────────────────────────────────────────
@@ -250,6 +253,13 @@ const newWeaponName = ref('')
 
 // ── Name generator ────────────────────────────────────────────────────
 const GEN_NOUNS = {
+  shield: [
+    'Bulwark','Wall','Ward','Vow','Promise','Aegis','Bastion','Rampart',
+    'Vigil','Shelter','Mantle','Cover','Guard','Keep','Hold','Resolve',
+    'Last Stand','Defiance','Endurance','Patience','Answer','Reply',
+    'Steadfast','Refuge','Sanctuary','Haven','Anchor','Foundation',
+    'Cornerstone','Keystone','Linchpin','Constant','Certainty',
+  ],
   sword: [
     'Fang','Edge','Vow','Oath','Talon','Resolve','Verdict','Rite','Sorrow',
     'Pact','Promise','Burden','Reckoning','Testament','Covenant','Memory',
@@ -426,6 +436,7 @@ const filteredRoster = computed(() => {
       if (activeFilter.value === '1h')     return hands === '1H'
       if (activeFilter.value === '2h')     return hands === '2H'
       if (activeFilter.value === 'ranged') return hands === 'Ranged'
+      if (activeFilter.value === 'shield') return hands === 'Shield'
       return true
     })
   }

@@ -5,18 +5,6 @@ import { BARS } from './bars.js'
 export const RECIPES = [
   // ── Copper tier ──────────────────────────────────────────────────────
   {
-    id: 'copper_shield',
-    name: 'Copper Shield',
-    tier: 'copper',
-    slot: GearSlot.OFF_HAND,
-    gearType: GearType.SHIELD,
-    armorType: 'plate',
-    desc: 'A round shield beaten from copper plate.',
-    barCost: { copper: 2 },
-    baseStats: { def: 80, hp: 800 },
-    rarity: 'Common',
-  },
-  {
     id: 'copper_helmet',
     name: 'Copper Helmet',
     tier: 'copper',
@@ -78,18 +66,6 @@ export const RECIPES = [
   },
 
   // ── Tin tier ─────────────────────────────────────────────────────────
-  {
-    id: 'tin_shield',
-    name: 'Tin Shield',
-    tier: 'tin',
-    slot: GearSlot.OFF_HAND,
-    gearType: GearType.SHIELD,
-    armorType: 'plate',
-    desc: 'A reinforced round shield. Tin absorbs blows copper would dent under.',
-    barCost: { tin: 2 },
-    baseStats: { def: 108, hp: 1080 },
-    rarity: 'Uncommon',
-  },
   {
     id: 'tin_helmet',
     name: 'Tin Helmet',
@@ -153,11 +129,6 @@ export const RECIPES = [
 
   // ── Steel tier ───────────────────────────────────────────────────────
   {
-    id: 'steel_shield',     name: 'Steel Shield',
-    tier: 'steel', slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD, armorType: 'plate',
-    desc: 'The first shield that actually makes an attacker reconsider.',
-    barCost: { steel: 2 }, baseStats: { def: 146, hp: 1460 }, rarity: 'Rare',
-  },
   {
     id: 'steel_helmet',     name: 'Steel Helmet',
     tier: 'steel', slot: GearSlot.HEAD, gearType: GearType.HELMET, armorType: 'plate',
@@ -191,11 +162,6 @@ export const RECIPES = [
 
   // ── Darksteel tier ───────────────────────────────────────────────────
   {
-    id: 'darksteel_shield',     name: 'Darksteel Shield',
-    tier: 'darksteel', slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD, armorType: 'plate',
-    desc: 'Absorbs force like a void. Attacks seem to simply stop against it.',
-    barCost: { darksteel: 3 }, baseStats: { def: 197, hp: 1970 }, rarity: 'Epic',
-  },
   {
     id: 'darksteel_helmet',     name: 'Darksteel Helm',
     tier: 'darksteel', slot: GearSlot.HEAD, gearType: GearType.HELMET, armorType: 'plate',
@@ -229,11 +195,6 @@ export const RECIPES = [
 
   // ── Mithril tier ─────────────────────────────────────────────────────
   {
-    id: 'mithril_shield',     name: 'Mithril Bulwark',
-    tier: 'mithril', slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD, armorType: 'plate',
-    desc: 'Mithril doesn\'t dent. Mithril doesn\'t crack. Mithril doesn\'t fail.',
-    barCost: { mithril: 3 }, baseStats: { def: 266, hp: 2660 }, rarity: 'Common',
-  },
   {
     id: 'mithril_helmet',     name: 'Mithril Helm',
     tier: 'mithril', slot: GearSlot.HEAD, gearType: GearType.HELMET, armorType: 'plate',
@@ -267,13 +228,6 @@ export const RECIPES = [
 
   // ── Moonsilver tier (Elven Forge) ────────────────────────────────────
   {
-    id: 'elven_shield', name: 'Elven Shield', tier: 'moonsilver', craftDiscipline: 'elven',
-    slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD,
-    armorType: 'plate',
-    desc: 'Woven from moonsilver vines by elven hands. Impossibly light, completely impenetrable.',
-    barCost: { moonsilver: 4 }, baseStats: { def: 300, hp: 5000 },
-    rarity: 'Common',
-  },
   {
     id: 'elven_helm', name: 'Elven Helm', tier: 'moonsilver', craftDiscipline: 'elven',
     slot: GearSlot.HEAD, gearType: GearType.HELMET,
@@ -320,8 +274,7 @@ export const RECIPE_TIERS = [
 
 // Slot display helpers
 export const SLOT_ICONS = {
-  [GearSlot.OFF_HAND]: '🛡',
-  [GearSlot.HEAD]:     '⬡',
+  [GearSlot.HEAD]:   '⬡',
   [GearSlot.CHEST]:    '◈',
   [GearSlot.LEGS]:     '▽',
   [GearSlot.BOOTS]:    '▾',

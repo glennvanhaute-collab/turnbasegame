@@ -121,9 +121,6 @@
             <span class="stat-delta" v-if="s.changed">+{{ s.delta }}</span>
           </div>
         </div>
-        <div class="dr-note" v-if="inventory.hasShield(selectedKey)">
-          🛡 Passive: 12% of all incoming damage is blocked
-        </div>
         <div class="set-bonus-section" v-if="setBonusSummary.length > 0">
           <div class="set-group" v-for="set in setBonusSummary" :key="set.type">
             <div class="set-header">
@@ -239,10 +236,7 @@ const filteredRoster = computed(() => {
 const selectedKey  = ref(collection.ownedKeys[0])
 const selectedHero = computed(() => roster.value.find(r => r.key === selectedKey.value)?.hero)
 
-const offhandMode = computed(() => {
-  if (inventory.hasShield(selectedKey.value)) return 'board'
-  return 'empty'
-})
+const offhandMode = computed(() => 'empty')
 
 function equippedCount(key) {
   return SLOTS.filter(s => !!inventory.getEquippedItem(key, s)).length

@@ -77,6 +77,14 @@ const WEAPON_STATS = {
     { atk: 2530, critRate: 0.17 },
     { atk: 3430, critRate: 0.21 },
   ],
+  shield:     [
+    { def: 600,  hp: 2000, damageReduction: 0.05 },
+    { def: 900,  hp: 3000, damageReduction: 0.08 },
+    { def: 1300, hp: 4400, damageReduction: 0.10 },
+    { def: 1800, hp: 6000, damageReduction: 0.13 },
+    { def: 2500, hp: 8200, damageReduction: 0.16 },
+    { def: 3400, hp: 11000, damageReduction: 0.20 },
+  ],
 }
 
 // ── Tier upgrade costs ───────────────────────────────────────────────────────
@@ -116,6 +124,51 @@ export const TIER_COSTS = [
 
 // ── Chronicle lore ───────────────────────────────────────────────────────────
 // {hero} = hero first name, {weapon} = weapon name, {type} = weapon type name
+const SHIELD_LORE_TEMPLATES = {
+  1: [
+    'The shield has no edge. {hero} named it anyway.',
+    '{weapon} was not made to win fights. It was made so {hero} could survive them.',
+    'A shield with a name means someone decided to come back. {hero} decided.',
+    'The first time {hero} raised {weapon}, it was not yet certain it would hold. It held.',
+    'Most shields are anonymous. {hero} refused to let this one be.',
+  ],
+  2: [
+    '{weapon} has taken three blows that would have ended other stories. {hero}\'s story continues.',
+    'The surface is marked now. {hero} calls the marks a record, not damage.',
+    'It came back to the forge heavier with history. It left heavier with purpose.',
+    'There are things {hero} knows now that could not have been learned any other way. {weapon} was present for all of them.',
+    'The second forging does not remove the dents. It builds around them.',
+  ],
+  3: [
+    'Three tiers in, {weapon} is no longer just protection. It is a statement.',
+    'People look at {weapon} before they look at {hero}. {hero} considers this an advantage.',
+    'A shield this far along has absorbed things most people never face. {hero} has faced all of them.',
+    'The crest is worn smooth now. {hero} knows every scratch and what made it.',
+    '{weapon} fits the arm as though it always belonged there. It did not, once.',
+  ],
+  4: [
+    '{weapon} has stopped things that should not have been stoppable. {hero} keeps that to themselves.',
+    'Allies stand closer to {hero} than they used to. They have noticed what {weapon} does.',
+    'There is a tier past which a shield is no longer equipment. It is architecture.',
+    'Four tiers of forging, and {weapon} has never failed. {hero} intends to keep it that way.',
+    'The forge-master ran a hand along the rim and said nothing. That was enough.',
+  ],
+  5: [
+    '{weapon} is spoken of in battles {hero} was not present for. The reputation preceded them both.',
+    'Fifth tier. {hero} does not count anymore — only holds the line.',
+    'Veterans step behind {hero} without being asked. They have seen {weapon} work.',
+    'What {weapon} has stopped would fill a ledger no one would want to read.',
+    'The weight has become nothing. {hero} stopped noticing it years ago.',
+  ],
+  6: [
+    '{weapon} is done. No forge can improve it. {hero} is the only variable remaining.',
+    'Eternal. The chronicle closes not because the protection ends — but because the shield has become what it was always going to be.',
+    'Every blow it has taken is still in the metal, converted into something that does not break.',
+    'The forge-master looked at {weapon} for a long time. Then he said: there is nothing left to add.',
+    'Final form. Final entry. {hero} stands behind it, and that is enough.',
+  ],
+}
+
 const LORE_TEMPLATES = {
   1: [
     '{hero} brought nothing to the forge but the name. The rest was decided in fire.',
@@ -161,8 +214,9 @@ const LORE_TEMPLATES = {
   ],
 }
 
-function generateLore(tier, heroFirstName, weaponName) {
-  const pool = LORE_TEMPLATES[tier] ?? LORE_TEMPLATES[1]
+function generateLore(tier, heroFirstName, weaponName, weaponType) {
+  const templates = weaponType === 'shield' ? SHIELD_LORE_TEMPLATES : LORE_TEMPLATES
+  const pool = templates[tier] ?? templates[1]
   const template = pool[Math.floor(Math.random() * pool.length)]
   return template
     .replace(/\{hero\}/g, heroFirstName)
@@ -206,7 +260,7 @@ export const useWeaponStore = defineStore('weapons', () => {
   // ── Actions ────────────────────────────────────────────────────────────────
   function createWeapon(heroKey, heroFirstName, weaponType, weaponName) {
     const stats = weaponStats(weaponType, 1)
-    const lore  = generateLore(1, heroFirstName, weaponName)
+    const lore  = generateLore(1, heroFirstName, weaponName, weaponType)
     weapons.value[heroKey] = {
       name:      weaponName,
       type:      weaponType,
@@ -255,7 +309,7 @@ export const useWeaponStore = defineStore('weapons', () => {
 
     const newTier = weapon.tier + 1
     const stats   = weaponStats(weapon.type, newTier)
-    const lore    = generateLore(newTier, heroFirstName, weapon.name)
+    const lore    = generateLore(newTier, heroFirstName, weapon.name, weapon.type)
 
     weapon.tier = newTier
     weapon.chronicle.push({ tier: newTier, lore, stats: { ...stats } })

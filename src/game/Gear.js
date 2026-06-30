@@ -1,15 +1,14 @@
 export const GearSlot = {
-  OFF_HAND: 'off_hand',  // shields only — no weapons
-  HEAD:     'head',
-  CHEST:    'chest',
-  LEGS:     'legs',
-  BOOTS:    'boots',
-  GLOVES:   'gloves',
+  HEAD:   'head',
+  CHEST:  'chest',
+  LEGS:   'legs',
+  BOOTS:  'boots',
+  GLOVES: 'gloves',
 }
 
 export const GearType = {
-  WEAPON:  'weapon',  // kept for legacy save compatibility — no longer used in UI
-  SHIELD:  'shield',
+  WEAPON:  'weapon',  // legacy stub — no longer used in UI
+  SHIELD:  'shield',  // legacy stub — shields now live in Weapon Forge
   HELMET:  'helmet',
   ARMOR:   'armor',
   LEGS:    'legs',
@@ -29,28 +28,24 @@ export const WEAPON_ARMOR_TYPE = {}  // legacy stub — no weapons in gear slots
 
 // Which gear types are allowed in each slot
 export const SLOT_ALLOWED_TYPES = {
-  [GearSlot.OFF_HAND]: [GearType.SHIELD],
-  [GearSlot.HEAD]:     [GearType.HELMET],
-  [GearSlot.CHEST]:    [GearType.ARMOR],
-  [GearSlot.LEGS]:     [GearType.LEGS],
-  [GearSlot.BOOTS]:    [GearType.BOOTS],
-  [GearSlot.GLOVES]:   [GearType.GLOVES],
+  [GearSlot.HEAD]:   [GearType.HELMET],
+  [GearSlot.CHEST]:  [GearType.ARMOR],
+  [GearSlot.LEGS]:   [GearType.LEGS],
+  [GearSlot.BOOTS]:  [GearType.BOOTS],
+  [GearSlot.GLOVES]: [GearType.GLOVES],
 }
 
 export const SLOT_LABELS = {
-  [GearSlot.OFF_HAND]: 'Shield',
-  [GearSlot.HEAD]:     'Helmet',
-  [GearSlot.CHEST]:    'Armor',
-  [GearSlot.LEGS]:     'Legs',
-  [GearSlot.BOOTS]:    'Boots',
-  [GearSlot.GLOVES]:   'Gloves',
+  [GearSlot.HEAD]:   'Helmet',
+  [GearSlot.CHEST]:  'Armor',
+  [GearSlot.LEGS]:   'Legs',
+  [GearSlot.BOOTS]:  'Boots',
+  [GearSlot.GLOVES]: 'Gloves',
 }
 
 export const TWO_HANDED_WEAPON_TYPES = new Set()  // legacy stub
 export const DUAL_WIELD_BONUS = {}                  // legacy stub
-
-// Passive damage reduction when off-hand is a shield
-export const SHIELD_PASSIVE_DR = 0.12   // 12% damage reduction
+export const SHIELD_PASSIVE_DR = 0                  // legacy stub — DR now comes from forge shield tier
 
 export const LineType = {
   USE:       'use',        // earned through battle use

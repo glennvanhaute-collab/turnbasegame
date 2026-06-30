@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
-import { GearSlot, GearType, SLOT_ALLOWED_TYPES, SHIELD_PASSIVE_DR, WEAPON_ARMOR_TYPE, createItemInstance, computeLineStats } from '../game/Gear.js'
+import { GearSlot, GearType, SLOT_ALLOWED_TYPES, WEAPON_ARMOR_TYPE, createItemInstance, computeLineStats } from '../game/Gear.js'
 import { SET_BONUSES, SET_PASSIVE_6, NAMED_SET_BONUSES, NAMED_SET_PASSIVE_6 } from '../game/data/setBonus.js'
 import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
@@ -177,10 +177,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     getLoadout(heroKey)[slot] = null
   }
 
-  function hasShield(heroKey) {
-    const oh = getLoadout(heroKey)[GearSlot.OFF_HAND]
-    return oh ? instanceById(oh)?.gearType === GearType.SHIELD : false
-  }
 
   function isGearEnabled(heroKey)  { return gearDisabled.value[heroKey] !== true }
   function toggleGearEnabled(heroKey) {
@@ -289,7 +285,7 @@ export const useInventoryStore = defineStore('inventory', () => {
       activePassives.add(ROLE_TO_PASSIVE[heroRole])
       let boosted = false
       if      (heroRole === 'warrior')  boosted = setPieces.plate >= 3
-      else if (heroRole === 'tank')     boosted = hasShield(heroKey) && setPieces.plate >= 3
+      else if (heroRole === 'tank')     boosted = setPieces.plate >= 3
       else if (heroRole === 'mage')     boosted = setPieces.cloth >= 3
       else if (heroRole === 'healer')   boosted = setPieces.cloth >= 3
       else if (heroRole === 'ranger')   boosted = setPieces.leather >= 3
@@ -297,8 +293,7 @@ export const useInventoryStore = defineStore('inventory', () => {
       if (boosted) activePassives.add(ROLE_TO_PASSIVE[heroRole] + '_boosted')
     }
 
-    const dr = hasShield(heroKey) ? SHIELD_PASSIVE_DR : 0
-    return { stats: totals, damageReduction: dr, setPieces, forgeAffinityCount, activePassives }
+    return { stats: totals, damageReduction: 0, setPieces, forgeAffinityCount, activePassives }
   }
 
   function availableForSlot(heroKey, slot) {
@@ -401,7 +396,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     instanceById,
     getLoadout, getEquippedItem,
     equip, unequip,
-    hasShield,
     isGearEnabled, toggleGearEnabled,
     computeGearStats, availableForSlot,
     getEquippedBy, equipTargets,

@@ -7,9 +7,6 @@
         <div class="modal-header">
           <div>
             <div class="slot-label">{{ SLOT_LABELS[inventory.pendingSlot] }}</div>
-            <div class="slot-hint" v-if="inventory.pendingSlot === GearSlot.OFF_HAND">
-              Equip a <strong>weapon</strong> for dual wield (+15% ATK, +5% Crit) or a <strong>shield</strong> for defence (-12% damage taken)
-            </div>
           </div>
           <button class="close-btn" @click="inventory.closePicker()">✕</button>
         </div>

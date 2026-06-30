@@ -3,47 +3,6 @@ import { Rarity } from '../Hero.js'
 
 export const GEAR_CATALOG = [
 
-  // ── SHIELDS ───────────────────────────────────────────────────────
-  new GearItem({
-    id: 'wooden_shield', name: 'Wooden Shield',
-    gearType: GearType.SHIELD,
-    rarity: Rarity.COMMON,
-    description: 'Basic protection. Small DEF bonus.',
-    stats: { def: 100 },
-  }),
-
-  new GearItem({
-    id: 'iron_shield', name: 'Iron Shield',
-    gearType: GearType.SHIELD,
-    rarity: Rarity.UNCOMMON,
-    description: 'Sturdy iron construction. DEF and HP.',
-    stats: { def: 160, hp: 800 },
-  }),
-
-  new GearItem({
-    id: 'knights_bulwark', name: "Knight's Bulwark",
-    gearType: GearType.SHIELD,
-    rarity: Rarity.RARE,
-    description: 'A tower shield. Significant DEF, HP, and passive damage reduction.',
-    stats: { defPct: 0.15, hp: 1500 },
-  }),
-
-  new GearItem({
-    id: 'enchanted_aegis', name: 'Enchanted Aegis',
-    gearType: GearType.SHIELD,
-    rarity: Rarity.EPIC,
-    description: 'Magic-infused buckler. DEF, HP, and resistance.',
-    stats: { defPct: 0.20, hpPct: 0.10, resistance: 0.08 },
-  }),
-
-  new GearItem({
-    id: 'dragon_shield', name: 'Dragon Shield',
-    gearType: GearType.SHIELD,
-    rarity: Rarity.LEGENDARY,
-    description: 'Forged from dragon scales. Maximum defensive power.',
-    stats: { defPct: 0.30, hpPct: 0.15, resistance: 0.12 },
-  }),
-
   // ── HELMETS ───────────────────────────────────────────────────────
   new GearItem({
     id: 'iron_helm', name: 'Iron Helm',
