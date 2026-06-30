@@ -22,7 +22,10 @@
         <button
           v-for="entry in filteredRoster" :key="entry.key"
           class="wfr-hero"
-          :class="{ active: selectedKey === entry.key, armed: !!getWeapon(entry.key) }"
+          :class="[
+            { active: selectedKey === entry.key, armed: !!getWeapon(entry.key) },
+            `rarity-${entry.hero.rarity?.toLowerCase()}`
+          ]"
           @click="selectHero(entry.key)"
         >
           <div class="wfrh-info">
@@ -389,6 +392,18 @@ function nextTierCost(heroKey) {
 }
 .wfrh-none { font-size: 0.58rem; color: #3a3a3a; font-style: italic; }
 .wfr-empty { font-size: 0.65rem; color: #444; text-align: center; padding: 20px 0; }
+
+/* Rarity borders */
+.wfr-hero.rarity-common    { border-color: #383030; }
+.wfr-hero.rarity-uncommon  { border-color: #186838; }
+.wfr-hero.rarity-rare      { border-color: #1a50a0; }
+.wfr-hero.rarity-epic      { border-color: #6a2890; }
+.wfr-hero.rarity-legendary { border-color: #8a6418; }
+.wfr-hero.rarity-mythical  { border-color: #9933cc; }
+.wfr-hero.rarity-ancient   { border-color: #7a1060; }
+.wfr-hero.rarity-legendary .wfrh-name { color: #c9a227; }
+.wfr-hero.rarity-mythical  .wfrh-name { color: #c050ff; }
+.wfr-hero.rarity-ancient   .wfrh-name { color: #ee22ee; }
 
 /* ── Center ───────────────────────────────────────────────────────── */
 .wf-forge {
