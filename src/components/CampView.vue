@@ -16,21 +16,6 @@
       </div>
     </div>
 
-    <!-- Artisan shortcut -->
-    <div class="artisan-shortcuts">
-      <button class="artisan-card" @click="$emit('open-fusion-workshop')">
-        <div class="ac-bg" :style="{ backgroundImage: `url(${fusionBg})` }" />
-        <div class="ac-tint" />
-        <img :src="fusionIcon" class="ac-icon" alt="" />
-        <div class="ac-info">
-          <div class="ac-name">Fusion Workshop</div>
-          <div class="ac-desc">Combine two disciplines to craft hybrid gear sets</div>
-          <div class="ac-tag">✦ Multi-discipline</div>
-        </div>
-        <div class="ac-enter">Enter →</div>
-      </button>
-    </div>
-
     <!-- Buildings grid -->
     <div class="buildings-panel">
       <div class="buildings-grid">
@@ -126,10 +111,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted } from 'vue'
 import campBgDefault  from '../assets/backgrounds/training_camp.png'
-import fusionBg   from '../assets/backgrounds/fusion_workshop.png'
-import fusionIcon from '../assets/ui/fusion_worshop_icon.png'
-
-defineEmits(['open-fusion-workshop'])
 import campBgAldric   from '../assets/lore/siege_aldric.png'
 import campBgValdris  from '../assets/lore/siege_Valdris.png'
 import campBgCaelwyn  from '../assets/lore/siege_caelwyn.png'
@@ -237,83 +218,6 @@ onUnmounted(() => clearInterval(interval))
   font-weight: 700;
   color: var(--gold);
   white-space: nowrap;
-}
-
-/* Artisan shortcut strip */
-.artisan-shortcuts {
-  padding: 20px 28px 0;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-.artisan-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  width: 100%;
-  padding: 18px 22px;
-  border-radius: 12px;
-  border: 1px solid rgba(153,85,255,0.25);
-  background: rgba(153,85,255,0.05);
-  cursor: pointer;
-  text-align: left;
-  overflow: hidden;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
-}
-.artisan-card:hover {
-  border-color: rgba(153,85,255,0.55);
-  background: rgba(153,85,255,0.10);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 24px rgba(153,85,255,0.12);
-}
-.artisan-card:hover .ac-enter { opacity: 1; transform: translateX(0); }
-.ac-bg {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: center;
-  opacity: 0.12; pointer-events: none;
-}
-.ac-tint {
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(153,85,255,0.08) 0%, transparent 60%);
-  pointer-events: none;
-}
-.ac-icon {
-  position: relative;
-  width: 52px; height: 52px;
-  object-fit: contain;
-  flex-shrink: 0;
-  filter: drop-shadow(0 0 8px rgba(153,85,255,0.4));
-}
-.ac-info {
-  position: relative;
-  flex: 1;
-  display: flex; flex-direction: column; gap: 3px;
-}
-.ac-name {
-  font-family: var(--font-head);
-  font-size: 0.9rem; font-weight: 800;
-  color: #fff; letter-spacing: 1.5px; text-transform: uppercase;
-}
-.ac-desc {
-  font-size: 0.64rem; color: var(--text-muted);
-  line-height: 1.4; font-style: italic;
-}
-.ac-tag {
-  font-family: var(--font-head);
-  font-size: 0.55rem;
-  color: #9955ff; letter-spacing: 1px;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-.ac-enter {
-  position: relative;
-  font-family: var(--font-head); font-size: 0.62rem; font-weight: 700;
-  color: #9955ff; letter-spacing: 1.5px; text-transform: uppercase;
-  opacity: 0; transform: translateX(-8px);
-  transition: opacity 0.2s, transform 0.2s;
-  flex-shrink: 0;
 }
 
 /* Buildings panel */
