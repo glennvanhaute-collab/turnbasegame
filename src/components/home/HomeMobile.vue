@@ -185,6 +185,13 @@
               <span class="camp-opt-sub">Carve bows and staves from timber</span>
             </span>
           </button>
+          <button class="mob-camp-opt mob-fusion-opt" @click="$emit('open-fusion-workshop')">
+            <img :src="fusionWorkshopIcon" class="camp-opt-icon" style="width:26px;height:26px;object-fit:contain;" alt="" />
+            <span class="camp-opt-info">
+              <span class="camp-opt-name">Fusion Workshop</span>
+              <span class="camp-opt-sub">Combine disciplines to craft hybrid gear</span>
+            </span>
+          </button>
           <button class="mob-camp-opt mob-codex-opt" @click="$emit('open-codex')">
             <img :src="codexIcon" class="camp-opt-icon" style="width:26px;height:26px;object-fit:contain;" alt="" />
             <span class="camp-opt-info">
@@ -223,6 +230,7 @@ import codexIcon              from '../../assets/ui/codex.png'
 import leatherworkingIcon     from '../../assets/ui/leatherworking_icon.png'
 import tailoringIcon          from '../../assets/ui/tailoring_icon.png'
 import woodworkingIcon        from '../../assets/ui/woodworking_icon.png'
+import fusionWorkshopIcon     from '../../assets/ui/fusion_worshop_icon.png'
 import GameIcon               from '../ui/GameIcon.vue'
 import HuntsView              from '../HuntsView.vue'
 import ArtisanZoneView        from '../ArtisanZoneView.vue'
