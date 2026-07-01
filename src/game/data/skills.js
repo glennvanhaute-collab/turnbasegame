@@ -483,4 +483,56 @@ export const SKILLS = {
       new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_DEF, statusDuration: 3, buffValue: 0.30 }),
     ],
   }),
+
+  // ── Lord Caelwyn — Mythical Spirit Champion ─────────────────────
+  MOONLIT_SEVERANCE: new Skill({
+    id: 'moonlit_severance',
+    name: 'Moonlit Severance',
+    description: 'The First Lord\'s blade finds the seam between armour and oath. Strikes twice for 160% ATK each, with a 75% chance to reduce the target\'s Defence for 2 turns.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.6, hits: 2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_DEF, statusChance: 0.75, statusDuration: 2 }),
+    ],
+  }),
+
+  MARBLE_DECREE: new Skill({
+    id: 'marble_decree',
+    name: 'Marble Decree',
+    description: 'The First Lord speaks, and the house answers. Grants Shield and +30% Defence to all allies for 2 turns, then heals the entire party for 18% of their max HP.',
+    cooldown: 4,
+    targetType: TargetType.ALL_ALLIES,
+    effects: [
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.SHIELD, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.BUFF, statusEffect: StatusEffect.INCREASE_DEF, statusDuration: 2, buffValue: 0.30 }),
+      new SkillEffect({ type: EffectType.HEAL, healPercent: 0.18 }),
+    ],
+  }),
+
+  OATH_OF_THE_WHITE_GROVE: new Skill({
+    id: 'oath_of_the_white_grove',
+    name: 'Oath of the White Grove',
+    description: 'The sacred vow made weapon. Strikes all enemies for 140% ATK. Those who stand against the grove are left with reduced Attack and Weakened for 2 turns.',
+    cooldown: 4,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.4 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_ATK, statusChance: 1.0, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 1.0, statusDuration: 2 }),
+    ],
+  }),
+
+  LETHARIEL_ASCENDANT: new Skill({
+    id: 'lethariel_ascendant',
+    name: 'Lethariel Ascendant',
+    description: 'The First Lord\'s final word. He does not raise his voice. He raises his blade. Deals 390% ATK to one enemy. If they survive, they are Stunned and Weakened for 2 turns.',
+    cooldown: 5,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 3.9 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.STUN, statusChance: 0.85, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 1.0, statusDuration: 2 }),
+    ],
+  }),
 }

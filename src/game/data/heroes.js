@@ -416,6 +416,28 @@ His battle cry is four words. The spelling is his own. He has never once questio
     lore: 'The dragon did not choose a conqueror. It chose her because she was the first person in three hundred years to offer it food before asking for anything in return. Jade Dragonforge has never started a war — but she has ended several. Her enemies remember the fire. Her allies remember that she learned every one of their names on the first day.',
   }),
 
+  LORD_CAELWYN: () => new Hero({
+    id: 'lord_caelwyn', name: 'Lord Caelwyn',
+    faction: Faction.CAELWYN, rarity: Rarity.MYTHICAL, affinity: Affinity.SPIRIT,
+    baseHp: 21000, baseAtk: 1950, baseDef: 1050, baseSpd: 106,
+    critRate: 0.28, critDmg: 0.72,
+    skills: [SKILLS.MOONLIT_SEVERANCE, SKILLS.MARBLE_DECREE, SKILLS.OATH_OF_THE_WHITE_GROVE, SKILLS.LETHARIEL_ASCENDANT],
+    artisanSkills: [ARTISAN.herbalism, ARTISAN.apothecary],
+    isPlayer: true, role: 'champion', weaponType: 'sword',
+    quote: 'The grove remembers what crowns forget.',
+    lore: `Long before Caelwyn was a house, it was a vow. Lord Caelwyn was the one who made it.
+
+He did not arrive with an army or a crown. He planted a white bough before the oldest tree in the grove, laid his blade across his palms, and swore that no hand under his guidance would take from the land without first vowing to protect it. The elders mocked him for speaking law before he held power. The forest flowered in winter.
+
+His armour was wrought from moon-pale living stone and sanctified gold, veined with emerald sigils that bound him to the heart of the grove. His blade was not forged for war alone — but to sever corruption from what is sacred. He offered peace once. Mercy twice. Judgement only when both were rejected.
+
+When the wars ended, he refused all monuments. He ordered sanctuaries rebuilt, rivers cleansed, and enemy graves tended with the same care as those of his own. He wrote the Marble Accord: that beauty without duty is vanity, that power without mercy is blight, that no ruler of Caelwyn may claim the house while forgetting the grove.
+
+The oldest texts do not say Lord Caelwyn died. They say only that when peace returned, he walked into the inner sanctum of the White Grove and became still as the marble pillars around him.
+
+He returns, it is said, when the house forgets its vow. Not to reclaim a throne. To measure whether those who bear his name are still worthy of it.`,
+  }),
+
   // ── Normal Portal — House Ignar (Force · Raiders) ───────────────
   ARNE_FROSTBOUND: () => new Hero({
     id: 'arne_frostbound', name: 'Arne Frostbound',
@@ -618,6 +640,7 @@ export const RECRUIT_POOL = [
   { key: 'AURELAN',             rarity: 'Mythical' },
   { key: 'VORATH',              rarity: 'Mythical' },
   { key: 'JADE_DRAGONFORGE',    rarity: 'Mythical' },
+  { key: 'LORD_CAELWYN',        rarity: 'Mythical' },
   // ── Ancient ──────────────────────────────────────────────────────
   { key: 'VAERIC',              rarity: 'Ancient' },
   { key: 'VALERIUS',            rarity: 'Ancient' },
