@@ -37,7 +37,6 @@ const props = defineProps({
 defineEmits(['equip', 'unequip'])
 
 const GEARTYPE_SLOT = {
-  [GearType.WEAPON]: 'main_hand',
   [GearType.SHIELD]: 'off_hand',
   [GearType.HELMET]: 'head',
   [GearType.ARMOR]:  'chest',

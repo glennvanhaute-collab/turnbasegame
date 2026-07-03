@@ -210,6 +210,22 @@
           </div>
         </section>
 
+        <!-- Reputation -->
+        <section class="dev-section">
+          <div class="dev-section-label">Reputation</div>
+          <div v-for="faction in PLAYER_HOUSES" :key="faction" class="dev-row">
+            <span class="dev-row-name" style="font-size:0.62rem">
+              {{ faction }}
+              <span style="color:#888"> — {{ repStore.tier(faction).name }} ({{ repStore.getRep(faction) }})</span>
+            </span>
+            <div class="dev-btns">
+              <button @click="repStore.earnRep(faction, 250)">+250</button>
+              <button @click="repStore.setRep(faction, 1000)">MAX</button>
+              <button @click="repStore.setRep(faction, 0)">Reset</button>
+            </div>
+          </div>
+        </section>
+
         <!-- Roster -->
         <section class="dev-section">
           <div class="dev-section-label">Roster</div>
@@ -253,6 +269,7 @@ import { useSmeltingStore } from '../stores/useSmeltingStore.js'
 import { useTanningStore } from '../stores/useTanningStore.js'
 import { useWeavingStore } from '../stores/useWeavingStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
+import { useReputationStore } from '../stores/useReputationStore.js'
 import { RECIPES } from '../game/data/recipes.js'
 import { LEATHER_RECIPES } from '../game/data/leatherRecipes.js'
 import { TAILORING_RECIPES } from '../game/data/tailoringRecipes.js'
@@ -277,6 +294,9 @@ const smelting   = useSmeltingStore()
 const tanning    = useTanningStore()
 const weaving    = useWeavingStore()
 const inventory  = useInventoryStore()
+const repStore   = useReputationStore()
+
+const PLAYER_HOUSES = ['House Caelwyn', 'House Aldric', 'House Valdris', 'House Mordaine']
 
 const anyJobRunning = computed(() => smelting.isRunning || tanning.isRunning || weaving.isRunning)
 

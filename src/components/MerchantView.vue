@@ -108,7 +108,6 @@ const RARITY_OPTS = [
 ]
 
 const GEAR_ICONS = {
-  [GearType.WEAPON]: '⚔', [GearType.SHIELD]: '🛡',
   [GearType.HELMET]: '⛑', [GearType.ARMOR]:  '🥋', [GearType.BOOTS]: '👟',
   [GearType.GLOVES]: '🧤',
 }

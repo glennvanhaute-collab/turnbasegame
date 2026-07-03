@@ -87,6 +87,31 @@
                 </div>
               </section>
 
+              <!-- Chronicle Weapon -->
+              <section class="section">
+                <h3 class="section-title">Chronicle Weapon</h3>
+                <div v-if="forgedWeapon" class="chronicle-card">
+                  <div class="chronicle-top">
+                    <img :src="weaponsIcon" class="chronicle-icon" alt="" />
+                    <div class="chronicle-identity">
+                      <div class="chronicle-name">{{ forgedWeapon.name }}</div>
+                      <div class="chronicle-meta">
+                        <span class="chronicle-type">{{ forgedWeapon.type }}</span>
+                        <span class="chronicle-tier-badge">{{ TIER_NAMES[forgedWeapon.tier - 1] }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="chronicle-stats">
+                    <span v-for="s in weaponStatChips(forgedWeapon)" :key="s" class="chronicle-stat-chip">{{ s }}</span>
+                  </div>
+                  <p v-if="forgedWeapon.lore" class="chronicle-lore">"{{ forgedWeapon.lore }}"</p>
+                </div>
+                <div v-else class="chronicle-empty">
+                  <img :src="weaponsIcon" class="chronicle-empty-icon" alt="" />
+                  <span>No chronicle begun — visit the Weapon Forge</span>
+                </div>
+              </section>
+
               <!-- Equipped gear -->
               <section class="section">
                 <h3 class="section-title">Equipped Gear</h3>
@@ -239,6 +264,8 @@ import HeroAvatar from './HeroAvatar.vue'
 import ValdrisBg  from '../assets/lore/Valdris.png'
 import AldricBg   from '../assets/lore/Aldric.png'
 import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
+import { useWeaponStore } from '../stores/useWeaponStore.js'
+import weaponsIcon from '../assets/ui/weapons_icon.png'
 const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 const PLAYER_AVATARS = Object.fromEntries(
   Object.entries(_avatarModules).map(([path, mod]) => {
@@ -266,6 +293,31 @@ const store = useCollectionStore()
 const collectionStore = store
 const inventory   = useInventoryStore()
 const playerHero  = usePlayerHeroStore()
+const weaponStore = useWeaponStore()
+
+const TIER_NAMES = ['First Light', 'Tempered', 'Bound', 'Hallowed', 'Ascendant', 'Eternal']
+
+const forgedWeapon = computed(() => {
+  const key = entry.value?.key
+  if (!key) return null
+  return weaponStore.getWeapon(key) ?? null
+})
+
+const WEAPON_STAT_LABELS = {
+  atk: v => `+${v} ATK`,
+  critRate: v => `+${Math.round(v * 100)}% CR`,
+  critDmg: v => `+${Math.round(v * 100)}% CD`,
+  def: v => `+${v} DEF`,
+  hp: v => `+${v} HP`,
+  damageReduction: v => `${Math.round(v * 100)}% Block`,
+}
+
+function weaponStatChips(weapon) {
+  if (!weapon?.stats) return []
+  return Object.entries(weapon.stats)
+    .filter(([, v]) => v > 0)
+    .map(([k, v]) => WEAPON_STAT_LABELS[k]?.(v) ?? `+${v}`)
+}
 
 const rarityThresholds = [
   { level: 1,   label: 'Rare' },
@@ -559,6 +611,58 @@ const stats = computed(() => {
 .eq-row.uncommon  { border-left-color: #4dff88; }
 .eq-row.common    { border-left-color: #555; }
 .eq-row.empty     { border-left-color: #2a1008; opacity: 0.5; }
+
+/* Chronicle Weapon card */
+.chronicle-card {
+  background: linear-gradient(135deg, #1a0e04 0%, #110a02 100%);
+  border: 1px solid #6a4010;
+  border-left: 3px solid #c9a227;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chronicle-top { display: flex; align-items: center; gap: 12px; }
+.chronicle-icon { width: 36px; height: 36px; object-fit: contain; flex-shrink: 0; filter: sepia(0.4) brightness(1.1); }
+.chronicle-identity { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.chronicle-name {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f0d080;
+  letter-spacing: 0.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chronicle-meta { display: flex; align-items: center; gap: 6px; }
+.chronicle-type { font-size: 0.65rem; color: #888; text-transform: capitalize; }
+.chronicle-tier-badge {
+  font-size: 0.6rem; font-weight: 700;
+  color: #c9a227; background: #2a1a00;
+  border: 1px solid #5a3800; border-radius: 4px;
+  padding: 1px 6px;
+}
+.chronicle-stats { display: flex; gap: 5px; flex-wrap: wrap; }
+.chronicle-stat-chip {
+  font-size: 0.65rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 4px;
+  background: #221108; color: #d4a04a;
+  border: 1px solid #4a2a08;
+}
+.chronicle-lore {
+  font-size: 0.65rem; font-style: italic;
+  color: #6a5030; line-height: 1.5;
+  border-top: 1px solid #2a1a08;
+  padding-top: 7px;
+  margin: 0;
+}
+.chronicle-empty {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: #0e0804; border: 1px dashed #2a1408; border-radius: 8px;
+  font-size: 0.7rem; color: #3a2a1a; font-style: italic;
+}
+.chronicle-empty-icon { width: 24px; height: 24px; object-fit: contain; opacity: 0.2; }
 
 .eq-icon     { flex-shrink: 0; }
 .eq-details  { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }

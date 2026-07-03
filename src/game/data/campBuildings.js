@@ -9,6 +9,7 @@ export const BUILDING_IDS = [
   'arcane_post',
   'quartermasters_hold',
   'siege_forge',
+  'lumber_hall',
 ]
 
 // Ore display names (for cost breakdown)
@@ -117,6 +118,20 @@ export const CAMP_BUILDINGS = {
       { cost: { gold: 5500,  ores: { steel:     25 } }, bonus: 'Unlocks Tier 2 siege gear recipes'             },
       { cost: { gold: 11000, ores: { darksteel: 30 } }, bonus: 'Unlocks Tier 3 siege gear recipes'             },
       { cost: { gold: 22000, ores: { mithril:   25 } }, bonus: 'Unlocks Legendary siege gear + unique weapons' },
+    ],
+  },
+
+  lumber_hall: {
+    id:    'lumber_hall',
+    name:  'The Lumber Hall',
+    lore:  'Surplus timber does not rot in this camp. It becomes walls, weapon racks, and eventually — advantage.',
+    image: 'camp_lumber_hall.png',
+    tiers: [
+      { cost: { gold: 600,   planks: { pine:      25000 } }, bonus: '+20% woodworking XP from all crafting'                   },
+      { cost: { gold: 1400,  planks: { oak:        8000 } }, bonus: '+35% woodworking XP from all crafting'                   },
+      { cost: { gold: 3000,  planks: { yew:        3500 } }, bonus: '+50% woodworking XP, +5% DEF to all heroes'              },
+      { cost: { gold: 6000,  planks: { ashwood:    2000 } }, bonus: '+65% woodworking XP, +10% DEF to all heroes'             },
+      { cost: { gold: 12000, planks: { ironwood:   1000 } }, bonus: '+80% woodworking XP, +15% DEF, bows deal +10% in raids'  },
     ],
   },
 }

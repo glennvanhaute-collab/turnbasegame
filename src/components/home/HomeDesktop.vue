@@ -293,6 +293,22 @@
             </span>
           </button>
 
+          <button class="enc-option enc-option--fusion" @click="$emit('open-fusion-workshop')">
+            <img :src="fusionWorkshopIcon" class="enc-opt-icon" style="width:28px;height:28px;object-fit:contain;" alt="" />
+            <span class="enc-opt-info">
+              <span class="enc-opt-name">Fusion Workshop</span>
+              <span class="enc-opt-sub">Combine disciplines to craft hybrid gear</span>
+            </span>
+          </button>
+
+          <button class="enc-option enc-option--forge" @click="$emit('open-weapon-forge')">
+            <img :src="weaponForgeIcon" class="enc-opt-icon" style="width:28px;height:28px;object-fit:contain;" alt="" />
+            <span class="enc-opt-info">
+              <span class="enc-opt-name">Weapon Forge</span>
+              <span class="enc-opt-sub">Forge a weapon and write its chronicle</span>
+            </span>
+          </button>
+
         </div>
 
         <div class="enc-panel-footer">
@@ -318,6 +334,8 @@
         @open-leatherworking="$emit('open-leatherworking')"
         @open-tailoring="$emit('open-tailoring')"
         @open-woodworking="$emit('open-woodworking')"
+        @open-fusion-workshop="$emit('open-fusion-workshop')"
+        @open-weapon-forge="$emit('open-weapon-forge')"
       />
     </div>
 
@@ -332,11 +350,13 @@ import codexIcon              from '../../assets/ui/codex.png'
 import leatherworkingIcon     from '../../assets/ui/leatherworking_icon.png'
 import tailoringIcon          from '../../assets/ui/tailoring_icon.png'
 import woodworkingIcon        from '../../assets/ui/woodworking_icon.png'
+import fusionWorkshopIcon     from '../../assets/ui/fusion_worshop_icon.png'
+import weaponForgeIcon        from '../../assets/ui/weaponsmith_icon.png'
 import GameIcon               from '../ui/GameIcon.vue'
 import HuntsView              from '../HuntsView.vue'
 import ArtisanZoneView        from '../ArtisanZoneView.vue'
 
-const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring', 'open-woodworking'])
+const emit = defineEmits(['start-battle', 'open-collection', 'open-blacksmith', 'open-market', 'open-codex', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop', 'open-weapon-forge'])
 
 const {
   activeHomeTab,
@@ -782,6 +802,8 @@ const {
   transition: background 0.15s, border-color 0.15s; position: relative;
 }
 .enc-option:not(:disabled):hover { background: rgba(201,162,39,0.08); border-color: var(--border-gold); }
+.enc-option--fusion:not(:disabled):hover { background: rgba(153,85,255,0.08); border-color: rgba(153,85,255,0.5); }
+.enc-option--forge:not(:disabled):hover  { background: rgba(212,175,55,0.08);  border-color: rgba(212,175,55,0.5); }
 .enc-opt-icon { flex-shrink: 0; width: 28px; text-align: center; }
 .enc-opt-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .enc-opt-name { font-family: var(--font-head); font-size: 0.68rem; font-weight: 700; color: var(--text-parchment); text-transform: uppercase; letter-spacing: 1px; }

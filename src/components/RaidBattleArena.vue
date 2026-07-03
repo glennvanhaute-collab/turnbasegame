@@ -192,13 +192,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useBattleStore }     from '../stores/useBattleStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { getPortrait, PORTRAIT_MAP } from '../game/portraits.js'
 import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
+import { playRaid, playVoidHeir, playMain } from '../game/music.js'
 import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
 
 const props = defineProps({
@@ -382,12 +383,16 @@ onMounted(() => {
     store.autoCompleteRaid(props.raidId)
     return
   }
+  props.raidId === 'void_heir' ? playVoidHeir() : playRaid()
   const team = collection.buildTeam()
   if (store.autoplay) store.toggleAutoplay()
   store.currentRaidId = props.raidId
   store.initBattle(encounter, team)
-  // Allow phase watcher to fire after first render
   nextTick(() => { phaseWatchReady = true })
+})
+
+onUnmounted(() => {
+  playMain()
 })
 </script>
 

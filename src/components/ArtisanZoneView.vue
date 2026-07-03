@@ -21,17 +21,21 @@
         >
           <div class="az-card-glow" />
           <div class="az-card-icon-wrap">
-            <GameIcon :icon="shop.icon" :size="52" class="az-card-icon" />
+            <img v-if="shop.imgUrl" :src="shop.imgUrl" class="az-card-img-icon" alt="" />
+            <GameIcon v-else :icon="shop.icon" :size="52" class="az-card-icon" />
           </div>
           <div class="az-card-info">
             <div class="az-card-name">{{ shop.name }}</div>
             <div class="az-card-desc">{{ shop.desc }}</div>
-            <div class="az-card-level">
+            <div class="az-card-level" v-if="shop.level !== null">
               <span class="az-card-lv-label">Lv.</span>
               <span class="az-card-lv-val">{{ shop.level }}</span>
               <div class="az-card-xp-track">
                 <div class="az-card-xp-fill" :style="{ width: (shop.progress * 100) + '%' }" />
               </div>
+            </div>
+            <div class="az-card-level" v-else>
+              <span class="az-card-lv-label" style="color: #9955ff; letter-spacing: 1px;">✦ Multi-discipline</span>
             </div>
           </div>
           <div class="az-card-enter">Enter →</div>
@@ -47,9 +51,11 @@
 import { computed } from 'vue'
 import GameIcon from './ui/GameIcon.vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
-import zoneBg from '../assets/backgrounds/artisan-zone_bg.png'
+import zoneBg          from '../assets/backgrounds/artisan-zone_bg.png'
+import fusionIcon        from '../assets/ui/fusion_worshop_icon.png'
+import weaponsmithIcon  from '../assets/ui/weaponsmith_icon.png'
 
-defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking'])
+defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop', 'open-weapon-forge'])
 
 const resources = useResourceStore()
 
@@ -93,6 +99,26 @@ const SHOPS = computed(() => [
     color:    '#6bba4a',
     level:    resources.woodworkingLevel,
     progress: resources.woodworkingProgress,
+  },
+  {
+    id:       'fusion_workshop',
+    event:    'open-fusion-workshop',
+    name:     'Fusion Workshop',
+    desc:     'Combine two disciplines to craft hybrid gear sets',
+    imgUrl:   fusionIcon,
+    color:    '#9955ff',
+    level:    null,
+    progress: 0,
+  },
+  {
+    id:       'weapon_forge',
+    event:    'open-weapon-forge',
+    name:     'Weapon Forge',
+    desc:     'Forge a weapon and write its chronicle',
+    imgUrl:   weaponsmithIcon,
+    color:    '#d4af37',
+    level:    null,
+    progress: 0,
   },
 ])
 </script>
@@ -204,6 +230,7 @@ const SHOPS = computed(() => [
   box-shadow: 0 0 16px color-mix(in srgb, var(--card-color) 25%, transparent);
 }
 .az-card-icon { image-rendering: pixelated; }
+.az-card-img-icon { width: 52px; height: 52px; object-fit: contain; }
 
 .az-card-info {
   flex: 1; min-width: 0;

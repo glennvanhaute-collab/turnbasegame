@@ -42,6 +42,48 @@
           <div class="house-count">{{ ownedInHouse(faction) }} / {{ heroesForHouse(faction).length }} owned</div>
         </div>
 
+        <!-- ── Reputation ────────────────────────────────────────── -->
+        <div class="house-rep" :class="{ exalted: repStore.isExalted(faction) }">
+          <div class="rep-header">
+            <span class="rep-label">Reputation</span>
+            <span class="rep-tier-name" :class="{ exalted: repStore.isExalted(faction) }">
+              {{ repStore.tier(faction).name }}
+            </span>
+            <span class="rep-count">{{ repStore.getRep(faction) }} / {{ repStore.REP_MAX }}</span>
+          </div>
+          <div class="rep-track">
+            <div class="rep-fill" :style="{ width: repStore.tier(faction).pct + '%' }" />
+            <div
+              v-for="t in repStore.REP_TIERS.slice(1)"
+              :key="t.threshold"
+              class="rep-pip"
+              :style="{ left: (t.threshold / repStore.REP_MAX * 100) + '%' }"
+              :class="{ reached: repStore.getRep(faction) >= t.threshold }"
+            />
+          </div>
+
+          <!-- Lord unlock panel -->
+          <template v-if="repStore.lordKey(faction)">
+            <div v-if="repStore.canClaimLord(faction)" class="rep-lord-panel">
+              <div class="rep-lord-ready">
+                <span class="rep-lord-sigil">✦</span>
+                <span class="rep-lord-text">
+                  {{ lordHero(faction)?.name ?? 'The Lord' }} steps forward — the house stands ready.
+                </span>
+              </div>
+              <button class="rep-claim-btn" @click="repStore.claimLord(faction)">
+                Welcome to the Banner
+              </button>
+            </div>
+            <div v-else-if="repStore.isExalted(faction) && !repStore.canClaimLord(faction)" class="rep-lord-claimed">
+              ✓ {{ lordHero(faction)?.name }} has joined your banner
+            </div>
+            <div v-else class="rep-lord-locked">
+              Reach Exalted to summon the lord of this house
+            </div>
+          </template>
+        </div>
+
         <div class="hero-grid">
           <div
             v-for="{ key, hero } in heroesForHouse(faction)"
@@ -226,6 +268,7 @@
 import { ref, computed, nextTick } from 'vue'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useArtisanStore } from '../stores/useArtisanStore.js'
+import { useReputationStore } from '../stores/useReputationStore.js'
 import HeroAvatar from './HeroAvatar.vue'
 import { HERO_TEMPLATES, STARTER_KEYS, NORMAL_POOL, VOID_POOL } from '../game/data/heroes.js'
 import { getPortrait } from '../game/portraits.js'
@@ -233,6 +276,13 @@ import mapImg from '../assets/backgrounds/map.png'
 
 const collection = useCollectionStore()
 const artisan    = useArtisanStore()
+const repStore   = useReputationStore()
+
+function lordHero(faction) {
+  const key = repStore.lordKey(faction)
+  if (!key || !(key in HERO_TEMPLATES)) return null
+  return HERO_TEMPLATES[key]()
+}
 
 const showEnemies     = ref(false)
 const selectedFaction = ref(null)
@@ -449,6 +499,96 @@ async function selectFaction(faction) {
 .house-name       { font-size: 1rem; font-weight: 800; color: #fff; }
 .house-desc       { font-size: 0.74rem; color: #666; font-style: italic; margin-bottom: 4px; }
 .house-count      { font-size: 0.65rem; color: #444; }
+
+/* ── Reputation ────────────────────────────────────────────────── */
+.house-rep {
+  margin: 14px 0 18px;
+  padding: 12px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-left: 2px solid var(--house-color, #666);
+  border-radius: 6px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.house-rep.exalted {
+  border-color: rgba(212,175,55,0.4);
+  border-left-color: #d4af37;
+  background: rgba(212,175,55,0.04);
+}
+.rep-header {
+  display: flex; align-items: center; gap: 8px;
+}
+.rep-label {
+  font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase;
+  color: #555; flex-shrink: 0;
+}
+.rep-tier-name {
+  font-size: 0.68rem; font-weight: 700;
+  color: var(--house-color, #888);
+  flex: 1;
+}
+.rep-tier-name.exalted { color: #d4af37; }
+.rep-count {
+  font-size: 0.58rem; color: #444;
+  font-variant-numeric: tabular-nums;
+}
+.rep-track {
+  position: relative;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: visible;
+}
+.rep-fill {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  background: var(--house-color, #888);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  opacity: 0.75;
+}
+.house-rep.exalted .rep-fill { background: #d4af37; opacity: 1; }
+.rep-pip {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #222; border: 1px solid rgba(255,255,255,0.1);
+  transition: border-color 0.3s, background 0.3s;
+}
+.rep-pip.reached {
+  background: var(--house-color, #888);
+  border-color: var(--house-color, #888);
+}
+
+/* Lord unlock */
+.rep-lord-locked {
+  font-size: 0.6rem; color: #333; font-style: italic;
+}
+.rep-lord-panel {
+  display: flex; align-items: center; gap: 10px;
+  padding-top: 4px;
+}
+.rep-lord-ready {
+  display: flex; align-items: center; gap: 6px; flex: 1;
+}
+.rep-lord-sigil { font-size: 0.8rem; color: #d4af37; }
+.rep-lord-text  { font-size: 0.65rem; color: #b8960a; font-style: italic; }
+.rep-claim-btn {
+  flex-shrink: 0;
+  padding: 6px 16px;
+  background: rgba(212,175,55,0.1);
+  border: 1px solid rgba(212,175,55,0.5);
+  border-radius: 4px;
+  color: #d4af37;
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s;
+}
+.rep-claim-btn:hover {
+  background: rgba(212,175,55,0.2);
+  border-color: #d4af37;
+}
+.rep-lord-claimed {
+  font-size: 0.65rem; color: #4dff88; font-weight: 700;
+}
 
 .affinity-chip { font-size: 0.62rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 1px; }
 .affinity-chip.force   { background: #3a1a0a; color: #ff8c42; }

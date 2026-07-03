@@ -1,6 +1,7 @@
 export const EffectType = {
   DAMAGE: 'damage',
   HEAL: 'heal',
+  SELF_HEAL: 'self_heal',
   BUFF: 'buff',
   DEBUFF: 'debuff',
   REVIVE: 'revive',

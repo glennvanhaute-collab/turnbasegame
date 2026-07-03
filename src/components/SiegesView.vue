@@ -1,419 +1,582 @@
 <template>
-  <div class="sieges-view">
+  <div class="sieges-root">
 
-    <div class="sieges-header">
-      <h2 class="sieges-title">Siege the Realm</h2>
-      <p class="sieges-sub">March on the great houses of Westrun. Your faction composition determines your attack and defence — bring the right banners to the wall.</p>
-      <div class="sieges-notice">
-        <span class="notice-icon">⚔</span>
-        <span>Sieges require a minimum <strong>10-unit war party</strong>. The scale of attacking an entire house demands numbers — and may one day call for a <strong>duplicate unit system</strong> to fill the ranks.</span>
+    <!-- ── Active Event Hero Banner ─────────────────────────────────── -->
+    <div class="event-hero" :style="{ backgroundImage: `url(${active.img})` }">
+      <div class="event-hero-gradient" />
+
+      <div class="event-top-bar">
+        <div class="event-label-group">
+          <span class="event-live-pill">⚔ Active Siege</span>
+          <span class="event-affinity-chip" :class="active.affinity.toLowerCase()">{{ active.affinity }}</span>
+        </div>
+        <div class="event-timer-block">
+          <span class="timer-label">Event ends in</span>
+          <span class="timer-value">{{ timeLeft }}</span>
+        </div>
+      </div>
+
+      <div class="event-hero-body">
+        <div class="event-house-label" :style="{ color: active.color }">{{ active.house }}</div>
+        <h2 class="event-title">{{ active.event.title }}</h2>
+        <div class="event-dispatch">
+          <span class="dispatch-label">Field Report</span>
+          <p class="dispatch-text">{{ active.event.dispatch }}</p>
+        </div>
       </div>
     </div>
 
-    <div class="siege-list">
-      <div
-        v-for="siege in SIEGES"
-        :key="siege.id"
-        class="siege-card"
-        :style="{ '--house-color': siege.color, backgroundImage: `url(${siege.img})` }"
-      >
-        <div class="siege-art-gradient" />
-
-        <!-- Top badges -->
-        <div class="siege-art-top">
-          <span class="siege-tier-badge" :class="siege.tier.toLowerCase()">{{ siege.tier }}</span>
-          <span class="siege-affinity-chip" :class="siege.affinity.toLowerCase()">{{ siege.affinity }}</span>
+    <!-- ── Stronghold Tiers ──────────────────────────────────────────── -->
+    <div class="tiers-section">
+      <div class="tiers-label">Strongholds</div>
+      <div class="tiers-list">
+        <div
+          v-for="tier in TIERS"
+          :key="tier.id"
+          class="tier-card"
+          :class="tier.id"
+          :style="{ '--tc': tier.color }"
+        >
+          <div class="tier-left">
+            <span class="tier-name">{{ tier.name }}</span>
+            <span class="tier-sub">{{ tier.sub }}</span>
+          </div>
+          <div class="tier-rewards">
+            <span class="t-reward">🪙 {{ tier.gold.toLocaleString() }}</span>
+            <span class="t-reward">💎 {{ tier.diamonds }}</span>
+            <span class="t-reward mat" :style="{ color: active.color }">◆ {{ active.event.matReward }} ×{{ tier.matCount }}</span>
+          </div>
+          <button
+            v-if="campBuildings.hasUnlock(tier.unlock)"
+            class="tier-btn"
+            @click="openSetup(tier)"
+          >Besiege</button>
+          <div v-else class="tier-locked">
+            <span class="tier-lock-icon">🔒</span>
+            <span class="tier-lock-hint">{{ tier.unlockHint }}</span>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Info overlay -->
-        <div class="siege-info">
-          <div class="siege-header-labels">
-            <div class="siege-house-label">{{ siege.house }}</div>
-            <div class="siege-name">{{ siege.name }}</div>
-          </div>
-
-          <p class="siege-desc">{{ siege.desc }}</p>
-
-          <div class="siege-matchups">
-            <div class="matchup-row" v-if="siege.strongAgainst.length">
-              <span class="matchup-label strong">Advantage vs</span>
-              <span class="matchup-tag strong" v-for="f in siege.strongAgainst" :key="f"
-                :style="{ color: AFFINITY_COLOR[f], borderColor: AFFINITY_COLOR[f] + '66', background: AFFINITY_COLOR[f] + '18' }">{{ f }}</span>
-            </div>
-            <div class="matchup-row" v-if="siege.weakAgainst.length">
-              <span class="matchup-label weak">Weakness vs</span>
-              <span class="matchup-tag weak" v-for="f in siege.weakAgainst" :key="f"
-                :style="{ color: AFFINITY_COLOR[f], borderColor: AFFINITY_COLOR[f] + '66', background: AFFINITY_COLOR[f] + '18' }">{{ f }}</span>
-            </div>
-          </div>
-
-          <div class="siege-footer">
-            <div class="siege-rewards">
-              <span class="reward-chip"><span class="r-icon">🪙</span>{{ siege.gold.toLocaleString() }}</span>
-              <span class="reward-chip"><span class="r-icon">💎</span>{{ siege.diamonds }}</span>
-              <span class="reward-chip mat" :style="{ '--mat-color': siege.matColor }">
-                <span class="r-icon mat-gem" :style="{ color: siege.matColor }">◆</span>{{ siege.matReward }}
-              </span>
-            </div>
-            <div class="btn-siege-group">
-              <span class="siege-team-req">⚔ 10-unit war party required</span>
-              <button class="btn-siege" disabled>
-                <span class="btn-siege-inner">Besiege</span>
-                <span class="btn-siege-soon">Coming Soon</span>
-              </button>
-            </div>
+    <!-- ── Rotation Strip ────────────────────────────────────────────── -->
+    <div class="rotation-section">
+      <div class="rotation-label">Faction Rotation</div>
+      <div class="rotation-strip">
+        <div
+          v-for="(faction, i) in FACTIONS"
+          :key="faction.id"
+          class="rotation-card"
+          :class="{ active: faction.id === active.id, next: i === nextIdx }"
+          :style="{ '--fc': faction.color, backgroundImage: `url(${faction.img})` }"
+        >
+          <div class="rc-gradient" />
+          <div class="rc-body">
+            <span class="rc-status" v-if="faction.id === active.id">Active</span>
+            <span class="rc-status next-tag" v-else-if="i === nextIdx">Next</span>
+            <span class="rc-house">{{ faction.house }}</span>
+            <span class="rc-sin">{{ faction.sin }}</span>
           </div>
         </div>
       </div>
     </div>
 
   </div>
+
+  <!-- Setup screen — full-screen overlay when a tier is clicked -->
+  <Teleport to="body">
+    <SiegeSetupScreen
+      v-if="setupTier"
+      :faction="active"
+      :tier="setupTier"
+      @back="closeSetup"
+      @march="openBattle"
+    />
+    <SiegeBattleArena
+      v-if="battleOpen && battleTier"
+      :faction="active"
+      :tier="battleTier"
+      @back="closeBattle"
+    />
+  </Teleport>
+
 </template>
 
 <script setup>
-const AFFINITY_COLOR = {
-  Force:  '#ff8c42',
-  Magic:  '#4fa8ff',
-  Spirit: '#4dff88',
-  Void:   '#b44fff',
-}
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import SiegeSetupScreen  from './SiegeSetupScreen.vue'
+import SiegeBattleArena  from './SiegeBattleArena.vue'
+import { useCampBuildingStore } from '../stores/useCampBuildingStore.js'
 
+const campBuildings = useCampBuildingStore()
 import siegeAldric   from '../assets/lore/siege_aldric.png'
 import siegeValdris  from '../assets/lore/siege_Valdris.png'
 import siegeCaelwyn  from '../assets/lore/siege_caelwyn.png'
 import siegeMordaine from '../assets/lore/siege_mordaine.png'
 
-const SIEGES = [
+// ── Faction definitions ───────────────────────────────────────────
+const FACTIONS = [
   {
-    id:           'aldric',
-    house:        'House Aldric',
-    name:         'Storm the Iron Bastion',
-    img:          siegeAldric,
-    color:        '#c8962a',
-    affinity:     'Force',
-    tier:         'Hard',
-    desc:         'The walls of House Aldric have never been broken. Iron gates, disciplined ranks, and knights sworn to die before they yield. You will need brute force and tactical cunning to shatter their defences.',
-    strongAgainst: ['Spirit', 'Void'],
-    weakAgainst:   ['Magic'],
-    gold:          2500,
-    diamonds:      35,
-    matReward:     'Ember Shard ×3',
-    matColor:      '#ff7722',
+    id:       'aldric',
+    house:    'House Aldric',
+    affinity: 'Force',
+    color:    '#c8962a',
+    img:      siegeAldric,
+    sin:      'Territorial expansion',
+    event: {
+      title:     'The Iron March',
+      dispatch:  'House Aldric has marched past the Thornpass boundary stones for the third time this season. A forward camp has been established in contested land. They are not accepting envoys. The other houses cannot move without triggering open war. You can.',
+      matReward: 'Iron Sigil',
+    },
   },
   {
-    id:           'valdris',
-    house:        'House Valdris',
-    name:         'Breach the Arcane Citadel',
-    img:          siegeValdris,
-    color:        '#4fa8ff',
-    affinity:     'Magic',
-    tier:         'Hard',
-    desc:         'The mages of House Valdris have warded every stone of their citadel. Wards detonate on contact, runic barriers redirect force. Spirit and void champions can pierce their arcane defences where steel cannot.',
-    strongAgainst: ['Force', 'Void'],
-    weakAgainst:   ['Spirit'],
-    gold:          2500,
-    diamonds:      35,
-    matReward:     'Void Crystal ×2',
-    matColor:      '#aa44ff',
+    id:       'valdris',
+    house:    'House Valdris',
+    affinity: 'Magic',
+    color:    '#4fa8ff',
+    img:      siegeValdris,
+    sin:      'Void experimentation',
+    event: {
+      title:     'The Mirror Incident',
+      dispatch:  'Three Valdris scholars entered the Citadel of Mirrors six days ago. None have returned. The house has sealed the lower vaults and is refusing all investigation. Something is responding from beneath the Citadel. The other houses are afraid to find out what.',
+      matReward: 'Void Shard',
+    },
   },
   {
-    id:           'caelwyn',
-    house:        'House Caelwyn',
-    name:         'Fell the Eternal Grove',
-    img:          siegeCaelwyn,
-    color:        '#4dff88',
-    affinity:     'Spirit',
-    tier:         'Nightmare',
-    desc:         "The ancient wardens of House Caelwyn fight on terrain that fights back. Living roots seal breaches, stone titans guard the gate, and their healers keep the line standing long after hope is gone. Void corruption is their only true vulnerability.",
-    strongAgainst: ['Force', 'Magic'],
-    weakAgainst:   ['Void'],
-    gold:          4000,
-    diamonds:      60,
-    matReward:     'Void Crystal ×4',
-    matColor:      '#aa44ff',
+    id:       'caelwyn',
+    house:    'House Caelwyn',
+    affinity: 'Spirit',
+    color:    '#4dff88',
+    img:      siegeCaelwyn,
+    sin:      'Witch mutiny',
+    event: {
+      title:     'The Coven Split',
+      dispatch:  "House Caelwyn's eastern coven has stopped answering to the house banner. The rites they performed in the Thornwood summoned something that is no longer under their control. The house leadership will not admit this publicly. Settlements near the wood are already empty.",
+      matReward: 'Thornwood Rune',
+    },
   },
   {
-    id:           'mordaine',
-    house:        'House Mordaine',
-    name:         'Shatter the Void Sanctum',
-    img:          siegeMordaine,
-    color:        '#b44fff',
-    affinity:     'Void',
-    tier:         'Nightmare',
-    desc:         'House Mordaine has built their sanctum in the space between worlds. Shadow knights phase through walls, void rift towers warp incoming strikes, and the Sovereign himself waits at the throne. Only holy light and overwhelming force can end this darkness.',
-    strongAgainst: ['Magic', 'Spirit'],
-    weakAgainst:   ['Force'],
-    gold:          4000,
-    diamonds:      60,
-    matReward:     'Ember Shard ×4',
-    matColor:      '#ff7722',
+    id:       'mordaine',
+    house:    'House Mordaine',
+    affinity: 'Void',
+    color:    '#b44fff',
+    img:      siegeMordaine,
+    sin:      'Old grudges & privateers',
+    event: {
+      title:     'The Greyveil Closure',
+      dispatch:  'House Mordaine has invoked a century-old maritime charter to close the Greyveil trade route. Grain shipments to three houses have stopped. They insist it is legal. It is not wrong — they have the documentation. That does not make it acceptable.',
+      matReward: 'Privateer Seal',
+    },
   },
 ]
+
+// ── Tier definitions ──────────────────────────────────────────────
+const TIERS = [
+  {
+    id: 'skirmish', name: 'Skirmish', sub: 'Outer garrison — weakened defenders',
+    color: '#888', gold: 800, diamonds: 12, matCount: 1,
+    unlock: 'siege_easy',
+    unlockHint: "Requires Breachwright's Yard Tier 1",
+    garrison: ['Militia conscripts ×8', 'Untrained archers ×4'],
+  },
+  {
+    id: 'siege', name: 'Siege', sub: 'Main wall — organised resistance',
+    color: '#c8962a', gold: 1800, diamonds: 25, matCount: 2,
+    unlock: 'siege_medium',
+    unlockHint: "Requires Breachwright's Yard Tier 2",
+    garrison: ['Veteran soldiers ×10', 'Tower archers ×6', 'Wall ballista ×2'],
+  },
+  {
+    id: 'assault', name: 'Full Assault', sub: 'Inner sanctum — elite guard',
+    color: '#cc4444', gold: 3200, diamonds: 45, matCount: 4,
+    unlock: 'siege_hard',
+    unlockHint: "Requires Breachwright's Yard Tier 3",
+    garrison: ['Elite guard ×8', 'Battlemage ×3', 'Siege artillery ×3', 'Captain of the Guard'],
+  },
+  {
+    id: 'breach', name: 'The Breach', sub: 'The commander — ends the transgression',
+    color: '#b44fff', gold: 5000, diamonds: 70, matCount: 7,
+    unlock: 'siege_nightmare',
+    unlockHint: "Requires Breachwright's Yard Tier 4",
+    garrison: ['Full garrison ×20', 'Arcane constructs ×4', 'The Commander (Phase 2)'],
+  },
+]
+
+// ── Active event — rotates every 7 days based on real time ───────
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+function getActiveIndex() {
+  return Math.floor(Date.now() / WEEK_MS) % FACTIONS.length
+}
+
+function getWeekEnd() {
+  const weekNum = Math.floor(Date.now() / WEEK_MS)
+  return (weekNum + 1) * WEEK_MS
+}
+
+const activeIdx = computed(() => getActiveIndex())
+const nextIdx   = computed(() => (activeIdx.value + 1) % FACTIONS.length)
+const active    = computed(() => FACTIONS[activeIdx.value])
+
+// ── Setup screen state ────────────────────────────────────────────
+const setupTier  = ref(null)
+const battleTier = ref(null)
+const battleOpen = ref(false)
+
+function openSetup(tier)  { setupTier.value = tier }
+function closeSetup()     { setupTier.value = null }
+
+function openBattle() {
+  battleTier.value = setupTier.value
+  setupTier.value  = null
+  battleOpen.value = true
+}
+function closeBattle() {
+  battleOpen.value = false
+  battleTier.value = null
+}
+
+// ── Countdown timer ───────────────────────────────────────────────
+const timeLeft = ref('')
+
+function updateTimer() {
+  const remaining = getWeekEnd() - Date.now()
+  if (remaining <= 0) { timeLeft.value = 'Ending...'; return }
+  const d = Math.floor(remaining / 86400000)
+  const h = Math.floor((remaining % 86400000) / 3600000)
+  const m = Math.floor((remaining % 3600000) / 60000)
+  if (d > 0) timeLeft.value = `${d}d ${h}h`
+  else if (h > 0) timeLeft.value = `${h}h ${m}m`
+  else timeLeft.value = `${m}m`
+}
+
+let timerInterval = null
+onMounted(() => { updateTimer(); timerInterval = setInterval(updateTimer, 60000) })
+onUnmounted(() => clearInterval(timerInterval))
 </script>
 
 <style scoped>
-.sieges-view {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px 24px 48px;
-}
-
-.sieges-header {
-  margin-bottom: 24px;
-}
-.sieges-title {
-  font-family: var(--font-head);
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--gold);
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin-bottom: 6px;
-}
-.sieges-sub {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.7;
-  max-width: 640px;
-  margin-bottom: 10px;
-}
-.sieges-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  background: #100a04;
-  border: 1px solid var(--border-brown);
-  border-left: 3px solid var(--gold-dim);
-  border-radius: 6px;
-  padding: 9px 14px;
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-  max-width: 680px;
-}
-.sieges-notice strong { color: var(--text-parchment); }
-.notice-icon { font-size: 0.8rem; flex-shrink: 0; margin-top: 1px; }
-
-/* ── Siege list ─────────────────────────────────────────────────── */
-.siege-list {
+.sieges-root {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  min-height: 100%;
+  background: #0a0604;
 }
 
-.siege-card {
+/* ── Hero Banner ──────────────────────────────────────────────── */
+.event-hero {
   position: relative;
-  border: 1px solid #3e1c0c;
-  border-radius: 14px;
-  overflow: hidden;
+  min-height: 420px;
   background-size: cover;
-  background-position: center center;
-  transition: border-color 0.25s, box-shadow 0.25s;
+  background-position: center 30%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 400px;
-}
-.siege-card:hover {
-  border-color: var(--house-color);
-  box-shadow: 0 6px 40px rgba(0,0,0,0.7), 0 0 0 1px color-mix(in srgb, var(--house-color) 30%, transparent);
 }
 
-.siege-art-gradient {
+.event-hero-gradient {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.05) 0%,
-    rgba(0,0,0,0.08) 45%,
-    rgba(0,0,0,0.55) 70%,
-    rgba(0,0,0,0.82) 100%
+    rgba(0,0,0,0.15) 0%,
+    rgba(0,0,0,0.1)  35%,
+    rgba(0,0,0,0.6)  70%,
+    rgba(10,6,4,0.97) 100%
   );
   pointer-events: none;
 }
 
-.siege-art-top {
+.event-top-bar {
   position: relative;
   z-index: 1;
   display: flex;
-  gap: 8px;
   align-items: flex-start;
-  padding: 14px 18px;
+  justify-content: space-between;
+  padding: 18px 28px;
 }
 
-.siege-tier-badge {
+.event-label-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.event-live-pill {
+  font-family: var(--font-head);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  background: rgba(200,150,42,0.18);
+  border: 1px solid #c8962a88;
+  color: #c8962a;
+  border-radius: 20px;
+  padding: 4px 12px;
+  backdrop-filter: blur(4px);
+}
+
+.event-affinity-chip {
+  font-family: var(--font-head);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 12px;
+  padding: 3px 10px;
+  backdrop-filter: blur(4px);
+}
+.event-affinity-chip.force  { background: rgba(26,6,0,0.75);  color: #ff8c42; border: 1px solid #66331166; }
+.event-affinity-chip.magic  { background: rgba(0,16,31,0.75); color: #4fa8ff; border: 1px solid #11336666; }
+.event-affinity-chip.spirit { background: rgba(0,16,8,0.75);  color: #4dff88; border: 1px solid #11663366; }
+.event-affinity-chip.void   { background: rgba(15,0,26,0.75); color: #b44fff; border: 1px solid #44118866; }
+
+.event-timer-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 6px 14px;
+}
+.timer-label { font-size: 0.54rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+.timer-value { font-family: var(--font-head); font-size: 1rem; font-weight: 700; color: #ddd; letter-spacing: 2px; }
+
+.event-hero-body {
+  position: relative;
+  z-index: 1;
+  padding: 0 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-house-label {
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+}
+
+.event-title {
+  font-family: var(--font-head);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.95);
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.event-dispatch {
+  max-width: 580px;
+  background: rgba(0,0,0,0.45);
+  border-left: 3px solid rgba(255,255,255,0.1);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 16px;
+  backdrop-filter: blur(4px);
+}
+.dispatch-label {
+  display: block;
+  font-size: 0.52rem;
+  font-family: var(--font-head);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #666;
+  margin-bottom: 5px;
+}
+.dispatch-text {
+  font-size: 0.74rem;
+  color: #aaa;
+  line-height: 1.75;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Stronghold Tiers ─────────────────────────────────────────── */
+.tiers-section {
+  padding: 24px 28px 8px;
+}
+.tiers-label {
   font-family: var(--font-head);
   font-size: 0.58rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  border-radius: 10px;
-  padding: 3px 10px;
-  backdrop-filter: blur(4px);
+  letter-spacing: 3px;
+  color: #555;
+  margin-bottom: 12px;
 }
-.siege-tier-badge.hard      { background: rgba(26,16,8,0.75); color: #cc8833; border: 1px solid #663311; }
-.siege-tier-badge.nightmare { background: rgba(24,10,26,0.75); color: #aa44ff; border: 1px solid #661188; }
 
-.siege-affinity-chip {
-  font-family: var(--font-head);
-  font-size: 0.58rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  border-radius: 10px;
-  padding: 3px 10px;
-  backdrop-filter: blur(4px);
+.tiers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.siege-affinity-chip.force   { background: rgba(26,6,0,0.75);  color: #ff8c42; border: 1px solid #663311; }
-.siege-affinity-chip.magic   { background: rgba(0,16,31,0.75); color: #4fa8ff; border: 1px solid #113366; }
-.siege-affinity-chip.spirit  { background: rgba(0,16,8,0.75);  color: #4dff88; border: 1px solid #116633; }
-.siege-affinity-chip.void    { background: rgba(15,0,26,0.75); color: #b44fff; border: 1px solid #441188; }
 
-.siege-header-labels {
+.tier-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #0e0906;
+  border: 1px solid #1e1008;
+  border-left: 3px solid var(--tc);
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tier-card:hover { background: #13100a; }
+
+.tier-left {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
-.siege-house-label {
+.tier-name {
   font-family: var(--font-head);
-  font-size: 0.6rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--house-color);
-  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
-}
-
-.siege-name {
-  font-family: var(--font-head);
-  font-size: 1.3rem;
-  font-weight: 900;
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.95), 0 0 30px rgba(0,0,0,0.7);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--tc);
   letter-spacing: 1px;
-  line-height: 1.2;
+}
+.tier-sub {
+  font-size: 0.62rem;
+  color: #555;
 }
 
-/* ── Info overlay ───────────────────────────────────────────────── */
-.siege-info {
-  position: relative;
-  z-index: 1;
-  padding: 14px 20px 18px;
+.tier-rewards {
   display: flex;
-  flex-direction: column;
   gap: 10px;
-  background: rgba(8, 4, 2, 0.25);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  border-top: 1px solid var(--house-color);
-}
-
-.siege-desc {
-  font-size: 0.72rem;
-  color: #9a7e68;
-  line-height: 1.7;
-}
-
-/* Matchups */
-.siege-matchups { display: flex; flex-direction: column; gap: 5px; }
-.matchup-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.matchup-label {
-  font-size: 0.56rem;
-  font-family: var(--font-head);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 700;
-  min-width: 74px;
+  align-items: center;
   flex-shrink: 0;
 }
-.matchup-label.strong { color: #44cc66; }
-.matchup-label.weak   { color: #cc4444; }
-.matchup-tag {
-  font-size: 0.6rem;
-  font-weight: 700;
-  border-radius: 4px;
-  padding: 1px 8px;
-}
-.matchup-tag.strong { background: #0d1a0a; color: #44cc66; border: 1px solid #1a4411; }
-.matchup-tag.weak   { background: #1a0808; color: #cc5544; border: 1px solid #441111; }
-
-/* Footer */
-.siege-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  padding-top: 4px;
-  border-top: 1px solid rgba(255,255,255,0.05);
-}
-
-.siege-rewards { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.reward-chip {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.t-reward {
   font-size: 0.68rem;
+  font-family: var(--font-head);
   font-weight: 700;
-  font-family: var(--font-head);
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 4px;
-  padding: 3px 9px;
-  color: var(--text-muted);
+  color: #777;
 }
-.reward-chip.mat { color: var(--mat-color); }
-.r-icon { font-size: 0.72rem; }
-.mat-gem { font-size: 0.7rem; }
+.t-reward.mat { }
 
-.btn-siege-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
-  flex-shrink: 0;
-}
-.siege-team-req {
-  font-size: 0.58rem;
+.tier-btn {
+  padding: 8px 22px;
+  border-radius: 6px;
+  border: 1px solid var(--tc);
+  background: color-mix(in srgb, var(--tc) 8%, transparent);
+  color: var(--tc);
   font-family: var(--font-head);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--gold-dim);
-  opacity: 0.8;
-}
-
-/* Button */
-.btn-siege {
-  position: relative;
-  padding: 10px 28px;
-  border-radius: 8px;
-  border: 1px solid var(--house-color);
-  background: color-mix(in srgb, var(--house-color) 10%, transparent);
-  color: var(--house-color);
-  font-family: var(--font-head);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  cursor: not-allowed;
-  overflow: hidden;
-  opacity: 0.6;
+  cursor: pointer;
   flex-shrink: 0;
+  min-width: 110px;
+  transition: background 0.15s, box-shadow 0.15s;
 }
-.btn-siege-inner { display: block; transition: opacity 0.2s, transform 0.2s; }
-.btn-siege-soon {
-  position: absolute;
-  inset: 0;
+.tier-btn:hover {
+  background: color-mix(in srgb, var(--tc) 18%, transparent);
+  box-shadow: 0 0 16px -4px var(--tc);
+}
+
+.tier-locked {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  background: color-mix(in srgb, var(--house-color) 15%, transparent);
+  gap: 6px;
+  flex-shrink: 0;
+  opacity: 0.5;
 }
-.btn-siege:hover .btn-siege-inner { opacity: 0; transform: translateY(-4px); }
-.btn-siege:hover .btn-siege-soon  { opacity: 1; }
+.tier-lock-icon { font-size: 0.8rem; }
+.tier-lock-hint {
+  font-size: 0.58rem;
+  color: #666;
+  font-style: italic;
+  max-width: 140px;
+  line-height: 1.4;
+}
+
+/* ── Rotation Strip ───────────────────────────────────────────── */
+.rotation-section {
+  padding: 24px 28px 40px;
+}
+.rotation-label {
+  font-family: var(--font-head);
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.rotation-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.rotation-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  min-height: 130px;
+  border: 1px solid #1e1008;
+  transition: border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.rotation-card.active {
+  border-color: var(--fc);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fc) 40%, transparent);
+}
+.rotation-card.next { border-color: #3a2a1a; }
+
+.rc-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.82) 100%);
+}
+
+.rc-body {
+  position: relative;
+  z-index: 1;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rc-status {
+  font-family: var(--font-head);
+  font-size: 0.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--fc);
+  margin-bottom: 1px;
+}
+.rc-status.next-tag { color: #666; }
+
+.rc-house {
+  font-family: var(--font-head);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ddd;
+  line-height: 1.2;
+}
+.rc-sin {
+  font-size: 0.57rem;
+  color: #555;
+  font-style: italic;
+}
 </style>

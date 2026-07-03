@@ -7,13 +7,15 @@
     <header class="app-header">
       <div class="app-header-bg" :style="{ backgroundImage: `url(${navBg})` }" />
       <div class="header-inner">
-        <img :src="navLogo" class="logo-img" alt="" @click="navigate('campaign')" style="cursor:pointer" />
-        <h1 class="logo" @click="navigate('campaign')" style="cursor:pointer">Bannerlords of Westrun</h1>
+        <img :src="navLogo" class="logo-img" alt="" @click="navigate('hall')" style="cursor:pointer" />
+        <h1 class="logo" @click="navigate('hall')" style="cursor:pointer">Bannerlords of Westrun</h1>
         <nav class="nav">
-          <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="navigate('campaign')">Home</button>
+          <button class="nav-btn" :class="{ active: view === 'hall' }" @click="navigate('hall')">Hall</button>
+          <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="navigate('campaign')">Campaign</button>
           <button class="nav-btn" :class="{ active: view === 'summon' }" @click="navigate('summon')">Recruit</button>
           <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
+          <button class="nav-btn" :class="{ active: view === 'sieges' }" @click="navigate('sieges')">Sieges</button>
           <button class="nav-btn" :class="{ active: view === 'camp' }" @click="navigate('camp')">Stronghold</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }" @click="navigate('realm')">Realm</button>
           <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
@@ -50,7 +52,7 @@
     <DevMenu v-if="$isDev" />
 
     <!-- Floating Codex button — hidden on home, available everywhere else -->
-    <button class="codex-fab" v-if="view !== 'campaign'" @click="showCodex = true" title="Open Codex">
+    <button class="codex-fab" v-if="view !== 'hall' && view !== 'campaign'" @click="showCodex = true" title="Open Codex">
       <img :src="codexIcon" class="codex-fab-icon" alt="Codex" />
     </button>
 
@@ -129,6 +131,36 @@
       </Transition>
     </Teleport>
 
+    <!-- Fusion Workshop modal -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showFusionWorkshop">
+          <div class="coll-modal-backdrop" @click="showFusionWorkshop = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showFusionWorkshop = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <FusionWorkshopView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Weapon Forge modal -->
+    <Teleport to="body">
+      <Transition name="coll-modal">
+        <div class="coll-modal-wrap" v-if="showWeaponForge">
+          <div class="coll-modal-backdrop" @click="showWeaponForge = false" />
+          <div class="coll-modal-panel">
+            <button class="coll-modal-close" @click="showWeaponForge = false" title="Close">
+              <img :src="closeImg" class="coll-modal-close-icon" alt="Close" />
+            </button>
+            <WeaponForgeView />
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Market modal — floats over the homepage map -->
     <Teleport to="body">
       <Transition name="coll-modal">
@@ -172,14 +204,17 @@
     </Teleport>
 
     <main>
+      <GreatHallView v-if="view === 'hall'" @navigate="navigate" />
       <HomeView
-        v-if="view === 'campaign'"
+        v-else-if="view === 'campaign'"
         @start-battle="startBattle"
         @open-collection="showCollection = true"
         @open-blacksmith="showBlacksmith = true"
         @open-leatherworking="showLeatherworking = true"
         @open-tailoring="showTailoring = true"
         @open-woodworking="showWoodworking = true"
+        @open-fusion-workshop="showFusionWorkshop = true"
+        @open-weapon-forge="showWeaponForge = true"
         @open-market="showMarket = true"
         @open-codex="showCodex = true"
       />
@@ -207,14 +242,13 @@
           <button class="gear-tab" :class="{ active: expTab === 'dungeons' }" @click="expTab = 'dungeons'">Dungeons</button>
           <button class="gear-tab" :class="{ active: expTab === 'explore' }" @click="expTab = 'explore'">Explore</button>
           <button class="gear-tab" :class="{ active: expTab === 'raids' }" @click="expTab = 'raids'">Raids</button>
-          <button class="gear-tab" :class="{ active: expTab === 'sieges' }" @click="expTab = 'sieges'">Sieges</button>
         </div>
         <DungeonView v-if="expTab === 'dungeons'" @enter-dungeon="startDungeonBattle" />
         <ExploreView v-else-if="expTab === 'explore'" @enter-dungeon="startDungeonBattle" />
         <RaidsView v-else-if="expTab === 'raids'" @enter-raid="startRaidBattle" @auto-raid="startAutoRaid" />
-        <SiegesView v-else-if="expTab === 'sieges'" />
         <ExplorationView v-else />
       </div>
+      <SiegesView v-else-if="view === 'sieges'" />
       <CampView v-else-if="view === 'camp'" />
       <RealmView v-else-if="view === 'realm'" />
     </main>
@@ -224,6 +258,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useMusic } from './composables/useMusic.js'
+import { playBattleForTeam, playMain } from './game/music.js'
 import { useSmeltingTick } from './composables/useSmeltingTick.js'
 import { useTanningTick }  from './composables/useTanningTick.js'
 import { useWeavingTick }  from './composables/useWeavingTick.js'
@@ -242,12 +277,15 @@ import { useForgeStore } from './stores/useForgeStore.js'
 import { ENCOUNTERS } from './game/data/heroes.js'
 import StarterPickView from './components/StarterPickView.vue'
 import HeroCreationView from './components/HeroCreationView.vue'
+import GreatHallView from './components/GreatHallView.vue'
 import HomeView from './components/HomeView.vue'
 import CollectionView from './components/CollectionView.vue'
 import BlacksmithView from './components/BlacksmithView.vue'
 import LeatherworkingView from './components/LeatherworkingView.vue'
 import TailoringView from './components/TailoringView.vue'
 import WoodworkingView from './components/WoodworkingView.vue'
+import FusionWorkshopView from './components/FusionWorkshopView.vue'
+import WeaponForgeView from './components/WeaponForgeView.vue'
 import MarketView from './components/MarketView.vue'
 import InventoryView from './components/InventoryView.vue'
 import EquipmentView from './components/EquipmentView.vue'
@@ -279,7 +317,7 @@ import { useAdvisorStore } from './stores/useAdvisorStore.js'
 import { useSettingsStore } from './stores/useSettingsStore.js'
 import { buildDungeonEncounter } from './game/data/dungeons.js'
 
-const view       = ref('campaign')
+const view       = ref('hall')
 const gearTab    = ref('inventory')
 const expTab     = ref('dungeons')
 const showShop        = ref(false)
@@ -289,6 +327,8 @@ const showBlacksmith      = ref(false)
 const showLeatherworking  = ref(false)
 const showTailoring       = ref(false)
 const showWoodworking     = ref(false)
+const showFusionWorkshop  = ref(false)
+const showWeaponForge     = ref(false)
 const showMarket          = ref(false)
 const showBattle      = ref(false)
 const showRaidBattle  = ref(false)
@@ -300,6 +340,8 @@ function closeAllPanels() {
   showLeatherworking.value  = false
   showTailoring.value       = false
   showWoodworking.value     = false
+  showFusionWorkshop.value  = false
+  showWeaponForge.value     = false
   showMarket.value          = false
   showBattle.value          = false
   showRaidBattle.value      = false
@@ -423,6 +465,7 @@ function onHeroCreated() {
 function startBattle(encounterIndex) {
   const team = collectionStore.buildTeam()
   battleStore.initBattle(encounterIndex, team)
+  playBattleForTeam(team.map(h => h.id))
   showBattle.value = true
 }
 
@@ -431,9 +474,12 @@ function startDungeonBattle(dungeon) {
   const encounter = buildDungeonEncounter(dungeon)
   if (dungeon.batchCount > 1) battleStore.setupBatch(dungeon.batchCount)
   battleStore.initBattle(encounter, team)
+  playBattleForTeam(team.map(h => h.id))
   if (!battleStore.autoplay) battleStore.toggleAutoplay()
   showBattle.value = true
 }
+
+watch(showBattle, v => { if (!v) playMain() })
 </script>
 
 <style>

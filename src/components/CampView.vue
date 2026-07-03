@@ -77,8 +77,17 @@
                   class="cost-row ore-cost"
                   :class="{ insufficient: (resources.ores[oreId] ?? 0) < amount }"
                 >
-                  {{ ORE_NAMES[oreId] }} ×{{ amount }}
-                  <span class="ore-owned">({{ resources.ores[oreId] ?? 0 }})</span>
+                  {{ ORE_NAMES[oreId] }} ×{{ amount.toLocaleString() }}
+                  <span class="ore-owned">({{ (resources.ores[oreId] ?? 0).toLocaleString() }})</span>
+                </span>
+                <span
+                  v-for="(amount, plankId) in buildings.getNextCost(id).planks"
+                  :key="'plank_' + plankId"
+                  class="cost-row plank-cost"
+                  :class="{ insufficient: (resources.planks[plankId] ?? 0) < amount }"
+                >
+                  {{ PLANK_NAMES[plankId] }} ×{{ amount.toLocaleString() }}
+                  <span class="ore-owned">({{ (resources.planks[plankId] ?? 0).toLocaleString() }})</span>
                 </span>
               </div>
 
@@ -112,6 +121,9 @@ import { useResourceStore }      from '../stores/useResourceStore.js'
 import { useCampBuildingStore }  from '../stores/useCampBuildingStore.js'
 import { useSettingsStore }      from '../stores/useSettingsStore.js'
 import { CAMP_BUILDINGS, BUILDING_IDS, ORE_NAMES } from '../game/data/campBuildings.js'
+import { PLANK_LIST } from '../game/data/planks.js'
+
+const PLANK_NAMES = Object.fromEntries(PLANK_LIST.map(p => [p.id, p.name]))
 
 const camp      = useCampStore()
 const currency  = useCurrencyStore()
@@ -386,6 +398,7 @@ onUnmounted(() => clearInterval(interval))
   color: #bbb;
 }
 .cost-row.gold-cost { color: var(--gold); font-weight: 600; }
+.cost-row.plank-cost { color: #c8a87a; }
 .cost-row.insufficient { color: #e05050; }
 .ore-owned { color: #555; font-size: 0.60rem; }
 

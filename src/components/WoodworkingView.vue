@@ -355,6 +355,7 @@ import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useArtisanStore } from '../stores/useArtisanStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useAdvisorStore } from '../stores/useAdvisorStore.js'
+import { useCampBuildingStore } from '../stores/useCampBuildingStore.js'
 import { createItemInstance } from '../game/Gear.js'
 import { WOODS, WOOD_LIST } from '../game/data/woods.js'
 import { PLANK_LIST, PLANKS } from '../game/data/planks.js'
@@ -368,6 +369,7 @@ const inventory  = useInventoryStore()
 const artisan    = useArtisanStore()
 const collection = useCollectionStore()
 const advisor    = useAdvisorStore()
+const campBuildings = useCampBuildingStore()
 
 const showCarpenterPicker = ref(false)
 const selectedId   = ref(null)
@@ -413,7 +415,7 @@ function makePlanks(woodId) {
   if ((resources.logs[woodId] ?? 0) < plank.logCost) return
   resources.removeLog(woodId, plank.logCost)
   resources.addPlank(woodId, 1)
-  resources.addWoodworkingXp(3)
+  resources.addWoodworkingXp(Math.round(3 * (1 + campBuildings.lumberXpBonus)))
 }
 
 function makePlanksAll(woodId) {
@@ -425,7 +427,7 @@ function makePlanksAll(woodId) {
     resources.addPlank(woodId, 1)
     count++
   }
-  if (count > 0) resources.addWoodworkingXp(3 * count)
+  if (count > 0) resources.addWoodworkingXp(Math.round(3 * count * (1 + campBuildings.lumberXpBonus)))
 }
 
 function toggleTier(id) {
@@ -496,7 +498,8 @@ function _craftOnce(recipe) {
   instance.crafted   = true
   inventory.addInstance(instance)
   const baseXp = XP_PER_TIER[recipe.tier] ?? 10
-  const bonus  = assignedCarpenter.value ? carpenterXpBonus.value / 100 : 0
+  const carpBonus = assignedCarpenter.value ? carpenterXpBonus.value / 100 : 0
+  const bonus = carpBonus + campBuildings.lumberXpBonus
   resources.addWoodworkingXp(Math.round(baseXp * (1 + bonus)))
   if (assignedCarpenter.value) {
     artisan.addSkillXp(artisan.assignedCarpenterKey, 'woodworking', Math.ceil(baseXp * 0.5))
