@@ -46,7 +46,7 @@
         :class="item.rarity.toLowerCase()"
       >
         <div class="mc-top">
-          <span class="mc-icon">{{ item.weaponType ? (WEAPON_ICONS[item.weaponType] ?? '⚔') : (GEAR_ICONS[item.gearType] ?? '▪') }}</span>
+          <GameIcon :icon="itemIcon(item)" :size="28" class="mc-icon" />
           <div class="mc-info">
             <span class="mc-name">{{ item.name }}</span>
             <div class="mc-badges">
@@ -85,6 +85,8 @@ import { useInventoryStore, calcSellPrice } from '../stores/useInventoryStore.js
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { GearType } from '../game/Gear.js'
 import { Rarity } from '../game/Hero.js'
+import { tierSlotIcon } from '../game/data/spritesheet.js'
+import GameIcon from './ui/GameIcon.vue'
 import marketBg from '../assets/backgrounds/market-bg.png'
 
 const inventory = useInventoryStore()
@@ -102,25 +104,20 @@ const RARITY_OPTS = [
   { value: Rarity.LEGENDARY, label: 'Legendary', cls: 'f-legendary' },
 ]
 
-const GEAR_ICONS = {
-  [GearType.WEAPON]: '⚔',
-  [GearType.SHIELD]: '🛡',
-  [GearType.HELMET]: '🪖',
-  [GearType.ARMOR]:  '🧥',
-  [GearType.LEGS]:   '🦵',
-  [GearType.BOOTS]:  '🥾',
-  [GearType.GLOVES]: '🧤',
+const GEARTYPE_SLOT = {
+  [GearType.WEAPON]: 'main_hand',
+  [GearType.SHIELD]: 'off_hand',
+  [GearType.HELMET]: 'head',
+  [GearType.ARMOR]:  'chest',
+  [GearType.LEGS]:   'legs',
+  [GearType.BOOTS]:  'boots',
+  [GearType.GLOVES]: 'gloves',
 }
 
-const WEAPON_ICONS = {
-  sword:  '⚔',
-  axe:    '🪓',
-  dagger: '🗡',
-  staff:  '🪄',
-  mace:   '⚒',
-  spear:  '🔱',
-  bow:    '🏹',
-  wand:   '✦',
+function itemIcon(item) {
+  if (item.image) return item.image
+  const slot = item.slot ?? GEARTYPE_SLOT[item.gearType]
+  return tierSlotIcon(item.tier, slot, item.craftDiscipline)
 }
 
 const STAT_LABELS = {
@@ -332,7 +329,7 @@ function doSellAll() {
 .market-card.common    { border-left: 3px solid #444; }
 
 .mc-top { display: flex; align-items: flex-start; gap: 10px; }
-.mc-icon { font-size: 1.5rem; line-height: 1; flex-shrink: 0; }
+.mc-icon { flex-shrink: 0; image-rendering: pixelated; }
 .mc-info { flex: 1; min-width: 0; }
 .mc-name { display: block; font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 3px; }
 .mc-badges { display: flex; flex-wrap: wrap; gap: 4px; }
