@@ -195,6 +195,10 @@ export class BattleEngine {
               died:     target.isDead,
             })
           }
+          if (result.selfHeal > 0) {
+            this.logMessage(`${caster.name} drains ${result.selfHeal} HP.`)
+            actionHits.push({ targetId: caster.id, damage: 0, heal: result.selfHeal, crit: false, died: false })
+          }
         }
       }
     }
@@ -328,6 +332,12 @@ export class BattleEngine {
       if (caster.passives?.has('mending_boosted') && result.heal > 0) {
         this._removeOneDebuff(target)
       }
+
+    } else if (effect.type === EffectType.SELF_HEAL) {
+      const amount = effect.healPercent
+        ? Math.floor(caster.maxHp * effect.healPercent)
+        : Math.floor(caster.atk * (effect.multiplier ?? 0.20))
+      result.selfHeal = caster.heal(amount)
 
     } else if (effect.type === EffectType.DEBUFF && effect.statusEffect) {
       let resistChance = Math.max(0, target.resistance - caster.accuracy)

@@ -103,6 +103,11 @@
           </div>
         </div>
 
+        <!-- Chronicle weapon image -->
+        <div v-if="chronicleImage" class="wfw-chronicle-img-wrap">
+          <img :src="chronicleImage" class="wfw-chronicle-img" alt="" />
+        </div>
+
         <!-- Tier track -->
         <div class="wfw-tier-track">
           <div
@@ -197,6 +202,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import forgeBg from '../assets/backgrounds/weaponsmith_background.png'
+
+const chronicleImages = import.meta.glob('../assets/chronicles/*.png', { eager: true, import: 'default' })
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useWeaponStore, TIER_COSTS } from '../stores/useWeaponStore.js'
 import { useResourceStore } from '../stores/useResourceStore.js'
@@ -417,6 +424,12 @@ const selectedHero = computed(() =>
   collection.roster.find(e => e.key === selectedKey.value)?.hero ?? null
 )
 
+const chronicleImage = computed(() => {
+  const id = selectedHero.value?.id
+  if (!id) return null
+  return chronicleImages[`../assets/chronicles/${id}.png`] ?? null
+})
+
 const RARITY_ORDER = ['ancient', 'mythical', 'legendary', 'epic', 'rare', 'uncommon', 'common']
 const rarityRank = r => { const i = RARITY_ORDER.indexOf(r?.toLowerCase() ?? ''); return i === -1 ? 99 : i }
 
@@ -592,10 +605,10 @@ function forgeTier() {
 .wfr-hero.rarity-rare      { border-color: #1a50a0; }
 .wfr-hero.rarity-epic      { border-color: #6a2890; }
 .wfr-hero.rarity-legendary { border-color: #8a6418; }
-.wfr-hero.rarity-mythical  { border-color: #9933cc; }
+.wfr-hero.rarity-mythical  { border-color: #5a1010; }
 .wfr-hero.rarity-ancient   { border-color: #7a1060; }
 .wfr-hero.rarity-legendary .wfrh-name { color: #c9a227; }
-.wfr-hero.rarity-mythical  .wfrh-name { color: #c050ff; }
+.wfr-hero.rarity-mythical  .wfrh-name { color: #ff2244; }
 .wfr-hero.rarity-ancient   .wfrh-name { color: #ee22ee; }
 
 /* ── Center ───────────────────────────────────────────────────────── */
@@ -708,7 +721,29 @@ function forgeTier() {
 }
 
 /* Weapon detail */
-.wfw-header { text-align: center; margin-bottom: 28px; }
+.wfw-header { text-align: center; margin-bottom: 20px; }
+
+.wfw-chronicle-img-wrap {
+  display: flex; justify-content: center;
+  margin-bottom: 28px;
+  position: relative;
+}
+.wfw-chronicle-img-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -20px 20%;
+  background: radial-gradient(ellipse at center, rgba(212,175,55,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.wfw-chronicle-img {
+  max-height: 380px; max-width: 520px;
+  width: 100%;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 28px rgba(212,175,55,0.45))
+    drop-shadow(0 0 60px rgba(212,175,55,0.18));
+  position: relative; z-index: 1;
+}
 .wfw-weapon-name {
   font-family: var(--font-head, serif);
   font-size: 2rem; color: #e8d88a;

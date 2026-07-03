@@ -33,6 +33,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
 
   const currentOptions  = ref(saved?.currentOptions ?? [])
   const pinnedDungeons  = ref(saved?.pinnedDungeons ?? [])
+  const dungeonClears   = ref(saved?.dungeonClears ?? 0)
   const pendingNodeId       = ref(null)   // node awaiting item pick
   const pendingTavernId     = ref(null)   // tavern node awaiting claim
   const pendingTavernFrag   = ref(null)   // { heroId, heroTitle, frag } pre-rolled for modal
@@ -41,6 +42,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       currentOptions: currentOptions.value,
       pinnedDungeons: pinnedDungeons.value,
+      dungeonClears:  dungeonClears.value,
     }))
   }
 
@@ -146,6 +148,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
       useInventoryStore().awardSoulVessel()
     }
 
+    dungeonClears.value++
     persist()
     return { componentDrops, forgeUnlock }
   }
@@ -228,7 +231,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
   }
 
   return {
-    currentOptions, pinnedDungeons, pendingNodeId,
+    currentOptions, pinnedDungeons, dungeonClears, pendingNodeId,
     pendingTavernId, pendingTavernFrag,
     EXPLORE_COST,
     explore, pin, unpin, onDungeonVictory, findDungeon,

@@ -13,6 +13,7 @@ import { useInventoryStore }   from './useInventoryStore.js'
 import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
 import { useCodexStore } from './useCodexStore.js'
+import { useReputationStore } from './useReputationStore.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -35,6 +36,8 @@ export const useBattleStore = defineStore('battle', () => {
   function _persistClears() {
     localStorage.setItem('raid-clears', JSON.stringify([...clearedRaids.value]))
   }
+
+  const battleWins = ref(Number(localStorage.getItem('raid-battle-wins')) || 0)
 
   const lastAction = ref(null)
 
@@ -200,6 +203,18 @@ export const useBattleStore = defineStore('battle', () => {
             codex.unlock(pick.frag.id)
             loreFragment = pick
           }
+        }
+
+        battleWins.value++
+        localStorage.setItem('raid-battle-wins', battleWins.value)
+
+        // Reputation — earned per house hero in team, scaled by content type
+        const repPerHero = enc.isRaid ? 60 : enc.isDungeon ? 30 : 5
+        const repStore = useReputationStore()
+        const collection = useCollectionStore()
+        for (const entry of collection.teamEntries) {
+          const faction = entry?.hero?.faction
+          if (faction) repStore.earnRep(faction, repPerHero)
         }
 
         const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock, loreFragments: loreFragment ? [loreFragment] : [] }
@@ -398,7 +413,7 @@ export const useBattleStore = defineStore('battle', () => {
     selectedSkillIndex, currentEncounterIndex, currentEncounter,
     autoplay, battleSpeed, lastReward, lastAction,
     batchTotal, batchDone, isBatchRunning,
-    clearedRaids, currentRaidId,
+    clearedRaids, currentRaidId, battleWins,
     ENCOUNTERS,
     isPlayerTurn, canAct, isOver,
     initBattle, selectSkill, selectTarget,

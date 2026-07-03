@@ -139,7 +139,7 @@ export const HERO_TEMPLATES = {
 
   LORD_ALDRIC: () => new Hero({
     id: 'lord_aldric', name: 'Lord Aldric',
-    faction: Faction.ALDRIC, rarity: Rarity.LEGENDARY, affinity: Affinity.FORCE,
+    faction: Faction.ALDRIC, rarity: Rarity.MYTHICAL, affinity: Affinity.FORCE,
     baseHp: 22000, baseAtk: 1700, baseDef: 1000, baseSpd: 100,
     critRate: 0.25, critDmg: 0.65,
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
@@ -416,6 +416,26 @@ His battle cry is four words. The spelling is his own. He has never once questio
     lore: 'The dragon did not choose a conqueror. It chose her because she was the first person in three hundred years to offer it food before asking for anything in return. Jade Dragonforge has never started a war — but she has ended several. Her enemies remember the fire. Her allies remember that she learned every one of their names on the first day.',
   }),
 
+  ARCHMAGE_VALDRIS: () => new Hero({
+    id: 'archmage_valdris', name: 'Archmage Valdris',
+    faction: Faction.VALDRIS, rarity: Rarity.MYTHICAL, affinity: Affinity.MAGIC,
+    baseHp: 16000, baseAtk: 2400, baseDef: 650, baseSpd: 118,
+    critRate: 0.32, critDmg: 0.88,
+    skills: [SKILLS.ARCANE_LANCE, SKILLS.THEORY_OF_RUIN, SKILLS.TEMPORAL_SEAL, SKILLS.THE_ABSOLUTE],
+    artisanSkills: [ARTISAN.apothecary, ARTISAN.leatherworking],
+    isPlayer: true, role: 'mage', weaponType: 'staff',
+    quote: 'I did not study magic to feel wonder. I studied it until wonder ran out of places to hide.',
+    lore: `No one remembers who built the first tower. The records do not begin there. They begin with Valdris.
+
+He arrived at the unfinished spire carrying no title, only a sealed notebook and a list of corrections to work that had been accepted as truth for two centuries. The senior mages debated whether to let him in. He had already solved the third lock before they reached a decision.
+
+Within a decade the tower bore his name — not by decree but by habit. Scholars began calling their work "Valdris-verified" when it had withstood his scrutiny, and "Valdris-burned" when it had not. He did not cultivate followers. He cultivated precision. The students who flourished under him were the ones who could say "I was wrong" faster than they said "I was right."
+
+His armour was designed by the tower's finest enchanters: layered arcanite and spell-woven silk, each plate inscribed with a theorem. Not for protection — theorems do not stop blades. For reminder. He wore his work. He went to war the way he went to every argument: with the full weight of what he knew and the willingness to be the last one standing.
+
+When he speaks in battle, he does not threaten. He explains what is about to happen. He has never been wrong.`,
+  }),
+
   LORD_CAELWYN: () => new Hero({
     id: 'lord_caelwyn', name: 'Lord Caelwyn',
     faction: Faction.CAELWYN, rarity: Rarity.MYTHICAL, affinity: Affinity.SPIRIT,
@@ -436,6 +456,30 @@ When the wars ended, he refused all monuments. He ordered sanctuaries rebuilt, r
 The oldest texts do not say Lord Caelwyn died. They say only that when peace returned, he walked into the inner sanctum of the White Grove and became still as the marble pillars around him.
 
 He returns, it is said, when the house forgets its vow. Not to reclaim a throne. To measure whether those who bear his name are still worthy of it.`,
+  }),
+
+  LORD_MORDAINE: () => new Hero({
+    id: 'lord_mordaine', name: 'Lord Mordaine',
+    faction: Faction.MORDAINE, rarity: Rarity.MYTHICAL, affinity: Affinity.VOID,
+    baseHp: 18000, baseAtk: 2250, baseDef: 750, baseSpd: 114,
+    critRate: 0.30, critDmg: 0.82,
+    skills: [SKILLS.BLOOD_DRAIN, SKILLS.CRIMSON_EDICT, SKILLS.SHADOW_DOMINION, SKILLS.THE_VOID_RECEIVES],
+    artisanSkills: [ARTISAN.apothecary, ARTISAN.tailoring],
+    isPlayer: true, role: 'mage', weaponType: 'staff',
+    quote: 'You mistake what I do for cruelty. I simply let the void show you what was already true.',
+    lore: `Before Mordaine was a house, it was a question. Lord Mordaine was the one who asked it — and did not flinch when the void answered.
+
+He did not enter the void seeking power. He entered it seeking clarity. What he found there was not darkness but precision: the void strips everything that is performed, everything that is hoped for, everything that is pretended, until only what is true remains. He saw himself clearly. He saw others even more clearly. He has never been deceived since.
+
+The house he built is one of patience, not conquest. They do not rush to war. They wait until the truth of a conflict has been established, and then they act with the economy of certainty. Their enemies rarely understand what is happening until it is already finished. This is, Lord Mordaine has noted, precisely the point.
+
+His power is not theatrical. The red light that crackles at his hands is not fire, though it burns. It is the void made visible — a breach in the careful surface of reality through which cold accuracy flows. He does not raise his voice. He does not make threats. He simply tells you what is going to happen, and then it does.
+
+He has offered clemency three times in his life. He still remembers their names. He remembers everything the void shows him, and the void has shown him a great deal.
+
+Those who serve House Mordaine say the most unsettling thing about him is not the power, or the silence, or the way he always seems to know. It is that he is, by all accounts, unfailingly polite. He is courteous to servants. He thanks people for their time. He listens, fully, to arguments he has already disproven. He makes excellent tea.
+
+He simply also does not stop.`,
   }),
 
   // ── Normal Portal — House Ignar (Force · Raiders) ───────────────
@@ -628,7 +672,7 @@ export const RECRUIT_POOL = [
   { key: 'THALRIC',             rarity: 'Epic' },
   { key: 'BORRIK',              rarity: 'Epic' },
   // ── Legendary ────────────────────────────────────────────────────
-  { key: 'LORD_ALDRIC',         rarity: 'Legendary' },
+  // LORD_ALDRIC is reputation-gated — unlocked via House Aldric at Exalted standing
   { key: 'HELGA',               rarity: 'Legendary' },
   { key: 'ARCHMAGE_KELVAR',     rarity: 'Legendary' },
   { key: 'THERON',              rarity: 'Legendary' },
@@ -640,7 +684,10 @@ export const RECRUIT_POOL = [
   { key: 'AURELAN',             rarity: 'Mythical' },
   { key: 'VORATH',              rarity: 'Mythical' },
   { key: 'JADE_DRAGONFORGE',    rarity: 'Mythical' },
-  { key: 'LORD_CAELWYN',        rarity: 'Mythical' },
+  // LORD_CAELWYN is reputation-gated — unlocked via House Caelwyn at Exalted standing
+  // LORD_ALDRIC is reputation-gated — unlocked via House Aldric at Exalted standing
+  // ARCHMAGE_VALDRIS is reputation-gated — unlocked via House Valdris at Exalted standing
+  // LORD_MORDAINE is reputation-gated — unlocked via House Mordaine at Exalted standing
   // ── Ancient ──────────────────────────────────────────────────────
   { key: 'VAERIC',              rarity: 'Ancient' },
   { key: 'VALERIUS',            rarity: 'Ancient' },

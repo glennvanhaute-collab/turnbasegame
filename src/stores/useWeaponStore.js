@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useResourceStore } from './useResourceStore.js'
+import { HERO_TEMPLATES } from '../game/data/heroes.js'
+import { useReputationStore } from './useReputationStore.js'
 
 // ── Stat tables ─────────────────────────────────────────────────────────────
 // Each array index = tier - 1. Stats chosen to give each weapon type a clear identity.
@@ -314,6 +316,10 @@ export const useWeaponStore = defineStore('weapons', () => {
     weapon.tier = newTier
     weapon.chronicle.push({ tier: newTier, lore, stats: { ...stats } })
     persist()
+
+    const heroFaction = HERO_TEMPLATES[heroKey]?.()?.faction
+    if (heroFaction) useReputationStore().earnRep(heroFaction, 100)
+
     return true
   }
 

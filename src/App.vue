@@ -7,10 +7,11 @@
     <header class="app-header">
       <div class="app-header-bg" :style="{ backgroundImage: `url(${navBg})` }" />
       <div class="header-inner">
-        <img :src="navLogo" class="logo-img" alt="" @click="navigate('campaign')" style="cursor:pointer" />
-        <h1 class="logo" @click="navigate('campaign')" style="cursor:pointer">Bannerlords of Westrun</h1>
+        <img :src="navLogo" class="logo-img" alt="" @click="navigate('hall')" style="cursor:pointer" />
+        <h1 class="logo" @click="navigate('hall')" style="cursor:pointer">Bannerlords of Westrun</h1>
         <nav class="nav">
-          <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="navigate('campaign')">Home</button>
+          <button class="nav-btn" :class="{ active: view === 'hall' }" @click="navigate('hall')">Hall</button>
+          <button class="nav-btn" :class="{ active: view === 'campaign' }" @click="navigate('campaign')">Campaign</button>
           <button class="nav-btn" :class="{ active: view === 'summon' }" @click="navigate('summon')">Recruit</button>
           <button class="nav-btn" :class="{ active: view === 'gear' }" @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'dungeon' }" @click="navigate('dungeon')">Expeditions</button>
@@ -51,7 +52,7 @@
     <DevMenu v-if="$isDev" />
 
     <!-- Floating Codex button — hidden on home, available everywhere else -->
-    <button class="codex-fab" v-if="view !== 'campaign'" @click="showCodex = true" title="Open Codex">
+    <button class="codex-fab" v-if="view !== 'hall' && view !== 'campaign'" @click="showCodex = true" title="Open Codex">
       <img :src="codexIcon" class="codex-fab-icon" alt="Codex" />
     </button>
 
@@ -203,8 +204,9 @@
     </Teleport>
 
     <main>
+      <GreatHallView v-if="view === 'hall'" @navigate="navigate" />
       <HomeView
-        v-if="view === 'campaign'"
+        v-else-if="view === 'campaign'"
         @start-battle="startBattle"
         @open-collection="showCollection = true"
         @open-blacksmith="showBlacksmith = true"
@@ -275,6 +277,7 @@ import { useForgeStore } from './stores/useForgeStore.js'
 import { ENCOUNTERS } from './game/data/heroes.js'
 import StarterPickView from './components/StarterPickView.vue'
 import HeroCreationView from './components/HeroCreationView.vue'
+import GreatHallView from './components/GreatHallView.vue'
 import HomeView from './components/HomeView.vue'
 import CollectionView from './components/CollectionView.vue'
 import BlacksmithView from './components/BlacksmithView.vue'
@@ -314,7 +317,7 @@ import { useAdvisorStore } from './stores/useAdvisorStore.js'
 import { useSettingsStore } from './stores/useSettingsStore.js'
 import { buildDungeonEncounter } from './game/data/dungeons.js'
 
-const view       = ref('campaign')
+const view       = ref('hall')
 const gearTab    = ref('inventory')
 const expTab     = ref('dungeons')
 const showShop        = ref(false)

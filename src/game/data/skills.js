@@ -535,4 +535,99 @@ export const SKILLS = {
       new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 1.0, statusDuration: 2 }),
     ],
   }),
+
+  // ── Lord Mordaine — Mythical Blood Arbiter ────────────────────────
+  BLOOD_DRAIN: new Skill({
+    id: 'blood_drain',
+    name: 'Blood Drain',
+    description: 'He does not reach for you. He reaches into what sustains you, and takes it. Deals 185% ATK to one enemy and restores 20% of his own maximum HP.',
+    cooldown: 0,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.85 }),
+      new SkillEffect({ type: EffectType.SELF_HEAL, healPercent: 0.20 }),
+    ],
+  }),
+
+  CRIMSON_EDICT: new Skill({
+    id: 'crimson_edict',
+    name: 'Crimson Edict',
+    description: 'The lord\'s decree does not travel in ink. It travels in blood. Deals 155% ATK to all enemies, reduces their Attack for 2 turns, and restores 20% of his own maximum HP.',
+    cooldown: 4,
+    targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.55 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_ATK, statusChance: 1.0, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.SELF_HEAL, healPercent: 0.20 }),
+    ],
+  }),
+
+  SHADOW_DOMINION: new Skill({
+    id: 'shadow_dominion',
+    name: 'Shadow Dominion',
+    description: 'The house that walks in shadow is never blinded by light. Deals 220% ATK to one enemy and drains their vital force — restoring 20% of Lord Mordaine\'s maximum HP. Leaves them Weakened for 2 turns.',
+    cooldown: 4,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.20 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 1.0, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.SELF_HEAL, healPercent: 0.20 }),
+    ],
+  }),
+
+  THE_VOID_RECEIVES: new Skill({
+    id: 'the_void_receives',
+    name: 'The Void Receives',
+    description: 'You mistake what I do for cruelty. I simply let the void show you what was already true. Deals 480% ATK to one enemy, heals Lord Mordaine for 20% of his maximum HP. They are Stunned for 2 turns and Poisoned for 3.',
+    cooldown: 5,
+    targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 4.8 }),
+      new SkillEffect({ type: EffectType.SELF_HEAL, healPercent: 0.20 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.STUN, statusChance: 0.90, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.POISON, statusChance: 1.0, statusDuration: 3 }),
+    ],
+  }),
+
+  // ── Archmage Valdris skills (Arcane · House Valdris) ─────────────
+  ARCANE_LANCE: new Skill({
+    id: 'arcane_lance', name: 'Arcane Lance',
+    description: 'Precision made lethal. Deals 195% ATK to one enemy and strips their defences — 80% chance to Weaken for 2 turns.',
+    cooldown: 0, targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.95 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 0.80, statusDuration: 2 }),
+    ],
+  }),
+
+  THEORY_OF_RUIN: new Skill({
+    id: 'theory_of_ruin', name: 'Theory of Ruin',
+    description: 'He wrote the paper. He burned the archive. Deals 140% ATK to all enemies and saps their power — reducing ATK by 25% for 2 turns.',
+    cooldown: 4, targetType: TargetType.ALL_ENEMIES,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 1.40 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_ATK, statusChance: 1.0, statusDuration: 2 }),
+    ],
+  }),
+
+  TEMPORAL_SEAL: new Skill({
+    id: 'temporal_seal', name: 'Temporal Seal',
+    description: 'Time is a variable. He is not. Deals 265% ATK to one enemy and arrests them in a sealed moment — 90% chance to Stun for 2 turns.',
+    cooldown: 4, targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.65 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.STUN, statusChance: 0.90, statusDuration: 2 }),
+    ],
+  }),
+
+  THE_ABSOLUTE: new Skill({
+    id: 'the_absolute', name: 'The Absolute',
+    description: 'There is a theorem at the end of all things. He has solved it. Deals 530% ATK to one enemy, Freezes them for 2 turns, and Weakens them for 2 turns.',
+    cooldown: 5, targetType: TargetType.SINGLE_ENEMY,
+    effects: [
+      new SkillEffect({ type: EffectType.DAMAGE, multiplier: 5.30 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.FREEZE, statusChance: 1.0, statusDuration: 2 }),
+      new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.WEAKEN, statusChance: 1.0, statusDuration: 2 }),
+    ],
+  }),
 }
