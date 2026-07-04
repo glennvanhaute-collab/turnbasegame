@@ -201,7 +201,7 @@ const showRates = ref(false)
 .contract-art {
   position: relative;
   margin: -24px -24px 0;
-  height: 140px;
+  height: 220px;
   overflow: hidden;
   border-radius: 2px 2px 0 0;
 }
@@ -209,13 +209,13 @@ const showRates = ref(false)
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center center;
   display: block;
 }
 .portal-art-fade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(12,7,3,0.95) 100%);
+  background: linear-gradient(to bottom, transparent 65%, rgba(12,7,3,0.98) 100%);
 }
 
 /* Header */
