@@ -18,10 +18,8 @@ export const PORTALS = {
     flavour: 'A contract sealed at the crossroads — wanderers, scouts, and sell-swords answer the call.',
     pool: RECRUIT_POOL,
     rates: {
-      [Rarity.RARE]:      0.870,
-      [Rarity.EPIC]:      0.100,
-      [Rarity.LEGENDARY]: 0.025,
-      [Rarity.MYTHICAL]:  0.005,
+      [Rarity.RARE]: 0.95,
+      [Rarity.EPIC]: 0.05,
     },
     pity: { threshold: Rarity.EPIC, every: 40 },
     duplicateGold: 500,
@@ -34,11 +32,10 @@ export const PORTALS = {
     pool: RECRUIT_POOL,
     ignoreCeiling: true,
     rates: {
-      [Rarity.EPIC]:      0.750,
-      [Rarity.LEGENDARY]: 0.220,
-      [Rarity.MYTHICAL]:  0.030,
+      [Rarity.RARE]: 0.70,
+      [Rarity.EPIC]: 0.30,
     },
-    pity: { threshold: Rarity.LEGENDARY, every: 20 },
+    pity: { threshold: Rarity.EPIC, every: 20 },
     duplicateGold: 3000,
   },
   house_seal: {
@@ -49,10 +46,11 @@ export const PORTALS = {
     pool: RECRUIT_POOL,
     ignoreCeiling: true,
     rates: {
-      [Rarity.LEGENDARY]: 0.900,
-      [Rarity.MYTHICAL]:  0.100,
+      [Rarity.RARE]:      0.55,
+      [Rarity.EPIC]:      0.40,
+      [Rarity.LEGENDARY]: 0.05,
     },
-    pity: { threshold: Rarity.MYTHICAL, every: 10 },
+    pity: { threshold: Rarity.LEGENDARY, every: 20 },
     duplicateGold: 10000,
   },
 }

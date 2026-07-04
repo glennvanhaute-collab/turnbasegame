@@ -24,24 +24,31 @@
       </span>
     </div>
 
-    <!-- Rank distribution -->
-    <div class="rank-table">
-      <div class="rank-title">Expected Calibre</div>
-      <div
-        class="rank-row"
-        v-for="(weight, rarity) in visibleRates"
-        :key="rarity"
-        :class="{ locked: isLocked(rarity) }"
-      >
-        <span class="rank-label" :class="rarity.toLowerCase()">
-          <span class="lock-icon" v-if="isLocked(rarity)">⌁</span>
-          {{ rarity }}
-        </span>
-        <div class="rank-bar-wrap">
-          <div class="rank-bar" :class="[rarity.toLowerCase(), { 'rank-bar--locked': isLocked(rarity) }]" :style="{ width: (weight * 100) + '%' }" />
+    <!-- Rank distribution (collapsed by default) -->
+    <div class="rank-table" :class="{ expanded: showRates }">
+      <button class="rank-toggle" @click="showRates = !showRates">
+        <span class="rank-toggle-label">Expected Calibre</span>
+        <span class="rank-toggle-icon">{{ showRates ? '▲' : 'ℹ' }}</span>
+      </button>
+      <transition name="rates-slide">
+        <div v-if="showRates" class="rank-rows">
+          <div
+            class="rank-row"
+            v-for="(weight, rarity) in visibleRates"
+            :key="rarity"
+            :class="{ locked: isLocked(rarity) }"
+          >
+            <span class="rank-label" :class="rarity.toLowerCase()">
+              <span class="lock-icon" v-if="isLocked(rarity)">⌁</span>
+              {{ rarity }}
+            </span>
+            <div class="rank-bar-wrap">
+              <div class="rank-bar" :class="[rarity.toLowerCase(), { 'rank-bar--locked': isLocked(rarity) }]" :style="{ width: (weight * 100) + '%' }" />
+            </div>
+            <span class="rank-pct">{{ (weight * 100).toFixed(0) }}%</span>
+          </div>
         </div>
-        <span class="rank-pct">{{ (weight * 100).toFixed(0) }}%</span>
-      </div>
+      </transition>
     </div>
 
     <!-- Recruitment ceiling -->
@@ -94,7 +101,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import recruitImg  from '../assets/ui/recruit.png'
 import recruit2Img from '../assets/ui/recruit_2.png'
 import recruit3Img from '../assets/ui/recruit_3.png'
@@ -139,6 +146,8 @@ const actionLabel = computed(() => ACTION_LABELS[props.portal.id] ?? 'Recruit')
 
 const PORTAL_IMAGES = { common_writ: recruitImg, sealed_charter: recruit2Img, house_seal: recruit3Img }
 const portalImage = computed(() => PORTAL_IMAGES[props.portal.id] ?? null)
+
+const showRates = ref(false)
 </script>
 
 <style scoped>
@@ -266,8 +275,18 @@ const portalImage = computed(() => PORTAL_IMAGES[props.portal.id] ?? null)
 .scroll-owned.empty { color: #555; }
 
 /* Rank table */
-.rank-table { background: rgba(0,0,0,0.25); border-radius: 4px; padding: 12px; }
-.rank-title { font-family: var(--font-head); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 10px; }
+.rank-table { border-radius: 4px; overflow: hidden; }
+.rank-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: rgba(0,0,0,0.25); border: none;
+  padding: 8px 12px; cursor: pointer;
+  font-family: var(--font-head);
+}
+.rank-toggle:hover { background: rgba(0,0,0,0.35); }
+.rank-toggle-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+.rank-toggle-icon  { font-size: 0.65rem; color: var(--text-muted); opacity: 0.6; }
+
+.rank-rows { background: rgba(0,0,0,0.20); padding: 10px 12px 8px; }
 .rank-row   { display: grid; grid-template-columns: 76px 1fr 34px; align-items: center; gap: 8px; margin-bottom: 6px; }
 .rank-row:last-child { margin-bottom: 0; }
 .rank-label { font-size: 0.68rem; font-weight: 700; }
@@ -288,6 +307,9 @@ const portalImage = computed(() => PORTAL_IMAGES[props.portal.id] ?? null)
 .rank-row.locked { opacity: 0.28; }
 .lock-icon { font-size: 0.60rem; margin-right: 3px; opacity: 0.6; }
 .rank-bar--locked { background: #333 !important; }
+
+.rates-slide-enter-active, .rates-slide-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.rates-slide-enter-from, .rates-slide-leave-to { opacity: 0; transform: translateY(-4px); }
 
 /* Ceiling badge */
 .ceiling-badge {
