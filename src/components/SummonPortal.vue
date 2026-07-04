@@ -1,6 +1,11 @@
 <template>
   <div class="contract-card" :class="portal.id">
 
+    <div class="contract-art" v-if="portalImage">
+      <img :src="portalImage" :alt="portal.name" class="portal-art-img" />
+      <div class="portal-art-fade" />
+    </div>
+
     <div class="contract-header">
       <div class="contract-seal" :class="portal.id" />
       <div class="contract-title-block">
@@ -11,11 +16,12 @@
 
     <div class="contract-divider" />
 
-    <!-- Fee -->
-    <div class="contract-fee">
-      <span class="fee-label">Contract Fee</span>
-      <span class="fee-value gold"    v-if="portal.cost.gold">🪙 {{ portal.cost.gold.toLocaleString() }} gold</span>
-      <span class="fee-value diamond" v-if="portal.cost.diamonds">💎 {{ portal.cost.diamonds }} diamonds</span>
+    <!-- Scroll inventory -->
+    <div class="scroll-row">
+      <span class="scroll-label">{{ scrollLabel }}</span>
+      <span class="scroll-owned" :class="{ empty: scrollCount === 0 }">
+        📜 {{ scrollCount }} owned
+      </span>
     </div>
 
     <!-- Rank distribution -->
@@ -69,8 +75,8 @@
         @click="$emit('summon', portal.id)"
       >
         <span v-if="pulling">Seeking…</span>
-        <span v-else-if="!canAfford">Insufficient {{ portal.cost.gold ? 'gold' : 'diamonds' }}</span>
-        <span v-else>Hire Champion</span>
+        <span v-else-if="!canAfford">No {{ scrollLabel }} available</span>
+        <span v-else>{{ actionLabel }}</span>
       </button>
       <button
         class="hire-btn hire-btn-10"
@@ -79,8 +85,8 @@
         @click="$emit('summon10', portal.id)"
       >
         <span v-if="pulling">Seeking…</span>
-        <span v-else-if="!canAfford10">Insufficient {{ portal.cost.gold ? 'gold' : 'diamonds' }} for ×10</span>
-        <span v-else>Send the Call ×10 · {{ cost10Label }}</span>
+        <span v-else-if="!canAfford10">Need 10 {{ scrollLabel }}</span>
+        <span v-else>{{ actionLabel }} ×10</span>
       </button>
     </div>
 
@@ -89,6 +95,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import recruitImg  from '../assets/ui/recruit.png'
+import recruit2Img from '../assets/ui/recruit_2.png'
+import recruit3Img from '../assets/ui/recruit_3.png'
 
 const props = defineProps({
   portal:             { type: Object,  required: true },
@@ -98,6 +107,7 @@ const props = defineProps({
   progress:           { type: Object,  required: true },
   recruitmentCeiling: { type: String,  default: 'Rare' },
   nextUnlock:         { type: Object,  default: null },
+  scrollCount:        { type: Number,  default: 0 },
 })
 defineEmits(['summon', 'summon10'])
 
@@ -105,18 +115,30 @@ const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic
 function rarityIndex(r) { return RARITY_ORDER.indexOf(r) }
 
 const ceilingIdx = computed(() => rarityIndex(props.recruitmentCeiling))
-function isLocked(rarity) { return rarityIndex(rarity) > ceilingIdx.value }
+function isLocked(rarity) {
+  if (props.portal.ignoreCeiling) return false
+  return rarityIndex(rarity) > ceilingIdx.value
+}
 
 const visibleRates = computed(() =>
   Object.fromEntries(Object.entries(props.portal.rates).filter(([r]) => r !== 'Ancient'))
 )
 
-const cost10Label = computed(() => {
-  const c = props.portal.cost
-  if (c.gold)     return `🪙 ${(c.gold * 10).toLocaleString()}`
-  if (c.diamonds) return `💎 ${c.diamonds * 10}`
-  return ''
-})
+const SCROLL_LABELS = {
+  common_writ:    'Common Writ',
+  sealed_charter: 'Sealed Charter',
+  house_seal:     'House Seal',
+}
+const ACTION_LABELS = {
+  common_writ:    'Issue Writ',
+  sealed_charter: 'Present Charter',
+  house_seal:     'Invoke the Seal',
+}
+const scrollLabel = computed(() => SCROLL_LABELS[props.portal.id] ?? props.portal.name)
+const actionLabel = computed(() => ACTION_LABELS[props.portal.id] ?? 'Recruit')
+
+const PORTAL_IMAGES = { common_writ: recruitImg, sealed_charter: recruit2Img, house_seal: recruit3Img }
+const portalImage = computed(() => PORTAL_IMAGES[props.portal.id] ?? null)
 </script>
 
 <style scoped>
@@ -143,21 +165,49 @@ const cost10Label = computed(() => {
 .contract-card::before { top: -4px; left: -4px; }
 .contract-card::after  { bottom: -4px; right: -4px; }
 
-.contract-card.normal {
+.contract-card.common_writ {
   border-color: #5a2810;
   box-shadow: 0 4px 32px rgba(0,0,0,0.6), inset 0 0 40px rgba(100,40,10,0.06);
 }
-.contract-card.void {
-  border-color: #3a1a5e;
-  box-shadow: 0 4px 32px rgba(0,0,0,0.6), inset 0 0 40px rgba(80,20,140,0.06);
+.contract-card.sealed_charter {
+  border-color: #2a4a6e;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.6), inset 0 0 40px rgba(30,60,120,0.08);
 }
-.contract-card.normal::before,
-.contract-card.normal::after { color: #5a2810; }
-.contract-card.void::before,
-.contract-card.void::after   { color: #5a2890; }
+.contract-card.house_seal {
+  border-color: #7a5000;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.6), inset 0 0 40px rgba(160,100,0,0.08);
+}
+.contract-card.common_writ::before,
+.contract-card.common_writ::after  { color: #5a2810; }
+.contract-card.sealed_charter::before,
+.contract-card.sealed_charter::after { color: #2a4a6e; }
+.contract-card.house_seal::before,
+.contract-card.house_seal::after   { color: #7a5000; }
 
-.contract-card.normal:hover { border-color: #8a3818; box-shadow: 0 6px 40px rgba(0,0,0,0.7), inset 0 0 40px rgba(100,40,10,0.10); }
-.contract-card.void:hover   { border-color: #6a3aae; box-shadow: 0 6px 40px rgba(0,0,0,0.7), inset 0 0 40px rgba(80,20,140,0.12); }
+.contract-card.common_writ:hover    { border-color: #8a3818; box-shadow: 0 6px 40px rgba(0,0,0,0.7), inset 0 0 40px rgba(100,40,10,0.10); }
+.contract-card.sealed_charter:hover { border-color: #4a7aae; box-shadow: 0 6px 40px rgba(0,0,0,0.7), inset 0 0 40px rgba(30,60,120,0.14); }
+.contract-card.house_seal:hover     { border-color: #c09020; box-shadow: 0 6px 40px rgba(0,0,0,0.7), inset 0 0 40px rgba(160,100,0,0.14); }
+
+/* Portal art */
+.contract-art {
+  position: relative;
+  margin: -24px -24px 0;
+  height: 140px;
+  overflow: hidden;
+  border-radius: 2px 2px 0 0;
+}
+.portal-art-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+.portal-art-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(12,7,3,0.95) 100%);
+}
 
 /* Header */
 .contract-header {
@@ -180,8 +230,9 @@ const cost10Label = computed(() => {
   background: currentColor;
   opacity: 0.25;
 }
-.contract-seal.normal { color: #c87030; }
-.contract-seal.void   { color: #9050cc; }
+.contract-seal.common_writ    { color: #c87030; }
+.contract-seal.sealed_charter { color: #5090cc; }
+.contract-seal.house_seal     { color: #d4a020; }
 
 .contract-name {
   font-family: var(--font-head);
@@ -191,8 +242,9 @@ const cost10Label = computed(() => {
   text-transform: uppercase;
   margin-bottom: 5px;
 }
-.normal .contract-name { color: #d4803a; }
-.void   .contract-name { color: #b47fff; }
+.common_writ    .contract-name { color: #d4803a; }
+.sealed_charter .contract-name { color: #70b0e0; }
+.house_seal     .contract-name { color: #d4a020; }
 .contract-flavour {
   font-size: 0.74rem;
   color: var(--text-parchment);
@@ -204,14 +256,14 @@ const cost10Label = computed(() => {
   height: 1px;
   background: linear-gradient(to right, transparent, #3e1c0c, transparent);
 }
-.void .contract-divider { background: linear-gradient(to right, transparent, #3a1a5e, transparent); }
+.sealed_charter .contract-divider { background: linear-gradient(to right, transparent, #2a4a6e, transparent); }
+.house_seal     .contract-divider { background: linear-gradient(to right, transparent, #7a5000, transparent); }
 
-/* Fee */
-.contract-fee  { display: flex; align-items: center; gap: 10px; }
-.fee-label     { font-family: var(--font-head); font-size: 0.60rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); flex: 1; }
-.fee-value     { font-size: 0.95rem; font-weight: 700; }
-.fee-value.gold    { color: var(--gold); }
-.fee-value.diamond { color: #88ccff; }
+/* Scroll inventory */
+.scroll-row   { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.scroll-label { font-family: var(--font-head); font-size: 0.60rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+.scroll-owned { font-size: 0.88rem; font-weight: 700; color: var(--gold); }
+.scroll-owned.empty { color: #555; }
 
 /* Rank table */
 .rank-table { background: rgba(0,0,0,0.25); border-radius: 4px; padding: 12px; }
@@ -285,22 +337,31 @@ const cost10Label = computed(() => {
 .hire-btn:active:not(:disabled) { transform: scale(0.97); }
 .hire-btn:disabled { opacity: 0.30; cursor: not-allowed; }
 
-.hire-btn.normal {
+.hire-btn.common_writ {
   background: linear-gradient(135deg, #5a1a0a, #8a2a10);
   border-color: #a03010;
   color: #f0c080;
 }
-.hire-btn.normal:not(:disabled):hover {
+.hire-btn.common_writ:not(:disabled):hover {
   box-shadow: 0 0 16px rgba(180,80,20,0.4);
   opacity: 0.92;
 }
-.hire-btn.void {
-  background: linear-gradient(135deg, #2a0a5a, #5a1ace);
-  border-color: #6a2aae;
-  color: #c8a0ff;
+.hire-btn.sealed_charter {
+  background: linear-gradient(135deg, #0a1a3a, #1a3a6a);
+  border-color: #2a5a9a;
+  color: #a0d0ff;
 }
-.hire-btn.void:not(:disabled):hover {
-  box-shadow: 0 0 16px rgba(120,40,220,0.4);
+.hire-btn.sealed_charter:not(:disabled):hover {
+  box-shadow: 0 0 16px rgba(40,100,200,0.4);
+  opacity: 0.92;
+}
+.hire-btn.house_seal {
+  background: linear-gradient(135deg, #3a2200, #6a4000);
+  border-color: #b07820;
+  color: #f5d060;
+}
+.hire-btn.house_seal:not(:disabled):hover {
+  box-shadow: 0 0 18px rgba(200,140,20,0.5);
   opacity: 0.92;
 }
 </style>

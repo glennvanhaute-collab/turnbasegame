@@ -2,15 +2,18 @@
   <div class="summon-scene" :style="{ backgroundImage: `url(${recruitmentBg})` }">
   <div class="summon-wrap">
     <div class="summon-header">
-      <div class="summon-eyebrow">The Adventurers' Hall</div>
-      <h2 class="summon-title">Recruiting Grounds</h2>
-      <p class="summon-sub">You are a hedge knight without a banner. Post your call — champions seek gold, glory, and a worthy cause.</p>
+      <div class="summon-eyebrow">Recruiting Grounds</div>
+      <h2 class="summon-title">Answer the Call</h2>
+      <p class="summon-sub">Writs, charters, and house seals are earned through deeds — dungeons cleared, quests fulfilled. Spend them wisely.</p>
     </div>
 
     <div class="debug-bar" v-if="$isDev">
       <span class="debug-label">Dev</span>
       <button class="debug-btn" @click="currency.addGold(10000)">+10k 🪙</button>
       <button class="debug-btn" @click="currency.addDiamonds(10000)">+10k 💎</button>
+      <button class="debug-btn" @click="currency.addScroll('commonWrit', 10)">+10 Writs</button>
+      <button class="debug-btn" @click="currency.addScroll('sealedCharter', 5)">+5 Charters</button>
+      <button class="debug-btn" @click="currency.addScroll('houseSeal', 3)">+3 Seals</button>
       <button class="debug-btn" @click="energyDev.add(energyDev.maxEnergy)">Full ⚡</button>
       <button class="debug-btn" @click="collection.unlockAll()">⚑ Unlock All</button>
       <button class="debug-btn debug-btn--danger" @click="confirmReset">↺ Reset</button>
@@ -27,6 +30,7 @@
         :progress="store.pityProgress(portal.id)"
         :recruitmentCeiling="playerHero.rarity"
         :nextUnlock="playerHero.nextUnlock"
+        :scrollCount="currency.getScrollCount(portal.scrollType)"
         @summon="store.summon($event)"
         @summon10="store.summon10($event)"
       />
@@ -203,9 +207,10 @@ function confirmReset() {
   location.reload()
 }
 
-const portalLabel = computed(() =>
-  store.lastResult?.portal === 'void' ? 'Void' : 'Ancient'
-)
+const portalLabel = computed(() => {
+  const pid = store.lastResult?.portal
+  return pid ? store.PORTALS[pid]?.name ?? '' : ''
+})
 
 // Bond reveal helpers
 const BOND_IMAGES = { iron_vow: bondUnlockImage, last_conquest: bondHildaArneImage }
@@ -241,7 +246,7 @@ function heroDisplayName(id) { return HERO_DISPLAY_NAMES[id] ?? id }
 .summon-wrap {
   position: relative;
   z-index: 1;
-  max-width: 960px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 40px 24px 60px;
 }
@@ -314,12 +319,12 @@ function heroDisplayName(id) { return HERO_DISPLAY_NAMES[id] ?? id }
 .debug-btn--danger:hover { color: #ff6b6b; border-color: #ff6b6b66; }
 
 .portals-grid {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
-.portals-grid > * {
-  width: 100%;
-  max-width: 480px;
+@media (max-width: 900px) {
+  .portals-grid { grid-template-columns: 1fr; }
 }
 
 /* Result overlay */

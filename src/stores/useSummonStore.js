@@ -11,19 +11,49 @@ import { BONDS } from '../game/data/bonds.js'
 
 // ── Portal definitions ──────────────────────────────────────────────────────
 export const PORTALS = {
-  normal: {
-    id: 'normal',
-    name: 'Free Companies',
-    flavour: 'Warriors, scouts, void-touched wanderers — all walk the same roads seeking coin and a worthy banner. Post your call.',
-    cost: { gold: 2000, diamonds: 0 },
+  common_writ: {
+    id: 'common_writ',
+    scrollType: 'commonWrit',
+    name: 'Common Writ',
+    flavour: 'A contract sealed at the crossroads — wanderers, scouts, and sell-swords answer the call.',
     pool: RECRUIT_POOL,
     rates: {
-      [Rarity.RARE]:      0.880,
-      [Rarity.EPIC]:      0.090,
+      [Rarity.RARE]:      0.870,
+      [Rarity.EPIC]:      0.100,
       [Rarity.LEGENDARY]: 0.025,
       [Rarity.MYTHICAL]:  0.005,
     },
     pity: { threshold: Rarity.EPIC, every: 40 },
+    duplicateGold: 500,
+  },
+  sealed_charter: {
+    id: 'sealed_charter',
+    scrollType: 'sealedCharter',
+    name: 'Sealed Charter',
+    flavour: "A minor lord's endorsement. Experienced champions and veteran knights answer the house seal.",
+    pool: RECRUIT_POOL,
+    ignoreCeiling: true,
+    rates: {
+      [Rarity.EPIC]:      0.750,
+      [Rarity.LEGENDARY]: 0.220,
+      [Rarity.MYTHICAL]:  0.030,
+    },
+    pity: { threshold: Rarity.LEGENDARY, every: 20 },
+    duplicateGold: 3000,
+  },
+  house_seal: {
+    id: 'house_seal',
+    scrollType: 'houseSeal',
+    name: 'House Seal',
+    flavour: "The lord's direct summons. Only those who have earned a name — the legendary and the mythical — will answer.",
+    pool: RECRUIT_POOL,
+    ignoreCeiling: true,
+    rates: {
+      [Rarity.LEGENDARY]: 0.900,
+      [Rarity.MYTHICAL]:  0.100,
+    },
+    pity: { threshold: Rarity.MYTHICAL, every: 10 },
+    duplicateGold: 10000,
   },
 }
 
@@ -69,7 +99,7 @@ export const useSummonStore = defineStore('summon', () => {
   const cityStore   = useCityStore()
 
   // Per-portal pity counters (pulls since last pity-threshold hit)
-  const pityCounters = ref({ normal: 0 })
+  const pityCounters = ref({ common_writ: 0, sealed_charter: 0, house_seal: 0 })
 
   // Last pull result(s) for the reveal animation
   const lastResult  = ref(null)   // single pull
@@ -94,16 +124,12 @@ export const useSummonStore = defineStore('summon', () => {
 
   function canAfford(portalId) {
     const p = PORTALS[portalId]
-    if (p.cost.gold     > 0 && !currency.canAffordGold(p.cost.gold))         return false
-    if (p.cost.diamonds > 0 && !currency.canAffordDiamonds(p.cost.diamonds)) return false
-    return true
+    return currency.canAffordScroll(p.scrollType, 1)
   }
 
   function canAfford10(portalId) {
     const p = PORTALS[portalId]
-    if (p.cost.gold     > 0 && !currency.canAffordGold(p.cost.gold * 10))         return false
-    if (p.cost.diamonds > 0 && !currency.canAffordDiamonds(p.cost.diamonds * 10)) return false
-    return true
+    return currency.canAffordScroll(p.scrollType, 10)
   }
 
   function summon(portalId) {
@@ -113,9 +139,7 @@ export const useSummonStore = defineStore('summon', () => {
 
     pulling.value = true
     try {
-      // Deduct cost
-      if (portal.cost.gold)     currency.spendGold(portal.cost.gold)
-      if (portal.cost.diamonds) currency.spendDiamonds(portal.cost.diamonds)
+      currency.spendScroll(portal.scrollType, 1)
 
       // City guaranteed recruit overrides normal rarity roll
       const cityKey = cityStore.popPending()
@@ -128,40 +152,34 @@ export const useSummonStore = defineStore('summon', () => {
           rarity   = tentativeRarity
           fromCity = true
         } else {
-          // Hero is above the player's current recruitment cap — re-queue for later
           cityStore.addPending(cityKey)
         }
       }
       if (!fromCity) {
-        // Pity check
-        const counter = pityCounters.value[portalId]
+        const counter     = pityCounters.value[portalId]
         const triggerPity = counter >= portal.pity.every - 1
         const guarantee   = triggerPity ? portal.pity.threshold : null
-        // Roll rarity then hero — capped at player's current recruitment ceiling
-        rarity = rollRarity(portal.rates, guarantee, playerHero.rarity)
+        const maxRarity   = portal.ignoreCeiling ? null : playerHero.rarity
+        rarity = rollRarity(portal.rates, guarantee, maxRarity)
         entry  = pickFromPool(portal.pool, rarity)
       }
 
       if (!entry) return
 
-      // Pity counter management
       if (rarityIndex(rarity) >= rarityIndex(portal.pity.threshold)) {
         pityCounters.value[portalId] = 0
       } else {
         pityCounters.value[portalId]++
       }
 
-      // Add to collection (or handle duplicate)
       const isDuplicate = collection.ownsHero(entry.key)
       collection.addToRoster(entry.key)
       checkBondUnlocks([entry.key])
 
-      // Duplicate: add a star, then gold compensation
       let starAdded = false
       if (isDuplicate) {
         starAdded = collection.addStar(entry.key)
-        if (portal.cost.gold)     currency.addGold(Math.floor(portal.cost.gold * 0.5))
-        if (portal.cost.diamonds) currency.addDiamonds(Math.floor(portal.cost.diamonds * 0.25))
+        currency.addGold(portal.duplicateGold ?? 500)
       }
 
       lastResult.value = {
@@ -173,10 +191,7 @@ export const useSummonStore = defineStore('summon', () => {
         newStarCount: collection.getStars(entry.key),
         portal: portalId,
         fromCity,
-        compensation: isDuplicate
-          ? (portal.cost.gold ? { gold: Math.floor(portal.cost.gold * 0.5) }
-                              : { diamonds: Math.floor(portal.cost.diamonds * 0.25) })
-          : null,
+        compensation: isDuplicate ? { gold: portal.duplicateGold ?? 500 } : null,
       }
     } catch (e) {
       console.error('Summon error:', e)
@@ -192,44 +207,39 @@ export const useSummonStore = defineStore('summon', () => {
 
     pulling.value = true
     try {
-      if (portal.cost.gold)     currency.spendGold(portal.cost.gold * 10)
-      if (portal.cost.diamonds) currency.spendDiamonds(portal.cost.diamonds * 10)
+      currency.spendScroll(portal.scrollType, 10)
 
       const results = []
-      // Inject city recruit as first result if pending and within rarity cap
       const cityKey10 = cityStore.popPending()
       let usedCitySlot = false
       if (cityKey10 && HERO_TEMPLATES[cityKey10]) {
-        const cityEntry   = portal.pool.find(e => e.key === cityKey10) ?? { key: cityKey10, rarity: HERO_TEMPLATES[cityKey10]().rarity }
-        const cityRarity  = cityEntry.rarity
+        const cityEntry  = portal.pool.find(e => e.key === cityKey10) ?? { key: cityKey10, rarity: HERO_TEMPLATES[cityKey10]().rarity }
+        const cityRarity = cityEntry.rarity
         if (rarityIndex(cityRarity) <= rarityIndex(playerHero.rarity)) {
           const isDup = collection.ownsHero(cityEntry.key)
           collection.addToRoster(cityEntry.key)
           let cityStarAdded = false
-          if (isDup) {
-            cityStarAdded = collection.addStar(cityEntry.key)
-            if (portal.cost.gold) currency.addGold(Math.floor(portal.cost.gold * 0.5))
-          }
+          if (isDup) { cityStarAdded = collection.addStar(cityEntry.key); currency.addGold(portal.duplicateGold ?? 500) }
           if (rarityIndex(cityRarity) >= rarityIndex(portal.pity.threshold)) pityCounters.value[portalId] = 0
           else pityCounters.value[portalId]++
           results.push({
             heroKey: cityEntry.key, hero: HERO_TEMPLATES[cityEntry.key](), rarity: cityRarity,
             isDuplicate: isDup, starAdded: cityStarAdded, newStarCount: collection.getStars(cityEntry.key),
             portal: portalId, fromCity: true,
-            compensation: isDup && portal.cost.gold ? { gold: Math.floor(portal.cost.gold * 0.5) } : null,
+            compensation: isDup ? { gold: portal.duplicateGold ?? 500 } : null,
           })
           usedCitySlot = true
         } else {
-          // Above cap — re-queue
           cityStore.addPending(cityKey10)
         }
       }
+      const maxRarity = portal.ignoreCeiling ? null : playerHero.rarity
       for (let i = 0; i < (usedCitySlot ? 9 : 10); i++) {
         const counter     = pityCounters.value[portalId]
         const triggerPity = counter >= portal.pity.every - 1
         const guarantee   = triggerPity ? portal.pity.threshold : null
 
-        const rarity = rollRarity(portal.rates, guarantee, playerHero.rarity)
+        const rarity = rollRarity(portal.rates, guarantee, maxRarity)
         const entry  = pickFromPool(portal.pool, rarity)
         if (!entry) continue
 
@@ -244,8 +254,7 @@ export const useSummonStore = defineStore('summon', () => {
         let starAdded = false
         if (isDuplicate) {
           starAdded = collection.addStar(entry.key)
-          if (portal.cost.gold)     currency.addGold(Math.floor(portal.cost.gold * 0.5))
-          if (portal.cost.diamonds) currency.addDiamonds(Math.floor(portal.cost.diamonds * 0.25))
+          currency.addGold(portal.duplicateGold ?? 500)
         }
 
         results.push({
@@ -256,10 +265,7 @@ export const useSummonStore = defineStore('summon', () => {
           starAdded,
           newStarCount: collection.getStars(entry.key),
           portal:  portalId,
-          compensation: isDuplicate
-            ? (portal.cost.gold ? { gold: Math.floor(portal.cost.gold * 0.5) }
-                                : { diamonds: Math.floor(portal.cost.diamonds * 0.25) })
-            : null,
+          compensation: isDuplicate ? { gold: portal.duplicateGold ?? 500 } : null,
         })
       }
 
