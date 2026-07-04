@@ -78,7 +78,14 @@ const onResize = () => { windowWidth.value = window.innerWidth }
 onMounted(() => window.addEventListener('resize', onResize))
 onUnmounted(() => window.removeEventListener('resize', onResize))
 
-const CARD_W = computed(() => windowWidth.value <= 500 ? 58 : 76)
+const CARD_W = computed(() => {
+  const w = windowWidth.value
+  if (w <= 500)  return 58
+  if (w <= 1440) return 130
+  if (w <= 2000) return 180
+  if (w <= 2800) return 240
+  return 300
+})
 
 const store      = useBattleStore()
 const playerHero = usePlayerHeroStore()
@@ -247,6 +254,15 @@ watch(() => store.battleKey, () => {
   border: 1px solid #3e1c0c;
   background-color: #06020e;
 }
+@container combat-col (min-width: 1400px) {
+  .combat-stage { min-height: 660px; }
+}
+@container combat-col (min-width: 2000px) {
+  .combat-stage { min-height: 900px; }
+}
+@container combat-col (min-width: 2800px) {
+  .combat-stage { min-height: 1100px; }
+}
 
 /* Dark vignette over background art */
 .stage-bg-overlay {
@@ -290,9 +306,12 @@ watch(() => store.battleKey, () => {
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  width: 100px;
+  width: 140px;
   transition: opacity 0.4s;
 }
+@container combat-col (min-width: 1400px) { .hero-unit { width: 190px; } }
+@container combat-col (min-width: 2000px) { .hero-unit { width: 250px; } }
+@container combat-col (min-width: 2800px) { .hero-unit { width: 310px; } }
 .hero-unit.dead { opacity: 0.3; }
 .hero-unit.can-target { cursor: crosshair; }
 
@@ -322,15 +341,19 @@ watch(() => store.battleKey, () => {
 /* ── Portrait card ───────────────────────────────────────────────── */
 .pcard {
   position: relative;
-  width: 76px;
-  height: 108px;
-  border-radius: 5px;
+  width: 130px;
+  height: 186px;
+  border-radius: 7px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--rarity, #444) 55%, #111);
   box-shadow: 0 0 14px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04) inset;
   background: #0a0608;
   flex-shrink: 0;
 }
+
+@container combat-col (min-width: 1400px) { .pcard { width: 180px; height: 257px; } }
+@container combat-col (min-width: 2000px) { .pcard { width: 240px; height: 343px; border-radius: 9px; } }
+@container combat-col (min-width: 2800px) { .pcard { width: 300px; height: 429px; border-radius: 10px; } }
 
 .pcard-img {
   display: block;
@@ -419,11 +442,11 @@ watch(() => store.battleKey, () => {
 
 /* ── Name ────────────────────────────────────────────────────────── */
 .hero-name {
-  font-size: 0.56rem;
+  font-size: 0.62rem;
   font-weight: 600;
   color: #555;
   text-align: center;
-  max-width: 96px;
+  max-width: 138px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -437,6 +460,10 @@ watch(() => store.battleKey, () => {
 .hero-name.rare      { color: #4fa8ff; }
 .hero-name.uncommon  { color: #4dff88; }
 .hero-name.common    { color: #aaa; }
+
+@container combat-col (min-width: 1400px) { .hero-name { font-size: 0.68rem; max-width: 188px; } }
+@container combat-col (min-width: 2000px) { .hero-name { font-size: 0.76rem; max-width: 248px; } }
+@container combat-col (min-width: 2800px) { .hero-name { font-size: 0.86rem; max-width: 308px; } }
 
 /* ── Mobile ──────────────────────────────────────────────────────── */
 @media (max-width: 500px) {
