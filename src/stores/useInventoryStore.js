@@ -6,6 +6,7 @@ import { GEAR_CATALOG, GEAR_BY_ID } from '../game/data/gear.js'
 import { HERO_TEMPLATES } from '../game/data/heroes.js'
 import { usePlayerHeroStore } from './usePlayerHeroStore.js'
 import { useCurrencyStore } from './useCurrencyStore.js'
+import { useWeaponStore } from './useWeaponStore.js'
 import { computeCP } from '../game/cp.js'
 import { RECIPES, STAR_BAR_COST } from '../game/data/recipes.js'
 
@@ -291,6 +292,16 @@ export const useInventoryStore = defineStore('inventory', () => {
       else if (heroRole === 'ranger')   boosted = setPieces.leather >= 3
       else if (heroRole === 'debuffer') boosted = setPieces.leather >= 3 || setPieces.cloth >= 3
       if (boosted) activePassives.add(ROLE_TO_PASSIVE[heroRole] + '_boosted')
+    }
+
+    // Soul weapon (forged via Weapon Forge)
+    const weaponStore = useWeaponStore()
+    const forgedWeapon = weaponStore.getWeapon(heroKey)
+    if (forgedWeapon) {
+      const wStats = weaponStore.weaponStats(forgedWeapon.type, forgedWeapon.tier)
+      for (const [key, val] of Object.entries(wStats)) {
+        if (key in totals) totals[key] += val
+      }
     }
 
     return { stats: totals, damageReduction: 0, setPieces, forgeAffinityCount, activePassives }

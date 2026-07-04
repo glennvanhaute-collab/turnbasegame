@@ -4,9 +4,12 @@
     <div class="stage-bg-overlay" />
     <div class="stage-bg" />
 
-    <!-- ── Enemy row ── -->
+    <!-- Labels float in the corners — don't consume flex space -->
+    <div class="stage-label stage-label--enemies">Enemies</div>
+    <div class="stage-label stage-label--players">Your Team</div>
+
+    <!-- ── Enemy row — anchored to top ── -->
     <div class="stage-row enemy-side">
-      <div class="side-label">Enemies</div>
       <div class="combatants">
         <div
           v-for="{ hero, hp, maxHp, isDead } in snapshot.enemies"
@@ -30,7 +33,7 @@
             <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
             <div class="pcard-target" v-if="store.state === 'selecting_target' && !isDead" />
             <img v-if="portrait(hero)" :src="portrait(hero)" class="pcard-img" alt="" />
-            <HeroAvatar v-else :hero="hero" :size="76" :noBorder="true" class="pcard-avatar" />
+            <HeroAvatar v-else :hero="hero" :size="140" :noBorder="true" class="pcard-avatar" />
             <div class="pcard-bottom">
               <div class="hp-track">
                 <div class="hp-fill" :style="{ width: pct(hp, maxHp) + '%', background: hpColor(hp, maxHp) }" />
@@ -43,10 +46,10 @@
       </div>
     </div>
 
-    <!-- ── Divider ── -->
-    <div class="stage-divider"><span class="vs">⚔</span></div>
+    <!-- ── Open battlefield — grows to fill, shows the art ── -->
+    <div class="stage-middle" />
 
-    <!-- ── Player row ── -->
+    <!-- ── Player row — anchored to bottom ── -->
     <div class="stage-row player-side">
       <div class="combatants">
         <div
@@ -68,7 +71,7 @@
           <div class="pcard" :class="spriteClass(hero.id, isDead, true)" :style="{ '--rarity': rarityBorder(hero) }">
             <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
             <img v-if="portrait(hero)" :src="portrait(hero)" class="pcard-img" alt="" />
-            <HeroAvatar v-else :hero="hero" :size="76" :noBorder="true" class="pcard-avatar" />
+            <HeroAvatar v-else :hero="hero" :size="140" :noBorder="true" class="pcard-avatar" />
             <div class="pcard-bottom">
               <div class="hp-track">
                 <div class="hp-fill" :style="{ width: pct(hp, maxHp) + '%', background: hpColor(hp, maxHp) }" />
@@ -79,7 +82,6 @@
           <div class="combatant-name" :class="{ dead: isDead }">{{ hero.name }}</div>
         </div>
       </div>
-      <div class="side-label player-label">Your Team</div>
     </div>
   </div>
 </template>
@@ -238,12 +240,11 @@ function onSpriteClick(hero, isDead) {
   background: #06020e;
   border: 1px solid #3e1c0c;
   border-radius: 12px;
-  padding: 18px 20px 14px;
+  padding: 14px 20px;
   overflow: hidden;
-  min-height: 340px;
+  min-height: 680px;
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 /* Background art layer */
@@ -251,19 +252,19 @@ function onSpriteClick(hero, isDead) {
   position: absolute; inset: 0; pointer-events: none;
   background-size: cover;
   background-position: center 30%;
-  opacity: 0.55;
+  opacity: 0.65;
 }
 
-/* Gradient vignette: darken top+bottom where combatants are, reveal art in middle */
+/* Gradient vignette: darken edges where units stand, open in the middle */
 .stage-bg-overlay {
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(
     to bottom,
-    rgba(4,1,10,0.72) 0%,
-    rgba(4,1,10,0.28) 32%,
-    rgba(8,2,12,0.18) 50%,
-    rgba(10,3,2,0.28) 68%,
-    rgba(10,4,2,0.75) 100%
+    rgba(4,1,10,0.78) 0%,
+    rgba(4,1,10,0.15) 28%,
+    rgba(8,2,12,0.05) 50%,
+    rgba(10,3,2,0.15) 72%,
+    rgba(10,4,2,0.80) 100%
   );
 }
 
@@ -280,45 +281,39 @@ function onSpriteClick(hero, isDead) {
     );
 }
 
-/* ── Rows ── */
-.stage-row { display: flex; flex-direction: column; gap: 6px; }
-.enemy-side { padding-bottom: 4px; }
-.player-side { padding-top: 4px; }
-
-.side-label {
-  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px;
-  color: #333; font-weight: 700;
+/* ── Corner labels — absolute, don't take flex space ── */
+.stage-label {
+  position: absolute;
+  font-size: 0.58rem; text-transform: uppercase; letter-spacing: 2px;
+  color: #2e2820; font-weight: 700;
+  z-index: 10; pointer-events: none;
 }
-.player-label { text-align: right; }
+.stage-label--enemies { top: 12px; right: 18px; }
+.stage-label--players { bottom: 12px; left: 18px; }
+
+/* ── Rows ── */
+.stage-row { position: relative; z-index: 2; }
+.enemy-side { padding-bottom: 0; }
+.player-side { padding-top: 0; }
+
+/* ── Open battlefield — flex spacer ── */
+.stage-middle {
+  flex: 1;
+  min-height: 80px;
+  pointer-events: none;
+}
 
 .combatants {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 14px;
   flex-wrap: wrap;
-}
-
-/* ── Divider ── */
-.stage-divider {
-  display: flex; align-items: center; justify-content: center;
-  padding: 6px 0;
-  position: relative;
-}
-.stage-divider::before, .stage-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, transparent, #3e1c0c, transparent);
-}
-.vs {
-  font-size: 0.85rem; color: #5c2810;
-  padding: 0 12px;
 }
 
 /* ── Individual combatant ── */
 .combatant {
   display: flex; flex-direction: column; align-items: center;
-  gap: 5px; position: relative;
+  gap: 6px; position: relative;
 }
 .combatant.selectable { cursor: crosshair; }
 
@@ -326,7 +321,7 @@ function onSpriteClick(hero, isDead) {
 .float-zone {
   position: absolute;
   top: -10px; left: 50%; transform: translateX(-50%);
-  width: 80px; height: 60px;
+  width: 180px; height: 90px;
   pointer-events: none; z-index: 20;
   overflow: visible;
 }
@@ -335,13 +330,13 @@ function onSpriteClick(hero, isDead) {
   position: absolute;
   left: 50%; transform: translateX(-50%);
   white-space: nowrap;
-  font-weight: 900; font-size: 1rem;
+  font-weight: 900; font-size: 1.1rem;
   color: #ff4444;
   text-shadow: 0 0 8px rgba(255,0,0,0.7), 0 1px 3px rgba(0,0,0,1);
   animation: float-up var(--dur-num, 1s) ease-out forwards;
 }
 .dmg-num.crit {
-  font-size: 1.35rem; color: #ffd700;
+  font-size: 1.5rem; color: #ffd700;
   text-shadow: 0 0 14px rgba(255,210,0,0.9), 0 1px 4px rgba(0,0,0,1);
 }
 .dmg-num.heal {
@@ -352,12 +347,12 @@ function onSpriteClick(hero, isDead) {
 /* ── Portrait card ── */
 .pcard {
   position: relative;
-  width: 76px; height: 108px;
-  border-radius: 5px;
+  width: 170px; height: 242px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--rarity, #444) 55%, #111);
   box-shadow:
-    0 0 10px rgba(0,0,0,0.7),
+    0 0 18px rgba(0,0,0,0.85),
     0 0 0 1px rgba(255,255,255,0.04) inset;
   background: #0a0608;
   flex-shrink: 0;
@@ -381,32 +376,32 @@ function onSpriteClick(hero, isDead) {
 .pcard-bottom {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  padding: 22px 5px 5px;
-  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.88));
+  padding: 60px 8px 8px;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.92));
 }
 
 /* Active — gold card glow */
 .pcard-active {
   position: absolute; inset: 0; z-index: 5; pointer-events: none;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 2px solid #ffd700;
-  box-shadow: inset 0 0 14px rgba(255,215,0,0.25), 0 0 18px rgba(255,215,0,0.45);
+  box-shadow: inset 0 0 18px rgba(255,215,0,0.25), 0 0 24px rgba(255,215,0,0.5);
   animation: card-pulse 1.2s ease-in-out infinite;
 }
 
 /* Target — red card glow */
 .pcard-target {
   position: absolute; inset: 0; z-index: 5; pointer-events: none;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 2px solid #ff4444;
-  box-shadow: inset 0 0 14px rgba(255,60,60,0.25), 0 0 18px rgba(255,60,60,0.5);
+  box-shadow: inset 0 0 18px rgba(255,60,60,0.25), 0 0 24px rgba(255,60,60,0.55);
   animation: card-pulse-red 0.8s ease-in-out infinite;
 }
 
 /* Dead veil */
 .dead-veil {
   position: absolute; inset: 0;
-  border-radius: 5px;
+  border-radius: 8px;
   background: rgba(0,0,0,0.55);
   backdrop-filter: grayscale(1);
   pointer-events: none;
@@ -415,17 +410,17 @@ function onSpriteClick(hero, isDead) {
 
 /* ── HP bar (inside card) ── */
 .hp-track {
-  width: 100%; height: 4px;
-  background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
+  width: 100%; height: 5px;
+  background: rgba(0,0,0,0.6); border-radius: 3px; overflow: hidden;
 }
 .hp-fill {
-  height: 100%; border-radius: 2px;
+  height: 100%; border-radius: 3px;
   transition: width 0.35s ease-out, background 0.35s;
 }
 
 .combatant-name {
-  font-size: 0.6rem; color: #bbb; font-weight: 600;
-  text-align: center; max-width: 80px;
+  font-size: 0.68rem; color: #bbb; font-weight: 600;
+  text-align: center; max-width: 174px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 1px 4px rgba(0,0,0,1);
 }
@@ -440,14 +435,14 @@ function onSpriteClick(hero, isDead) {
 /* ── Keyframes ── */
 @keyframes lunge-up {
   0%   { transform: translateY(0)    scale(1); }
-  28%  { transform: translateY(-48px) scale(1.08); }
-  55%  { transform: translateY(-44px) scale(1.06); }
+  28%  { transform: translateY(-56px) scale(1.06); }
+  55%  { transform: translateY(-52px) scale(1.04); }
   100% { transform: translateY(0)    scale(1); }
 }
 @keyframes lunge-down {
   0%   { transform: translateY(0)   scale(1); }
-  28%  { transform: translateY(48px) scale(1.08); }
-  55%  { transform: translateY(44px) scale(1.06); }
+  28%  { transform: translateY(56px) scale(1.06); }
+  55%  { transform: translateY(52px) scale(1.04); }
   100% { transform: translateY(0)   scale(1); }
 }
 @keyframes hit-shake {
@@ -464,16 +459,16 @@ function onSpriteClick(hero, isDead) {
 }
 @keyframes float-up {
   0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(0.85); }
-  18%  { opacity: 1; transform: translateX(-50%) translateY(-12px) scale(1.15); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-58px) scale(0.9); }
+  18%  { opacity: 1; transform: translateX(-50%) translateY(-14px) scale(1.15); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-64px) scale(0.9); }
 }
 @keyframes card-pulse {
   0%, 100% { opacity: 0.75; }
-  50%       { opacity: 1; box-shadow: inset 0 0 18px rgba(255,215,0,0.35), 0 0 24px rgba(255,215,0,0.55); }
+  50%       { opacity: 1; box-shadow: inset 0 0 18px rgba(255,215,0,0.35), 0 0 28px rgba(255,215,0,0.6); }
 }
 @keyframes card-pulse-red {
   0%, 100% { opacity: 0.6; }
-  50%       { opacity: 1; box-shadow: inset 0 0 18px rgba(255,60,60,0.35), 0 0 24px rgba(255,60,60,0.65); }
+  50%       { opacity: 1; box-shadow: inset 0 0 18px rgba(255,60,60,0.35), 0 0 28px rgba(255,60,60,0.7); }
 }
 
 /* TransitionGroup for floating numbers */
