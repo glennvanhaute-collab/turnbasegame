@@ -28,8 +28,6 @@
         :canAfford10="store.canAfford10(portal.id)"
         :pulling="store.pulling"
         :progress="store.pityProgress(portal.id)"
-        :recruitmentCeiling="playerHero.rarity"
-        :nextUnlock="playerHero.nextUnlock"
         :scrollCount="currency.getScrollCount(portal.scrollType)"
         @summon="store.summon($event)"
         @summon10="store.summon10($event)"

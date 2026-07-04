@@ -51,16 +51,6 @@
       </transition>
     </div>
 
-    <!-- Recruitment ceiling -->
-    <div class="ceiling-badge">
-      <span class="ceiling-icon">⚑</span>
-      <span class="ceiling-text">
-        Ceiling: <strong :class="recruitmentCeiling.toLowerCase()">{{ recruitmentCeiling }}</strong>
-        <span class="ceiling-next" v-if="nextUnlock"> · {{ nextUnlock.rarity }} unlocks at level {{ nextUnlock.level }}</span>
-        <span class="ceiling-next" v-else> · Max tier reached</span>
-      </span>
-    </div>
-
     <!-- Fate's promise (pity) -->
     <div class="fate-row">
       <div class="fate-label">
@@ -112,20 +102,14 @@ const props = defineProps({
   canAfford10:        { type: Boolean, default: false },
   pulling:            { type: Boolean, default: false },
   progress:           { type: Object,  required: true },
-  recruitmentCeiling: { type: String,  default: 'Rare' },
-  nextUnlock:         { type: Object,  default: null },
-  scrollCount:        { type: Number,  default: 0 },
+  scrollCount: { type: Number, default: 0 },
 })
 defineEmits(['summon', 'summon10'])
 
 const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical']
 function rarityIndex(r) { return RARITY_ORDER.indexOf(r) }
 
-const ceilingIdx = computed(() => rarityIndex(props.recruitmentCeiling))
-function isLocked(rarity) {
-  if (props.portal.ignoreCeiling) return false
-  return rarityIndex(rarity) > ceilingIdx.value
-}
+function isLocked() { return false }
 
 const visibleRates = computed(() =>
   Object.fromEntries(Object.entries(props.portal.rates).filter(([r]) => r !== 'Ancient'))
