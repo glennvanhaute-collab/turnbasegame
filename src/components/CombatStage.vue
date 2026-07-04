@@ -242,9 +242,15 @@ function onSpriteClick(hero, isDead) {
   border-radius: 12px;
   padding: 14px 20px;
   overflow: hidden;
-  min-height: 680px;
+  min-height: 560px;
   display: flex;
   flex-direction: column;
+}
+@container combat-col (min-width: 1400px) {
+  .combat-stage { min-height: 700px; }
+}
+@container combat-col (min-width: 2000px) {
+  .combat-stage { min-height: 960px; }
 }
 
 /* Background art layer */
@@ -344,10 +350,10 @@ function onSpriteClick(hero, isDead) {
   text-shadow: 0 0 8px rgba(77,255,136,0.8), 0 1px 3px rgba(0,0,0,1);
 }
 
-/* ── Portrait card ── */
+/* ── Portrait card — scales with combat column width via @container ── */
 .pcard {
   position: relative;
-  width: 170px; height: 242px;
+  width: 160px; height: 229px;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--rarity, #444) 55%, #111);
@@ -357,6 +363,16 @@ function onSpriteClick(hero, isDead) {
   background: #0a0608;
   flex-shrink: 0;
   transition: transform 0.08s;
+}
+
+@container combat-col (min-width: 1400px) {
+  .pcard { width: 210px; height: 300px; }
+}
+@container combat-col (min-width: 2000px) {
+  .pcard { width: 280px; height: 400px; border-radius: 10px; }
+}
+@container combat-col (min-width: 2800px) {
+  .pcard { width: 340px; height: 486px; }
 }
 
 .pcard-img {
@@ -420,11 +436,25 @@ function onSpriteClick(hero, isDead) {
 
 .combatant-name {
   font-size: 0.68rem; color: #bbb; font-weight: 600;
-  text-align: center; max-width: 174px;
+  text-align: center; max-width: 164px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 1px 4px rgba(0,0,0,1);
 }
 .combatant-name.dead { color: #444; }
+@container combat-col (min-width: 1400px) {
+  .combatant-name { max-width: 214px; font-size: 0.72rem; }
+  .float-zone { width: 220px; }
+}
+@container combat-col (min-width: 2000px) {
+  .combatant-name { max-width: 284px; font-size: 0.8rem; }
+  .float-zone { width: 290px; }
+  .dmg-num { font-size: 1.4rem; }
+  .dmg-num.crit { font-size: 1.9rem; }
+}
+@container combat-col (min-width: 2800px) {
+  .combatant-name { max-width: 344px; font-size: 0.9rem; }
+  .float-zone { width: 350px; }
+}
 
 /* ── Card animation classes ── */
 .pcard.lunge-up   { animation: lunge-up    var(--dur-lunge, 0.52s) ease-in-out forwards; }

@@ -352,6 +352,8 @@ function startBatch100() {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  container-type: inline-size;
+  container-name: combat-col;
 }
 
 .encounter-label {
