@@ -350,6 +350,42 @@ Mira has never claimed to defeat death. She only steals moments from it, enough 
     ],
   },
 
+  genesis: {
+    title:  'The First Wound',
+    quote:  '"Genesis does not remember the first night. That is not reassuring." — Mordaine night-warden',
+    fragments: [
+      {
+        id: 'genesis_f1',
+        title: 'The Name in the Margin',
+        text: `There is a name that appears in the oldest Mordaine records — before the house took its shape, before the pacts were sealed and the shadow found direction. The name is Genesis. It appears once, in a margin, in a script that predates the current Mordaine tongue.
+
+Scholars who have tried to translate it use words like initiation and rupture and, in one case, the moment before the wound understands itself.
+
+The person who carries that name now is either the original — which Mordaine healers consider biologically improbable and metaphysically concerning — or someone who found the name and chose to carry it, which Mordaine philosophers consider worse.`,
+      },
+      {
+        id: 'genesis_f2',
+        title: 'The Arrival',
+        text: `Genesis arrived in the Mordaine holdings without announcement, without papers, without the debt that usually precedes Mordaine loyalty.
+
+The gatewarden who let them in cannot explain why. The captain who gave them quarters has no memory of the conversation. The records show a name, a bunk assignment, and nothing else.
+
+Three clerks have independently reviewed the intake ledger. All three agree the handwriting in Genesis's entry is not the captain's. None of them can identify whose it is. One of them stopped looking.`,
+      },
+      {
+        id: 'genesis_f3',
+        title: 'The Question',
+        text: `Genesis has not sought rank. They have not asked for coin. When the house moves, Genesis moves with it. When the house requires something that cannot be asked of ordinary soldiers, Genesis is already there.
+
+Lord Mordaine has been asked, twice, whether Genesis serves him.
+
+He said, the first time, that the question was backwards.
+
+He did not answer the second time.`,
+      },
+    ],
+  },
+
   velmorn: {
     title:  'The Shadow Between Bells',
     quote:  '"If Velmorn wanted you dead, you would first notice him in the afterlife." â€” Mordaine fence',
