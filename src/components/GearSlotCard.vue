@@ -4,7 +4,8 @@
 
     <div class="slot-content" v-if="item">
       <div class="item-icon">
-        <GameIcon :icon="slotIcon" :size="44" />
+        <img v-if="gearImg" :src="gearImg" :alt="item.name" class="gear-img" />
+        <GameIcon v-else :icon="slotIcon" :size="128" />
       </div>
       <div class="item-info">
         <div class="item-name-row">
@@ -30,6 +31,12 @@ import { GearSlot, SLOT_LABELS, computeLineStats } from '../game/Gear.js'
 import { SLOT_TO_ICON, tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 
+const _gearSources = import.meta.glob('../assets/gear/*.png', { eager: true })
+const gearImageMap = {}
+for (const [path, mod] of Object.entries(_gearSources)) {
+  gearImageMap[path.split('/').pop().replace(/\.png$/i, '')] = mod.default
+}
+
 const props = defineProps({
   slotId:  { type: String, required: true },
   item:    { type: Object, default: null },
@@ -37,6 +44,16 @@ const props = defineProps({
   blocked: { type: Boolean, default: false },
 })
 defineEmits(['click'])
+
+const gearImg = computed(() => {
+  if (!props.item) return null
+  // Explicit key first (handles edge cases like Moonveil using Eclipse_ filenames)
+  if (props.item.gearImageKey && gearImageMap[props.item.gearImageKey])
+    return gearImageMap[props.item.gearImageKey]
+  // Derive from item name: "Arcane Hauberk" → "Arcane_Hauberk"
+  const derived = props.item.name?.replace(/\s+/g, '_')
+  return derived ? (gearImageMap[derived] ?? null) : null
+})
 
 const slotIcon = computed(() =>
   props.item
@@ -94,6 +111,7 @@ const topStats = computed(() => {
 
 .slot-content { display: flex; align-items: flex-start; gap: 8px; flex: 1; }
 .item-icon    { flex-shrink: 0; }
+.gear-img     { width: 128px; height: 128px; object-fit: contain; display: block; }
 .item-info     { flex: 1; min-width: 0; }
 .item-name-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 4px; min-width: 0; }
 .item-name     { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

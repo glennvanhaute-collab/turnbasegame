@@ -20,7 +20,7 @@ export const PORTALS = {
       [Rarity.RARE]: 0.95,
       [Rarity.EPIC]: 0.05,
     },
-    pity: { threshold: Rarity.EPIC, every: 40 },
+    pity: { threshold: Rarity.EPIC, every: 80 },
     duplicateGold: 500,
   },
   sealed_charter: {
@@ -126,6 +126,11 @@ export const useSummonStore = defineStore('summon', () => {
     return currency.canAffordScroll(p.scrollType, 10)
   }
 
+  function canAfford100(portalId) {
+    const p = PORTALS[portalId]
+    return currency.canAffordScroll(p.scrollType, 100)
+  }
+
   function summon(portalId) {
     if (pulling.value) return
     const portal = PORTALS[portalId]
@@ -186,14 +191,14 @@ export const useSummonStore = defineStore('summon', () => {
     }
   }
 
-  function summon10(portalId) {
+  function _summonMulti(portalId, count) {
     if (pulling.value) return
     const portal = PORTALS[portalId]
-    if (!canAfford10(portalId)) return
+    if (!currency.canAffordScroll(portal.scrollType, count)) return
 
     pulling.value = true
     try {
-      currency.spendScroll(portal.scrollType, 10)
+      currency.spendScroll(portal.scrollType, count)
 
       const results = []
       const cityKey10 = cityStore.popPending()
@@ -215,7 +220,7 @@ export const useSummonStore = defineStore('summon', () => {
         })
         usedCitySlot = true
       }
-      for (let i = 0; i < (usedCitySlot ? 9 : 10); i++) {
+      for (let i = 0; i < (usedCitySlot ? count - 1 : count); i++) {
         const counter     = pityCounters.value[portalId]
         const triggerPity = counter >= portal.pity.every - 1
         const guarantee   = triggerPity ? portal.pity.threshold : null
@@ -250,16 +255,18 @@ export const useSummonStore = defineStore('summon', () => {
         })
       }
 
-      // Sort best rarity first
       results.sort((a, b) => rarityIndex(b.rarity) - rarityIndex(a.rarity))
       lastResults.value = results
       checkBondUnlocks(results.map(r => r.heroKey))
     } catch (e) {
-      console.error('Summon ×10 error:', e)
+      console.error(`Summon ×${count} error:`, e)
     } finally {
       pulling.value = false
     }
   }
+
+  function summon10(portalId)  { _summonMulti(portalId, 10) }
+  function summon100(portalId) { _summonMulti(portalId, 100) }
 
   function dismissResult()  { lastResult.value  = null }
   function dismissResults() { lastResults.value = [] }
@@ -272,6 +279,6 @@ export const useSummonStore = defineStore('summon', () => {
 
   return {
     PORTALS, pulling, lastResult, lastResults, pendingBondReveal,
-    canAfford, canAfford10, summon, summon10, dismissResult, dismissResults, dismissBondReveal, pityProgress,
+    canAfford, canAfford10, canAfford100, summon, summon10, summon100, dismissResult, dismissResults, dismissBondReveal, pityProgress,
   }
 })

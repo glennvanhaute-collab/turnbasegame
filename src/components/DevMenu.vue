@@ -220,7 +220,7 @@
             </span>
             <div class="dev-btns">
               <button @click="repStore.earnRep(faction, 250)">+250</button>
-              <button @click="repStore.setRep(faction, 1000)">MAX</button>
+              <button @click="repStore.setRep(faction, repStore.REP_MAX)">MAX</button>
               <button @click="repStore.setRep(faction, 0)">Reset</button>
             </div>
           </div>

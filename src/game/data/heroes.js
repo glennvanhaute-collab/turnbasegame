@@ -238,6 +238,56 @@ export const HERO_TEMPLATES = {
     isPlayer: true, role: 'healer', weaponType: 'staff',
   }),
 
+  ARENDIAL: () => new Hero({
+    id: 'arendial', name: 'Arendial',
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
+    baseHp: 12500, baseAtk: 1200, baseDef: 620, baseSpd: 114,
+    critRate: 0.22, critDmg: 0.58,
+    skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
+    artisanSkills: [ARTISAN.herbalism],
+    isPlayer: true, role: 'ranger', weaponType: 'bow',
+  }),
+
+  THRANDYL: () => new Hero({
+    id: 'thrandyl', name: 'Thrandyl',
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
+    baseHp: 15500, baseAtk: 950, baseDef: 820, baseSpd: 98,
+    critRate: 0.12, critDmg: 0.50,
+    skills: [SKILLS.MEND, SKILLS.REVITALIZE],
+    artisanSkills: [ARTISAN.herbalism],
+    isPlayer: true, role: 'healer', weaponType: 'staff',
+  }),
+
+  GORUNDAL: () => new Hero({
+    id: 'gorundal', name: 'Gorundal',
+    faction: Faction.CAELWYN, rarity: Rarity.RARE, affinity: Affinity.SPIRIT,
+    baseHp: 19000, baseAtk: 880, baseDef: 1100, baseSpd: 84,
+    critRate: 0.10, critDmg: 0.45,
+    skills: [SKILLS.PROVOKE, SKILLS.FORTIFY],
+    artisanSkills: [ARTISAN.leatherworking],
+    isPlayer: true, role: 'tank', weaponType: 'sword',
+  }),
+
+  EILISTRA: () => new Hero({
+    id: 'eilistra', name: 'Eilistra',
+    faction: Faction.CAELWYN, rarity: Rarity.EPIC, affinity: Affinity.SPIRIT,
+    baseHp: 13500, baseAtk: 1450, baseDef: 680, baseSpd: 116,
+    critRate: 0.24, critDmg: 0.65,
+    skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY, SKILLS.REVITALIZE],
+    artisanSkills: [ARTISAN.herbalism],
+    isPlayer: true, role: 'ranger', weaponType: 'bow',
+  }),
+
+  ERON: () => new Hero({
+    id: 'eron', name: 'Eron',
+    faction: Faction.CAELWYN, rarity: Rarity.EPIC, affinity: Affinity.SPIRIT,
+    baseHp: 14500, baseAtk: 1350, baseDef: 760, baseSpd: 106,
+    critRate: 0.18, critDmg: 0.60,
+    skills: [SKILLS.VERDANT_HEX, SKILLS.RAVENS_CURSE, SKILLS.REVITALIZE],
+    artisanSkills: [ARTISAN.apothecary],
+    isPlayer: true, role: 'debuffer', weaponType: 'wand',
+  }),
+
   SYLARA: () => new Hero({
     id: 'sylara', name: 'Sylara the Reviver',
     faction: Faction.CAELWYN, rarity: Rarity.EPIC, affinity: Affinity.SPIRIT,
@@ -655,11 +705,16 @@ export const RECRUIT_POOL = [
   { key: 'LYRETH',              rarity: 'Rare' },
   { key: 'CAELWYN_HERBALIST',   rarity: 'Rare' },
   { key: 'MIRA',                rarity: 'Rare' },
+  { key: 'ARENDIAL',            rarity: 'Rare' },
+  { key: 'THRANDYL',            rarity: 'Rare' },
+  { key: 'GORUNDAL',            rarity: 'Rare' },
   { key: 'ZARETH',              rarity: 'Rare' },
   { key: 'SERIX',               rarity: 'Rare' },
   { key: 'NYXARA',              rarity: 'Rare' },
   { key: 'GRIBZAK',             rarity: 'Rare' },
   // ── Epic ─────────────────────────────────────────────────────────
+  { key: 'EILISTRA',            rarity: 'Epic' },
+  { key: 'ERON',                rarity: 'Epic' },
   { key: 'ARNE_FROSTBOUND',     rarity: 'Epic' },
   { key: 'HILDA_SHIELDMAIDEN',  rarity: 'Epic' },
   { key: 'GWENDAL',             rarity: 'Epic' },

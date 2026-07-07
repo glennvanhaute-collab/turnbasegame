@@ -10,7 +10,7 @@ import { useDungeonStore }     from './useDungeonStore.js'
 import { useResourceStore }    from './useResourceStore.js'
 import { useCollectionStore }  from './useCollectionStore.js'
 import { useInventoryStore }   from './useInventoryStore.js'
-import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops } from '../game/data/ores.js'
+import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops, rollScrollDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
 import { useCodexStore } from './useCodexStore.js'
 import { useReputationStore } from './useReputationStore.js'
@@ -174,6 +174,8 @@ export const useBattleStore = defineStore('battle', () => {
           keyDrops = rollTrainingKeyDrops(enc.difficulty)
           keyDrops.forEach(({ tier, amount }) => resources.addDungeonKey(tier, amount))
         }
+        const scrollDrops = enc.isRaid ? [] : rollScrollDrops(enc.isTraining, enc.difficulty)
+        scrollDrops.forEach(({ type, amount }) => currency.addScroll(type, amount))
         let raidDrops = null
         if (enc.isRaid) {
           raidDrops = rollRaidResourceDrops(currentRaidId.value)
@@ -209,7 +211,7 @@ export const useBattleStore = defineStore('battle', () => {
         localStorage.setItem('raid-battle-wins', battleWins.value)
 
         // Reputation — earned per house hero in team, scaled by content type
-        const repPerHero = enc.isRaid ? 60 : enc.isDungeon ? 30 : 5
+        const repPerHero = enc.isRaid ? 15 : enc.isDungeon ? 6 : 1
         const repStore = useReputationStore()
         const collection = useCollectionStore()
         for (const entry of collection.teamEntries) {
@@ -217,7 +219,7 @@ export const useBattleStore = defineStore('battle', () => {
           if (faction) repStore.earnRep(faction, repPerHero)
         }
 
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, raidDrops, forgeUnlock, loreFragments: loreFragment ? [loreFragment] : [] }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, scrollDrops, raidDrops, forgeUnlock, loreFragments: loreFragment ? [loreFragment] : [] }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run
@@ -247,6 +249,11 @@ export const useBattleStore = defineStore('battle', () => {
             if (ex) ex.amount += drop.amount
             else br.keyDrops.push({ ...drop })
           }
+          for (const drop of (runReward.scrollDrops ?? [])) {
+            const ex = br.scrollDrops.find(d => d.type === drop.type)
+            if (ex) ex.amount += drop.amount
+            else br.scrollDrops.push({ ...drop })
+          }
           br.loreFragments.push(...(runReward.loreFragments ?? []))
           batchDone.value++
           if (batchDone.value < batchTotal.value) {
@@ -269,47 +276,25 @@ export const useBattleStore = defineStore('battle', () => {
     }
   }
 
-  // When the tab is hidden browsers throttle setTimeout heavily.
-  // Store the pending resolve so the visibilitychange handler can fire it
-  // immediately when the player returns to the tab.
-  let _pendingResolve = null
-  let _pendingTimeout = null
-
   async function _runAutoTurn() {
-    await new Promise(r => {
-      _pendingResolve = r
-      _pendingTimeout = setTimeout(() => {
-        _pendingResolve = null
-        r()
-      }, turnDelay.value)
-    })
+    // Pause while tab is hidden — browsers throttle timers aggressively in background
+    // tabs, causing accumulated turns to burst-fire on return. Waiting for visibility
+    // first means the turn delay starts only when the player is actually watching.
+    if (typeof document !== 'undefined') {
+      while (document.hidden) {
+        await new Promise(r => document.addEventListener('visibilitychange', r, { once: true }))
+      }
+    }
+    await new Promise(r => setTimeout(r, turnDelay.value))
     if (!engine.value) return
     const result = runAI(engine.value)
     if (result) _applyResult(result)
   }
 
-  if (typeof document !== 'undefined') {
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        // Tab hidden while a batch is running — complete all remaining runs instantly
-        // so the player returns to a finished result screen, not a frozen mid-run.
-        if (isBatchRunning.value) devCompleteBatch()
-      } else {
-        // Tab visible again — fire any pending single-turn delay immediately
-        if (_pendingResolve) {
-          clearTimeout(_pendingTimeout)
-          const resolve = _pendingResolve
-          _pendingResolve = null
-          resolve()
-        }
-      }
-    })
-  }
-
   function startBatchRun(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [], loreFragments: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [], scrollDrops: [], loreFragments: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
     _runBatchNext()
   }
@@ -319,7 +304,7 @@ export const useBattleStore = defineStore('battle', () => {
   function setupBatch(n) {
     batchTotal.value   = n
     batchDone.value    = 0
-    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [], loreFragments: [] }
+    batchRewards.value = { gold: 0, diamonds: 0, xp: 0, levelsGained: 0, oreDrops: [], gatherDrops: { hides: [], fibers: [] }, componentDrops: [], keyDrops: [], scrollDrops: [], loreFragments: [] }
     if (!autoplay.value) { autoplay.value = true; localStorage.setItem('battle-auto', true) }
   }
 
@@ -359,6 +344,13 @@ export const useBattleStore = defineStore('battle', () => {
         const ex = br.oreDrops.find(d => d.oreId === oreId)
         if (ex) ex.amount += amount
         else br.oreDrops.push({ oreId, amount })
+      })
+      const scrollDrops = rollScrollDrops(enc.isTraining, enc.difficulty)
+      scrollDrops.forEach(({ type, amount }) => {
+        currency.addScroll(type, amount)
+        const ex = br.scrollDrops.find(d => d.type === type)
+        if (ex) ex.amount += amount
+        else br.scrollDrops.push({ type, amount })
       })
     }
 

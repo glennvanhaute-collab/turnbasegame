@@ -22,7 +22,7 @@
           <span class="divider-label">✦ Soul Bound</span>
           <span class="divider-sub">Heroes bound to your progression — their power scales with your level</span>
         </div>
-        <div class="hero-grid" style="margin-bottom: 28px;">
+        <div class="hero-grid" style="margin-bottom: 16px;">
           <div
             v-for="{ key, hero } in progressionRoster"
             :key="key"
@@ -242,10 +242,10 @@ const activeBonds = computed(() =>
 .collection-layout {
   display: grid;
   grid-template-columns: 1fr 290px;
-  gap: 20px;
+  gap: 16px;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px 40px;
+  padding: 10px 16px 24px;
   align-items: start;
   position: relative;
 }
@@ -269,8 +269,8 @@ const activeBonds = computed(() =>
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 18px;
+  gap: 6px;
+  margin-bottom: 10px;
   align-items: center;
 }
 .back-btn {
@@ -333,8 +333,8 @@ const activeBonds = computed(() =>
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 5px;
   border-bottom: 1px solid var(--border-brown);
 }
 .divider-label {
@@ -354,8 +354,8 @@ const activeBonds = computed(() =>
 /* ── Hero grid ───────────────────────────────────────── */
 .hero-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
 }
 
 /* ── Card ────────────────────────────────────────────── */

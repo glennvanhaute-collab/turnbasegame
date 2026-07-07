@@ -82,8 +82,18 @@
         @click="$emit('summon10', portal.id)"
       >
         <span v-if="pulling">Seeking…</span>
-        <span v-else-if="!canAfford10">Need 10 {{ scrollLabel }}</span>
+        <span v-else-if="!canAfford10">No {{ scrollLabel }} available</span>
         <span v-else>{{ actionLabel }} ×10</span>
+      </button>
+      <button
+        class="hire-btn hire-btn-100"
+        :class="portal.id"
+        :disabled="!canAfford100 || pulling"
+        @click="$emit('summon100', portal.id)"
+      >
+        <span v-if="pulling">Seeking…</span>
+        <span v-else-if="!canAfford100">No {{ scrollLabel }} available</span>
+        <span v-else>{{ actionLabel }} ×100</span>
       </button>
     </div>
 
@@ -97,14 +107,15 @@ import recruit2Img from '../assets/ui/recruit_2.png'
 import recruit3Img from '../assets/ui/recruit_3.png'
 
 const props = defineProps({
-  portal:             { type: Object,  required: true },
-  canAfford:          { type: Boolean, default: false },
-  canAfford10:        { type: Boolean, default: false },
-  pulling:            { type: Boolean, default: false },
-  progress:           { type: Object,  required: true },
-  scrollCount: { type: Number, default: 0 },
+  portal:      { type: Object,  required: true },
+  canAfford:   { type: Boolean, default: false },
+  canAfford10: { type: Boolean, default: false },
+  canAfford100:{ type: Boolean, default: false },
+  pulling:     { type: Boolean, default: false },
+  progress:    { type: Object,  required: true },
+  scrollCount: { type: Number,  default: 0 },
 })
-defineEmits(['summon', 'summon10'])
+defineEmits(['summon', 'summon10', 'summon100'])
 
 const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythical']
 function rarityIndex(r) { return RARITY_ORDER.indexOf(r) }
@@ -339,7 +350,8 @@ const showRates = ref(false)
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
 }
-.hire-btn-10 { font-size: 0.70rem; padding: 10px 12px; }
+.hire-btn-10  { font-size: 0.70rem; padding: 10px 12px; }
+.hire-btn-100 { font-size: 0.65rem; padding: 8px 12px; opacity: 0.85; }
 .hire-btn:active:not(:disabled) { transform: scale(0.97); }
 .hire-btn:disabled { opacity: 0.30; cursor: not-allowed; }
 

@@ -26,11 +26,13 @@
         :portal="portal"
         :canAfford="store.canAfford(portal.id)"
         :canAfford10="store.canAfford10(portal.id)"
+        :canAfford100="store.canAfford100(portal.id)"
         :pulling="store.pulling"
         :progress="store.pityProgress(portal.id)"
         :scrollCount="currency.getScrollCount(portal.scrollType)"
         @summon="store.summon($event)"
         @summon10="store.summon10($event)"
+        @summon100="store.summon100($event)"
       />
     </div>
   </div>
@@ -107,7 +109,7 @@
     <div class="result-backdrop" v-if="store.lastResults.length" @click.self="store.dismissResults()">
       <div class="multi-result-card">
         <div class="multi-header">
-          <div class="multi-title">×10 Summon</div>
+          <div class="multi-title">×{{ store.lastResults.length }} Summon</div>
           <div class="multi-sub">
             <span class="new-count">{{ store.lastResults.filter(r => !r.isDuplicate).length }} new</span>
             &nbsp;·&nbsp;

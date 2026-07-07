@@ -2,11 +2,12 @@ import mainUrl          from '../assets/audio/main.ost?url'
 import battleUrl        from '../assets/audio/battle.mp3?url'
 import raidUrl          from '../assets/audio/Throne of regret.mp3?url'
 import voidHeirUrl      from '../assets/audio/Aurelian Dragonforge .mp3?url'
+import malacharUrl      from '../assets/audio/Malachar_trimmed.mp3?url'
 import siegeBreachUrl   from '../assets/audio/Siege of Mordaine - The Iron Thirst - Treblo.mp3?url'
 import siegeVanguardUrl from '../assets/audio/Siege of Mordaine - The Silent Pact - Treblo.mp3?url'
 import kyverUrl         from '../assets/audio/kyver.mp3?url'
 
-const VOL = { main: 0.40, battle: 0.55, raid: 0.55, void_heir: 0.55, siege_breach: 0.55, siege_vanguard: 0.50, kyver: 0.55 }
+const VOL = { main: 0.40, battle: 0.55, raid: 0.55, void_heir: 0.55, malachar: 0.55, siege_breach: 0.55, siege_vanguard: 0.50, kyver: 0.55 }
 
 // heroId → { key, url } — add entries here when a hero gets their own track
 const HERO_TRACKS = {
@@ -83,6 +84,7 @@ export function playBattleForTeam(heroIds = []) {
   _crossfade(key, url)
 }
 export function playRaid()         { _crossfade('raid',           raidUrl)          }
+export function playMalachar()     { _crossfade('malachar',       malacharUrl)      }
 export function playVoidHeir()     { _crossfade('void_heir',      voidHeirUrl)      }
 export function playSiegeBreach()  { _crossfade('siege_breach',   siegeBreachUrl)   }
 export function playSiegeVanguard(){ _crossfade('siege_vanguard', siegeVanguardUrl) }

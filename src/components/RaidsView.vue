@@ -128,9 +128,12 @@ import { useBattleStore } from '../stores/useBattleStore.js'
 const emit = defineEmits(['enter-raid', 'auto-raid'])
 const battleStore = useBattleStore()
 
-const _raidBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
+const _raidBgSources = {
+  ...import.meta.glob('../assets/dungeons/*.png',    { eager: true }),
+  ...import.meta.glob('../assets/backgrounds/*.png', { eager: true }),
+}
 const raidBgMap = {}
-for (const [path, mod] of Object.entries(_raidBgs)) {
+for (const [path, mod] of Object.entries(_raidBgSources)) {
   const key = path.split('/').pop().replace(/\.png$/i, '')
   raidBgMap[key] = mod.default
 }

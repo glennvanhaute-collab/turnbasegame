@@ -31,8 +31,8 @@ function loadSaved() {
 export const useDungeonStore = defineStore('dungeons', () => {
   const saved = loadSaved()
 
-  const currentOptions  = ref(saved?.currentOptions ?? [])
-  const pinnedDungeons  = ref(saved?.pinnedDungeons ?? [])
+  const currentOptions  = ref((saved?.currentOptions ?? []).filter(d => !d.isDungeon))
+  const pinnedDungeons  = ref((saved?.pinnedDungeons ?? []).filter(d => !d.isDungeon))
   const dungeonClears   = ref(saved?.dungeonClears ?? 0)
   const pendingNodeId       = ref(null)   // node awaiting item pick
   const pendingTavernId     = ref(null)   // tavern node awaiting claim
@@ -221,6 +221,21 @@ export const useDungeonStore = defineStore('dungeons', () => {
     return { line, itemName: instance.name }
   }
 
+  function claimResourceNode(id) {
+    const node = findDungeon(id)
+    if (!node || node.nodeType !== 'resource') return null
+    const resources = useResourceStore()
+    for (const drop of node.drops ?? []) {
+      if (drop.type === 'ore')   resources.addOre(drop.id, drop.amount)
+      else if (drop.type === 'hide')  resources.addHide(drop.id, drop.amount)
+      else if (drop.type === 'fiber') resources.addFiber(drop.id, drop.amount)
+    }
+    currentOptions.value = currentOptions.value.filter(d => d.id !== id)
+    pinnedDungeons.value  = pinnedDungeons.value.filter(d => d.id !== id)
+    persist()
+    return node.drops
+  }
+
   function claimCityNode(id) {
     const node = findDungeon(id)
     if (!node || node.nodeType !== 'city') return null
@@ -237,6 +252,6 @@ export const useDungeonStore = defineStore('dungeons', () => {
     explore, pin, unpin, onDungeonVictory, findDungeon,
     openNode, closeNode, applyNodeToItem,
     openTavern, claimTavern, closeTavern,
-    claimForgeDiscovery, claimCityNode,
+    claimForgeDiscovery, claimCityNode, claimResourceNode,
   }
 })

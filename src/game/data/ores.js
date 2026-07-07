@@ -101,6 +101,42 @@ export function rollTrainingKeyDrops(difficulty) {
   return drops
 }
 
+// Scroll drops — training drips commonWrit only; dungeons scale up through all tiers.
+// Raids are excluded (they have their own distinct reward loop).
+export function rollScrollDrops(isTraining, difficulty) {
+  const drops = []
+  const d = difficulty?.toLowerCase() ?? 'easy'
+
+  if (isTraining) {
+    if (d === 'easy') {
+      if (Math.random() < 0.04) drops.push({ type: 'commonWrit', amount: 1 })
+    } else if (d === 'normal') {
+      if (Math.random() < 0.06) drops.push({ type: 'commonWrit', amount: 1 })
+    } else if (d === 'hard') {
+      if (Math.random() < 0.10) drops.push({ type: 'commonWrit', amount: 1 })
+      if (Math.random() < 0.02) drops.push({ type: 'sealedCharter', amount: 1 })
+    } else if (d === 'nightmare') {
+      if (Math.random() < 0.12) drops.push({ type: 'commonWrit', amount: 1 })
+      if (Math.random() < 0.05) drops.push({ type: 'sealedCharter', amount: 1 })
+    }
+  } else {
+    if (d === 'easy') {
+      if (Math.random() < 0.25) drops.push({ type: 'commonWrit', amount: 1 })
+    } else if (d === 'normal' || d === 'medium') {
+      if (Math.random() < 0.30) drops.push({ type: 'commonWrit', amount: 1 })
+      if (Math.random() < 0.05) drops.push({ type: 'sealedCharter', amount: 1 })
+    } else if (d === 'hard') {
+      if (Math.random() < 0.40) drops.push({ type: 'commonWrit', amount: 1 })
+      if (Math.random() < 0.15) drops.push({ type: 'sealedCharter', amount: 1 })
+    } else if (d === 'brutal' || d === 'nightmare') {
+      if (Math.random() < 0.30) drops.push({ type: 'sealedCharter', amount: 1 })
+      if (Math.random() < 0.05) drops.push({ type: 'houseSeal', amount: 1 })
+    }
+  }
+
+  return drops
+}
+
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }

@@ -15,6 +15,9 @@
           <button class="nav-btn" :class="{ active: view === 'gear' }"    @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'combat' }"  @click="navigate('combat')">Combat</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }"   @click="navigate('realm')">Realm</button>
+          <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
+            <img :src="collectionIcon" class="nav-icon-img" alt="Collection" />
+          </button>
         </nav>
         <div class="currency-display">
           <span class="currency energy" title="Energy (1 per 3 min)">
@@ -199,52 +202,83 @@
 
     <main>
       <!-- ── Hall ── -->
-      <template v-if="view === 'hall'">
-        <div class="gear-tabs hall-tabs">
-          <button class="gear-tab" :class="{ active: hallTab === 'hall' }"       @click="hallTab = 'hall'">Great Hall</button>
-          <button class="gear-tab" :class="{ active: hallTab === 'stronghold' }" @click="hallTab = 'stronghold'">Stronghold</button>
-          <button class="gear-tab" :class="{ active: hallTab === 'artisan' }"    @click="hallTab = 'artisan'">Artisan</button>
-          <button class="gear-tab" :class="{ active: hallTab === 'market' }"     @click="hallTab = 'market'">Market</button>
-        </div>
+      <div v-if="view === 'hall'" class="hall-section">
+        <nav class="hall-subnav">
+          <button
+            class="hall-subnav-btn"
+            v-for="path in HALL_PATHS"
+            :key="path.dest"
+            :class="{ active: hallTab === path.dest }"
+            @click="navigate(path.dest)"
+          >
+            <p class="hall-subnav-name">{{ path.name }}</p>
+            <p class="hall-subnav-flavor">{{ path.flavor }}</p>
+          </button>
+        </nav>
+        <nav v-if="hallTab === 'artisan'" class="hall-subnav hall-subnav--artisan">
+          <button class="hall-subnav-btn" :class="{ active: artisanTab === 'smith' }"     @click="artisanTab = 'smith'">
+            <p class="hall-subnav-name">Blacksmith</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: artisanTab === 'leather' }"   @click="artisanTab = 'leather'">
+            <p class="hall-subnav-name">Leatherwork</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: artisanTab === 'tailoring' }" @click="artisanTab = 'tailoring'">
+            <p class="hall-subnav-name">Tailoring</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: artisanTab === 'woodwork' }"  @click="artisanTab = 'woodwork'">
+            <p class="hall-subnav-name">Woodwork</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: artisanTab === 'fusion' }"    @click="artisanTab = 'fusion'">
+            <p class="hall-subnav-name">Fusion</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: artisanTab === 'weapon' }"    @click="artisanTab = 'weapon'">
+            <p class="hall-subnav-name">Weapon Forge</p>
+          </button>
+        </nav>
+        <div class="hall-content">
         <GreatHallView v-if="hallTab === 'hall'" @navigate="navigate" />
         <CampView v-else-if="hallTab === 'stronghold'" />
-        <template v-else-if="hallTab === 'artisan'">
-          <div class="gear-tabs artisan-tabs">
-            <button class="gear-tab" :class="{ active: artisanTab === 'smith' }"    @click="artisanTab = 'smith'">Blacksmith</button>
-            <button class="gear-tab" :class="{ active: artisanTab === 'leather' }"  @click="artisanTab = 'leather'">Leatherwork</button>
-            <button class="gear-tab" :class="{ active: artisanTab === 'tailoring' }" @click="artisanTab = 'tailoring'">Tailoring</button>
-            <button class="gear-tab" :class="{ active: artisanTab === 'woodwork' }" @click="artisanTab = 'woodwork'">Woodwork</button>
-            <button class="gear-tab" :class="{ active: artisanTab === 'fusion' }"   @click="artisanTab = 'fusion'">Fusion</button>
-            <button class="gear-tab" :class="{ active: artisanTab === 'weapon' }"   @click="artisanTab = 'weapon'">Weapon Forge</button>
+        <div v-else-if="hallTab === 'artisan'" class="artisan-shell">
+          <div class="artisan-body">
+            <BlacksmithView      v-if="artisanTab === 'smith'" />
+            <LeatherworkingView  v-else-if="artisanTab === 'leather'" />
+            <TailoringView       v-else-if="artisanTab === 'tailoring'" />
+            <WoodworkingView     v-else-if="artisanTab === 'woodwork'" />
+            <FusionWorkshopView  v-else-if="artisanTab === 'fusion'" />
+            <WeaponForgeView     v-else />
           </div>
-          <BlacksmithView      v-if="artisanTab === 'smith'" />
-          <LeatherworkingView  v-else-if="artisanTab === 'leather'" />
-          <TailoringView       v-else-if="artisanTab === 'tailoring'" />
-          <WoodworkingView     v-else-if="artisanTab === 'woodwork'" />
-          <FusionWorkshopView  v-else-if="artisanTab === 'fusion'" />
-          <WeaponForgeView     v-else />
-        </template>
+        </div>
         <MarketView v-else-if="hallTab === 'market'" />
-      </template>
+        </div>
+      </div>
 
       <!-- ── Recruit ── -->
       <SummonView v-else-if="view === 'summon'" />
 
       <!-- ── Arsenal ── -->
       <div v-else-if="view === 'gear'" class="gear-view arsenal-view" :style="{ '--arsenal-bg': `url(${arsenalBg})` }">
-        <div class="gear-tabs">
-          <button class="gear-tab" :class="{ active: gearTab === 'roster' }"    @click="gearTab = 'roster'">Roster</button>
-          <button class="gear-tab" :class="{ active: gearTab === 'inventory' }" @click="gearTab = 'inventory'">Inventory</button>
-          <button class="gear-tab" :class="{ active: gearTab === 'equipment' }" @click="gearTab = 'equipment'">Equipment</button>
-          <button class="gear-tab" :class="{ active: gearTab === 'forge' }"     @click="gearTab = 'forge'">
-            Forge
-            <span class="relic-pip" v-if="forgeStore.totalOrbs > 0">{{ forgeStore.totalOrbs }}</span>
+        <nav class="hall-subnav hall-subnav--5col">
+          <button class="hall-subnav-btn" :class="{ active: gearTab === 'roster' }"    @click="gearTab = 'roster'">
+            <p class="hall-subnav-name">Roster</p>
+            <p class="hall-subnav-flavor">Your champions</p>
           </button>
-          <button class="gear-tab gear-tab--relics" :class="{ active: gearTab === 'relics' }" @click="gearTab = 'relics'">
-            Relics
-            <span class="relic-pip" v-if="inventoryStore.soulVessels > 0">{{ inventoryStore.soulVessels }}</span>
+          <button class="hall-subnav-btn" :class="{ active: gearTab === 'inventory' }" @click="gearTab = 'inventory'">
+            <p class="hall-subnav-name">Inventory</p>
+            <p class="hall-subnav-flavor">Hoarded treasures</p>
           </button>
-        </div>
+          <button class="hall-subnav-btn" :class="{ active: gearTab === 'equipment' }" @click="gearTab = 'equipment'">
+            <p class="hall-subnav-name">Equipment</p>
+            <p class="hall-subnav-flavor">Arm your warriors</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: gearTab === 'forge' }"     @click="gearTab = 'forge'">
+            <p class="hall-subnav-name">Forge <span class="relic-pip" v-if="forgeStore.totalOrbs > 0">{{ forgeStore.totalOrbs }}</span></p>
+            <p class="hall-subnav-flavor">Reforge &amp; empower</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: gearTab === 'relics' }"    @click="gearTab = 'relics'">
+            <p class="hall-subnav-name">Relics <span class="relic-pip" v-if="inventoryStore.soulVessels > 0">{{ inventoryStore.soulVessels }}</span></p>
+            <p class="hall-subnav-flavor">Soul vessels</p>
+          </button>
+        </nav>
         <CollectionView v-if="gearTab === 'roster'" />
         <InventoryView  v-else-if="gearTab === 'inventory'" />
         <EquipmentView  v-else-if="gearTab === 'equipment'" />
@@ -254,15 +288,28 @@
 
       <!-- ── Combat ── -->
       <div v-else-if="view === 'combat'" class="gear-view exploration-view" :style="{ '--exploration-bg': `url(${explorationBg})` }">
-        <div class="gear-tabs combat-tabs">
-          <button class="gear-tab" :class="{ active: combatTab === 'training' }" @click="combatTab = 'training'">Training</button>
-          <button class="gear-tab" :class="{ active: combatTab === 'explore' }"  @click="combatTab = 'explore'">Exploration</button>
-          <div class="tab-sep"></div>
-          <button class="gear-tab" :class="{ active: combatTab === 'dungeons' }" @click="combatTab = 'dungeons'">Dungeons</button>
-          <button class="gear-tab" :class="{ active: combatTab === 'raids' }"    @click="combatTab = 'raids'">Raids</button>
-          <div class="tab-sep"></div>
-          <button class="gear-tab" :class="{ active: combatTab === 'sieges' }"   @click="combatTab = 'sieges'">Sieges</button>
-        </div>
+        <nav class="hall-subnav hall-subnav--5col">
+          <button class="hall-subnav-btn" :class="{ active: combatTab === 'training' }" @click="combatTab = 'training'">
+            <p class="hall-subnav-name">Training</p>
+            <p class="hall-subnav-flavor">Sharpen your warriors</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: combatTab === 'explore' }"  @click="combatTab = 'explore'">
+            <p class="hall-subnav-name">Exploration</p>
+            <p class="hall-subnav-flavor">Scout the region</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: combatTab === 'dungeons' }" @click="combatTab = 'dungeons'">
+            <p class="hall-subnav-name">Dungeons</p>
+            <p class="hall-subnav-flavor">Delve the deep</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: combatTab === 'raids' }"    @click="combatTab = 'raids'">
+            <p class="hall-subnav-name">Raids</p>
+            <p class="hall-subnav-flavor">Boss encounters</p>
+          </button>
+          <button class="hall-subnav-btn" :class="{ active: combatTab === 'sieges' }"   @click="combatTab = 'sieges'">
+            <p class="hall-subnav-name">Sieges</p>
+            <p class="hall-subnav-flavor">Storm the walls</p>
+          </button>
+        </nav>
         <HomeView
           v-if="combatTab === 'training'"
           @start-battle="startBattle"
@@ -343,6 +390,7 @@ import arsenalBg     from './assets/backgrounds/arsenal.png'
 import explorationBg from './assets/backgrounds/exploration_bg.png'
 import navBg from './assets/backgrounds/bg_nav.png'
 import codexIcon from './assets/ui/codex.png'
+import collectionIcon from './assets/ui/collection-icon.png'
 import closeImg  from './assets/ui/close.png'
 import GameIcon from './components/ui/GameIcon.vue'
 import { useAdvisorStore } from './stores/useAdvisorStore.js'
@@ -399,6 +447,13 @@ function startAutoRaid(raidId) {
 
 function navigate(newView) {
   closeAllPanels()
+  if (newView === 'hall')       { view.value = 'hall';   hallTab.value = 'hall';      return }
+  if (newView === 'stronghold') { view.value = 'hall';   hallTab.value = 'stronghold'; return }
+  if (newView === 'artisan')    { view.value = 'hall';   hallTab.value = 'artisan';    return }
+  if (newView === 'market')     { view.value = 'hall';   hallTab.value = 'market';     return }
+  if (newView === 'campaign')   { view.value = 'combat'; combatTab.value = 'training'; return }
+  if (newView === 'dungeon')    { view.value = 'combat'; combatTab.value = 'dungeons'; return }
+  if (newView === 'sieges')     { view.value = 'combat'; combatTab.value = 'sieges';   return }
   view.value = newView
 }
 
@@ -407,6 +462,21 @@ useSmeltingTick()
 useTanningTick()
 useWeavingTick()
 const settings = useSettingsStore()
+
+const HALL_PATHS = [
+  { dest: 'hall',       name: 'Great Hall',  flavor: 'Your seat of power' },
+  { dest: 'stronghold', name: 'Stronghold',  flavor: 'The keep demands your attention' },
+  { dest: 'artisan',    name: 'Artisan',     flavor: 'The forge and loom await your craft' },
+  { dest: 'market',     name: 'Market',      flavor: 'Trade routes feed the war machine' },
+]
+
+const HOUSE_COLORS = {
+  'House Aldric':   '#c8962a',
+  'House Valdris':  '#4fa8ff',
+  'House Caelwyn':  '#4dff88',
+  'House Mordaine': '#b44fff',
+}
+const hallNavColor = computed(() => HOUSE_COLORS[playerHeroStore.heroFaction] ?? 'var(--gold)')
 
 const SHIELD_IMAGES = { aldric: shieldAldric, valdris: shieldValdris, caelwyn: shieldCaelwyn, mordaine: shieldMordaine }
 const navLogo = computed(() => SHIELD_IMAGES[settings.theme] ?? logoNav)
@@ -886,7 +956,76 @@ body {
   flex-shrink: 0;
 }
 
-.hall-tabs, .artisan-tabs { position: relative; z-index: 2; }
+.hall-section {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+}
+.hall-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.hall-subnav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border-gold);
+  background: #0b0804;
+  flex-shrink: 0;
+}
+.hall-subnav--artisan {
+  grid-template-columns: repeat(6, 1fr);
+  background: #090703;
+  border-top: none;
+}
+.hall-subnav--5col {
+  grid-template-columns: repeat(5, 1fr);
+}
+.hall-subnav-btn {
+  background: none;
+  border: none;
+  border-right: 1px solid var(--border-brown);
+  padding: 8px 16px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s, border-bottom-color 0.15s;
+  border-bottom: 2px solid transparent;
+}
+.hall-subnav-btn:last-child { border-right: none; }
+.hall-subnav-btn:hover { background: var(--bg-panel); }
+.hall-subnav-btn.active {
+  background: var(--bg-panel);
+  border-bottom-color: v-bind(hallNavColor);
+}
+.hall-subnav-name {
+  font-family: var(--font-head);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: v-bind(hallNavColor);
+  margin: 0;
+}
+.hall-subnav-flavor {
+  font-size: 0.56rem;
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+
+.artisan-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.artisan-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
 .combat-tabs { display: flex; align-items: center; }
 .relic-pip {
   background: #3a1a6a;

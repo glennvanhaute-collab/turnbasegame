@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit Roster · Westrun Chronicles</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0e0c15;
+  --surface: #17142a;
+  --card:    #201d38;
+  --border:  #302a50;
+  --text:    #ede8ff;
+  --muted:   #6a618c;
+  --dim:     #3c3660;
+
+  --c-aldric:  #d4882a;
+  --c-valdris: #5878d0;
+  --c-caelwyn: #42a857;
+  --c-mordaine:#a050d4;
+  --c-ignar:   #c84040;
+  --c-ancient: #c4a428;
+
+  --rare:      #4fa8ff;
+  --epic:      #b44fff;
+  --legendary: #ffd700;
+  --mythical:  #ff3355;
+  --ancient:   #c4a428;
+
+  --r-warrior:  #d07030;
+  --r-tank:     #4090d0;
+  --r-mage:     #9044cc;
+  --r-healer:   #30a858;
+  --r-ranger:   #c8a030;
+  --r-debuffer: #c04050;
+  --r-champion: #d4a828;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 100vh;
+}
+
+/* ── page header ── */
+.page-header {
+  background: linear-gradient(180deg, rgba(18,14,30,0) 0%, var(--surface) 100%), var(--bg);
+  padding: 36px 28px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.page-eyebrow {
+  font-size: 0.59rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.page-title {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-size: 1.65rem;
+  font-weight: 400;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  color: var(--text);
+}
+
+.header-counts {
+  display: flex;
+  gap: 18px;
+  font-size: 0.63rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  align-items: center;
+}
+
+.header-counts span b { color: var(--text); font-variant-numeric: tabular-nums; }
+
+/* ── legend bar ── */
+.legend-bar { background: var(--surface); border-bottom: 1px solid var(--border); }
+
+.legend-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 9px 28px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.legend-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.61rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.gem { width: 7px; height: 7px; transform: rotate(45deg); flex-shrink: 0; }
+
+/* ── main ── */
+main { max-width: 1440px; margin: 0 auto; padding: 32px 28px 60px; }
+
+/* ── faction block ── */
+.faction-block { margin-bottom: 44px; }
+
+.faction-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+
+.faction-bar { width: 3px; height: 24px; border-radius: 1px; flex-shrink: 0; }
+
+.faction-title {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-variant: small-caps;
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--text);
+}
+
+.faction-affinity {
+  font-size: 0.59rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.faction-rule { flex: 1; height: 1px; background: var(--border); }
+
+.faction-count {
+  font-size: 0.59rem;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── hero grid ── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+  gap: 7px;
+}
+
+/* ── hero card ── */
+.hero-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%);
+  overflow: hidden;
+  transition: background 0.12s;
+}
+
+.hero-card:hover { background: #262050; }
+
+.hero-card.rarity-mythical { box-shadow: inset 0 0 0 1px rgba(255,51,85,0.12); }
+.hero-card.rarity-ancient  { box-shadow: inset 0 0 0 1px rgba(196,164,40,0.2); }
+
+/* rarity diamond — floats over portrait */
+.card-gem {
+  position: absolute;
+  top: 6px;
+  right: 16px;
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  z-index: 2;
+  /* subtle border to pop against light portrait */
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.4);
+}
+
+/* portrait */
+.card-portrait {
+  width: 100%;
+  height: 155px;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+/* subtle bottom fade so card body merges naturally */
+.card-portrait::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--card));
+  pointer-events: none;
+}
+
+.portrait-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* card body */
+.card-body {
+  padding: 7px 10px 9px;
+}
+
+.hero-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.28;
+  margin-bottom: 6px;
+  min-height: 1.82em;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.hero-badges { display: flex; gap: 3px; flex-wrap: wrap; }
+
+.badge {
+  font-size: 0.54rem;
+  padding: 2px 5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+}
+
+.badge-role {
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  border-color: var(--border);
+}
+
+.badge-rare      { color: var(--rare);      background: rgba(79,168,255,0.06);  border-color: rgba(79,168,255,0.22); }
+.badge-epic      { color: var(--epic);      background: rgba(180,79,255,0.06);  border-color: rgba(180,79,255,0.22); }
+.badge-legendary { color: var(--legendary); background: rgba(255,215,0,0.06);   border-color: rgba(255,215,0,0.22); }
+.badge-mythical  { color: var(--mythical);  background: rgba(255,51,85,0.06);   border-color: rgba(255,51,85,0.22); }
+.badge-ancient   { color: var(--ancient);   background: rgba(196,164,40,0.08);  border-color: rgba(196,164,40,0.28); }
+
+.role-dot {
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+  position: relative;
+  top: -0.5px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-card.rarity-mythical:hover .portrait-img,
+  .hero-card.rarity-ancient:hover .portrait-img {
+    animation: portrait-pulse 2s ease-in-out infinite;
+  }
+  @keyframes portrait-pulse { 0%,100%{opacity:1} 50%{opacity:.85} }
+}
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <p class="page-eyebrow">Westrun Chronicles</p>
+  <div class="header-inner">
+    <h1 class="page-title">Unit Roster</h1>
+    <div class="header-counts" id="hdr-counts"></div>
+  </div>
+</header>
+
+<div class="legend-bar">
+  <div class="legend-inner">
+    <span class="legend-label">Rarity —</span>
+    <div class="legend-item"><div class="gem" style="background:var(--rare)"></div>Rare</div>
+    <div class="legend-item"><div class="gem" style="background:var(--epic)"></div>Epic</div>
+    <div class="legend-item"><div class="gem" style="background:var(--legendary)"></div>Legendary</div>
+    <div class="legend-item"><div class="gem" style="background:var(--mythical)"></div>Mythical</div>
+    <div class="legend-item"><div class="gem" style="background:var(--ancient)"></div>Ancient</div>
+  </div>
+</div>
+
+<main id="app-main"></main>
+
+<script>
+// Portrait map — key = hero.name.toLowerCase().replace(/\s+/g, '-')
+const PORTRAIT_MAP = {
+  // House Aldric
+  'garrett-the-unbroken':  'src/assets/units/rare/garrett-the-unbroken.png',
+  'sir-hadvar':            'src/assets/units/rare/Sir-Hadvar.png',
+  'durwald-the-immovable': 'src/assets/units/rare/Durwald-the-Immovable.png',
+  'aldric-marksman':       'src/assets/units/rare/aldric-marksman.png',
+  'ser-roland':            'src/assets/units/epic/ser-roland.png',
+  'gwendal-ironvow':       'src/assets/units/epic/Gwendal-Ironvow.png',
+  'brenna-shieldmaiden':   'src/assets/units/epic/brenna-shieldmaiden.png',
+  'helga':                 'src/assets/units/legendary/Helga.png',
+  'kyver':                 'src/assets/units/legendary/Kyver.png',
+  'lord-aldric':           'src/assets/units/legendary/lord-aldric.png',
+  'aurelan-dawnspire':     'src/assets/units/mythical/aurelan-dawnspire.png',
+  'jade-dragonforge':      'src/assets/units/mythical/Jade-dragonforge.png',
+  // House Valdris
+  'lyra-of-the-crescent':  'src/assets/units/rare/Lyra-of-the-Crescent.png',
+  'draven-spellblade':     'src/assets/units/rare/Draven-Spellblade.png',
+  'elara-frostweaver':     'src/assets/units/rare/Elara-Frostweaver.png',
+  'mirena-ashveil':        'src/assets/units/rare/Mirena-Ashveil.png',
+  'gribzak-gearvein':      'src/assets/units/rare/Gribzak-Gearvein.png',
+  'caius-stormbinder':     'src/assets/units/epic/caius-stormbinder.png',
+  'borrik-stormcog':       'src/assets/units/epic/Borrik-Stormcog.png',
+  'zwierls':               'src/assets/units/epic/zwierls.png',
+  'seraphel':              'src/assets/units/legendary/seraphel.png',
+  'archmage-kelvar':       'src/assets/units/legendary/archmage-kelvar.png',
+  'archmage-valdris':      'src/assets/units/mythical/archmage-valdris.png',
+  // House Caelwyn
+  'rowan-the-wandering':   'src/assets/units/rare/Rowan-the-Wandering.png',
+  'mira-of-caelwyn':       'src/assets/units/epic/Mira-of-Caelwyn.png',
+  'caelwyn-warden':        'src/assets/units/epic/caelwyn-warden.png',
+  'lyreth-moondrift':      'src/assets/units/rare/Lyreth-Moondrift.png',
+  'caelwyn-herbalist':     'src/assets/units/rare/caelwyn-herbalist.png',
+  'arendial':              'src/assets/units/rare/Arendial.png',
+  'thrandyl':              'src/assets/units/rare/Thrandyl.png',
+  'gorundal':              'src/assets/units/rare/gorundal.png',
+  'sylara-the-reviver':    'src/assets/units/epic/sylara-the-reviver.png',
+  'eilistra':              'src/assets/units/epic/Eilistra.jpg',
+  'eron':                  'src/assets/units/epic/Eron.png',
+  'theron-greenmarch':     'src/assets/units/legendary/theron-greenmarch.png',
+  'arri-the-witch':        'src/assets/units/legendary/Arri-the-witch.png',
+  'lord-caelwyn':          'src/assets/units/mythical/lord-caelwyn.png',
+  // House Mordaine
+  'zareth-the-hollow':     'src/assets/units/rare/Zareth-the-Hollow.png',
+  'serix-the-wretched':    'src/assets/units/epic/serix-the-wretched.png',
+  'nyxara-voidwalker':     'src/assets/units/rare/Nyxara-Voidwalker.png',
+  'velmorn-the-shadow':    'src/assets/units/epic/Velmorn-the-Shadow.png',
+  'mord-the-forsaken':     'src/assets/units/epic/mord-the-forsaken.png',
+  'thalric-vaelorian':     'src/assets/units/epic/thalric-vaelorian.png',
+  'vorath-the-undying':    'src/assets/units/mythical/vorath-the-undying.png',
+  'lord-mordaine':         'src/assets/units/mythical/lord-mordaine.png',
+  // House Ignar
+  'arne-frostbound':            'src/assets/units/epic/arne-frostbound.png',
+  'hilda-the-shieldmaiden':     'src/assets/units/epic/Hilda-the-shieldmaiden.png',
+  // Ancient Nobles
+  'valerius-dawnchaser':        'src/assets/units/ancient/valerius-dawnchaser.png',
+  'lord-vaeric-corvayne':       'src/assets/units/ancient/lord-vaeric-corvayne.png',
+}
+
+const RARITY_ORDER = { rare:0, epic:1, legendary:2, mythical:3, ancient:4 }
+const RARITY_CSS   = { rare:'--rare', epic:'--epic', legendary:'--legendary', mythical:'--mythical', ancient:'--ancient' }
+
+const ROLE_COLOR = {
+  warrior:'var(--r-warrior)', tank:'var(--r-tank)', mage:'var(--r-mage)',
+  healer:'var(--r-healer)', ranger:'var(--r-ranger)',
+  debuffer:'var(--r-debuffer)', champion:'var(--r-champion)',
+}
+
+const ROLE_LABEL = {
+  warrior:'War', tank:'Tnk', mage:'Mag',
+  healer:'Hlr', ranger:'Rng', debuffer:'Dbf', champion:'Chp',
+}
+
+const FACTIONS = [
+  {
+    id:'aldric', name:'House Aldric', affinity:'Force', cssVar:'--c-aldric',
+    heroes:[
+      {name:'Garrett the Unbroken',  rarity:'rare',      role:'warrior'},
+      {name:'Sir Hadvar',            rarity:'rare',      role:'tank'},
+      {name:'Durwald the Immovable', rarity:'rare',      role:'tank'},
+      {name:'Aldric Marksman',       rarity:'rare',      role:'ranger'},
+      {name:'Ser Roland',            rarity:'epic',      role:'warrior'},
+      {name:'Gwendal Ironvow',       rarity:'epic',      role:'warrior'},
+      {name:'Brenna Shieldmaiden',   rarity:'epic',      role:'warrior'},
+      {name:'Helga',                 rarity:'legendary', role:'tank'},
+      {name:'Kyver',                 rarity:'legendary', role:'warrior'},
+      {name:'Lord Aldric',           rarity:'mythical',  role:'warrior'},
+      {name:'Aurelan Dawnspire',     rarity:'mythical',  role:'warrior'},
+      {name:'Jade Dragonforge',      rarity:'mythical',  role:'warrior'},
+    ]
+  },
+  {
+    id:'valdris', name:'House Valdris', affinity:'Magic', cssVar:'--c-valdris',
+    heroes:[
+      {name:'Lyra of the Crescent',  rarity:'rare',      role:'mage'},
+      {name:'Draven Spellblade',     rarity:'rare',      role:'mage'},
+      {name:'Elara Frostweaver',     rarity:'rare',      role:'mage'},
+      {name:'Mirena Ashveil',        rarity:'rare',      role:'mage'},
+      {name:'Gribzak Gearvein',      rarity:'rare',      role:'mage'},
+      {name:'Caius Stormbinder',     rarity:'epic',      role:'mage'},
+      {name:'Borrik Stormcog',       rarity:'epic',      role:'warrior'},
+      {name:'Zwierls',               rarity:'epic',      role:'warrior'},
+      {name:'Seraphel',              rarity:'legendary', role:'mage'},
+      {name:'Archmage Kelvar',       rarity:'legendary', role:'mage'},
+      {name:'Archmage Valdris',      rarity:'mythical',  role:'mage'},
+    ]
+  },
+  {
+    id:'caelwyn', name:'House Caelwyn', affinity:'Spirit', cssVar:'--c-caelwyn',
+    heroes:[
+      {name:'Rowan the Wandering',   rarity:'rare',      role:'healer'},
+      {name:'Mira of Caelwyn',       rarity:'rare',      role:'healer'},
+      {name:'Caelwyn Warden',        rarity:'rare',      role:'healer'},
+      {name:'Lyreth Moondrift',      rarity:'rare',      role:'ranger'},
+      {name:'Caelwyn Herbalist',     rarity:'rare',      role:'healer'},
+      {name:'Arendial',              rarity:'rare',      role:'ranger'},
+      {name:'Thrandyl',              rarity:'rare',      role:'healer'},
+      {name:'Gorundal',              rarity:'rare',      role:'tank'},
+      {name:'Sylara the Reviver',    rarity:'epic',      role:'healer'},
+      {name:'Eilistra',              rarity:'epic',      role:'ranger'},
+      {name:'Eron',                  rarity:'epic',      role:'debuffer'},
+      {name:'Theron Greenmarch',     rarity:'legendary', role:'healer'},
+      {name:'Arri the Witch',        rarity:'legendary', role:'debuffer'},
+      {name:'Lord Caelwyn',          rarity:'mythical',  role:'champion'},
+    ]
+  },
+  {
+    id:'mordaine', name:'House Mordaine', affinity:'Void', cssVar:'--c-mordaine',
+    heroes:[
+      {name:'Zareth the Hollow',     rarity:'rare',      role:'tank'},
+      {name:'Serix the Wretched',    rarity:'rare',      role:'warrior'},
+      {name:'Nyxara Voidwalker',     rarity:'rare',      role:'debuffer'},
+      {name:'Velmorn the Shadow',    rarity:'epic',      role:'ranger'},
+      {name:'Mord the Forsaken',     rarity:'epic',      role:'ranger'},
+      {name:'Thalric Vaelorian',     rarity:'epic',      role:'tank'},
+      {name:'Vorath the Undying',    rarity:'mythical',  role:'mage'},
+      {name:'Lord Mordaine',         rarity:'mythical',  role:'mage'},
+    ]
+  },
+  {
+    id:'ignar', name:'House Ignar', affinity:'Force · Raiders', cssVar:'--c-ignar',
+    heroes:[
+      {name:'Arne Frostbound',         rarity:'epic', role:'warrior'},
+      {name:'Hilda the Shieldmaiden',  rarity:'epic', role:'tank'},
+    ]
+  },
+  {
+    id:'ancient', name:'Ancient Nobles', affinity:'Astral · Blood', cssVar:'--c-ancient',
+    heroes:[
+      {name:'Valerius Dawnchaser',   rarity:'ancient', role:'mage'},
+      {name:'Lord Vaeric Corvayne',  rarity:'ancient', role:'debuffer'},
+    ]
+  },
+]
+
+function heroKey(name) {
+  return name.toLowerCase().replace(/\s+/g, '-')
+}
+
+function initials(name) {
+  const w = name.split(' ')
+  if (w.length === 1) return w[0][0].toUpperCase()
+  return (w[0][0] + w[w.length - 1][0]).toUpperCase()
+}
+
+function heroCard(hero, factionCssVar) {
+  const rc   = `var(${RARITY_CSS[hero.rarity]})`
+  const fc   = `var(${factionCssVar})`
+  const avbg = `color-mix(in srgb, ${fc} 18%, transparent)`
+  const rol  = ROLE_LABEL[hero.role] || hero.role
+  const rclr = ROLE_COLOR[hero.role] || 'var(--muted)'
+  const key  = heroKey(hero.name)
+  const src  = PORTRAIT_MAP[key] || ''
+  const inits = initials(hero.name)
+
+  const portraitContent = src
+    ? `<img class="portrait-img" src="${src}" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`
+      + `<div class="portrait-fallback" style="background:${avbg};color:${fc};display:none">${inits}</div>`
+    : `<div class="portrait-fallback" style="background:${avbg};color:${fc}">${inits}</div>`
+
+  return `<div class="hero-card rarity-${hero.rarity}" style="border-left-color:${fc}">
+    <div class="card-gem" style="background:${rc}"></div>
+    <div class="card-portrait">${portraitContent}</div>
+    <div class="card-body">
+      <div class="hero-name">${hero.name}</div>
+      <div class="hero-badges">
+        <span class="badge badge-${hero.rarity}">${hero.rarity}</span>
+        <span class="badge badge-role"><span class="role-dot" style="background:${rclr}"></span>${rol}</span>
+      </div>
+    </div>
+  </div>`
+}
+
+function renderFaction(f) {
+  const sorted = [...f.heroes].sort((a,b) => RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity])
+  const fc = `var(${f.cssVar})`
+  const cards = sorted.map(h => heroCard(h, f.cssVar)).join('')
+  return `<section class="faction-block">
+    <div class="faction-heading">
+      <div class="faction-bar" style="background:${fc}"></div>
+      <span class="faction-title">${f.name}</span>
+      <span class="faction-affinity">${f.affinity}</span>
+      <div class="faction-rule"></div>
+      <span class="faction-count">${f.heroes.length}</span>
+    </div>
+    <div class="hero-grid">${cards}</div>
+  </section>`
+}
+
+document.getElementById('app-main').innerHTML = FACTIONS.map(renderFaction).join('')
+
+const total = FACTIONS.reduce((n, f) => n + f.heroes.length, 0)
+const byRarity = {}
+FACTIONS.forEach(f => f.heroes.forEach(h => { byRarity[h.rarity] = (byRarity[h.rarity]||0)+1 }))
+const parts = ['rare','epic','legendary','mythical','ancient']
+  .filter(r => byRarity[r])
+  .map(r => `<b>${byRarity[r]}</b> ${r}`)
+  .join('  ·  ')
+document.getElementById('hdr-counts').innerHTML =
+  `<span><b>${total}</b> total</span><span>${parts}</span>`
+</script>
+</body>
+</html>

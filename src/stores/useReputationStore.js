@@ -4,16 +4,16 @@ import { useCollectionStore } from './useCollectionStore.js'
 
 const STORAGE_KEY = 'raid-reputation'
 
-// Reputation earned by interacting with each house (0–1000)
-export const REP_MAX = 1000
+// Reputation earned by interacting with each house (0–30000)
+export const REP_MAX = 30000
 
 export const REP_TIERS = [
-  { name: 'Stranger',  threshold: 0   },
-  { name: 'Known',     threshold: 100 },
-  { name: 'Trusted',   threshold: 300 },
-  { name: 'Allied',    threshold: 600 },
-  { name: 'Devoted',   threshold: 850 },
-  { name: 'Exalted',   threshold: 1000 },
+  { name: 'Stranger',  threshold: 0     },
+  { name: 'Known',     threshold: 500   },
+  { name: 'Trusted',   threshold: 2500  },
+  { name: 'Allied',    threshold: 7500  },
+  { name: 'Devoted',   threshold: 15000 },
+  { name: 'Exalted',   threshold: 30000 },
 ]
 
 // Hero key that unlocks when the house reaches Exalted

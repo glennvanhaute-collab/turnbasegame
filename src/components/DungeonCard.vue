@@ -58,6 +58,30 @@
     </button>
   </div>
 
+  <!-- Resource Cache card -->
+  <div
+    v-else-if="dungeon.isNode && dungeon.nodeType === 'resource'"
+    class="dungeon-card node-card node-resource"
+  >
+    <div class="node-type-badge" style="color: #c9a44a; border-color: #c9a44a44;">Supply Cache</div>
+    <div class="card-name">{{ dungeon.name }}</div>
+    <div class="node-desc">Provisions left behind — yours for the taking.</div>
+    <div class="node-stat-pool">
+      <span class="card-label">Contents</span>
+      <div class="resource-drops">
+        <span
+          v-for="drop in dungeon.drops"
+          :key="drop.id"
+          class="drop-chip"
+          :style="{ borderColor: drop.color + '55', color: drop.color }"
+        >{{ drop.name }} ×{{ drop.amount }}</span>
+      </div>
+    </div>
+    <button class="enter-btn" style="border-color: #c9a44a; color: #c9a44a;" @click="$emit('claim')">
+      Collect →
+    </button>
+  </div>
+
   <!-- Discovery Node card -->
   <div
     v-else-if="dungeon.isNode"
@@ -374,6 +398,15 @@ const statPool  = computed(() => {
 .forge-disc-elven  { border-color: #1a4a38; box-shadow: 0 0 18px rgba(136,255,204,0.12); }
 .forge-disc-goblin { border-color: #2a3a10; box-shadow: 0 0 18px rgba(170,255,68,0.10); }
 .forge-disc-dwarf  { border-color: #4a2a18; box-shadow: 0 0 18px rgba(255,153,102,0.12); }
+.node-card.node-resource {
+  border-color: #3a2e18;
+  background-color: #0d0a05;
+}
+.resource-drops { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.drop-chip {
+  font-size: 0.6rem; font-weight: 700; border: 1px solid;
+  border-radius: 3px; padding: 2px 6px;
+}
 .node-icon { font-size: 1.6rem; margin-bottom: 2px; }
 .node-type-badge {
   display: inline-flex; align-items: center;

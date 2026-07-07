@@ -325,10 +325,26 @@ export function rollDungeonDrops(tier) {
 let _counter = 0
 function uid()  { return `dng_${Date.now()}_${++_counter}` }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)] }
+function rand(a, b) { return a + Math.floor(Math.random() * (b - a + 1)) }
+
+const CACHE_NAMES = [
+  'Collapsed Mineshaft', 'Hidden Stash', 'Abandoned Campsite',
+  'Overgrown Depot', 'Roadside Cache', 'Deserted Outpost',
+  'Buried Provisions', 'Old Waystation', 'Forgotten Stockpile',
+]
+
+export function rollResourceCacheDrops() {
+  const drops = []
+  drops.push({ type: 'ore',  id: 'copper', name: 'Copper Ore',  color: '#cd7f32', amount: rand(3, 7) })
+  if (Math.random() < 0.55) drops.push({ type: 'ore',  id: 'tin',    name: 'Tin Ore',    color: '#9ea8a8', amount: rand(2, 5) })
+  if (Math.random() < 0.25) drops.push({ type: 'ore',  id: 'steel',  name: 'Steel Ore',  color: '#6b7c85', amount: rand(1, 3) })
+  if (Math.random() < 0.35) drops.push({ type: 'hide', id: 'rough',  name: 'Rough Hide', color: '#c8906e', amount: rand(1, 4) })
+  if (Math.random() < 0.30) drops.push({ type: 'fiber',id: 'cotton', name: 'Cotton',     color: '#f0e0c0', amount: rand(1, 4) })
+  return drops
+}
 
 const FORGE_CHANCE   = 0.01
 const BLESSED_CHANCE = 0.01
-const TAVERN_CHANCE  = 0.08
 
 // Per-slot tier weights — lower tiers roll more often
 const TIER_WEIGHTS = [
@@ -408,9 +424,8 @@ function buildCityCard(city) {
 // Returns a special node type if one rolls, else null
 function rollSpecialNode() {
   const r = Math.random()
-  if (r < FORGE_CHANCE)                            return { nodeType: 'forge' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE)           return { nodeType: 'blessed' }
-  if (r < FORGE_CHANCE + BLESSED_CHANCE + TAVERN_CHANCE) return { nodeType: 'tavern' }
+  if (r < FORGE_CHANCE)                  return { nodeType: 'forge' }
+  if (r < FORGE_CHANCE + BLESSED_CHANCE) return { nodeType: 'blessed' }
   return null
 }
 
@@ -433,21 +448,14 @@ export function generateDungeonOptions() {
       }
     }
 
-    const tier = rollTier()
-    const city = rollCityNode(tier)
-    if (city) return buildCityCard(city)
-
-    const enemyPoolId = pick(POOLS_BY_TIER[tier])
     return {
       id: uid(),
-      name: pick(NAMES[tier]),
-      tier,
-      enemyPoolId,
-      rewards: DUNGEON_REWARDS[tier],
-      difficulty: TIER_DIFFICULTY[tier],
-      isDungeon: true,
-      isNode: false,
+      name: pick(CACHE_NAMES),
+      nodeType: 'resource',
+      isNode: true,
+      isDungeon: false,
       pinned: false,
+      drops: rollResourceCacheDrops(),
     }
   })
 }

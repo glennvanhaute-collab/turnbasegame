@@ -50,7 +50,7 @@
           >
             <span class="rb-slot">{{ SLOT_LABELS[r.slot] }}</span>
             <span class="rb-name">{{ r.name }}</span>
-            <span class="rb-cost">{{ r.barCost }}×</span>
+            <span class="rb-cost">{{ r.costs ? r.costs[0].qty + '×' : r.barCost + '×' }}</span>
           </button>
 
         </div>
@@ -112,10 +112,15 @@
 
       <!-- Recipe detail -->
       <template v-else>
-        <div class="detail-header">
-          <div class="dh-slot">{{ SLOT_LABELS[selectedRecipe.slot] }}</div>
-          <div class="dh-name">{{ selectedRecipe.name }}</div>
-          <div class="dh-tier" :style="{ color: activeTierColor }">{{ activeTierName }}</div>
+        <div class="detail-top" :class="{ 'has-image': !!gearImage }">
+          <div class="detail-header">
+            <div class="dh-slot">{{ SLOT_LABELS[selectedRecipe.slot] }}</div>
+            <div class="dh-name">{{ selectedRecipe.name }}</div>
+            <div class="dh-tier" :style="{ color: activeTierColor }">{{ activeTierName }}</div>
+          </div>
+          <div v-if="gearImage" class="gear-preview">
+            <img :src="gearImage" :alt="selectedRecipe.name" class="gear-preview-img" />
+          </div>
         </div>
 
         <div class="detail-stats">
@@ -128,7 +133,12 @@
 
         <div class="detail-cost">
           <div class="ds-label">Materials</div>
-          <div class="cost-row">
+          <template v-if="selectedRecipe.costs">
+            <div v-for="c in selectedRecipe.costs" :key="c.id" class="cost-row">
+              <span class="cost-mat">{{ c.qty }}× {{ c.name }}</span>
+            </div>
+          </template>
+          <div v-else class="cost-row">
             <span class="cost-mat">{{ selectedRecipe.barCost }}× {{ selectedRecipe.barName }}</span>
           </div>
         </div>
@@ -159,7 +169,7 @@
           <span v-if="craftResult">✓ {{ craftResult }}</span>
           <span v-else-if="!assignedKey1 || !assignedKey2">Assign both artisans</span>
           <span v-else-if="!artisanMeetsLevel(selectedRecipe)">Artisan level too low</span>
-          <span v-else-if="!canAfford(selectedRecipe)">Not enough {{ selectedRecipe.barName }}</span>
+          <span v-else-if="!canAfford(selectedRecipe)">Not enough {{ missingMaterial(selectedRecipe) }}</span>
           <span v-else>✦ Craft {{ selectedRecipe.name }}</span>
         </button>
       </template>
@@ -174,6 +184,13 @@ import { ref, computed } from 'vue'
 import arcaneBg   from '../assets/backgrounds/fusion_workshop.png'
 import shadowBg   from '../assets/backgrounds/shadow_loom_background.png'
 import tanneryBg  from '../assets/backgrounds/iron_loom_background.png'
+
+const _gearSources = import.meta.glob('../assets/gear/*.png', { eager: true })
+const gearImageMap = {}
+for (const [path, mod] of Object.entries(_gearSources)) {
+  const key = path.split('/').pop().replace(/\.png$/i, '')
+  gearImageMap[key] = mod.default
+}
 
 const activeAtelierId = ref('arcane')
 const selectedRecipe  = ref(null)
@@ -208,31 +225,31 @@ const ATELIERS = [
       {
         id: 'steel', name: 'Steel', color: '#8899aa',
         recipes: [
-          { id: 'arcane_chest_steel',  name: 'Arcane Hauberk',    slot: 'chest',    tier: 'steel',     barCost: 5, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 90,  hp: 800,  atkPct: 0.05 } },
-          { id: 'arcane_helm_steel',   name: 'Arcane Helm',       slot: 'head',     tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 55,  hp: 500 } },
-          { id: 'arcane_legs_steel',   name: 'Arcane Greaves',    slot: 'legs',     tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 70,  hp: 600,  spd: 8 } },
-          { id: 'arcane_boots_steel',  name: 'Arcane Boots',      slot: 'boots',    tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 10, def: 40 } },
-          { id: 'arcane_gloves_steel', name: 'Arcane Gauntlets',  slot: 'gloves',   tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { atk: 60,  atkPct: 0.04 } },
+          { id: 'arcane_chest_steel',  name: 'Arcane Hauberk',    slot: 'chest',    tier: 'steel',     barCost: 5, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 90,  hp: 800,  atkPct: 0.05 }, image: 'Arcane_Hauberk' },
+          { id: 'arcane_helm_steel',   name: 'Arcane Helm',       slot: 'head',     tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 55,  hp: 500 }, image: 'Arcane_Helm' },
+          { id: 'arcane_legs_steel',   name: 'Arcane Greaves',    slot: 'legs',     tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 70,  hp: 600,  spd: 8 }, image: 'Arcane_Greaves' },
+          { id: 'arcane_boots_steel',  name: 'Arcane Boots',      slot: 'boots',    tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 10, def: 40 }, image: 'Arcane_Boots' },
+          { id: 'arcane_gloves_steel', name: 'Arcane Gauntlets',  slot: 'gloves',   tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { atk: 60,  atkPct: 0.04 }, image: 'Arcane_Gauntlets' },
         ],
       },
       {
-        id: 'mithril', name: 'Mithril', color: '#5bacd4',
+        id: 'darksteel', name: 'Darksteel', color: '#7c5cbf',
         recipes: [
-          { id: 'arcane_chest_mithril',  name: 'Void Plate',          slot: 'chest',  tier: 'mithril', barCost: 5, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 280, hp: 3200, atkPct: 0.10 } },
-          { id: 'arcane_helm_mithril',   name: 'Void Sallet',         slot: 'head',   tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 160, hp: 2000 } },
-          { id: 'arcane_legs_mithril',   name: 'Void Cuisses',        slot: 'legs',   tier: 'mithril', barCost: 4, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 220, hp: 2600, spd: 16 } },
-          { id: 'arcane_boots_mithril',  name: 'Void Sabatons',       slot: 'boots',  tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 20, def: 130 } },
-          { id: 'arcane_gloves_mithril', name: 'Void Gauntlets',      slot: 'gloves', tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { atk: 200, atkPct: 0.09 } },
+          { id: 'arcane_chest_darksteel',  name: 'Void Plate',     slot: 'chest',  tier: 'darksteel', barCost: 5, barName: 'Darksteel Bars', reqLevel: 9, baseStats: { def: 280, hp: 3200, atkPct: 0.10 }, image: 'Void_Plate' },
+          { id: 'arcane_helm_darksteel',   name: 'Void Sallet',    slot: 'head',   tier: 'darksteel', barCost: 3, barName: 'Darksteel Bars', reqLevel: 9, baseStats: { def: 160, hp: 2000 }, image: 'Void_Sallet' },
+          { id: 'arcane_legs_darksteel',   name: 'Void Cuisses',   slot: 'legs',   tier: 'darksteel', barCost: 4, barName: 'Darksteel Bars', reqLevel: 9, baseStats: { def: 220, hp: 2600, spd: 16 }, image: 'Void_Cuisses' },
+          { id: 'arcane_boots_darksteel',  name: 'Void Sabatons',  slot: 'boots',  tier: 'darksteel', barCost: 3, barName: 'Darksteel Bars', reqLevel: 9, baseStats: { spd: 20, def: 130 }, image: 'Void_Sabatons' },
+          { id: 'arcane_gloves_darksteel', name: 'Void Gauntlets', slot: 'gloves', tier: 'darksteel', barCost: 3, barName: 'Darksteel Bars', reqLevel: 9, baseStats: { atk: 200, atkPct: 0.09 }, image: 'Void_Gauntlets' },
         ],
       },
       {
         id: 'moonsilver', name: 'Moonsilver', color: '#99ccff',
         recipes: [
-          { id: 'arcane_chest_moon',  name: 'Moonshard Mantle',   slot: 'chest',  tier: 'moonsilver', barCost: 5, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 420, hp: 6000, atkPct: 0.16 } },
-          { id: 'arcane_helm_moon',   name: 'Moonshard Crown',    slot: 'head',   tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 240, hp: 3800 } },
-          { id: 'arcane_legs_moon',   name: 'Moonshard Cuisses',  slot: 'legs',   tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 340, hp: 4600, spd: 24 } },
-          { id: 'arcane_boots_moon',  name: 'Moonshard Sabatons', slot: 'boots',  tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 28, def: 200 } },
-          { id: 'arcane_gloves_moon', name: 'Moonshard Gauntlets',slot: 'gloves', tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { atk: 320, atkPct: 0.14 } },
+          { id: 'arcane_chest_moon',  name: 'Moonshard Mantle',   slot: 'chest',  tier: 'moonsilver', barCost: 5, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 420, hp: 6000, atkPct: 0.16 }, image: 'Moonshard_Mantle' },
+          { id: 'arcane_helm_moon',   name: 'Moonshard Crown',    slot: 'head',   tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 240, hp: 3800 }, image: 'Moonshard_Crown' },
+          { id: 'arcane_legs_moon',   name: 'Moonshard Cuisses',  slot: 'legs',   tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 340, hp: 4600, spd: 24 }, image: 'Moonshard_Cuisses' },
+          { id: 'arcane_boots_moon',  name: 'Moonshard Sabatons', slot: 'boots',  tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 28, def: 200 }, image: 'Moonshard_Sabatons' },
+          { id: 'arcane_gloves_moon', name: 'Moonshard Gauntlets',slot: 'gloves', tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { atk: 320, atkPct: 0.14 }, image: 'Moonshard_Gauntlets' },
         ],
       },
     ],
@@ -256,31 +273,31 @@ const ATELIERS = [
       {
         id: 'steel', name: 'Steel', color: '#8899aa',
         recipes: [
-          { id: 'shadow_chest_steel',  name: 'Shadowweave Cuirass', slot: 'chest',  tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 12, critRate: 0.04, hp: 600 } },
-          { id: 'shadow_helm_steel',   name: 'Shadowweave Cowl',    slot: 'head',   tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 8,  critRate: 0.03 } },
-          { id: 'shadow_legs_steel',   name: 'Shadowweave Chaps',   slot: 'legs',   tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 10, atk: 55 } },
-          { id: 'shadow_boots_steel',  name: 'Shadowweave Treads',  slot: 'boots',  tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 14, critRate: 0.03 } },
-          { id: 'shadow_gloves_steel', name: 'Shadowweave Wraps',   slot: 'gloves', tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { atk: 65, critRate: 0.04 } },
+          { id: 'shadow_chest_steel',  name: 'Shadowweave Cuirass', slot: 'chest',  tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 12, critRate: 0.04, hp: 600 }, image: 'Shadowweave_Cuirass' },
+          { id: 'shadow_helm_steel',   name: 'Shadowweave Cowl',    slot: 'head',   tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 8,  critRate: 0.03 }, image: 'Shadowweave_Cowl' },
+          { id: 'shadow_legs_steel',   name: 'Shadowweave Chaps',   slot: 'legs',   tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 10, atk: 55 }, image: 'Shadowweave_Chaps' },
+          { id: 'shadow_boots_steel',  name: 'Shadowweave Treads',  slot: 'boots',  tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 14, critRate: 0.03 }, image: 'Shadowweave_Treads' },
+          { id: 'shadow_gloves_steel', name: 'Shadowweave Wraps',   slot: 'gloves', tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { atk: 65, critRate: 0.04 }, image: 'Shadowweave_Wraps' },
         ],
       },
       {
-        id: 'mithril', name: 'Mithril', color: '#5bacd4',
+        id: 'shadow_mat', name: 'Shadow', color: '#7040b0',
         recipes: [
-          { id: 'shadow_chest_mithril',  name: 'Phantom Cuirass',      slot: 'chest',  tier: 'mithril', barCost: 4, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 22, critRate: 0.07, hp: 2200 } },
-          { id: 'shadow_helm_mithril',   name: 'Phantom Cowl',         slot: 'head',   tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 16, critRate: 0.06 } },
-          { id: 'shadow_legs_mithril',   name: 'Phantom Chaps',        slot: 'legs',   tier: 'mithril', barCost: 4, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 18, atk: 160 } },
-          { id: 'shadow_boots_mithril',  name: 'Phantom Treads',       slot: 'boots',  tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 26, critRate: 0.06 } },
-          { id: 'shadow_gloves_mithril', name: 'Phantom Wraps',        slot: 'gloves', tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { atk: 200, critRate: 0.07 } },
+          { id: 'shadow_chest_shadow',  name: 'Phantom Cuirass', slot: 'chest',  tier: 'shadow_mat', costs: [{ store: 'hides', id: 'shadow', qty: 3, name: 'Shadow Pelt' }, { store: 'fibers', id: 'shadowthread', qty: 3, name: 'Shadow Thread' }], reqLevel: 12, baseStats: { spd: 22, critRate: 0.07, hp: 2200 }, image: 'Phantom_Cuirass' },
+          { id: 'shadow_helm_shadow',   name: 'Phantom Cowl',    slot: 'head',   tier: 'shadow_mat', costs: [{ store: 'hides', id: 'shadow', qty: 2, name: 'Shadow Pelt' }, { store: 'fibers', id: 'shadowthread', qty: 2, name: 'Shadow Thread' }], reqLevel: 12, baseStats: { spd: 16, critRate: 0.06 }, image: 'Phantom_Cowl' },
+          { id: 'shadow_legs_shadow',   name: 'Phantom Chaps',   slot: 'legs',   tier: 'shadow_mat', costs: [{ store: 'hides', id: 'shadow', qty: 3, name: 'Shadow Pelt' }, { store: 'fibers', id: 'shadowthread', qty: 2, name: 'Shadow Thread' }], reqLevel: 12, baseStats: { spd: 18, atk: 160 }, image: 'Phantom_Chaps' },
+          { id: 'shadow_boots_shadow',  name: 'Phantom Treads',  slot: 'boots',  tier: 'shadow_mat', costs: [{ store: 'hides', id: 'shadow', qty: 2, name: 'Shadow Pelt' }, { store: 'fibers', id: 'shadowthread', qty: 2, name: 'Shadow Thread' }], reqLevel: 12, baseStats: { spd: 26, critRate: 0.06 }, image: 'Phantom_Treads' },
+          { id: 'shadow_gloves_shadow', name: 'Phantom Wraps',   slot: 'gloves', tier: 'shadow_mat', costs: [{ store: 'hides', id: 'shadow', qty: 2, name: 'Shadow Pelt' }, { store: 'fibers', id: 'shadowthread', qty: 2, name: 'Shadow Thread' }], reqLevel: 12, baseStats: { atk: 200, critRate: 0.07 }, image: 'Phantom_Wraps' },
         ],
       },
       {
         id: 'moonsilver', name: 'Moonsilver', color: '#99ccff',
         recipes: [
-          { id: 'shadow_chest_moon',  name: 'Moonveil Coat',    slot: 'chest',  tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 32, critRate: 0.10, hp: 4000 } },
-          { id: 'shadow_helm_moon',   name: 'Moonveil Coif',    slot: 'head',   tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 24, critRate: 0.09 } },
-          { id: 'shadow_legs_moon',   name: 'Moonveil Chaps',   slot: 'legs',   tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 28, atk: 260 } },
-          { id: 'shadow_boots_moon',  name: 'Moonveil Treads',  slot: 'boots',  tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 36, critRate: 0.09 } },
-          { id: 'shadow_gloves_moon', name: 'Moonveil Wraps',   slot: 'gloves', tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { atk: 320, critRate: 0.10 } },
+          { id: 'shadow_chest_moon',  name: 'Moonveil Coat',    slot: 'chest',  tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 32, critRate: 0.10, hp: 4000 }, image: 'Moonveil_Coat' },
+          { id: 'shadow_helm_moon',   name: 'Moonveil Coif',    slot: 'head',   tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 24, critRate: 0.09 }, image: 'Moonveil_Coif' },
+          { id: 'shadow_legs_moon',   name: 'Moonveil Chaps',   slot: 'legs',   tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 28, atk: 260 }, image: 'Moonveil_Chaps' },
+          { id: 'shadow_boots_moon',  name: 'Moonveil Treads',  slot: 'boots',  tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 36, critRate: 0.09 }, image: 'Moonveil_Treads' },
+          { id: 'shadow_gloves_moon', name: 'Moonveil Wraps',   slot: 'gloves', tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { atk: 320, critRate: 0.10 }, image: 'Moonveil_Wraps' },
         ],
       },
     ],
@@ -304,31 +321,31 @@ const ATELIERS = [
       {
         id: 'steel', name: 'Steel', color: '#8899aa',
         recipes: [
-          { id: 'tannery_chest_steel',  name: 'Ironveil Hauberk',   slot: 'chest',  tier: 'steel',     barCost: 5, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 80, hp: 700, spd: 8 } },
-          { id: 'tannery_helm_steel',   name: 'Ironveil Helm',      slot: 'head',   tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 50, hp: 450 } },
-          { id: 'tannery_legs_steel',   name: 'Ironveil Chaps',     slot: 'legs',   tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 65, spd: 10 } },
-          { id: 'tannery_boots_steel',  name: 'Ironveil Treads',    slot: 'boots',  tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 12, def: 38 } },
-          { id: 'tannery_gloves_steel', name: 'Ironveil Gauntlets', slot: 'gloves', tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { atk: 55, def: 44 } },
+          { id: 'tannery_chest_steel',  name: 'Ironveil Hauberk',   slot: 'chest',  tier: 'steel',     barCost: 5, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 80, hp: 700, spd: 8 }, image: 'Ironveil_Hauberk' },
+          { id: 'tannery_helm_steel',   name: 'Ironveil Helm',      slot: 'head',   tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 50, hp: 450 }, image: 'Ironveil_Helm' },
+          { id: 'tannery_legs_steel',   name: 'Ironveil Chaps',     slot: 'legs',   tier: 'steel',     barCost: 4, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { def: 65, spd: 10 }, image: 'Ironveil_Chaps' },
+          { id: 'tannery_boots_steel',  name: 'Ironveil Treads',    slot: 'boots',  tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { spd: 12, def: 38 }, image: 'Ironveil_Treads' },
+          { id: 'tannery_gloves_steel', name: 'Ironveil Gauntlets', slot: 'gloves', tier: 'steel',     barCost: 3, barName: 'Steel Bars',     reqLevel: 5,  baseStats: { atk: 55, def: 44 }, image: 'Ironveil_Gauntlets' },
         ],
       },
       {
         id: 'mithril', name: 'Mithril', color: '#5bacd4',
         recipes: [
-          { id: 'tannery_chest_mithril',  name: 'Starforged Hide',     slot: 'chest',  tier: 'mithril', barCost: 5, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 250, hp: 2800, spd: 16 } },
-          { id: 'tannery_helm_mithril',   name: 'Starforged Helm',     slot: 'head',   tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 148, hp: 1800 } },
-          { id: 'tannery_legs_mithril',   name: 'Starforged Chaps',    slot: 'legs',   tier: 'mithril', barCost: 4, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 200, spd: 20 } },
-          { id: 'tannery_boots_mithril',  name: 'Starforged Treads',   slot: 'boots',  tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 22, def: 120 } },
-          { id: 'tannery_gloves_mithril', name: 'Starforged Gauntlets',slot: 'gloves', tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { atk: 175, def: 130 } },
+          { id: 'tannery_chest_mithril',  name: 'Starforged Hide',     slot: 'chest',  tier: 'mithril', barCost: 5, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 250, hp: 2800, spd: 16 }, image: 'Starforged_Hide' },
+          { id: 'tannery_helm_mithril',   name: 'Starforged Helm',     slot: 'head',   tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 148, hp: 1800 }, image: 'Starforged_Helm' },
+          { id: 'tannery_legs_mithril',   name: 'Starforged Chaps',    slot: 'legs',   tier: 'mithril', barCost: 4, barName: 'Mithril Bars', reqLevel: 12, baseStats: { def: 200, spd: 20 }, image: 'Starforged_Chaps' },
+          { id: 'tannery_boots_mithril',  name: 'Starforged Treads',   slot: 'boots',  tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { spd: 22, def: 120 }, image: 'Starforged_Treads' },
+          { id: 'tannery_gloves_mithril', name: 'Starforged Gauntlets',slot: 'gloves', tier: 'mithril', barCost: 3, barName: 'Mithril Bars', reqLevel: 12, baseStats: { atk: 175, def: 130 }, image: 'Starforged_Gauntlets' },
         ],
       },
       {
         id: 'moonsilver', name: 'Moonsilver', color: '#99ccff',
         recipes: [
-          { id: 'tannery_chest_moon',  name: 'Eclipse Plate',     slot: 'chest',  tier: 'moonsilver', barCost: 5, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 400, hp: 5200, spd: 24 } },
-          { id: 'tannery_helm_moon',   name: 'Eclipse Coif',      slot: 'head',   tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 230, hp: 3200 } },
-          { id: 'tannery_legs_moon',   name: 'Eclipse Chaps',     slot: 'legs',   tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 320, spd: 30 } },
-          { id: 'tannery_boots_moon',  name: 'Eclipse Treads',    slot: 'boots',  tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 32, def: 185 } },
-          { id: 'tannery_gloves_moon', name: 'Eclipse Gauntlets', slot: 'gloves', tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { atk: 280, def: 200 } },
+          { id: 'tannery_chest_moon',  name: 'Eclipse Plate',     slot: 'chest',  tier: 'moonsilver', barCost: 5, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 400, hp: 5200, spd: 24 }, image: 'Eclipse_Plate' },
+          { id: 'tannery_helm_moon',   name: 'Eclipse Coif',      slot: 'head',   tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 230, hp: 3200 }, image: 'Eclipse_Coif' },
+          { id: 'tannery_legs_moon',   name: 'Eclipse Chaps',     slot: 'legs',   tier: 'moonsilver', barCost: 4, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { def: 320, spd: 30 }, image: 'Eclipse_Chaps' },
+          { id: 'tannery_boots_moon',  name: 'Eclipse Treads',    slot: 'boots',  tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { spd: 32, def: 185 }, image: 'Eclipse_Treads' },
+          { id: 'tannery_gloves_moon', name: 'Eclipse Gauntlets', slot: 'gloves', tier: 'moonsilver', barCost: 3, barName: 'Moonsilver Bars', reqLevel: 18, baseStats: { atk: 280, def: 200 }, image: 'Eclipse_Gauntlets' },
         ],
       },
     ],
@@ -351,6 +368,11 @@ const activeTierName = computed(() => {
     if (tier.recipes.some(r => r.id === selectedRecipe.value.id)) return tier.name
   }
   return ''
+})
+
+const gearImage = computed(() => {
+  const key = selectedRecipe.value?.image
+  return key ? (gearImageMap[key] ?? null) : null
 })
 
 // ── Stores ────────────────────────────────────────────────────────────
@@ -376,7 +398,7 @@ const SLOT_TO_GEARTYPE = {
   chest: 'armor', head: 'helmet', legs: 'legs', boots: 'boots', gloves: 'gloves',
 }
 
-const FUSION_XP_PER_TIER = { steel: 20, mithril: 45, moonsilver: 90 }
+const FUSION_XP_PER_TIER = { steel: 20, shadow_mat: 45, mithril: 45, moonsilver: 90 }
 
 // ── Artisan helpers ───────────────────────────────────────────────────
 const assignedKey1 = computed(() => {
@@ -443,7 +465,26 @@ function unassignArtisan2() {
 
 // ── Crafting logic ────────────────────────────────────────────────────
 function canAfford(recipe) {
+  if (recipe.costs) {
+    return recipe.costs.every(c => {
+      if (c.store === 'bars')   return (resources.bars[c.id]   ?? 0) >= c.qty
+      if (c.store === 'hides')  return (resources.hides[c.id]  ?? 0) >= c.qty
+      if (c.store === 'fibers') return (resources.fibers[c.id] ?? 0) >= c.qty
+      return false
+    })
+  }
   return (resources.bars[recipe.tier] ?? 0) >= recipe.barCost
+}
+
+function missingMaterial(recipe) {
+  if (!recipe.costs) return recipe.barName
+  const c = recipe.costs.find(c => {
+    if (c.store === 'bars')   return (resources.bars[c.id]   ?? 0) < c.qty
+    if (c.store === 'hides')  return (resources.hides[c.id]  ?? 0) < c.qty
+    if (c.store === 'fibers') return (resources.fibers[c.id] ?? 0) < c.qty
+    return false
+  })
+  return c?.name ?? 'materials'
 }
 
 function artisanMeetsLevel(recipe) {
@@ -464,7 +505,15 @@ let _flashTimer = null
 function craft() {
   if (!selectedRecipe.value || !canCraft(selectedRecipe.value)) return
   const recipe = selectedRecipe.value
-  resources.removeBar(recipe.tier, recipe.barCost)
+  if (recipe.costs) {
+    for (const c of recipe.costs) {
+      if (c.store === 'bars')   resources.removeBar(c.id, c.qty)
+      if (c.store === 'hides')  resources.removeHide(c.id, c.qty)
+      if (c.store === 'fibers') resources.removeFiber(c.id, c.qty)
+    }
+  } else {
+    resources.removeBar(recipe.tier, recipe.barCost)
+  }
 
   const instance = createItemInstance({
     id:        recipe.id,
@@ -481,6 +530,7 @@ function craft() {
   instance.craftedAt       = Date.now()
   instance.crafted         = true
   instance.craftDiscipline = 'fusion'
+  if (recipe.image) instance.gearImageKey = recipe.image
   inventory.addInstance(instance)
 
   const xp = FUSION_XP_PER_TIER[recipe.tier] ?? 20
@@ -645,6 +695,33 @@ function craft() {
 }
 .fsb-line {
   font-size: 0.73rem; color: #aaa; margin-bottom: 6px; line-height: 1.5;
+}
+
+.detail-top {
+  margin-bottom: 28px;
+}
+.detail-top.has-image {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+}
+.detail-top.has-image .detail-header {
+  flex: 1;
+  margin-bottom: 0;
+}
+.gear-preview {
+  flex-shrink: 0;
+  width: 160px; height: 160px;
+  background: rgba(153,85,255,0.06);
+  border: 1px solid rgba(153,85,255,0.25);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(153,85,255,0.15);
+}
+.gear-preview-img {
+  width: 100%; height: 100%;
+  object-fit: contain;
 }
 
 .detail-header { margin-bottom: 28px; }

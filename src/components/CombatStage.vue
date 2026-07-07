@@ -34,6 +34,7 @@
             <div class="pcard-target" v-if="store.state === 'selecting_target' && !isDead" />
             <img v-if="portrait(hero)" :src="portrait(hero)" class="pcard-img" alt="" />
             <HeroAvatar v-else :hero="hero" :size="140" :noBorder="true" class="pcard-avatar" />
+            <img v-if="cardBorder(hero)" :src="cardBorder(hero)" class="pcard-house-border" alt="" />
             <div class="pcard-bottom">
               <div class="hp-track">
                 <div class="hp-fill" :style="{ width: pct(hp, maxHp) + '%', background: hpColor(hp, maxHp) }" />
@@ -72,6 +73,7 @@
             <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
             <img v-if="portrait(hero)" :src="portrait(hero)" class="pcard-img" alt="" />
             <HeroAvatar v-else :hero="hero" :size="140" :noBorder="true" class="pcard-avatar" />
+            <img v-if="cardBorder(hero)" :src="cardBorder(hero)" class="pcard-house-border" alt="" />
             <div class="pcard-bottom">
               <div class="hp-track">
                 <div class="hp-fill" :style="{ width: pct(hp, maxHp) + '%', background: hpColor(hp, maxHp) }" />
@@ -91,8 +93,20 @@ import { ref, computed, reactive, watch } from 'vue'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { getPortrait } from '../game/portraits.js'
 import HeroAvatar from './HeroAvatar.vue'
-import battleBg   from '../assets/backgrounds/battle.png'
-import trainingBg from '../assets/backgrounds/training_camp.png'
+import battleBg        from '../assets/backgrounds/battle.png'
+import trainingBg      from '../assets/backgrounds/training_camp.png'
+import borderAldric    from '../assets/ui/aldric_red_border_195x260_transparent.png'
+import borderMordaine  from '../assets/ui/mordaine_border_195x260_transparent.png'
+import borderValdris   from '../assets/ui/valdris_border_195x260_transparent.png'
+import borderCaelwyn   from '../assets/ui/caelwyn_thin_border_transparent_full.png'
+
+const HOUSE_CARD_BORDERS = {
+  'House Aldric':   borderAldric,
+  'House Mordaine': borderMordaine,
+  'House Valdris':  borderValdris,
+  'House Caelwyn':  borderCaelwyn,
+}
+function cardBorder(hero) { return HOUSE_CARD_BORDERS[hero.faction] ?? null }
 
 const store = useBattleStore()
 
@@ -386,6 +400,15 @@ function onSpriteClick(hero, isDead) {
   position: absolute;
   top: 8px; left: 50%;
   transform: translateX(-50%);
+}
+
+.pcard-house-border {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Gradient + HP bar pinned to card bottom */

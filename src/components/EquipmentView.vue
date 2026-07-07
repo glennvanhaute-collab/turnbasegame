@@ -35,27 +35,24 @@
 
       <div class="list-count">{{ filteredRoster.length }} / {{ roster.length }}</div>
 
-      <div
-        v-for="{ key, hero } in filteredRoster"
-        :key="key"
-        class="hero-entry"
-        :class="{ active: selectedKey === key, 'in-team': collection.team.includes(key) }"
-        @click="selectedKey = key"
-      >
-        <div class="hero-avatar-wrap">
-          <HeroAvatar :hero="hero" :size="38" :noBorder="true" />
-          <span v-if="collection.team.includes(key)" class="team-slot-badge">
-            {{ collection.team.indexOf(key) + 1 }}
-          </span>
-        </div>
-        <div class="hero-entry-info">
+      <div class="hero-roster">
+        <div
+          v-for="{ key, hero } in filteredRoster"
+          :key="key"
+          class="hero-entry"
+          :class="{ active: selectedKey === key, 'in-team': collection.team.includes(key) }"
+          @click="selectedKey = key"
+        >
+          <div class="hero-avatar-wrap">
+            <HeroAvatar :hero="hero" :size="44" :noBorder="true" />
+            <span v-if="collection.team.includes(key)" class="team-slot-badge">
+              {{ collection.team.indexOf(key) + 1 }}
+            </span>
+            <span class="gear-count-badge">{{ equippedCount(key) }}/5</span>
+          </div>
           <span class="hero-entry-name">{{ hero.name }}</span>
-          <span class="hero-entry-meta">{{ hero.faction }} · {{ hero.affinity }}</span>
-          <span class="role-tag" :class="'role-' + hero.role">{{ ROLE_ICONS[hero.role] }} {{ ROLE_LABELS[hero.role] }}</span>
+          <span class="role-tag" :class="'role-' + hero.role">{{ ROLE_LABELS[hero.role] }}</span>
         </div>
-        <span class="gear-count" :title="equippedCount(key) + ' items equipped'">
-          {{ equippedCount(key) }}/5
-        </span>
       </div>
     </aside>
 
@@ -314,18 +311,17 @@ const pct = v => Math.round(v * 100) + '%'
 <style scoped>
 .equip-layout {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 340px 1fr;
   gap: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 20px 40px;
+  width: 100%;
+  padding: 20px 20px 40px;
   align-items: start;
+  box-sizing: border-box;
 }
 @media (max-width: 700px) {
   .equip-layout { grid-template-columns: 1fr; }
-  .hero-list { position: static; max-height: 220px; overflow-y: auto; }
-  .hero-entry { padding: 10px; }
-  .slots-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .hero-list { position: static; max-height: 300px; overflow-y: auto; }
+  .slots-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
 
 /* Hero list */
@@ -336,10 +332,15 @@ const pct = v => Math.round(v * 100) + '%'
   padding: 14px;
   position: sticky;
   top: 20px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
+.hero-list::-webkit-scrollbar { width: 4px; }
+.hero-list::-webkit-scrollbar-thumb { background: #3e1c0c; border-radius: 2px; }
 .panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 8px; }
 
-.list-filters { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.list-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 6px; }
+.list-filters .list-search { grid-column: 1 / -1; }
 .list-search, .list-select {
   background: #221108;
   border: 1px solid #3e1c0c;
@@ -350,6 +351,7 @@ const pct = v => Math.round(v * 100) + '%'
   outline: none;
   width: 100%;
   transition: border-color 0.15s;
+  box-sizing: border-box;
 }
 .list-search:focus, .list-select:focus { border-color: #ffd700; }
 .team-only-btn {
@@ -363,15 +365,24 @@ const pct = v => Math.round(v * 100) + '%'
 .team-only-btn:hover { border-color: rgba(255,215,0,0.45); color: #aaa; }
 .team-only-btn.active { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.55); color: var(--gold, #ffd700); }
 .list-count { font-size: 0.62rem; color: #444; text-align: right; margin-bottom: 6px; }
+
+.hero-roster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
 .hero-entry {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 4px;
+  padding: 8px 5px 7px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s;
   border: 1px solid transparent;
+  text-align: center;
+  min-width: 0;
 }
 .hero-entry:hover         { background: #221108; }
 .hero-entry.in-team       { background: rgba(255,215,0,0.04); border-color: rgba(255,215,0,0.18); }
@@ -385,12 +396,20 @@ const pct = v => Math.round(v * 100) + '%'
   display: flex; align-items: center; justify-content: center;
   border: 1.5px solid #1a0a00; line-height: 1; pointer-events: none;
 }
-.hero-entry-info { flex: 1; min-width: 0; }
-.hero-entry-name { display: block; font-size: 0.8rem; font-weight: 600; color: #ddd; }
-.hero-entry-meta { font-size: 0.65rem; color: #555; }
+.gear-count-badge {
+  position: absolute; top: -3px; left: -3px;
+  font-size: 0.48rem; font-weight: 700; font-family: var(--font-head);
+  background: #1a0d0a; color: #555;
+  border: 1px solid #3e1c0c; border-radius: 4px;
+  padding: 1px 4px; line-height: 1.2; pointer-events: none;
+}
+.hero-entry-name {
+  font-size: 0.68rem; font-weight: 600; color: #ddd;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  width: 100%; text-align: center;
+}
 .role-tag {
-  display: block; margin-top: 3px;
-  font-size: 0.58rem; font-weight: 700; font-family: var(--font-head);
+  font-size: 0.55rem; font-weight: 700; font-family: var(--font-head);
   text-transform: uppercase; letter-spacing: 1px;
 }
 .role-warrior  { color: #e07840; }
@@ -399,7 +418,6 @@ const pct = v => Math.round(v * 100) + '%'
 .role-ranger   { color: #44bbcc; }
 .role-tank     { color: #5599ff; }
 .role-debuffer { color: #cc7788; }
-.gear-count { font-size: 0.65rem; color: #555; flex-shrink: 0; }
 
 /* Main panel */
 .equip-main { display: flex; flex-direction: column; gap: 16px; }
@@ -452,7 +470,7 @@ const pct = v => Math.round(v * 100) + '%'
 /* Slots */
 .slots-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 10px;
 }
 

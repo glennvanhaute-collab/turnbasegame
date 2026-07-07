@@ -42,7 +42,7 @@
             </div>
           </template>
           <template v-if="store.lastReward.raidDrops?.gearDrops?.length">
-            <div class="raid-drops-label" style="color: #b44fff; border-color: #b44fff44;">Regalia of Regret</div>
+            <div class="raid-drops-label" :style="{ color: gearSetColor, borderColor: gearSetColor + '44' }">{{ gearSetName }}</div>
             <div class="raid-drops">
               <span v-for="g in store.lastReward.raidDrops.gearDrops" :key="g.instanceId" class="reward-pill regret-gear">
                 ◈ {{ g.name }}
@@ -199,7 +199,7 @@ import { getPortrait, PORTRAIT_MAP } from '../game/portraits.js'
 import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
-import { playRaid, playVoidHeir, playMain } from '../game/music.js'
+import { playRaid, playVoidHeir, playMalachar, playMain } from '../game/music.js'
 import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
 
 const props = defineProps({
@@ -214,10 +214,12 @@ const collection = useCollectionStore()
 const encounter = RAID_ENCOUNTERS[props.raidId]
 
 // ── Arena background (per-raid) ──────────────────────────────────
-const _arenaImagesPng  = import.meta.glob('../assets/dungeons/*.png',  { eager: true })
-const _arenaImagesJpeg = import.meta.glob('../assets/dungeons/*.jpeg', { eager: true })
-const _arenaImages = { ..._arenaImagesPng, ..._arenaImagesJpeg }
+const _arenaImagesPng  = import.meta.glob('../assets/dungeons/*.png',    { eager: true })
+const _arenaImagesJpeg = import.meta.glob('../assets/dungeons/*.jpeg',   { eager: true })
+const _arenaImagesBg   = import.meta.glob('../assets/backgrounds/*.png', { eager: true })
+const _arenaImages = { ..._arenaImagesPng, ..._arenaImagesJpeg, ..._arenaImagesBg }
 const ARENA_BG_MAP = {
+  malachar_void:    'malachar_raid',
   throne_of_regret: 'raid_fallen_room',
   void_heir:        'dungeon_battle_arena_Aurelian-Dragonforge',
 }
@@ -232,8 +234,9 @@ const arenaStyle = computed(() => {
 // Maps base enemy ID (strip trailing _0 index) → key in PORTRAIT_MAP
 // PORTRAIT_MAP keys = lowercased filename without extension
 const ENEMY_PORTRAIT_KEYS = {
-  batman_nightmare: 'raid_fallen-king-batman',   // units/mythical/Raid_fallen-king-batman.png
-  aurelian_eclipse: 'aurelian-dragonforge',      // units/mythical/Aurelian-Dragonforge.png
+  malachar_void:    'malachar',                   // units/enemy/Malachar.png
+  batman_nightmare: 'raid_fallen-king-batman',    // units/mythical/Raid_fallen-king-batman.png
+  aurelian_eclipse: 'aurelian-dragonforge',       // units/mythical/Aurelian-Dragonforge.png
   nytherax_wyrm:    'nytherax-the-starless-wyrm', // units/enemy/nytherax-the-starless-wyrm.png
 }
 function enemyPortrait(enemy) {
@@ -242,6 +245,13 @@ function enemyPortrait(enemy) {
   if (key && PORTRAIT_MAP[key]) return PORTRAIT_MAP[key]
   return getPortrait(enemy)
 }
+
+const GEAR_SET_INFO = {
+  malachar_void:    { name: 'Null Panoply',       color: '#8844ff' },
+  throne_of_regret: { name: 'Regalia of Regret',  color: '#b44fff' },
+}
+const gearSetName  = computed(() => GEAR_SET_INFO[props.raidId]?.name  ?? 'Raid Gear')
+const gearSetColor = computed(() => GEAR_SET_INFO[props.raidId]?.color ?? '#b44fff')
 
 // Phase tracking uses first enemy (main boss)
 const boss       = computed(() => store.enemyTeam[0] ?? null)
@@ -383,7 +393,9 @@ onMounted(() => {
     store.autoCompleteRaid(props.raidId)
     return
   }
-  props.raidId === 'void_heir' ? playVoidHeir() : playRaid()
+  if (props.raidId === 'malachar_void') playMalachar()
+  else if (props.raidId === 'void_heir') playVoidHeir()
+  else playRaid()
   const team = collection.buildTeam()
   if (store.autoplay) store.toggleAutoplay()
   store.currentRaidId = props.raidId

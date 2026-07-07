@@ -4,108 +4,119 @@
     <div class="wf-bg" :style="{ backgroundImage: `url(${forgeBg})` }" />
     <div class="wf-overlay" />
 
-    <!-- ── Left: Hero roster ─────────────────────────────────────── -->
-    <aside class="wf-roster">
-      <div class="wfr-head">
-        <div class="wfr-title">Heroes</div>
-        <div class="wfr-filters">
-          <button
-            v-for="f in FILTERS" :key="f.id"
-            class="wfr-filter"
-            :class="{ active: activeFilter === f.id }"
-            @click="activeFilter = f.id"
-          >{{ f.label }}</button>
-        </div>
-        <input
-          v-model="nameSearch"
-          class="wfr-search"
-          placeholder="Search heroes…"
-          spellcheck="false"
-        />
+    <!-- ── Left: Soul weapon inventory ──────────────────────────────── -->
+    <aside class="wf-inventory">
+      <div class="wfi-head">
+        <div class="wfi-title">Soul Weapons</div>
+        <input v-model="nameSearch" class="wfi-search" placeholder="Search…" spellcheck="false" />
       </div>
 
-      <div class="wfr-list">
+      <div class="wfi-list">
         <button
-          v-for="entry in filteredRoster" :key="entry.key"
-          class="wfr-hero"
-          :class="[
-            { active: selectedKey === entry.key, armed: !!getWeapon(entry.key) },
-            `rarity-${entry.hero.rarity?.toLowerCase()}`
-          ]"
-          @click="selectHero(entry.key)"
+          v-for="w in filteredWeapons" :key="w.id"
+          class="wfi-weapon"
+          :class="{ active: selectedId === w.id }"
+          :style="{ '--cc': SOUL_CATEGORIES[w.category]?.color }"
+          @click="selectWeapon(w.id)"
         >
-          <div class="wfrh-info">
-            <span class="wfrh-name">{{ entry.hero.name }}</span>
-            <span class="wfrh-role">{{ entry.hero.role }}</span>
+          <div class="wfiw-top">
+            <span class="wfiw-name">{{ w.name }}</span>
+            <span class="wfiw-tier">{{ TIERS[w.tier - 1]?.numeral }}</span>
           </div>
-          <div v-if="getWeapon(entry.key)" class="wfrh-weapon">
-            <span class="wfrh-wname">{{ getWeapon(entry.key).name }}</span>
-            <span class="wfrh-tier">{{ TIERS[getWeapon(entry.key).tier - 1]?.numeral }}</span>
+          <div class="wfiw-bottom">
+            <span class="wfiw-cat">{{ SOUL_CATEGORIES[w.category]?.label }}</span>
+            <span v-if="weaponStore.getHeroForWeapon(w.id)" class="wfiw-bearer">
+              {{ heroName(weaponStore.getHeroForWeapon(w.id)) }}
+            </span>
+            <span v-else class="wfiw-unassigned">unassigned</span>
           </div>
-          <div v-else class="wfrh-none">— unforged —</div>
         </button>
-        <div v-if="!filteredRoster.length" class="wfr-empty">No heroes match this filter</div>
+        <div v-if="!filteredWeapons.length && !nameSearch" class="wfi-empty">No soul weapons forged yet.</div>
+      </div>
+
+      <div class="wfi-foot">
+        <button class="wfi-craft-btn" @click="openCreate">✦ Craft New Weapon</button>
       </div>
     </aside>
 
-    <!-- ── Center: Forge panel ───────────────────────────────────── -->
-    <main class="wf-forge">
+    <!-- ── Center: Forge panel ───────────────────────────────────────── -->
+    <main class="wf-center">
 
-      <!-- Nothing selected -->
-      <div v-if="!selectedKey" class="wf-splash">
-        <div class="wfs-eyebrow">The Weapon Forge</div>
+      <!-- Splash -->
+      <div v-if="!showCreate && !selectedWeapon" class="wf-splash">
+        <div class="wfs-eyebrow">The Soul Forge</div>
         <div class="wfs-title">Every weapon begins<br>with a name.</div>
-        <div class="wfs-sub">Select a hero from the roster to forge their signature weapon or continue its chronicle.</div>
+        <div class="wfs-sub">Craft a soul weapon, forge it through six tiers, and assign it to a hero. The weapon carries their story.</div>
+        <button class="wfs-cta" @click="openCreate">✦ Craft First Weapon</button>
       </div>
 
-      <!-- Hero selected — no weapon yet -->
-      <template v-else-if="!getWeapon(selectedKey)">
-        <div class="wfc-hero-name">{{ selectedHero?.name }}</div>
-        <div class="wfc-headline">Forge a Weapon</div>
-        <div class="wfc-deck">Give it a name. Begin the chronicle.</div>
+      <!-- Create form -->
+      <div v-else-if="showCreate" class="wfc-create">
+        <div class="wfc-eyebrow">New Soul Weapon</div>
+        <div class="wfc-title">Choose its nature.</div>
 
-        <div class="wfc-preset-type">
-          <span class="wfpt-hand">{{ WEAPON_TYPE_MAP[selectedHero?.weaponType]?.hands }}</span>
-          <span class="wfpt-name">{{ WEAPON_TYPE_MAP[selectedHero?.weaponType]?.name }}</span>
+        <div class="wfc-cats">
+          <button
+            v-for="cat in SOUL_CATEGORIES" :key="cat.id"
+            class="wfc-cat"
+            :class="{ selected: newCategory === cat.id }"
+            :style="{ '--c': cat.color }"
+            @click="newCategory = cat.id"
+          >
+            <span class="wfcc-label">{{ cat.label }}</span>
+            <span class="wfcc-form">{{ cat.weaponForm }}</span>
+            <span class="wfcc-stat">{{ STAT_LABELS[cat.stat] }}</span>
+          </button>
         </div>
 
-        <div class="wfc-name-row">
-          <input
-            v-model="newWeaponName"
-            class="wfc-name-input"
-            placeholder="Name your weapon..."
-            maxlength="32"
-            spellcheck="false"
-          />
-          <button class="wfc-roll-btn" title="Generate a name" @click="generateWeaponName">⚄</button>
-        </div>
-
-        <button
-          class="wfc-begin-btn"
-          :class="{ ready: !!newWeaponName.trim() }"
-          :disabled="!newWeaponName.trim()"
-          @click="beginChronicle"
-        >
-          ✦ Begin the Chronicle
-        </button>
-      </template>
-
-      <!-- Hero has weapon -->
-      <template v-else>
-        <div class="wfw-header">
-          <div class="wfw-weapon-name">{{ getWeapon(selectedKey).name }}</div>
-          <div class="wfw-meta">
-            <span class="wfw-type">{{ WEAPON_TYPE_MAP[getWeapon(selectedKey).type]?.name }}</span>
-            <span class="wfw-sep">·</span>
-            <span class="wfw-hands">{{ WEAPON_TYPE_MAP[getWeapon(selectedKey).type]?.hands }}</span>
-            <span class="wfw-sep">·</span>
-            <span class="wfw-bearer">{{ selectedHero?.name }}</span>
+        <div v-if="newCategory" class="wfc-name-section">
+          <div class="wfc-name-row">
+            <input
+              v-model="newWeaponName"
+              class="wfc-name-input"
+              placeholder="Name your weapon…"
+              maxlength="32"
+              spellcheck="false"
+            />
+            <button class="wfc-roll-btn" title="Generate a name" @click="rollName">⚄</button>
           </div>
         </div>
 
-        <!-- Chronicle weapon image -->
-        <div v-if="chronicleImage" class="wfw-chronicle-img-wrap">
-          <img :src="chronicleImage" class="wfw-chronicle-img" alt="" />
+        <div class="wfc-actions">
+          <button class="wfc-cancel" @click="showCreate = false; newCategory = null; newWeaponName = ''">Cancel</button>
+          <button
+            class="wfc-forge-btn"
+            :class="{ ready: !!newWeaponName.trim() && !!newCategory }"
+            :disabled="!newWeaponName.trim() || !newCategory"
+            @click="craftWeapon"
+          >✦ Forge Weapon</button>
+        </div>
+      </div>
+
+      <!-- Weapon detail -->
+      <template v-else-if="selectedWeapon">
+        <div class="wfw-header">
+          <div class="wfw-name">{{ selectedWeapon.name }}</div>
+          <div class="wfw-meta">
+            <span class="wfw-cat" :style="{ color: catColor }">{{ SOUL_CATEGORIES[selectedWeapon.category]?.label }}</span>
+            <span class="wfw-sep">·</span>
+            <span class="wfw-form">{{ SOUL_CATEGORIES[selectedWeapon.category]?.weaponForm }}</span>
+          </div>
+        </div>
+
+        <!-- Weapon image -->
+        <div class="wfw-img-wrap">
+          <img
+            v-if="weaponImg"
+            :src="weaponImg"
+            class="wfw-img"
+            :style="{ '--glow': catColor }"
+            alt=""
+          />
+          <div v-else class="wfw-img-placeholder" :style="{ '--c': catColor }">
+            <span class="wfip-form">{{ SOUL_CATEGORIES[selectedWeapon.category]?.weaponForm }}</span>
+            <span class="wfip-tier">{{ TIERS[selectedWeapon.tier - 1]?.name }}</span>
+          </div>
         </div>
 
         <!-- Tier track -->
@@ -113,48 +124,46 @@
           <div
             v-for="t in TIERS" :key="t.num"
             class="wfw-pip"
-            :class="{
-              done:    getWeapon(selectedKey).tier > t.num,
-              current: getWeapon(selectedKey).tier === t.num,
-            }"
+            :class="{ done: selectedWeapon.tier > t.num, current: selectedWeapon.tier === t.num }"
           >
-            <div class="wfp-dot" />
+            <div class="wfp-dot" :style="selectedWeapon.tier >= t.num ? { background: catColor, borderColor: catColor, boxShadow: `0 0 8px ${catColor}88` } : {}" />
             <div class="wfp-numeral">{{ t.numeral }}</div>
             <div class="wfp-name">{{ t.name }}</div>
           </div>
           <div class="wfw-tier-line" />
         </div>
 
-        <!-- Current stats -->
-        <div class="wfw-stats">
-          <div class="wfws-tier-name">{{ TIERS[getWeapon(selectedKey).tier - 1]?.name }}</div>
-          <div v-for="(val, stat) in currentStats(selectedKey)" :key="stat" class="wfw-stat-row">
-            <span class="wfsr-key">{{ STAT_LABELS[stat] ?? stat }}</span>
-            <span class="wfsr-val">+{{ typeof val === 'number' && val < 1 ? (val * 100).toFixed(0) + '%' : val }}</span>
+        <!-- Stat bonus -->
+        <div class="wfw-bonus">
+          <div class="wfb-label">{{ STAT_LABELS[selectedWeapon.category] }} Bonus</div>
+          <div class="wfb-val" :style="{ color: catColor }">{{ formatStat(selectedWeapon.category, selectedWeapon.tier) }}</div>
+          <div v-if="selectedWeapon.tier < 6" class="wfb-next">
+            Next tier: <span :style="{ color: catColor + 'bb' }">{{ formatStat(selectedWeapon.category, selectedWeapon.tier + 1) }}</span>
           </div>
         </div>
 
-        <!-- Next tier or Eternal -->
-        <div v-if="getWeapon(selectedKey).tier < 6" class="wfw-next-tier">
-          <div class="wfnt-label">Next — {{ TIERS[getWeapon(selectedKey).tier]?.name }}</div>
-          <div class="wfnt-mats">
+        <!-- Chronicle lore -->
+        <div class="wfw-lore">{{ latestLore }}</div>
+
+        <!-- Forge / Eternal -->
+        <div v-if="selectedWeapon.tier < 6" class="wfw-next">
+          <div class="wfn-tier-label">Next — {{ TIERS[selectedWeapon.tier]?.name }}</div>
+          <div class="wfn-mats">
             <span
-              v-for="mat in nextTierCost(selectedKey)" :key="mat.id"
-              class="wfnt-mat"
-              :class="{ unaffordable: !resourceQty(mat) }"
-            >
-              {{ mat.qty }}× {{ mat.name }}
-            </span>
+              v-for="mat in weaponStore.tierCost(selectedWeapon.tier)" :key="mat.id"
+              class="wfn-mat"
+              :class="{ short: !canAffordMat(mat) }"
+            >{{ mat.qty }}× {{ mat.name }}</span>
           </div>
           <button
-            class="wfw-forge-btn"
-            :class="{ unaffordable: !canAfford(selectedKey) }"
-            :disabled="!canAfford(selectedKey)"
+            class="wfn-btn"
+            :class="{ cant: !weaponStore.canAffordTier(selectedWeapon.tier) }"
+            :disabled="!weaponStore.canAffordTier(selectedWeapon.tier)"
             @click="forgeTier"
           >⚒ Forge Next Tier</button>
         </div>
         <div v-else class="wfw-eternal">
-          <div class="wfe-sigil">✦</div>
+          <div class="wfe-sigil" :style="{ color: catColor }">✦</div>
           <div class="wfe-label">Eternal</div>
           <div class="wfe-sub">This weapon has reached its final form. Its chronicle is complete.</div>
         </div>
@@ -162,37 +171,52 @@
 
     </main>
 
-    <!-- ── Right: Chronicle ──────────────────────────────────────── -->
-    <aside class="wf-chronicle">
-      <div class="wfchr-head">
-        <span class="wfchr-title">The Chronicle</span>
-        <span v-if="getWeapon(selectedKey)" class="wfchr-wname">{{ getWeapon(selectedKey).name }}</span>
+    <!-- ── Right: Team assignment ───────────────────────────────────── -->
+    <aside class="wf-assign">
+      <div class="wfa-head">
+        <span class="wfa-title">Your Team</span>
+        <span class="wfa-count">{{ collection.teamEntries.filter(Boolean).length }}/{{ collection.teamEntries.length }}</span>
       </div>
 
-      <div v-if="!selectedKey || !getWeapon(selectedKey)" class="wfchr-empty">
-        <div class="wfchre-sigil">✦</div>
-        <div class="wfchre-text">No chronicle has been written.<br>Every weapon begins with its first strike.</div>
+      <div v-if="!collection.teamEntries.filter(Boolean).length" class="wfa-empty">
+        <div class="wfae-sigil">✦</div>
+        <div class="wfae-text">No heroes in your team yet. Build your team from the Roster.</div>
       </div>
 
-      <div v-else class="wfchr-entries">
+      <div v-else class="wfa-list">
         <div
-          v-for="entry in [...getWeapon(selectedKey).chronicle].reverse()"
-          :key="entry.tier"
-          class="wfchr-entry"
-          :class="{ latest: entry.tier === getWeapon(selectedKey).tier }"
+          v-for="(entry, i) in collection.teamEntries" :key="entry?.key ?? i"
+          class="wfa-slot"
+          :class="[
+            entry ? `rarity-${entry.hero.rarity?.toLowerCase()}` : 'empty-slot',
+            { equipped: entry && assignedKey === entry.key, clickable: !!selectedWeapon && !!entry },
+          ]"
+          @click="entry && selectedWeapon && toggleAssign(entry.key)"
         >
-          <div class="wfce-tier-head">
-            <span class="wfce-numeral">{{ TIERS[entry.tier - 1]?.numeral }}</span>
-            <span class="wfce-tier-name">{{ TIERS[entry.tier - 1]?.name }}</span>
-          </div>
-          <div class="wfce-lore">{{ entry.lore }}</div>
-          <div class="wfce-stats">
-            <span v-for="(val, stat) in entry.stats" :key="stat" class="wfce-stat">
-              {{ STAT_LABELS[stat] ?? stat }}
-              +{{ typeof val === 'number' && val < 1 ? (val * 100).toFixed(0) + '%' : val }}
-            </span>
-          </div>
+          <div class="wfas-num">#{{ i + 1 }}</div>
+          <template v-if="entry">
+            <div class="wfas-info">
+              <span class="wfas-name">{{ entry.hero.name }}</span>
+              <span class="wfas-role">{{ entry.hero.role }}</span>
+            </div>
+            <div class="wfas-weapon">
+              <template v-if="assignedKey === entry.key && selectedWeapon">
+                <span class="wfasw-name" :style="{ color: catColor }">{{ selectedWeapon.name }}</span>
+                <span class="wfasw-stat" :style="{ color: catColor }">{{ formatStat(selectedWeapon.category, selectedWeapon.tier) }}</span>
+              </template>
+              <template v-else-if="weaponStore.getAssignedWeapon(entry.key)">
+                <span class="wfasw-name">{{ weaponStore.getAssignedWeapon(entry.key).name }}</span>
+                <span class="wfasw-cat">{{ SOUL_CATEGORIES[weaponStore.getAssignedWeapon(entry.key).category]?.label }}</span>
+              </template>
+              <span v-else class="wfasw-none">no soul weapon</span>
+            </div>
+          </template>
+          <div v-else class="wfas-empty">— empty slot —</div>
         </div>
+      </div>
+
+      <div v-if="selectedWeapon" class="wfa-hint">
+        Click a hero to assign <em>{{ selectedWeapon.name }}</em>
       </div>
     </aside>
 
@@ -202,286 +226,124 @@
 <script setup>
 import { ref, computed } from 'vue'
 import forgeBg from '../assets/backgrounds/weaponsmith_background.png'
-
-const chronicleImages = import.meta.glob('../assets/chronicles/*.png', { eager: true, import: 'default' })
 import { useCollectionStore } from '../stores/useCollectionStore.js'
-import { useWeaponStore, TIER_COSTS } from '../stores/useWeaponStore.js'
-import { useResourceStore } from '../stores/useResourceStore.js'
+import { useResourceStore }   from '../stores/useResourceStore.js'
+import { useWeaponStore, SOUL_CATEGORIES, STAT_LABELS, generateWeaponName } from '../stores/useWeaponStore.js'
 
-const collection  = useCollectionStore()
-const weaponStore = useWeaponStore()
-const resources   = useResourceStore()
+const collection   = useCollectionStore()
+const resources    = useResourceStore()
+const weaponStore  = useWeaponStore()
 
-// ── Constants ─────────────────────────────────────────────────────────
-const WEAPON_TYPES = [
-  { id: 'sword',      name: 'Sword',      hands: '1H'     },
-  { id: 'greatsword', name: 'Greatsword', hands: '2H'     },
-  { id: 'mace',       name: 'Mace',       hands: '1H'     },
-  { id: 'warhammer',  name: 'War Hammer', hands: '2H'     },
-  { id: 'dagger',     name: 'Dagger',     hands: '1H'     },
-  { id: 'bow',        name: 'Bow',        hands: 'Ranged' },
-  { id: 'crossbow',   name: 'Crossbow',   hands: 'Ranged' },
-  { id: 'staff',      name: 'Staff',      hands: '2H'     },
-  { id: 'wand',       name: 'Wand',       hands: '1H'     },
-  { id: 'shield',     name: 'Shield',     hands: 'Shield' },
-]
-const WEAPON_TYPE_MAP = Object.fromEntries(WEAPON_TYPES.map(w => [w.id, w]))
+// Auto-discovers soul weapon images: src/assets/soul_weapons/hp_t1.png etc.
+const _soulImgs = import.meta.glob('../assets/soul_weapons/*.png', { eager: true, import: 'default' })
+function getSoulImg(category, tier) {
+  return _soulImgs[`../assets/soul_weapons/${category}_t${tier}.png`] ?? null
+}
 
 const TIERS = [
   { num: 1, numeral: 'I',   name: 'First Light' },
   { num: 2, numeral: 'II',  name: 'Tempered'    },
-  { num: 3, numeral: 'III', name: 'Bound'       },
+  { num: 3, numeral: 'III', name: 'Bound'        },
   { num: 4, numeral: 'IV',  name: 'Hallowed'    },
   { num: 5, numeral: 'V',   name: 'Ascendant'   },
   { num: 6, numeral: 'VI',  name: 'Eternal'     },
 ]
 
-const FILTERS = [
-  { id: 'all',    label: 'All'       },
-  { id: 'none',   label: 'Unforged'  },
-  { id: '1h',     label: '1H'        },
-  { id: '2h',     label: '2H'        },
-  { id: 'ranged', label: 'Ranged'    },
-  { id: 'shield', label: 'Shield'    },
-]
-
-const STAT_LABELS = {
-  atk: 'ATK', atkPct: 'ATK %', critRate: 'Crit Rate',
-  critDmg: 'Crit DMG', def: 'DEF', hp: 'HP', spd: 'SPD',
-  damageReduction: 'Dmg Block',
-}
-
-// ── State ─────────────────────────────────────────────────────────────
-const selectedKey   = ref(null)
-const activeFilter  = ref('all')
-const nameSearch    = ref('')
+// ── State ──────────────────────────────────────────────────────────────────
+const selectedId   = ref(null)
+const showCreate   = ref(false)
+const newCategory  = ref(null)
 const newWeaponName = ref('')
+const nameSearch   = ref('')
 
-
-// ── Name generator ────────────────────────────────────────────────────
-const GEN_NOUNS = {
-  shield: [
-    'Bulwark','Wall','Ward','Vow','Promise','Aegis','Bastion','Rampart',
-    'Vigil','Shelter','Mantle','Cover','Guard','Keep','Hold','Resolve',
-    'Last Stand','Defiance','Endurance','Patience','Answer','Reply',
-    'Steadfast','Refuge','Sanctuary','Haven','Anchor','Foundation',
-    'Cornerstone','Keystone','Linchpin','Constant','Certainty',
-  ],
-  sword: [
-    'Fang','Edge','Vow','Oath','Talon','Resolve','Verdict','Rite','Sorrow',
-    'Pact','Promise','Burden','Reckoning','Testament','Covenant','Memory',
-    'Toll','Justice','Mandate','Sovereign','Name','Honour','Strike','Lament',
-    'Weal','Ruin','Scar','Mercy','Silence','Wrath','Vigil','Witness',
-  ],
-  greatsword: [
-    'Ruin','Verdict','Wrath','Mandate','Dominion','Toll','Requiem','Colossus',
-    'Doom','Bane','Calamity','Undoing','Sentence','Sundering','Omen','Harbinger',
-    'Titan','Dread','Fall','Edict','Reckoning','Desolation','Last Word','Atonement',
-    'Cleaver','Severance','Absolution','Behemoth','Overthrow','Conquest',
-  ],
-  mace: [
-    'Judgment','Weight','Toll','Warrant','Bastion','Verdict','Sentence',
-    'Reckoning','Authority','Decree','Burden','Gospel','Canon','Writ',
-    'Gavel','Compulsion','Doctrine','Ordinance','Edict','Levy','Sanction',
-    'Mandate','Conviction','Ruling','Penalty','Reprisal',
-  ],
-  warhammer: [
-    'Thunder','Tremor','Fury','Ruination','Quake','Knell','Downfall',
-    'Avalanche','Fissure','Collapse','Upheaval','Shatter','Earthfall',
-    'Bellow','Obliteration','Landfall','Cataclysm','Crater','Impact',
-    'Detonation','Concussion','Resound','Percussion','Toll','Crescendo',
-    'Reverberation','Cascade','Surge','Rupture','Torrent',
-  ],
-  dagger: [
-    'Whisper','Spite','Needle','Veil','Umbra','Thorn','Fang','Sliver',
-    'Quiet','Hiss','Malice','Sting','Catch','Lace','Prick','Hex',
-    'Murmur','Rumour','Gossip','Lilt','Sigh','Flicker','Stitch',
-    'Trace','Scratch','Graze','Kiss','Nip','Secret','Aside','Confession',
-  ],
-  bow: [
-    'Song','Drift','Echo','Silence','Current','Lull','Stillness',
-    'Breath','Release','Sigh','Hum','Draw','Tension','Last Breath',
-    'Resonance','Pull','Refrain','Chord','Note','Verse','Aria',
-    'Cadence','Melody','Interval','Pause','Rest','Suspension','Passage',
-  ],
-  crossbow: [
-    'Mark','Reckoning','Verdict','Precision','Aim','Last Word',
-    'Levy','Edict','Toll','Decree','Sentence','Point','Period',
-    'Conclusion','Finality','Closure','End','Resolution','Statement',
-    'Proclamation','Notice','Writ','Warrant','Summons',
-  ],
-  staff: [
-    'Hymn','Lament','Resonance','Weaving','Vigil','Chronicle','Oration',
-    'Sermon','Invocation','Codex','Accord','Witness','Verse','Recitation',
-    'Utterance','Pillar','Pilgrimage','Testament','Canon','Gospel',
-    'Scripture','Revelation','Prophecy','Augury','Omen','Portent',
-    'Foretelling','Vision','Mandate','Word','Covenant','Decree',
-  ],
-  wand: [
-    'Thread','Murmur','Flicker','Tendril','Spark','Refrain','Mote',
-    'Wisp','Trace','Filament','Stitch','Flourish','Hum','Cantrip',
-    'Tremor','Shiver','Quiver','Flutter','Drift','Curl','Coil',
-    'Loop','Spiral','Arc','Ripple','Shimmer','Gleam','Pulse','Tick',
-  ],
-}
-
-const GEN_PREFIXES = {
-  Force: [
-    'Iron','Unyielding','Stone','Bronze','Steadfast','Unbroken','Bulwark',
-    'Granite','Steel','Ironclad','Tempered','Immovable','Resolute','Enduring',
-    'Stoic','Forged','Bastion','Fortified','Hardened','Stalwart','Graven',
-    'Solid','Immense','Heavy','Unbending','Unmoved','Unflinching','Steadied',
-    'Anchored','Grounded','Rooted','Planted',
-  ],
-  Magic: [
-    'Arcane','Runic','Crystal','Storm','Azure','Ember','Prismatic',
-    'Spellbound','Sigil','Glyphic','Ether','Chromatic','Spectral','Eldritch',
-    'Resonant','Mystic','Flux','Weaving','Bound','Traced','Woven',
-    'Scribed','Inscribed','Etched','Branded','Marked','Sealed','Locked',
-    'Threaded','Stitched','Knotted','Laced',
-  ],
-  Spirit: [
-    'Silver','Moon','Sacred','Hallowed','Verdant','Gilded','Celestial',
-    'Blessed','Sanctified','Anointed','Revered','Faithful','Pure','Luminous',
-    'Radiant','Dawn','Twilight','Devoted','Consecrated','Holy','Ordained',
-    'Vowed','Pledged','Sworn','Bound','Called','Chosen','Marked','Named',
-    'Known','Remembered','Honoured','Kept',
-  ],
-  Void: [
-    'Void','Shadow','Hollow','Dusk','Ashen','Forsaken','Pale','Blighted',
-    'Cursed','Withered','Wretched','Sunken','Charred','Corrupted','Fractured',
-    'Fading','Dimmed','Nameless','Doomed','Lost','Ruined','Fallen','Broken',
-    'Shattered','Cracked','Split','Torn','Severed','Cut','Cleaved','Rent',
-    'Divided','Scattered',
-  ],
-  Blood: [
-    'Crimson','Sanguine','Scarlet','Fell','Dark','Vital','Visceral',
-    'Draining','Thirsting','Hungering','Deathly','Ravenous','Fevered',
-    'Flushed','Feverish','Burning','Boiling','Seething','Raging','Livid',
-    'Frenzied','Manic','Rabid','Wild','Unbridled','Unbound','Unchained',
-  ],
-  Astral: [
-    'Stellar','Astral','Celestial','Ancient','Eternal','Pale','Cosmic',
-    'Timeless','Boundless','Infinite','Ageless','Distant','Wandering',
-    'Drifting','Floating','Suspended','Weightless','Endless','Vast','Deep',
-    'High','Far','Wide','Long','Old','Still','Quiet','Cold','Clear','Sharp',
-  ],
-}
-
-const GEN_GENERAL = [
-  'Forgotten','Last','First','Undying','Shattered','Crimson','Ashen','Gilded',
-  'Broken','Sundered','Mended','Tempered','Weeping','Silent','Patient',
-  'Hungry','Scarred','Nameless','Wandering','Exiled','Remnant','Buried',
-  'Ancient','Hidden','Saved','Kept','Held','Carried','Worn','Battered',
-  'Faithful','Loyal','True','Honest','Plain','Simple','Quiet','Steady',
-  'Tired','Old','Weathered','Tested','Proven','Known','Sure','Certain',
-]
-
-const GEN_CONCEPTS = [
-  'Ruin','Ash','Sorrow','the Fallen','the Abyss','the First Dawn','the Last Age',
-  'Silence','Blood','Embers','Thorns','Shadows','the Void','the Crown','the Pyre',
-  'Last Light','Grief','Regret','the Deep','Winter','Dust','Old Wars','the Veil',
-  'Mourning','the Forsaken','the Undying','Exile','the Long Road','Hunger',
-  'the Final Hour','Broken Oaths','Forgotten Names','Lost Kings','the Pale Shore',
-  'Old Debts','the Long Dark','Weeping Fields','the Second Death','Stillwater',
-  'Thorn & Ember','the Unmarked Grave','Bitter Hours','the Weight of Years',
-  'Fading Light','the Cold Shore','Unfinished Wars','Every Name I Carry',
-]
-
-const pick = arr => arr[Math.floor(Math.random() * arr.length)]
-
-function generateWeaponName() {
-  const hero     = selectedHero.value
-  const type     = hero?.weaponType ?? 'sword'
-  const nouns    = GEN_NOUNS[type] ?? GEN_NOUNS.sword
-  const affPfx   = GEN_PREFIXES[hero?.affinity] ?? []
-  const prefixes = [...affPfx, ...GEN_GENERAL]
-  const noun     = pick(nouns)
-  const r        = Math.random()
-
-  // 15%: "FirstName's Noun"
-  if (r < 0.15 && hero?.name) {
-    const first = hero.name.split(' ')[0]
-    newWeaponName.value = `${first}'s ${noun}`
-    return
-  }
-  // 20%: "Noun of [Concept]"
-  if (r < 0.35) {
-    newWeaponName.value = `${noun} of ${pick(GEN_CONCEPTS)}`
-    return
-  }
-  // 20%: "The Prefix Noun"
-  if (r < 0.55) {
-    newWeaponName.value = `The ${pick(prefixes)} ${noun}`
-    return
-  }
-  // 45%: "Prefix Noun"
-  newWeaponName.value = `${pick(prefixes)} ${noun}`
-}
-
-// ── Computed ──────────────────────────────────────────────────────────
-const selectedHero = computed(() =>
-  collection.roster.find(e => e.key === selectedKey.value)?.hero ?? null
+// ── Computed ───────────────────────────────────────────────────────────────
+const selectedWeapon = computed(() =>
+  selectedId.value != null ? weaponStore.soulWeapons.find(w => w.id === selectedId.value) ?? null : null
 )
 
-const chronicleImage = computed(() => {
-  const id = selectedHero.value?.id
-  if (!id) return null
-  return chronicleImages[`../assets/chronicles/${id}.png`] ?? null
+const catColor = computed(() =>
+  SOUL_CATEGORIES[selectedWeapon.value?.category]?.color ?? '#d4af37'
+)
+
+const weaponImg = computed(() => {
+  if (!selectedWeapon.value) return null
+  return getSoulImg(selectedWeapon.value.category, selectedWeapon.value.tier)
 })
 
-const RARITY_ORDER = ['ancient', 'mythical', 'legendary', 'epic', 'rare', 'uncommon', 'common']
-const rarityRank = r => { const i = RARITY_ORDER.indexOf(r?.toLowerCase() ?? ''); return i === -1 ? 99 : i }
+const latestLore = computed(() => {
+  const entries = selectedWeapon.value?.chronicle
+  if (!entries?.length) return ''
+  return entries[entries.length - 1].lore
+})
 
-const filteredRoster = computed(() => {
+const assignedKey = computed(() =>
+  selectedId.value != null ? weaponStore.getHeroForWeapon(selectedId.value) ?? null : null
+)
+
+const filteredWeapons = computed(() => {
   const q = nameSearch.value.trim().toLowerCase()
-  let list = collection.roster
-
-  if (q) list = list.filter(e => e.hero.name.toLowerCase().includes(q))
-
-  if (activeFilter.value === 'none') {
-    list = list.filter(e => !getWeapon(e.key))
-  } else if (activeFilter.value !== 'all') {
-    list = list.filter(e => {
-      const w = getWeapon(e.key)
-      if (!w) return false
-      const hands = WEAPON_TYPE_MAP[w.type]?.hands ?? ''
-      if (activeFilter.value === '1h')     return hands === '1H'
-      if (activeFilter.value === '2h')     return hands === '2H'
-      if (activeFilter.value === 'ranged') return hands === 'Ranged'
-      if (activeFilter.value === 'shield') return hands === 'Shield'
-      return true
-    })
-  }
-
-  return [...list].sort((a, b) => rarityRank(a.hero.rarity) - rarityRank(b.hero.rarity))
+  if (!q) return weaponStore.soulWeapons
+  return weaponStore.soulWeapons.filter(w =>
+    w.name.toLowerCase().includes(q) || SOUL_CATEGORIES[w.category]?.label.toLowerCase().includes(q)
+  )
 })
 
-// ── Helpers ───────────────────────────────────────────────────────────
-function getWeapon(heroKey)    { return weaponStore.getWeapon(heroKey) }
-function resourceQty(mat)      { return (resources[mat.store]?.[mat.id] ?? 0) >= mat.qty }
-function currentStats(heroKey) { const w = getWeapon(heroKey); return w ? weaponStore.weaponStats(w.type, w.tier) : {} }
-function nextTierCost(heroKey) { const w = getWeapon(heroKey); return w ? weaponStore.tierCost(w.tier) : [] }
-function canAfford(heroKey)    { const w = getWeapon(heroKey); return w ? weaponStore.canAffordTier(w.tier) : false }
 
-function selectHero(key) {
-  selectedKey.value   = key
+// ── Helpers ────────────────────────────────────────────────────────────────
+function heroName(heroKey) {
+  return collection.roster.find(e => e.key === heroKey)?.hero.name ?? heroKey
+}
+
+function formatStat(category, tier) {
+  const stats = weaponStore.weaponStats(category, tier)
+  const val   = stats[category]
+  if (val == null) return '—'
+  if (category === 'critRate' || category === 'critDmg') return `+${(val * 100).toFixed(0)}%`
+  return `+${val.toLocaleString()}`
+}
+
+function canAffordMat(mat) {
+  return (resources[mat.store]?.[mat.id] ?? 0) >= mat.qty
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+function selectWeapon(id) {
+  selectedId.value = id
+  showCreate.value = false
+}
+
+function openCreate() {
+  selectedId.value  = null
+  showCreate.value  = true
+  newCategory.value = null
   newWeaponName.value = ''
 }
 
-function beginChronicle() {
-  if (!selectedKey.value || !newWeaponName.value.trim()) return
-  const hero      = selectedHero.value
-  const firstName = hero?.name?.split(' ')[0] ?? hero?.name ?? 'Unknown'
-  weaponStore.createWeapon(selectedKey.value, firstName, hero.weaponType, newWeaponName.value.trim())
+function rollName() {
+  if (newCategory.value) newWeaponName.value = generateWeaponName(newCategory.value)
+}
+
+function craftWeapon() {
+  if (!newCategory.value || !newWeaponName.value.trim()) return
+  const id = weaponStore.craftWeapon(newCategory.value, newWeaponName.value.trim())
+  showCreate.value = false
+  newCategory.value = null
   newWeaponName.value = ''
+  selectedId.value = id
 }
 
 function forgeTier() {
-  if (!selectedKey.value) return
-  const hero      = selectedHero.value
-  const firstName = hero?.name?.split(' ')[0] ?? hero?.name ?? 'Unknown'
-  weaponStore.forgeTierFor(selectedKey.value, firstName)
+  if (!selectedId.value) return
+  weaponStore.forgeWeapon(selectedId.value)
+}
+
+function toggleAssign(heroKey) {
+  if (!selectedId.value) return
+  if (assignedKey.value === heroKey) {
+    weaponStore.unassignWeapon(heroKey)
+  } else {
+    weaponStore.assignWeapon(selectedId.value, heroKey)
+  }
 }
 </script>
 
@@ -494,197 +356,211 @@ function forgeTier() {
   color: #ccc;
 }
 
-/* Background */
 .wf-bg {
   position: absolute; inset: 0;
   background-size: cover; background-position: center 20%;
-  filter: brightness(0.35) saturate(0.7);
+  filter: brightness(0.30) saturate(0.6);
 }
 .wf-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(
     90deg,
-    rgba(4,3,8,0.88) 0%,
+    rgba(4,3,8,0.92) 0%,
     rgba(4,3,8,0.55) 30%,
-    rgba(4,3,8,0.45) 60%,
-    rgba(4,3,8,0.85) 100%
+    rgba(4,3,8,0.45) 65%,
+    rgba(4,3,8,0.90) 100%
   );
 }
 
-/* ── Left panel ───────────────────────────────────────────────────── */
-.wf-roster {
+/* ── Left: Inventory ──────────────────────────────────────────────── */
+.wf-inventory {
   position: relative; z-index: 1;
   width: 230px; flex-shrink: 0;
   display: flex; flex-direction: column;
   border-right: 1px solid rgba(212,175,55,0.12);
-  background: rgba(4,3,8,0.5);
+  background: rgba(4,3,8,0.55);
   backdrop-filter: blur(6px);
 }
 
-.wfr-head {
+.wfi-head {
   padding: 20px 16px 10px;
   border-bottom: 1px solid rgba(212,175,55,0.10);
 }
-.wfr-title {
+.wfi-title {
   font-family: var(--font-head, serif);
   font-size: 0.55rem; letter-spacing: 3px;
   text-transform: uppercase; color: #b8960a;
   margin-bottom: 10px;
 }
-.wfr-filters {
-  display: flex; flex-wrap: wrap; gap: 4px;
-}
-.wfr-filter {
-  background: none;
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 3px; padding: 3px 8px;
-  font-size: 0.58rem; color: #666; cursor: pointer;
-  transition: all 0.12s;
-}
-.wfr-filter.active, .wfr-filter:hover {
-  border-color: rgba(212,175,55,0.4);
-  color: #b8960a;
-}
-.wfr-search {
-  display: block; width: 100%; margin-top: 8px;
+.wfi-search {
+  display: block; width: 100%;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 3px; padding: 5px 9px;
   font-size: 0.6rem; color: #aaa;
-  outline: none; transition: border-color 0.12s;
-  box-sizing: border-box;
+  outline: none; box-sizing: border-box;
+  transition: border-color 0.12s;
 }
-.wfr-search::placeholder { color: #3a3a3a; }
-.wfr-search:focus { border-color: rgba(212,175,55,0.35); }
+.wfi-search::placeholder { color: #333; }
+.wfi-search:focus { border-color: rgba(212,175,55,0.35); }
 
-.wfr-list {
-  flex: 1; overflow-y: auto; padding: 8px;
-}
-.wfr-hero {
+.wfi-list { flex: 1; overflow-y: auto; padding: 8px; }
+
+.wfi-weapon {
   width: 100%; text-align: left;
   background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 6px; padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-left: 2px solid transparent;
+  border-radius: 5px; padding: 9px 11px;
   margin-bottom: 4px; cursor: pointer;
   transition: all 0.12s;
   display: flex; flex-direction: column; gap: 4px;
 }
-.wfr-hero:hover {
-  background: rgba(212,175,55,0.05);
-  border-color: rgba(212,175,55,0.2);
+.wfi-weapon:hover {
+  background: rgba(255,255,255,0.04);
+  border-left-color: var(--cc);
 }
-.wfr-hero.active {
-  background: rgba(212,175,55,0.08);
-  border-color: rgba(212,175,55,0.4);
+.wfi-weapon.active {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+  border-left-color: var(--cc);
+  box-shadow: inset 2px 0 8px -4px var(--cc);
 }
-.wfr-hero.armed .wfrh-name { color: #d4af37; }
-
-.wfrh-info { display: flex; justify-content: space-between; align-items: baseline; }
-.wfrh-name {
+.wfiw-top { display: flex; justify-content: space-between; align-items: baseline; }
+.wfiw-name {
   font-family: var(--font-head, serif);
-  font-size: 0.7rem; color: #bbb; font-weight: 700;
+  font-size: 0.7rem; color: #c0b080; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 150px;
 }
-.wfrh-role {
-  font-size: 0.52rem; color: #555;
-  text-transform: capitalize; letter-spacing: 0.5px;
-}
-.wfrh-weapon {
-  display: flex; justify-content: space-between; align-items: center;
-}
-.wfrh-wname { font-size: 0.6rem; color: #b8960a; font-style: italic; }
-.wfrh-tier {
+.wfi-weapon.active .wfiw-name { color: var(--cc); }
+.wfiw-tier {
   font-family: var(--font-head, serif);
-  font-size: 0.55rem; color: #777;
+  font-size: 0.55rem; color: #666;
 }
-.wfrh-none { font-size: 0.58rem; color: #3a3a3a; font-style: italic; }
-.wfr-empty { font-size: 0.65rem; color: #444; text-align: center; padding: 20px 0; }
+.wfiw-bottom { display: flex; justify-content: space-between; }
+.wfiw-cat { font-size: 0.58rem; color: var(--cc); opacity: 0.8; }
+.wfiw-bearer { font-size: 0.56rem; color: #777; font-style: italic; }
+.wfiw-unassigned { font-size: 0.56rem; color: #333; font-style: italic; }
+.wfi-empty { font-size: 0.65rem; color: #333; text-align: center; padding: 20px 8px; }
 
-/* Rarity borders */
-.wfr-hero.rarity-common    { border-color: #383030; }
-.wfr-hero.rarity-uncommon  { border-color: #186838; }
-.wfr-hero.rarity-rare      { border-color: #1a50a0; }
-.wfr-hero.rarity-epic      { border-color: #6a2890; }
-.wfr-hero.rarity-legendary { border-color: #8a6418; }
-.wfr-hero.rarity-mythical  { border-color: #5a1010; }
-.wfr-hero.rarity-ancient   { border-color: #7a1060; }
-.wfr-hero.rarity-legendary .wfrh-name { color: #c9a227; }
-.wfr-hero.rarity-mythical  .wfrh-name { color: #ff2244; }
-.wfr-hero.rarity-ancient   .wfrh-name { color: #ee22ee; }
+.wfi-foot {
+  padding: 12px;
+  border-top: 1px solid rgba(212,175,55,0.10);
+}
+.wfi-craft-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(212,175,55,0.07);
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: 5px; color: #b8960a;
+  font-family: var(--font-head, serif);
+  font-size: 0.72rem; letter-spacing: 1.5px;
+  text-transform: uppercase; cursor: pointer;
+  transition: all 0.13s;
+}
+.wfi-craft-btn:hover {
+  background: rgba(212,175,55,0.15);
+  border-color: rgba(212,175,55,0.5);
+  color: #d4af37;
+}
 
-/* ── Center ───────────────────────────────────────────────────────── */
-.wf-forge {
+/* ── Center ────────────────────────────────────────────────────────── */
+.wf-center {
   position: relative; z-index: 1;
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 40px 48px; overflow-y: auto;
+  padding: 32px 48px; overflow-y: auto;
+  gap: 0;
 }
 
 /* Splash */
-.wf-splash { text-align: center; max-width: 420px; }
+.wf-splash { text-align: center; max-width: 400px; display: flex; flex-direction: column; gap: 14px; }
 .wfs-eyebrow {
   font-family: var(--font-head, serif);
   font-size: 0.55rem; letter-spacing: 4px;
   text-transform: uppercase; color: #b8960a;
-  margin-bottom: 20px;
 }
 .wfs-title {
   font-family: var(--font-head, serif);
   font-size: 2.2rem; color: #e8d88a;
-  line-height: 1.15; margin-bottom: 16px;
-  font-weight: 400;
+  line-height: 1.15; font-weight: 400;
 }
-.wfs-sub { font-size: 0.8rem; color: #555; line-height: 1.6; }
-
-/* Creation form */
-.wfc-hero-name {
+.wfs-sub { font-size: 0.75rem; color: #555; line-height: 1.7; }
+.wfs-cta {
+  margin-top: 8px; align-self: center;
+  padding: 11px 32px;
+  background: rgba(212,175,55,0.10);
+  border: 1px solid rgba(212,175,55,0.35);
+  border-radius: 5px; color: #d4af37;
   font-family: var(--font-head, serif);
-  font-size: 0.58rem; letter-spacing: 3px;
-  text-transform: uppercase; color: #777;
-  margin-bottom: 6px;
+  font-size: 0.8rem; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer;
+  transition: all 0.13s;
 }
-.wfc-headline {
+.wfs-cta:hover { background: rgba(212,175,55,0.20); border-color: rgba(212,175,55,0.6); }
+
+/* Create form */
+.wfc-create {
+  width: 100%; max-width: 560px;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.wfc-eyebrow {
+  font-family: var(--font-head, serif);
+  font-size: 0.55rem; letter-spacing: 4px;
+  text-transform: uppercase; color: #b8960a;
+}
+.wfc-title {
   font-family: var(--font-head, serif);
   font-size: 1.8rem; color: #e8d88a;
-  margin-bottom: 8px; font-weight: 400;
+  font-weight: 400; margin-top: -8px;
 }
-.wfc-deck { font-size: 0.75rem; color: #555; margin-bottom: 28px; }
 
-.wfc-preset-type {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 28px;
-  padding: 10px 24px;
-  background: rgba(212,175,55,0.06);
-  border: 1px solid rgba(212,175,55,0.25);
-  border-radius: 6px;
+.wfc-cats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  width: 100%;
 }
-.wfpt-hand {
-  font-size: 0.52rem; color: #888;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  padding: 2px 7px;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 3px;
+.wfc-cat {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 7px; cursor: pointer;
+  transition: all 0.13s;
 }
-.wfpt-name {
+.wfc-cat:hover {
+  border-color: var(--c);
+  background: rgba(255,255,255,0.04);
+}
+.wfc-cat.selected {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  box-shadow: 0 0 12px -4px var(--c);
+}
+.wfcc-label {
   font-family: var(--font-head, serif);
-  font-size: 1rem; color: #d4af37;
-  letter-spacing: 1px;
+  font-size: 0.78rem; color: var(--c);
+  font-weight: 700; letter-spacing: 0.5px;
 }
+.wfcc-form { font-size: 0.58rem; color: #666; }
+.wfcc-stat { font-size: 0.55rem; color: #444; text-transform: uppercase; letter-spacing: 0.5px; }
+.wfc-cat.selected .wfcc-form { color: #888; }
+.wfc-cat.selected .wfcc-stat { color: #666; }
 
-.wfc-name-row {
-  width: 100%; max-width: 420px; margin-bottom: 20px;
-  display: flex; gap: 8px; align-items: stretch;
-}
+.wfc-name-section { width: 100%; }
+.wfc-name-row { display: flex; gap: 8px; }
 .wfc-name-input {
-  flex: 1; background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(212,175,55,0.2);
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,175,55,0.22);
   border-radius: 6px; padding: 12px 16px;
   font-family: var(--font-head, serif);
-  font-size: 1.1rem; color: #e8d88a;
+  font-size: 1.05rem; color: #e8d88a;
   text-align: center; letter-spacing: 1px;
   outline: none; transition: border-color 0.15s;
 }
-.wfc-name-input::placeholder { color: #3a3a3a; font-style: italic; }
-.wfc-name-input:focus { border-color: rgba(212,175,55,0.55); }
+.wfc-name-input::placeholder { color: #333; font-style: italic; }
+.wfc-name-input:focus { border-color: rgba(212,175,55,0.5); }
 .wfc-roll-btn {
   flex-shrink: 0;
   background: rgba(212,175,55,0.07);
@@ -692,79 +568,83 @@ function forgeTier() {
   border-radius: 6px; padding: 0 14px;
   font-size: 1.2rem; color: #b8960a;
   cursor: pointer; transition: all 0.12s;
-  line-height: 1;
 }
-.wfc-roll-btn:hover {
-  background: rgba(212,175,55,0.16);
-  border-color: rgba(212,175,55,0.5);
-  color: #d4af37;
-}
+.wfc-roll-btn:hover { background: rgba(212,175,55,0.16); color: #d4af37; }
 
-.wfc-begin-btn {
-  padding: 13px 40px;
-  background: rgba(212,175,55,0.08);
-  border: 1px solid rgba(212,175,55,0.2);
-  border-radius: 6px; color: #666;
-  font-family: var(--font-head, serif);
-  font-size: 0.85rem; letter-spacing: 2px;
-  text-transform: uppercase; cursor: not-allowed;
-  transition: all 0.15s;
+.wfc-actions { display: flex; gap: 12px; }
+.wfc-cancel {
+  padding: 11px 24px;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 5px; color: #555;
+  font-size: 0.75rem; cursor: pointer;
+  transition: all 0.12s;
 }
-.wfc-begin-btn.ready {
+.wfc-cancel:hover { border-color: rgba(255,255,255,0.18); color: #888; }
+.wfc-forge-btn {
+  padding: 11px 32px;
+  background: rgba(212,175,55,0.08);
+  border: 1px solid rgba(212,175,55,0.18);
+  border-radius: 5px; color: #555;
+  font-family: var(--font-head, serif);
+  font-size: 0.82rem; letter-spacing: 2px;
+  text-transform: uppercase; cursor: not-allowed;
+  transition: all 0.13s;
+}
+.wfc-forge-btn.ready {
   color: #d4af37; cursor: pointer;
   border-color: rgba(212,175,55,0.5);
   background: rgba(212,175,55,0.12);
 }
-.wfc-begin-btn.ready:hover {
-  background: rgba(212,175,55,0.20);
-  border-color: rgba(212,175,55,0.7);
-}
+.wfc-forge-btn.ready:hover { background: rgba(212,175,55,0.22); }
 
 /* Weapon detail */
-.wfw-header { text-align: center; margin-bottom: 20px; }
-
-.wfw-chronicle-img-wrap {
-  display: flex; justify-content: center;
-  margin-bottom: 28px;
-  position: relative;
-}
-.wfw-chronicle-img-wrap::before {
-  content: '';
-  position: absolute;
-  inset: -20px 20%;
-  background: radial-gradient(ellipse at center, rgba(212,175,55,0.12) 0%, transparent 70%);
-  pointer-events: none;
-}
-.wfw-chronicle-img {
-  max-height: 380px; max-width: 520px;
-  width: 100%;
-  object-fit: contain;
-  filter:
-    drop-shadow(0 0 28px rgba(212,175,55,0.45))
-    drop-shadow(0 0 60px rgba(212,175,55,0.18));
-  position: relative; z-index: 1;
-}
-.wfw-weapon-name {
+.wfw-header { text-align: center; margin-bottom: 16px; }
+.wfw-name {
   font-family: var(--font-head, serif);
-  font-size: 2rem; color: #e8d88a;
+  font-size: 1.9rem; color: #e8d88a;
   font-weight: 400; letter-spacing: 1px;
-  margin-bottom: 6px;
 }
-.wfw-meta { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.wfw-type { font-size: 0.7rem; color: #b8960a; text-transform: uppercase; letter-spacing: 1px; }
-.wfw-sep  { color: #444; }
-.wfw-hands { font-size: 0.7rem; color: #666; }
-.wfw-bearer { font-size: 0.7rem; color: #555; font-style: italic; }
+.wfw-meta { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 4px; }
+.wfw-cat { font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.wfw-sep { color: #333; }
+.wfw-form { font-size: 0.7rem; color: #555; }
+
+/* Image */
+.wfw-img-wrap {
+  position: relative; display: flex;
+  justify-content: center; align-items: center;
+  margin-bottom: 20px; height: 200px;
+}
+.wfw-img {
+  max-height: 200px; max-width: 400px;
+  width: 100%; object-fit: contain;
+  filter:
+    drop-shadow(0 0 20px var(--glow, #d4af37))
+    drop-shadow(0 0 50px color-mix(in srgb, var(--glow, #d4af37) 35%, transparent));
+}
+.wfw-img-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 280px; height: 180px;
+  border: 1px dashed color-mix(in srgb, var(--c) 30%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--c) 4%, transparent);
+  gap: 8px;
+}
+.wfip-form {
+  font-family: var(--font-head, serif);
+  font-size: 1rem; color: var(--c); opacity: 0.7;
+}
+.wfip-tier { font-size: 0.6rem; color: #444; letter-spacing: 2px; text-transform: uppercase; }
 
 /* Tier track */
 .wfw-tier-track {
-  position: relative;
-  display: flex; justify-content: center; gap: 0;
-  width: 100%; max-width: 480px; margin-bottom: 32px;
+  position: relative; display: flex; justify-content: center;
+  width: 100%; max-width: 460px; margin-bottom: 24px;
 }
 .wfw-tier-line {
-  position: absolute; top: 10px; left: 10%; right: 10%;
-  height: 1px; background: rgba(212,175,55,0.15); z-index: 0;
+  position: absolute; top: 10px; left: 8%; right: 8%;
+  height: 1px; background: rgba(212,175,55,0.12); z-index: 0;
 }
 .wfw-pip {
   position: relative; z-index: 1;
@@ -773,160 +653,163 @@ function forgeTier() {
 }
 .wfp-dot {
   width: 20px; height: 20px; border-radius: 50%;
-  border: 2px solid rgba(212,175,55,0.2);
+  border: 2px solid rgba(212,175,55,0.18);
   background: rgba(4,3,8,0.9);
   transition: all 0.2s;
 }
-.wfw-pip.done .wfp-dot {
-  background: rgba(212,175,55,0.3);
-  border-color: rgba(212,175,55,0.7);
-}
-.wfw-pip.current .wfp-dot {
-  background: #b8960a;
-  border-color: #d4af37;
-  box-shadow: 0 0 10px rgba(212,175,55,0.4);
-}
 .wfp-numeral {
   font-family: var(--font-head, serif);
-  font-size: 0.6rem; color: #444;
+  font-size: 0.58rem; color: #444;
 }
-.wfw-pip.done .wfp-numeral    { color: #b8960a; }
-.wfw-pip.current .wfp-numeral { color: #d4af37; }
-.wfp-name { font-size: 0.48rem; color: #444; letter-spacing: 0.5px; text-align: center; white-space: nowrap; }
-.wfw-pip.current .wfp-name { color: #888; }
+.wfw-pip.done .wfp-numeral, .wfw-pip.current .wfp-numeral { color: #b8960a; }
+.wfp-name { font-size: 0.45rem; color: #383838; letter-spacing: 0.5px; text-align: center; white-space: nowrap; }
+.wfw-pip.current .wfp-name { color: #777; }
 
-/* Stats */
-.wfw-stats { margin-bottom: 28px; text-align: center; }
-.wfws-tier-name {
+/* Stat bonus */
+.wfw-bonus { text-align: center; margin-bottom: 10px; }
+.wfb-label {
   font-family: var(--font-head, serif);
-  font-size: 0.55rem; letter-spacing: 2px;
-  text-transform: uppercase; color: #666;
-  margin-bottom: 10px;
+  font-size: 0.55rem; letter-spacing: 3px;
+  text-transform: uppercase; color: #555;
+  margin-bottom: 4px;
 }
-.wfw-stat-row {
-  display: flex; justify-content: center; gap: 24px;
-  font-size: 0.8rem;
+.wfb-val {
+  font-family: var(--font-head, serif);
+  font-size: 2.2rem; font-weight: 400; letter-spacing: 1px;
 }
-.wfsr-key { color: #666; }
-.wfsr-val { color: #d4af37; font-family: var(--font-head, serif); }
+.wfb-next { font-size: 0.62rem; color: #555; margin-top: 2px; }
+
+/* Lore */
+.wfw-lore {
+  font-size: 0.67rem; color: #444;
+  font-style: italic; text-align: center;
+  max-width: 380px; line-height: 1.7;
+  margin-bottom: 20px;
+}
 
 /* Next tier */
-.wfw-next-tier { text-align: center; }
-.wfnt-label {
+.wfw-next { text-align: center; }
+.wfn-tier-label {
   font-family: var(--font-head, serif);
   font-size: 0.55rem; letter-spacing: 2px;
-  text-transform: uppercase; color: #666;
+  text-transform: uppercase; color: #555;
   margin-bottom: 10px;
 }
-.wfnt-mats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-.wfnt-mat {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 4px; padding: 4px 12px;
-  font-size: 0.65rem; color: #888;
+.wfn-mats { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.wfn-mat {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 4px; padding: 3px 11px;
+  font-size: 0.63rem; color: #777;
 }
-.wfnt-qty { color: #d4af37; margin-right: 3px; }
-.wfnt-mat.unaffordable { color: #883333; border-color: rgba(180,40,40,0.25); background: rgba(180,40,40,0.05); }
-
-.wfw-forge-btn {
-  padding: 12px 36px;
+.wfn-mat.short { color: #883333; border-color: rgba(160,40,40,0.25); background: rgba(160,40,40,0.04); }
+.wfn-btn {
+  padding: 11px 34px;
   background: rgba(212,175,55,0.10);
-  border: 1px solid rgba(212,175,55,0.4);
-  border-radius: 6px; color: #d4af37;
+  border: 1px solid rgba(212,175,55,0.38);
+  border-radius: 5px; color: #d4af37;
   font-family: var(--font-head, serif);
-  font-size: 0.85rem; letter-spacing: 2px;
+  font-size: 0.83rem; letter-spacing: 2px;
   text-transform: uppercase; cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.14s;
 }
-.wfw-forge-btn:hover:not(:disabled) {
-  background: rgba(212,175,55,0.20);
-  border-color: rgba(212,175,55,0.7);
-}
-.wfw-forge-btn.unaffordable {
-  color: #555; border-color: rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.02); cursor: not-allowed;
-}
+.wfn-btn:hover:not(:disabled) { background: rgba(212,175,55,0.20); border-color: rgba(212,175,55,0.65); }
+.wfn-btn.cant { color: #444; border-color: rgba(255,255,255,0.06); background: rgba(255,255,255,0.01); cursor: not-allowed; }
 
 /* Eternal */
 .wfw-eternal { text-align: center; }
-.wfe-sigil { font-size: 2rem; color: #d4af37; margin-bottom: 6px; opacity: 0.7; }
+.wfe-sigil { font-size: 1.8rem; margin-bottom: 6px; }
 .wfe-label {
   font-family: var(--font-head, serif);
-  font-size: 1.2rem; color: #e8d88a;
+  font-size: 1.1rem; color: #e8d88a;
   letter-spacing: 3px; text-transform: uppercase;
   margin-bottom: 8px;
 }
-.wfe-sub { font-size: 0.7rem; color: #555; max-width: 280px; margin: 0 auto; line-height: 1.6; }
+.wfe-sub { font-size: 0.68rem; color: #444; max-width: 260px; margin: 0 auto; line-height: 1.6; }
 
-/* ── Right: Chronicle ─────────────────────────────────────────────── */
-.wf-chronicle {
+/* ── Right: Assign ─────────────────────────────────────────────────── */
+.wf-assign {
   position: relative; z-index: 1;
-  width: 280px; flex-shrink: 0;
+  width: 260px; flex-shrink: 0;
   display: flex; flex-direction: column;
   border-left: 1px solid rgba(212,175,55,0.12);
   background: rgba(8,6,2,0.6);
   backdrop-filter: blur(6px);
 }
 
-.wfchr-head {
+.wfa-head {
   padding: 20px 18px 14px;
   border-bottom: 1px solid rgba(212,175,55,0.10);
   display: flex; flex-direction: column; gap: 3px;
 }
-.wfchr-title {
+.wfa-title {
   font-family: var(--font-head, serif);
   font-size: 0.55rem; letter-spacing: 3px;
   text-transform: uppercase; color: #b8960a;
 }
-.wfchr-wname {
-  font-family: var(--font-head, serif);
-  font-size: 0.85rem; color: #e8d88a;
-  font-style: italic;
-}
+.wfa-count { font-size: 0.58rem; color: #444; }
 
-.wfchr-empty {
+.wfa-empty {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 24px; text-align: center; gap: 12px;
+  padding: 24px; gap: 12px;
 }
-.wfchre-sigil { font-size: 1.5rem; color: #2a2415; }
-.wfchre-text { font-size: 0.68rem; color: #3a3a3a; line-height: 1.7; font-style: italic; }
+.wfae-sigil { font-size: 1.4rem; color: #1e1a10; }
+.wfae-text { font-size: 0.67rem; color: #333; text-align: center; line-height: 1.7; font-style: italic; }
 
-.wfchr-entries {
-  flex: 1; overflow-y: auto; padding: 12px;
-  display: flex; flex-direction: column; gap: 0;
-}
-.wfchr-entry {
-  padding: 14px 4px 14px;
-  border-bottom: 1px solid rgba(212,175,55,0.07);
-}
-.wfchr-entry:first-child { border-top: none; }
-.wfchr-entry.latest .wfce-tier-head { opacity: 1; }
+.wfa-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
 
-.wfce-tier-head {
-  display: flex; align-items: baseline; gap: 8px;
-  margin-bottom: 8px; opacity: 0.7;
+.wfa-slot {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-left: 2px solid rgba(255,255,255,0.06);
+  border-radius: 5px; padding: 10px 12px;
+  transition: all 0.13s;
 }
-.wfce-numeral {
+.wfa-slot.clickable { cursor: pointer; }
+.wfa-slot.clickable:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+.wfa-slot.equipped { border-color: rgba(212,175,55,0.3); background: rgba(212,175,55,0.04); }
+.wfa-slot.empty-slot { opacity: 0.3; }
+
+.wfas-num {
   font-family: var(--font-head, serif);
-  font-size: 0.85rem; color: #d4af37;
+  font-size: 0.65rem; color: #444;
+  flex-shrink: 0; padding-top: 1px;
 }
-.wfce-tier-name {
-  font-family: var(--font-head, serif);
-  font-size: 0.6rem; letter-spacing: 1.5px;
-  text-transform: uppercase; color: #888;
-}
+.wfa-slot.equipped .wfas-num { color: #b8960a; }
 
-.wfce-lore {
-  font-size: 0.67rem; color: #777;
-  line-height: 1.75; margin-bottom: 10px;
-  font-style: italic;
+.wfas-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.wfas-name {
+  font-family: var(--font-head, serif);
+  font-size: 0.72rem; color: #b0a070;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.wfce-stats { display: flex; flex-wrap: wrap; gap: 6px; }
-.wfce-stat {
-  font-size: 0.58rem; color: #b8960a;
-  background: rgba(212,175,55,0.06);
-  border: 1px solid rgba(212,175,55,0.12);
-  border-radius: 3px; padding: 2px 8px;
+.wfas-role { font-size: 0.52rem; color: #444; text-transform: capitalize; }
+
+.wfas-weapon { display: flex; flex-direction: column; gap: 1px; text-align: right; flex-shrink: 0; max-width: 90px; }
+.wfasw-name { font-size: 0.58rem; color: #666; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wfasw-stat { font-size: 0.6rem; font-weight: 700; }
+.wfasw-cat { font-size: 0.52rem; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+.wfasw-none { font-size: 0.55rem; color: #2a2a2a; font-style: italic; }
+.wfas-empty { font-size: 0.6rem; color: #252525; font-style: italic; }
+
+/* Rarity left border */
+.wfa-slot.rarity-common    { border-left-color: #303030; }
+.wfa-slot.rarity-uncommon  { border-left-color: #186838; }
+.wfa-slot.rarity-rare      { border-left-color: #1a50a0; }
+.wfa-slot.rarity-epic      { border-left-color: #6a2890; }
+.wfa-slot.rarity-legendary { border-left-color: #8a6418; }
+.wfa-slot.rarity-mythical  { border-left-color: #5a1010; }
+.wfa-slot.rarity-ancient   { border-left-color: #7a1060; }
+.wfa-slot.rarity-legendary .wfas-name { color: #c9a227; }
+.wfa-slot.rarity-mythical  .wfas-name { color: #ff2244; }
+.wfa-slot.rarity-ancient   .wfas-name { color: #ee22ee; }
+
+.wfa-hint {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(212,175,55,0.08);
+  font-size: 0.6rem; color: #555; font-style: italic; text-align: center;
 }
+.wfa-hint em { color: #b8960a; font-style: normal; }
 </style>

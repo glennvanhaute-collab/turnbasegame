@@ -1,6 +1,6 @@
 import { Skill, SkillEffect, EffectType, TargetType, StatusEffect } from '../Skill.js'
 import { Hero, Faction, Rarity, Affinity } from '../Hero.js'
-import { rollThroneGear } from './raidGear.js'
+import { rollThroneGear, rollNullGear } from './raidGear.js'
 
 function makeBatmanSkills() {
   return [
@@ -58,6 +58,68 @@ export function buildBatmanBoss() {
     resistance: 0.60,
     accuracy: 0.50,
     skills: makeBatmanSkills(),
+    isPlayer: false,
+    enemyType: 'nightmare',
+    canRevive: false,
+  })
+}
+
+function makeMalacharSkills() {
+  return [
+    new Skill({
+      id: 'void_strike',
+      name: 'Void Strike',
+      description: 'A single devastating blow. 380% ATK to one target.',
+      cooldown: 0,
+      targetType: TargetType.SINGLE_ENEMY,
+      effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 3.8 })],
+    }),
+    new Skill({
+      id: 'null_decree',
+      name: 'Null Decree',
+      description: 'Strips all buffs from all enemies.',
+      cooldown: 4,
+      targetType: TargetType.ALL_ENEMIES,
+      effects: [new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.DECREASE_DEF, statusChance: 1.0, statusDuration: 2 })],
+    }),
+    new Skill({
+      id: 'voidgate',
+      name: 'Voidgate',
+      description: '220% AOE damage. Silences all enemies for 1 turn.',
+      cooldown: 3,
+      targetType: TargetType.ALL_ENEMIES,
+      effects: [
+        new SkillEffect({ type: EffectType.DAMAGE, multiplier: 2.2 }),
+        new SkillEffect({ type: EffectType.DEBUFF, statusEffect: StatusEffect.STUN, statusChance: 0.75, statusDuration: 1 }),
+      ],
+    }),
+    new Skill({
+      id: 'null_convergence',
+      name: 'Null Convergence',
+      description: 'A singularity collapses. 340% AOE damage. Cannot be dodged.',
+      cooldown: 5,
+      targetType: TargetType.ALL_ENEMIES,
+      effects: [new SkillEffect({ type: EffectType.DAMAGE, multiplier: 3.4 })],
+    }),
+  ]
+}
+
+export function buildMalachar() {
+  return new Hero({
+    id: 'malachar_void',
+    name: 'Malachar, Vanguard of the Void',
+    faction: Faction.ANCIENT_NOBLES,
+    rarity: Rarity.MYTHICAL,
+    affinity: Affinity.VOID,
+    baseHp: 120000,
+    baseAtk: 16000,
+    baseDef: 2200,
+    baseSpd: 140,
+    critRate: 0.42,
+    critDmg: 1.05,
+    resistance: 0.60,
+    accuracy: 0.60,
+    skills: makeMalacharSkills(),
     isPlayer: false,
     enemyType: 'nightmare',
     canRevive: false,
@@ -187,7 +249,9 @@ export function rollRaidResourceDrops(raidId) {
   components.push({ id: 'moonsilver_essence', amount: rand(1, 2) })
   if (Math.random() < 0.30) components.push({ id: 'moonsilver_core', amount: 1 })
 
-  const gearDrops = raidId === 'throne_of_regret' ? rollThroneGear() : []
+  const gearDrops = raidId === 'throne_of_regret' ? rollThroneGear()
+    : raidId === 'malachar_void' ? rollNullGear()
+    : []
 
   return {
     ores:       [{ id: 'mithril',    amount: rand(5, 10) }],
@@ -202,6 +266,21 @@ export function rollRaidResourceDrops(raidId) {
 }
 
 export const RAID_ENCOUNTERS = {
+  malachar_void: {
+    id: 'raid_malachar_void',
+    name: 'The Null Throne',
+    difficulty: 'Nightmare',
+    isRaid: true,
+    enemies: [buildMalachar],
+    mechanics: [],
+    rewards: { gold: 11000, diamonds: 110 },
+    victoryText: 'The void withdraws. For now.',
+    phases: [
+      { number: 1, name: 'The Vanguard',             hpAbove: 0.65, color: '#6644cc' },
+      { number: 2, name: 'The Null Commander',        hpAbove: 0.30, color: '#8855ff' },
+      { number: 3, name: 'Malachar, Void Incarnate',  hpAbove: 0,    color: '#aa66ff' },
+    ],
+  },
   throne_of_regret: {
     id: 'raid_throne_of_regret',
     name: 'The Throne of Regret',

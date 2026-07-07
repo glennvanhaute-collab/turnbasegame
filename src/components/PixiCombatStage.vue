@@ -30,10 +30,10 @@
         <div class="pcard-bottom">
           <div class="hp-track"><div class="hp-fill" :class="hpCls(hero)" :style="{ width: hpPct(hero) + '%' }" /></div>
         </div>
-        <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
         <div class="anim-flash" :class="{ on: hitIds.has(hero.id) }" />
         <div class="anim-veil"  :class="{ on: hero.isDead }" />
       </div>
+      <img v-if="cardBorder(hero)" :src="cardBorder(hero)" class="pcard-house-border" alt="" />
       <div class="hero-name" :class="[{ leader: i === 0 }, heroRarity(hero)?.toLowerCase()]">{{ i === 0 ? '★ ' : '' }}{{ hero.name }}</div>
     </div>
 
@@ -53,11 +53,11 @@
         <div class="pcard-bottom">
           <div class="hp-track"><div class="hp-fill" :class="hpCls(hero)" :style="{ width: hpPct(hero) + '%' }" /></div>
         </div>
-        <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
         <div class="pcard-target" v-if="isSelectingTarget && !hero.isDead" />
         <div class="anim-flash" :class="{ on: hitIds.has(hero.id) }" />
         <div class="anim-veil"  :class="{ on: hero.isDead }" />
       </div>
+      <img v-if="cardBorder(hero)" :src="cardBorder(hero)" class="pcard-house-border" alt="" />
       <div class="hero-name" :class="[{ leader: i === 0 }, heroRarity(hero)?.toLowerCase()]">{{ i === 0 ? '★ ' : '' }}{{ hero.name }}</div>
     </div>
 
@@ -71,7 +71,19 @@ import { BattleState } from '../game/BattleEngine.js'
 import { getPortrait } from '../game/portraits.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import HeroAvatar from './HeroAvatar.vue'
-import battlegroundBg from '../assets/backgrounds/battleground_background.png'
+import battlegroundBg  from '../assets/backgrounds/battleground_background.png'
+import borderAldric    from '../assets/ui/aldric_red_border_195x260_transparent.png'
+import borderMordaine  from '../assets/ui/mordaine_border_195x260_transparent.png'
+import borderValdris   from '../assets/ui/valdris_border_195x260_transparent.png'
+import borderCaelwyn   from '../assets/ui/caelwyn_thin_border_transparent_full.png'
+
+const HOUSE_CARD_BORDERS = {
+  'House Aldric':   borderAldric,
+  'House Mordaine': borderMordaine,
+  'House Valdris':  borderValdris,
+  'House Caelwyn':  borderCaelwyn,
+}
+function cardBorder(hero) { return HOUSE_CARD_BORDERS[hero.faction] ?? null }
 
 const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 800)
 const onResize = () => { windowWidth.value = window.innerWidth }
@@ -367,6 +379,18 @@ watch(() => store.battleKey, () => {
   top: 8px; left: 50%;
   transform: translateX(-50%);
 }
+
+.pcard-house-border {
+  position: absolute;
+  top: -11px; left: 50%;
+  transform: translateX(-50%);
+  width: auto; height: 205px;
+  pointer-events: none;
+  z-index: 3;
+}
+@container combat-col (min-width: 1400px) { .pcard-house-border { height: 273px; } }
+@container combat-col (min-width: 2000px) { .pcard-house-border { height: 364px; } }
+@container combat-col (min-width: 2800px) { .pcard-house-border { height: 456px; } }
 
 /* Gradient + HP bar pinned to card bottom */
 .pcard-bottom {

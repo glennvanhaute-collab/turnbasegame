@@ -32,7 +32,7 @@
           class="drop-chip"
           :style="{ '--c': ORES[drop.oreId]?.color ?? '#888' }"
         >
-          <span class="dot" />{{ ORES[drop.oreId]?.name ?? drop.oreId }} ×{{ drop.amount }}
+          <GameIcon :icon="oreIcon(drop.oreId)" :size="18" />{{ ORES[drop.oreId]?.name ?? drop.oreId }} ×{{ drop.amount }}
         </div>
         <div
           v-for="drop in store.lastReward.gatherDrops?.hides"
@@ -40,7 +40,7 @@
           class="drop-chip"
           :style="{ '--c': HIDES[drop.id]?.color ?? '#888' }"
         >
-          <span class="dot" />{{ HIDES[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
+          <GameIcon :icon="hideIcon(drop.id)" :size="18" />{{ HIDES[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
         </div>
         <div
           v-for="drop in store.lastReward.gatherDrops?.fibers"
@@ -48,15 +48,15 @@
           class="drop-chip"
           :style="{ '--c': FIBERS[drop.id]?.color ?? '#888' }"
         >
-          <span class="dot" />{{ FIBERS[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
+          <GameIcon :icon="fiberIcon(drop.id)" :size="18" />{{ FIBERS[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
         </div>
         <div
-          v-for="key in store.lastReward.componentDrops"
-          :key="key"
+          v-for="c in stackedComponents"
+          :key="c.id"
           class="drop-chip"
-          :style="{ '--c': UPGRADE_COMPONENTS[key]?.color ?? '#888' }"
+          :style="{ '--c': UPGRADE_COMPONENTS[c.id]?.color ?? '#888' }"
         >
-          <span class="dot" />{{ UPGRADE_COMPONENTS[key]?.name ?? key }}
+          ✨ {{ UPGRADE_COMPONENTS[c.id]?.name ?? c.id }} ×{{ c.amount }}
         </div>
         <div
           v-for="kd in store.lastReward.keyDrops"
@@ -64,7 +64,7 @@
           class="drop-chip"
           :style="{ '--c': DUNGEON_KEY_COLORS[kd.tier] ?? '#888' }"
         >
-          <span class="dot" />{{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
+          🗝️ {{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
         </div>
         <div
           v-for="lf in store.lastReward.loreFragments"
@@ -72,9 +72,17 @@
           class="drop-chip"
           style="--c: #d4a855"
         >
-          <span class="dot" />📜 Lore Fragment
+          📜 Lore Fragment
         </div>
-        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.gatherDrops?.hides?.length && !store.lastReward.gatherDrops?.fibers?.length && !store.lastReward.componentDrops?.length && !store.lastReward.keyDrops?.length && !store.lastReward.loreFragments?.length">
+        <div
+          v-for="sd in store.lastReward.scrollDrops"
+          :key="'sc_'+sd.type"
+          class="drop-chip"
+          :style="{ '--c': SCROLL_COLORS[sd.type] ?? '#888' }"
+        >
+          {{ SCROLL_EMOJI[sd.type] }} {{ SCROLL_NAMES[sd.type] ?? sd.type }} ×{{ sd.amount }}
+        </div>
+        <div class="chip dim" v-if="!store.lastReward.gold && !store.lastReward.diamonds && !store.lastReward.oreDrops?.length && !store.lastReward.gatherDrops?.hides?.length && !store.lastReward.gatherDrops?.fibers?.length && !store.lastReward.componentDrops?.length && !store.lastReward.keyDrops?.length && !store.lastReward.loreFragments?.length && !store.lastReward.scrollDrops?.length">
           No drops this run
         </div>
       </div>
@@ -149,14 +157,14 @@
         </template>
 
         <!-- Drops -->
-        <div class="drops-row" v-if="store.lastReward.oreDrops?.length || store.lastReward.gatherDrops?.hides?.length || store.lastReward.gatherDrops?.fibers?.length || store.lastReward.componentDrops?.length || store.lastReward.keyDrops?.length">
+        <div class="drops-row" v-if="store.lastReward.oreDrops?.length || store.lastReward.gatherDrops?.hides?.length || store.lastReward.gatherDrops?.fibers?.length || store.lastReward.componentDrops?.length || store.lastReward.keyDrops?.length || store.lastReward.scrollDrops?.length">
           <div
             v-for="drop in store.lastReward.oreDrops"
             :key="drop.oreId"
             class="drop-chip"
             :style="{ '--c': ORES[drop.oreId]?.color ?? '#888' }"
           >
-            <span class="dot" />{{ ORES[drop.oreId]?.name ?? drop.oreId }} ×{{ drop.amount }}
+            <GameIcon :icon="oreIcon(drop.oreId)" :size="18" />{{ ORES[drop.oreId]?.name ?? drop.oreId }} ×{{ drop.amount }}
           </div>
           <div
             v-for="drop in store.lastReward.gatherDrops?.hides"
@@ -164,7 +172,7 @@
             class="drop-chip"
             :style="{ '--c': HIDES[drop.id]?.color ?? '#888' }"
           >
-            <span class="dot" />{{ HIDES[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
+            <GameIcon :icon="hideIcon(drop.id)" :size="18" />{{ HIDES[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
           </div>
           <div
             v-for="drop in store.lastReward.gatherDrops?.fibers"
@@ -172,7 +180,7 @@
             class="drop-chip"
             :style="{ '--c': FIBERS[drop.id]?.color ?? '#888' }"
           >
-            <span class="dot" />{{ FIBERS[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
+            <GameIcon :icon="fiberIcon(drop.id)" :size="18" />{{ FIBERS[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
           </div>
           <div
             v-for="key in store.lastReward.componentDrops"
@@ -180,7 +188,7 @@
             class="drop-chip"
             :style="{ '--c': UPGRADE_COMPONENTS[key]?.color ?? '#888' }"
           >
-            <span class="dot" />{{ UPGRADE_COMPONENTS[key]?.name ?? key }}
+            ✨ {{ UPGRADE_COMPONENTS[key]?.name ?? key }}
           </div>
           <div
             v-for="kd in store.lastReward.keyDrops"
@@ -188,7 +196,15 @@
             class="drop-chip"
             :style="{ '--c': DUNGEON_KEY_COLORS[kd.tier] ?? '#888' }"
           >
-            <span class="dot" />{{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
+            🗝️ {{ DUNGEON_KEY_NAMES[kd.tier] ?? kd.tier }} ×{{ kd.amount }}
+          </div>
+          <div
+            v-for="sd in store.lastReward.scrollDrops"
+            :key="'sc_'+sd.type"
+            class="drop-chip"
+            :style="{ '--c': SCROLL_COLORS[sd.type] ?? '#888' }"
+          >
+            {{ SCROLL_EMOJI[sd.type] }} {{ SCROLL_NAMES[sd.type] ?? sd.type }} ×{{ sd.amount }}
           </div>
         </div>
 
@@ -230,15 +246,13 @@
           <button
             class="btn btn-batch"
             v-if="!encounter?.isDungeon"
-            :disabled="!currency.canAffordDiamonds(BATCH10_COST)"
             @click="startBatch"
-          >⚡ Run 10× <span class="batch-cost">💎{{ BATCH10_COST }}</span></button>
+          >⚡ Run 10×</button>
           <button
             class="btn btn-batch100"
             v-if="canRun100 && !encounter?.isDungeon"
-            :disabled="!currency.canAffordDiamonds(BATCH100_COST)"
             @click="startBatch100"
-          >⚡ Run 100× <span class="batch-cost">💎{{ BATCH100_COST }}</span></button>
+          >⚡ Run 100×</button>
           <button class="btn btn-secondary" @click="$emit('back')">← Team</button>
         </template>
         <!-- Defeat -->
@@ -251,22 +265,44 @@
     </div>
   </div>
 
+  <!-- Lore fragment discovery modal — shown on top of the reward panel -->
+  <LoreFragmentModal
+    v-if="pendingLoreFragments.length"
+    :fragment="pendingLoreFragments[0]"
+    @dismiss="dismissLoreFragment"
+  />
+
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useBattleStore }     from '../stores/useBattleStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
-import { useCurrencyStore }   from '../stores/useCurrencyStore.js'
 import { ORES }               from '../game/data/ores.js'
 import { HIDES }              from '../game/data/hides.js'
 import { FIBERS }             from '../game/data/fibers.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { DUNGEON_KEY_NAMES, DUNGEON_KEY_COLORS } from '../game/data/dungeons.js'
-import CombatStage from './PixiCombatStage.vue'
-import SkillPanel  from './SkillPanel.vue'
-import BattleLog   from './BattleLog.vue'
+import { oreIcon, hideIcon, fiberIcon } from '../game/data/spritesheet.js'
+import CombatStage        from './PixiCombatStage.vue'
+import SkillPanel          from './SkillPanel.vue'
+import BattleLog           from './BattleLog.vue'
+import GameIcon            from './ui/GameIcon.vue'
+import LoreFragmentModal   from './LoreFragmentModal.vue'
+
+const SCROLL_NAMES  = { commonWrit: 'Common Writ', sealedCharter: 'Sealed Charter', houseSeal: 'House Seal' }
+const SCROLL_COLORS = { commonWrit: '#b8860b', sealedCharter: '#7c3aed', houseSeal: '#dc2626' }
+const SCROLL_EMOJI  = { commonWrit: '📜', sealedCharter: '📋', houseSeal: '🔏' }
+
+const stackedComponents = computed(() => {
+  const counts = {}
+  for (const id of (store.lastReward?.componentDrops ?? [])) {
+    counts[id] = (counts[id] ?? 0) + 1
+  }
+  return Object.entries(counts).map(([id, amount]) => ({ id, amount }))
+})
+const KEY_EMOJI     = { easy: '🗝️', medium: '🗝️', hard: '🗝️', nightmare: '🗝️' }
 
 defineEmits(['back'])
 
@@ -294,15 +330,23 @@ const isDungeonVictory = computed(() =>
 const playerHero = usePlayerHeroStore()
 const store      = useBattleStore()
 const collection = useCollectionStore()
-const currency   = useCurrencyStore()
 
-const BATCH10_COST  = 5
-const BATCH100_COST = 25
 
 const rarityAtBattleStart = ref(playerHero.rarity)
 const rarityChanged = computed(() =>
   store.lastReward?.levelsGained > 0 && playerHero.rarity !== rarityAtBattleStart.value
 )
+
+// Lore fragment discovery queue — populated when a reward contains fragments
+const pendingLoreFragments = ref([])
+function dismissLoreFragment() {
+  pendingLoreFragments.value = pendingLoreFragments.value.slice(1)
+}
+watch(() => store.lastReward, (reward) => {
+  if (reward?.loreFragments?.length) {
+    pendingLoreFragments.value = [...reward.loreFragments]
+  }
+})
 
 const canRun100 = computed(() => !encounter.value?.isDungeon)
 
@@ -323,14 +367,8 @@ function retryEncounter() {
   const team = collection.buildTeam()
   store.initBattle(store.currentEncounterIndex, team)
 }
-function startBatch() {
-  if (!currency.spendDiamonds(BATCH10_COST)) return
-  store.startBatchRun(10)
-}
-function startBatch100() {
-  if (!currency.spendDiamonds(BATCH100_COST)) return
-  store.startBatchRun(100)
-}
+function startBatch()    { store.startBatchRun(10) }
+function startBatch100() { store.startBatchRun(100) }
 </script>
 
 <style scoped>

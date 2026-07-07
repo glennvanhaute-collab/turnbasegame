@@ -137,21 +137,6 @@
 
     </div>
 
-    <!-- ══════════════════════════════════
-         QUICK PATHS — bottom nav
-         ══════════════════════════════════ -->
-    <nav class="gh-paths">
-      <button
-        class="gh-path"
-        v-for="path in quickPaths"
-        :key="path.dest"
-        @click="emit('navigate', path.dest)"
-      >
-        <p class="gh-path-name">{{ path.name }}</p>
-        <p class="gh-path-flavor">{{ path.flavor }}</p>
-      </button>
-    </nav>
-
   </div>
 </template>
 
@@ -282,7 +267,7 @@ const artisanLabel = computed(() => {
 const clearedRaidsCount = computed(() => battleStore.clearedRaids.size)
 
 const highestWeaponTier = computed(() => {
-  const weapons = Object.values(weaponStore.weapons)
+  const weapons = weaponStore.soulWeapons
   if (!weapons.length) return 0
   return Math.max(...weapons.map(w => w.tier ?? 1))
 })
@@ -334,14 +319,6 @@ const deeds = computed(() => [
   { label: 'Highest Forge',    value: `T${highestWeaponTier.value}` },
 ])
 
-const quickPaths = [
-  { dest: 'campaign', name: 'Campaign',    flavor: 'The warfront awaits your orders' },
-  { dest: 'sieges',   name: 'Sieges',      flavor: 'The realm\'s gates hold, for now' },
-  { dest: 'dungeon',  name: 'Expeditions', flavor: 'Scouts report uncharted paths' },
-  { dest: 'camp',     name: 'Stronghold',  flavor: 'The keep demands your attention' },
-  { dest: 'realm',    name: 'Realm',       flavor: 'Lords watch. Alliances shift.' },
-]
-
 const parchmentUrl = `url(${_parchmentBg})`
 const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 </script>
@@ -351,7 +328,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
    Root
    ══════════════════════════════════ */
 .gh-wrap {
-  height: 100vh;
+  height: 100%;
   background: #09080c;
   color: #d4c9a8;
   display: flex;
@@ -663,9 +640,11 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  background-image: v-bind(parchmentUrl);
+  background-image:
+    linear-gradient(rgba(9,8,12,0.40), rgba(9,8,12,0.72)),
+    v-bind(parchmentUrl);
   background-repeat: repeat;
-  background-size: 600px 600px;
+  background-size: auto, 600px 600px;
 }
 
 .gh-chronicle-empty {
@@ -814,9 +793,14 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
    ══════════════════════════════════ */
 .gh-paths {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  border-top: 1px solid #1a1814;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid #1a1814;
   flex-shrink: 0;
+}
+
+/* All paths are hall sections — house-colored names */
+.gh-path .gh-path-name {
+  color: v-bind(houseColor);
 }
 
 .gh-path {
