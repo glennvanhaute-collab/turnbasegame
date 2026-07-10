@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { HERO_TEMPLATES, STARTER_KEYS } from '../game/data/heroes.js'
-import { useReputationStore } from './useReputationStore.js'
 import { applyBonds } from '../game/data/bonds.js'
 import { Rarity, Faction, Affinity } from '../game/Hero.js'
 import { useInventoryStore } from './useInventoryStore.js'
@@ -89,8 +88,6 @@ export const useCollectionStore = defineStore('collection', () => {
   function claimStarterHero(key) {
     ownedKeys.value = [key]
     starterChosen.value = true
-    const faction = HERO_TEMPLATES[key]?.()?.faction
-    if (faction) useReputationStore().earnRep(faction, 200)
   }
 
   function ownsHero(key) { return ownedKeys.value.includes(key) }
@@ -107,10 +104,6 @@ export const useCollectionStore = defineStore('collection', () => {
   function addToRoster(key, { silent = false } = {}) {
     if (!ownedKeys.value.includes(key)) {
       ownedKeys.value = [...ownedKeys.value, key]
-      if (!silent) {
-        const faction = HERO_TEMPLATES[key]?.()?.faction
-        if (faction) useReputationStore().earnRep(faction, 50)
-      }
     }
   }
 

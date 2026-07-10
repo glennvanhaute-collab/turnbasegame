@@ -1,9 +1,7 @@
 <template>
   <div class="gh-wrap">
 
-    <!-- ══════════════════════════════════
-         HEADER — house identity
-         ══════════════════════════════════ -->
+    <!-- HEADER -->
     <header class="gh-header" :style="headerBg ? { backgroundImage: headerBg } : {}">
       <div class="gh-header-overlay" />
       <div class="gh-header-inner">
@@ -15,72 +13,121 @@
           </h1>
           <p class="gh-tagline">{{ playerHouse?.tagline }}</p>
         </div>
+        <div v-if="questStore.totalQP > 0" class="gh-qp-badge" title="Quest Points">
+          {{ questStore.totalQP }} QP
+        </div>
       </div>
     </header>
 
-    <!-- ══════════════════════════════════
-         BODY — 3 columns
-         ══════════════════════════════════ -->
+    <!-- BODY -->
     <div class="gh-body">
 
-      <!-- ── LORD — left ── -->
+      <!-- LORD / STANDINGS — left -->
       <aside class="gh-col-lord">
-        <!-- Portrait -->
         <div class="gh-lord-portrait-wrap" v-if="playerHouseLordPortrait">
-          <img
-            :src="playerHouseLordPortrait"
-            class="gh-lord-img"
-            :alt="playerHouse?.lordName"
-          />
-          <img
-            v-if="playerHouse?.frame"
-            :src="playerHouse.frame"
-            class="gh-lord-frame"
-            aria-hidden="true"
-          />
+          <img :src="playerHouseLordPortrait" class="gh-lord-img" :alt="playerHouse?.lordName" />
+          <img v-if="playerHouse?.frame" :src="playerHouse.frame" class="gh-lord-frame" aria-hidden="true" />
           <div class="gh-lord-portrait-fade" />
         </div>
-        <div class="gh-lord-unclaimed" v-else>
-          <img v-if="playerHouse?.shield" :src="playerHouse.shield" class="gh-lord-crest-placeholder" />
-          <p class="gh-lord-unclaimed-text">No lord has answered</p>
+
+        <!-- Pre-oath: house standings -->
+        <div class="gh-standings" v-else>
+          <p class="gh-standings-label">Houses Watching</p>
+          <div
+            class="gh-standing-row"
+            v-for="h in houseStandings"
+            :key="h.name"
+            :style="{ '--house-color': h.color }"
+          >
+            <img :src="h.shield" class="gh-standing-crest" :alt="h.name" />
+            <div class="gh-standing-info">
+              <p class="gh-standing-name">{{ h.name }}</p>
+              <div class="gh-standing-tier-bar">
+                <div class="gh-standing-tier-fill" :style="{ width: h.tierPct + '%' }" />
+              </div>
+              <p class="gh-standing-tier-name" :class="{ 'is-negative': h.rep < 0 }">
+                {{ h.rep < 0 ? 'Unwelcome' : h.tierName }}
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Lord info -->
         <div class="gh-lord-info">
           <p class="gh-lord-name">{{ playerHouse?.lordName ?? '— —' }}</p>
-          <p class="gh-lord-role">House Lord</p>
-          <div class="gh-rep-badge" :style="{ borderColor: playerHouse?.color ?? '#2a2418', color: playerHouse?.color ?? '#d4af37' }">
-            {{ playerRepTier }}
-          </div>
+          <p class="gh-lord-role">{{ playerHouseLordPortrait ? 'House Lord' : 'No oath sworn' }}</p>
         </div>
       </aside>
 
-      <!-- ── CENTER — notices + chronicle ── -->
+      <!-- CENTER — dispatch + chronicle -->
       <main class="gh-col-center">
 
-        <!-- Hall Notices -->
-        <section class="gh-notices">
-          <h2 class="gh-section-title">Hall Notices</h2>
-          <div class="gh-notice-list">
+        <!-- ── OUTCOME REVEAL ── -->
+        <section class="gh-dispatch gh-dispatch--outcome" v-if="dispatchState === 'outcome' && outcome">
+          <div class="gh-dispatch-header">
+            <p class="gh-dispatch-quest-name">{{ outcome.questName }}</p>
+            <p class="gh-dispatch-qp">+{{ outcome.questPoints }} Quest Point{{ outcome.questPoints > 1 ? 's' : '' }}</p>
+          </div>
+          <p class="gh-outcome-text">{{ outcome.outcomeText }}</p>
+          <div class="gh-rep-reveal">
             <div
-              class="gh-notice"
-              :class="{ 'gh-notice--done': notice.done }"
-              v-for="notice in hallNotices"
-              :key="notice.id"
-              @click="emit('navigate', notice.dest)"
-              role="button"
-              tabindex="0"
+              class="gh-rep-row"
+              v-for="h in repRevealHouses"
+              :key="h.name"
+              :style="{ '--house-color': h.color }"
             >
-              <div class="gh-notice-check">
-                <span v-if="notice.done">✓</span>
-              </div>
-              <div class="gh-notice-body">
-                <p class="gh-notice-title">{{ notice.title }}</p>
-                <p class="gh-notice-flavor">{{ notice.flavor }}</p>
-              </div>
-              <span class="gh-notice-dest">{{ notice.destLabel }} →</span>
+              <img :src="h.shield" class="gh-rep-crest" :alt="h.name" />
+              <span class="gh-rep-house-name">{{ h.shortName }}</span>
+              <span class="gh-rep-delta" :class="h.delta > 0 ? 'pos' : 'neg'">
+                {{ h.delta > 0 ? '+' : '' }}{{ h.delta }}
+              </span>
             </div>
           </div>
+          <div class="gh-dispatch-reward">
+            <span v-for="r in outcome.reward" :key="r.type" class="gh-reward-chip">
+              {{ r.amount }}× {{ SCROLL_LABEL[r.type] }}
+            </span>
+          </div>
+          <button class="gh-dispatch-btn" @click="dismissOutcome">Continue</button>
+        </section>
+
+        <!-- ── READING A DISPATCH ── -->
+        <section class="gh-dispatch gh-dispatch--reading" v-else-if="dispatchState === 'reading' && activeQuest">
+          <div class="gh-dispatch-header">
+            <span class="gh-dispatch-sender">{{ activeQuest.dispatch.sender }}</span>
+            <span class="gh-dispatch-subject">{{ activeQuest.dispatch.subject }}</span>
+          </div>
+          <p class="gh-dispatch-body" v-for="(line, i) in activeQuest.dispatch.body.split('\n\n')" :key="i">
+            {{ line }}
+          </p>
+          <div class="gh-dispatch-options">
+            <button
+              class="gh-option-btn"
+              v-for="opt in activeQuest.options"
+              :key="opt.id"
+              @click="chooseOption(activeQuest.id, opt.id)"
+            >
+              <span class="gh-option-label">{{ opt.label }}</span>
+              <span class="gh-option-sub">{{ opt.text }}</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ── DISPATCH AVAILABLE ── -->
+        <section class="gh-dispatch gh-dispatch--sealed" v-else-if="nextDispatch">
+          <div class="gh-seal-icon">✉</div>
+          <div class="gh-seal-info">
+            <p class="gh-seal-from">From: {{ nextDispatch.dispatch.sender }}</p>
+            <p class="gh-seal-subject">{{ nextDispatch.dispatch.subject }}</p>
+          </div>
+          <button class="gh-dispatch-btn" @click="openDispatch(nextDispatch.id)">
+            Open Dispatch
+          </button>
+        </section>
+
+        <!-- ── IDLE ── -->
+        <section class="gh-dispatch gh-dispatch--idle" v-else>
+          <p class="gh-idle-text">The hall is quiet. No dispatches await.</p>
         </section>
 
         <!-- Chronicle -->
@@ -90,11 +137,7 @@
             The chronicle awaits your first deed.
           </p>
           <div class="gh-entries" v-else>
-            <div
-              class="gh-entry"
-              v-for="entry in recentEntries"
-              :key="entry.id"
-            >
+            <div class="gh-entry" v-for="entry in recentEntries" :key="entry.id">
               <span class="gh-entry-date">{{ entry.date }}</span>
               <span class="gh-entry-title">{{ entry.title }}</span>
             </div>
@@ -103,10 +146,9 @@
 
       </main>
 
-      <!-- ── PLAYER + DEEDS — right ── -->
+      <!-- PLAYER + DEEDS — right -->
       <aside class="gh-col-player">
 
-        <!-- Player card -->
         <div class="gh-player-card" v-if="playerHero.isCreated">
           <div class="gh-player-avatar-wrap">
             <img v-if="playerAvatarUrl" :src="playerAvatarUrl" class="gh-player-avatar" />
@@ -124,7 +166,6 @@
           </div>
         </div>
 
-        <!-- Deeds -->
         <div class="gh-deeds">
           <h2 class="gh-section-title">Chronicle of Deeds</h2>
           <div class="gh-deed-row" v-for="deed in deeds" :key="deed.label">
@@ -136,19 +177,19 @@
       </aside>
 
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useReputationStore } from '../stores/useReputationStore.js'
+import { ref, computed } from 'vue'
+import { useReputationStore, ALL_HOUSES } from '../stores/useReputationStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { useDungeonStore } from '../stores/useDungeonStore.js'
 import { useWeaponStore } from '../stores/useWeaponStore.js'
 import { useJournalStore } from '../stores/useJournalStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
+import { useQuestStore } from '../stores/useQuestStore.js'
 
 import shieldAldric      from '../assets/lore/house_aldric.png'
 import shieldValdris     from '../assets/lore/house_valdris.png'
@@ -168,6 +209,26 @@ import { HERO_TEMPLATES, STARTER_KEYS } from '../game/data/heroes.js'
 
 const emit = defineEmits(['navigate'])
 
+const SCROLL_LABEL = {
+  commonWrit:    'Common Writ',
+  sealedCharter: 'Sealed Charter',
+  houseSeal:     'House Seal',
+}
+
+const HOUSE_META = {
+  'House Caelwyn':  { shield: shieldCaelwyn,  color: '#4dff88', shortName: 'Caelwyn',  frame: frameCaelwyn,  lordKey: 'LORD_CAELWYN',     lordName: 'Lord Caelwyn',     tagline: 'Wardens of the Ancient Grove' },
+  'House Aldric':   { shield: shieldAldric,   color: '#c8962a', shortName: 'Aldric',   frame: frameAldric,   lordKey: 'LORD_ALDRIC',       lordName: 'Lord Aldric',       tagline: 'Warriors of the Iron Gate' },
+  'House Valdris':  { shield: shieldValdris,  color: '#4fa8ff', shortName: 'Valdris',  frame: frameValdris,  lordKey: 'ARCHMAGE_VALDRIS',  lordName: 'Archmage Valdris',  tagline: 'Scholars of the Arcane Tower' },
+  'House Mordaine': { shield: shieldMordaine, color: '#b44fff', shortName: 'Mordaine', frame: frameMordaine, lordKey: 'LORD_MORDAINE',     lordName: 'Lord Mordaine',     tagline: 'Shadowblades of the Dark Spire' },
+}
+
+const SIEGE_IMAGES = {
+  'House Aldric':   siegeAldric,
+  'House Valdris':  siegeValdris,
+  'House Caelwyn':  siegeCaelwyn,
+  'House Mordaine': siegeMordaine,
+}
+
 const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
 const PLAYER_AVATARS = Object.fromEntries(
   Object.entries(_avatarModules).map(([path, mod]) => {
@@ -183,36 +244,9 @@ const dungeonStore = useDungeonStore()
 const weaponStore  = useWeaponStore()
 const journalStore = useJournalStore()
 const playerHero   = usePlayerHeroStore()
+const questStore   = useQuestStore()
 
-const HOUSES = [
-  {
-    name: 'House Caelwyn',  color: '#4dff88', shield: shieldCaelwyn,
-    frame: frameCaelwyn, lordKey: 'LORD_CAELWYN', lordName: 'Lord Caelwyn',
-    tagline: 'Wardens of the Ancient Grove',
-  },
-  {
-    name: 'House Aldric',   color: '#c8962a', shield: shieldAldric,
-    frame: frameAldric, lordKey: 'LORD_ALDRIC', lordName: 'Lord Aldric',
-    tagline: 'Warriors of the Iron Gate',
-  },
-  {
-    name: 'House Valdris',  color: '#4fa8ff', shield: shieldValdris,
-    frame: frameValdris, lordKey: 'ARCHMAGE_VALDRIS', lordName: 'Archmage Valdris',
-    tagline: 'Scholars of the Arcane Tower',
-  },
-  {
-    name: 'House Mordaine', color: '#b44fff', shield: shieldMordaine,
-    frame: frameMordaine, lordKey: 'LORD_MORDAINE', lordName: 'Lord Mordaine',
-    tagline: 'Shadowblades of the Dark Spire',
-  },
-]
-
-const SIEGE_IMAGES = {
-  'House Aldric':   siegeAldric,
-  'House Valdris':  siegeValdris,
-  'House Caelwyn':  siegeCaelwyn,
-  'House Mordaine': siegeMordaine,
-}
+// ── House identity ──────────────────────────────────────────────────────────
 
 const starterFaction = computed(() => {
   if (playerHero.heroFaction) return playerHero.heroFaction
@@ -229,28 +263,22 @@ const headerBg = computed(() => {
   return img ? `url(${img})` : null
 })
 
-const playerHouse = computed(() => HOUSES.find(h => h.name === starterFaction.value) ?? null)
+const playerHouse = computed(() => {
+  if (!starterFaction.value) return null
+  const meta = HOUSE_META[starterFaction.value]
+  if (!meta) return null
+  return { name: starterFaction.value, ...meta }
+})
 
 const houseLordHero = computed(() => {
-  const h = playerHouse.value
-  if (!h?.lordKey) return null
-  return HERO_TEMPLATES[h.lordKey]?.() ?? null
+  const meta = playerHouse.value
+  if (!meta?.lordKey) return null
+  return HERO_TEMPLATES[meta.lordKey]?.() ?? null
 })
 
 const playerHouseLordPortrait = computed(() => {
   const hero = houseLordHero.value
   return hero ? getPortrait(hero) : null
-})
-
-const lordOwned = computed(() => {
-  const h = playerHouse.value
-  if (!h?.lordKey) return false
-  return collection.ownsHero(h.lordKey)
-})
-
-const playerRepTier = computed(() => {
-  if (!starterFaction.value) return 'Stranger'
-  return repStore.tier(starterFaction.value).name
 })
 
 const playerAvatarUrl = computed(() => {
@@ -264,9 +292,78 @@ const artisanLabel = computed(() => {
   return s.charAt(0).toUpperCase() + s.slice(1)
 })
 
-const clearedRaidsCount = computed(() => battleStore.clearedRaids.size)
+// ── House standings (left column) ──────────────────────────────────────────
 
-const highestWeaponTier = computed(() => {
+const houseStandings = computed(() =>
+  ALL_HOUSES.map(name => {
+    const meta   = HOUSE_META[name]
+    const t      = repStore.tier(name)
+    return {
+      name,
+      shield:    meta.shield,
+      color:     meta.color,
+      rep:       repStore.getRep(name),
+      tierName:  t.name,
+      tierPct:   t.pct,
+    }
+  })
+)
+
+// ── Quest + dispatch logic ──────────────────────────────────────────────────
+
+const dispatchState = ref('idle')  // 'idle' | 'reading' | 'outcome'
+const outcome       = ref(null)
+
+const currentStats = computed(() => ({
+  battleWins:       battleStore.battleWins,
+  dungeonClears:    dungeonStore.dungeonClears,
+  heroCount:        collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
+  raidClears:       battleStore.clearedRaids.size,
+  completedQuestIds: questStore.completedIds,
+}))
+
+const nextDispatch = computed(() => {
+  if (dispatchState.value !== 'idle') return null
+  return questStore.getNextAvailable(currentStats.value)
+})
+
+const activeQuest = computed(() => questStore.getActiveQuest())
+
+function openDispatch(id) {
+  questStore.openDispatch(id)
+  dispatchState.value = 'reading'
+}
+
+function chooseOption(questId, optionId) {
+  const result = questStore.complete(questId, optionId)
+  if (!result) return
+  outcome.value       = result
+  dispatchState.value = 'outcome'
+}
+
+function dismissOutcome() {
+  outcome.value       = null
+  dispatchState.value = 'idle'
+}
+
+// Houses shown in the rep reveal, ordered by magnitude of change
+const repRevealHouses = computed(() => {
+  if (!outcome.value?.repChanges) return []
+  return Object.entries(outcome.value.repChanges)
+    .map(([name, delta]) => ({
+      name,
+      delta,
+      shield:    HOUSE_META[name]?.shield,
+      color:     HOUSE_META[name]?.color,
+      shortName: HOUSE_META[name]?.shortName ?? name,
+    }))
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+})
+
+// ── Deeds / chronicle ──────────────────────────────────────────────────────
+
+const clearedRaidsCount    = computed(() => battleStore.clearedRaids.size)
+const highestWeaponTier    = computed(() => {
   const weapons = weaponStore.soulWeapons
   if (!weapons.length) return 0
   return Math.max(...weapons.map(w => w.tier ?? 1))
@@ -276,51 +373,17 @@ const recentEntries = computed(() =>
   [...journalStore.entries].reverse().slice(0, 5)
 )
 
-const hallNotices = computed(() => [
-  {
-    id: 'campaign',
-    title: 'Answer the Warfront',
-    flavor: 'Troops rally beyond the grove. Victory secures the house.',
-    dest: 'campaign',
-    destLabel: 'Campaign',
-    done: battleStore.battleWins > 0,
-  },
-  {
-    id: 'dungeon',
-    title: 'Heed the Expedition Board',
-    flavor: 'Scouts report uncharted paths. Essence and glory await the bold.',
-    dest: 'dungeon',
-    destLabel: 'Expeditions',
-    done: dungeonStore.dungeonClears > 0,
-  },
-  {
-    id: 'forge',
-    title: 'Visit the Forge',
-    flavor: 'A weapon unfinished is a battle half-lost. The smith awaits.',
-    dest: 'camp',
-    destLabel: 'Stronghold',
-    done: highestWeaponTier.value > 1,
-  },
-  {
-    id: 'realm',
-    title: 'Survey the Realm',
-    flavor: 'Lords watch. Alliances shift. Stand known or stand forgotten.',
-    dest: 'realm',
-    destLabel: 'Realm',
-    done: false,
-  },
-])
-
 const deeds = computed(() => [
-  { label: 'Raids Cleared',    value: clearedRaidsCount.value },
-  { label: 'Dungeons Cleared', value: dungeonStore.dungeonClears },
-  { label: 'Battles Won',      value: battleStore.battleWins },
-  { label: 'Heroes in Banner', value: collection.ownedKeys.length },
-  { label: 'Highest Forge',    value: `T${highestWeaponTier.value}` },
+  { label: 'Quest Points',    value: questStore.totalQP },
+  { label: 'Raids Cleared',   value: clearedRaidsCount.value },
+  { label: 'Dungeons Cleared',value: dungeonStore.dungeonClears },
+  { label: 'Battles Won',     value: battleStore.battleWins },
+  { label: 'Heroes in Banner',value: collection.ownedKeys.length },
+  { label: 'Highest Forge',   value: `T${highestWeaponTier.value}` },
 ])
 
 const parchmentUrl = `url(${_parchmentBg})`
-const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
+const houseColor   = computed(() => playerHouse.value?.color ?? '#d4af37')
 </script>
 
 <style scoped>
@@ -350,9 +413,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 .gh-header::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(to right, transparent 0%, v-bind(houseColor) 50%, transparent 100%);
   box-shadow: 0 0 14px v-bind(houseColor), 0 0 4px v-bind(houseColor);
@@ -362,12 +423,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 .gh-header-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(9,8,12,0.45) 0%,
-    rgba(9,8,12,0.88) 75%,
-    rgba(9,8,12,1.00) 100%
-  );
+  background: linear-gradient(to bottom, rgba(9,8,12,0.45) 0%, rgba(9,8,12,0.88) 75%, rgba(9,8,12,1.00) 100%);
 }
 
 .gh-header-inner {
@@ -381,14 +437,13 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 }
 
 .gh-crest {
-  width: 40px;
-  height: 40px;
+  width: 40px; height: 40px;
   object-fit: contain;
   opacity: 0.85;
   flex-shrink: 0;
 }
 
-.gh-header-text { display: flex; flex-direction: column; gap: 2px; }
+.gh-header-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 
 .gh-eyebrow {
   font-size: 0.58rem;
@@ -415,6 +470,18 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   margin: 0;
 }
 
+.gh-qp-badge {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d4af37;
+  border: 1px solid #3a3020;
+  padding: 4px 10px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+
 /* ══════════════════════════════════
    BODY
    ══════════════════════════════════ */
@@ -427,7 +494,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   overflow: hidden;
 }
 
-/* ── Lord column ── */
+/* ── Lord / standings column ── */
 .gh-col-lord {
   border-right: 1px solid #1a1814;
   display: flex;
@@ -455,8 +522,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 .gh-lord-frame {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   object-fit: fill;
   pointer-events: none;
   z-index: 2;
@@ -464,46 +530,87 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 
 .gh-lord-portrait-fade {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 60px;
   background: linear-gradient(to top, #0a0909 0%, transparent 100%);
   z-index: 3;
 }
 
-
-.gh-lord-unclaimed {
+.gh-standings {
   flex: 1;
+  padding: 20px 18px 12px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-  gap: 12px;
+  gap: 4px;
 }
 
-.gh-lord-crest-placeholder {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  opacity: 0.25;
-}
-
-.gh-lord-unclaimed-text {
-  font-size: 0.75rem;
+.gh-standings-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
   color: #4a4030;
-  font-style: italic;
-  margin: 0;
-  text-align: center;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1a1814;
 }
 
-.gh-lord-unclaimed-hint {
-  font-size: 0.62rem;
-  color: #2a2418;
-  letter-spacing: 0.08em;
+.gh-standing-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #1a181400;
+  border-bottom-color: rgba(255,255,255,0.03);
+}
+
+.gh-standing-crest {
+  width: 28px; height: 28px;
+  object-fit: contain;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.gh-standing-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.gh-standing-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--house-color);
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-standing-tier-bar {
+  height: 2px;
+  background: #1a1814;
+  border-radius: 1px;
+  margin-bottom: 3px;
+  overflow: hidden;
+}
+
+.gh-standing-tier-fill {
+  height: 100%;
+  background: var(--house-color);
+  opacity: 0.6;
+  border-radius: 1px;
+  transition: width 0.4s ease;
+}
+
+.gh-standing-tier-name {
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a4030;
   margin: 0;
-  text-align: center;
+}
+
+.gh-standing-tier-name.is-negative {
+  color: #6a3030;
 }
 
 .gh-lord-info {
@@ -511,6 +618,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border-top: 1px solid #1a1814;
 }
 
 .gh-lord-name {
@@ -528,19 +636,6 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   text-transform: uppercase;
   color: #4a4030;
   margin: 0;
-}
-
-.gh-rep-badge {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 0.58rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  border: 1px solid;
-  border-radius: 3px;
-  padding: 3px 8px;
-  width: fit-content;
-  opacity: 0.8;
 }
 
 /* ── Center column ── */
@@ -563,75 +658,234 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   border-bottom: 1px solid #1a1814;
 }
 
-/* Hall Notices */
-.gh-notices {
+/* ── Dispatch states ── */
+.gh-dispatch {
   padding: 24px 28px;
   border-bottom: 1px solid #1a1814;
   flex-shrink: 0;
 }
 
-.gh-notice-list {
+.gh-dispatch--idle {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
 }
 
-.gh-notice {
-  display: grid;
-  grid-template-columns: 28px 1fr auto;
+.gh-idle-text {
+  font-size: 0.75rem;
+  color: #4a4030;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Sealed dispatch */
+.gh-dispatch--sealed {
+  display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+.gh-seal-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  color: #d4af37;
+  opacity: 0.7;
+}
+
+.gh-seal-info { flex: 1; }
+
+.gh-seal-from {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #4a4030;
+  margin: 0 0 4px;
+}
+
+.gh-seal-subject {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #c4b888;
+  margin: 0;
+}
+
+/* Reading / letter */
+.gh-dispatch--reading {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  max-height: 70%;
+}
+
+.gh-dispatch-header {
+  display: flex;
   gap: 12px;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+
+.gh-dispatch-sender {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #4a4030;
+}
+
+.gh-dispatch-subject {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c4b888;
+}
+
+.gh-dispatch-body {
+  font-size: 0.82rem;
+  color: #b0a888;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+
+.gh-dispatch-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.gh-option-btn {
+  background: #0d0c0a;
+  border: 1px solid #2a2418;
+  border-radius: 4px;
   padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gh-option-btn:hover {
+  background: #141210;
+  border-color: #4a4030;
+}
+
+.gh-option-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #c4b888;
+}
+
+.gh-option-sub {
+  font-size: 0.68rem;
+  color: #5a5040;
+  font-style: italic;
+}
+
+/* Outcome reveal */
+.gh-dispatch--outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gh-dispatch-quest-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #c4b888;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.gh-dispatch-qp {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #d4af37;
+  margin: 0;
+}
+
+.gh-outcome-text {
+  font-size: 0.82rem;
+  color: #b0a888;
+  line-height: 1.7;
+  font-style: italic;
+  margin: 0;
+}
+
+.gh-rep-reveal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.gh-rep-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
   background: #0d0c0a;
   border: 1px solid #1a1814;
-  border-radius: 4px;
+  border-left: 2px solid var(--house-color);
+  border-radius: 3px;
+}
+
+.gh-rep-crest {
+  width: 20px; height: 20px;
+  object-fit: contain;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.gh-rep-house-name {
+  font-size: 0.65rem;
+  color: #7a7060;
+  flex: 1;
+}
+
+.gh-rep-delta {
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.gh-rep-delta.pos { color: #4dff88; }
+.gh-rep-delta.neg { color: #ff4444; }
+
+.gh-dispatch-reward {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gh-reward-chip {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #d4af37;
+  background: #1a1508;
+  border: 1px solid #3a3020;
+  padding: 4px 10px;
+  border-radius: 3px;
+}
+
+.gh-dispatch-btn {
+  align-self: flex-start;
+  background: #1a1508;
+  border: 1px solid #3a3020;
+  color: #d4af37;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
   cursor: pointer;
+  border-radius: 3px;
   transition: background 0.15s, border-color 0.15s;
 }
 
-.gh-notice:hover {
-  background: #121110;
-  border-color: #2a2418;
-}
-
-.gh-notice--done {
-  opacity: 0.45;
-}
-
-.gh-notice-check {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #2a2418;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.6rem;
-  color: #4dff88;
-  flex-shrink: 0;
-}
-
-.gh-notice-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #c4b888;
-  margin: 0 0 3px;
-}
-
-.gh-notice-flavor {
-  font-size: 0.68rem;
-  color: #4a4030;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.gh-notice-dest {
-  font-size: 0.58rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #4a4030;
-  white-space: nowrap;
-  flex-shrink: 0;
+.gh-dispatch-btn:hover {
+  background: #241e0a;
+  border-color: #5a5030;
 }
 
 /* Chronicle */
@@ -712,7 +966,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
 }
 
 .gh-player-details {
-  padding: 16px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -751,10 +1005,7 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   border-radius: 2px;
 }
 
-.gh-tag--rarity {
-  color: #d4af37;
-  border-color: #3a3020;
-}
+.gh-tag--rarity { color: #d4af37; border-color: #3a3020; }
 
 .gh-deeds {
   padding: 20px 20px 28px;
@@ -766,13 +1017,11 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   justify-content: space-between;
   align-items: baseline;
   padding: 8px 0;
-  border-bottom: 1px solid #16151200;
   border-bottom-color: rgba(255,255,255,0.03);
+  border-bottom: 1px solid #16151200;
 }
 
-.gh-deed-row:last-child {
-  border-bottom: none;
-}
+.gh-deed-row:last-child { border-bottom: none; }
 
 .gh-deed-label {
   font-size: 0.63rem;
@@ -786,55 +1035,5 @@ const houseColor = computed(() => playerHouse.value?.color ?? '#d4af37')
   font-weight: 700;
   color: #d4af37;
   font-variant-numeric: tabular-nums;
-}
-
-/* ══════════════════════════════════
-   QUICK PATHS
-   ══════════════════════════════════ */
-.gh-paths {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-bottom: 1px solid #1a1814;
-  flex-shrink: 0;
-}
-
-/* All paths are hall sections — house-colored names */
-.gh-path .gh-path-name {
-  color: v-bind(houseColor);
-}
-
-.gh-path {
-  background: none;
-  border: none;
-  border-right: 1px solid #1a1814;
-  padding: 16px 20px;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s;
-  color: inherit;
-}
-
-.gh-path:last-child {
-  border-right: none;
-}
-
-.gh-path:hover {
-  background: #0f0e0b;
-}
-
-.gh-path-name {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #c4b888;
-  margin: 0 0 4px;
-}
-
-.gh-path-flavor {
-  font-size: 0.6rem;
-  color: #4a4030;
-  margin: 0;
-  line-height: 1.4;
 }
 </style>

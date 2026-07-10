@@ -4,7 +4,6 @@ import { useCollectionStore } from './useCollectionStore.js'
 
 const STORAGE_KEY = 'raid-reputation'
 
-// Reputation earned by interacting with each house (0–30000)
 export const REP_MAX = 30000
 
 export const REP_TIERS = [
@@ -16,13 +15,20 @@ export const REP_TIERS = [
   { name: 'Exalted',   threshold: 30000 },
 ]
 
-// Hero key that unlocks when the house reaches Exalted
 export const HOUSE_LORD = {
   'House Caelwyn':  'LORD_CAELWYN',
   'House Aldric':   'LORD_ALDRIC',
   'House Valdris':  'ARCHMAGE_VALDRIS',
   'House Mordaine': 'LORD_MORDAINE',
 }
+
+// Which houses are bound together by shared worldview
+export const HOUSE_PAIRS = [
+  ['House Aldric', 'House Mordaine'],   // old order vs new order — both are about power
+  ['House Caelwyn', 'House Valdris'],   // nature vs science — both look beyond human politics
+]
+
+export const ALL_HOUSES = ['House Aldric', 'House Mordaine', 'House Caelwyn', 'House Valdris']
 
 function loadSaved() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') } catch { return null }
@@ -32,23 +38,36 @@ export const useReputationStore = defineStore('reputation', () => {
   const saved = loadSaved()
   const rep = ref(saved?.rep ?? {})
 
+  // Rep can go negative — houses lose interest when you consistently oppose them
   function getRep(faction) {
     return Math.min(REP_MAX, rep.value[faction] ?? 0)
   }
 
+  // Legacy single-house gain (used by DevMenu)
   function earnRep(faction, amount) {
     const current = getRep(faction)
     rep.value = { ...rep.value, [faction]: Math.min(REP_MAX, current + amount) }
     save()
   }
 
+  // Quest-driven: apply a map of { houseName: delta } all at once
+  function applyRepChanges(changes) {
+    const updated = { ...rep.value }
+    for (const [faction, delta] of Object.entries(changes)) {
+      const current = updated[faction] ?? 0
+      updated[faction] = Math.min(REP_MAX, current + delta)
+    }
+    rep.value = updated
+    save()
+  }
+
   function setRep(faction, amount) {
-    rep.value = { ...rep.value, [faction]: Math.min(REP_MAX, Math.max(0, amount)) }
+    rep.value = { ...rep.value, [faction]: Math.min(REP_MAX, amount) }
     save()
   }
 
   function tier(faction) {
-    const r = getRep(faction)
+    const r = Math.max(0, getRep(faction))  // display tiers floor at Stranger
     let current = REP_TIERS[0]
     let next    = REP_TIERS[1]
     for (let i = 0; i < REP_TIERS.length; i++) {
@@ -60,7 +79,7 @@ export const useReputationStore = defineStore('reputation', () => {
     const from = current.threshold
     const to   = next?.threshold ?? REP_MAX
     const pct  = next ? Math.min(100, ((r - from) / (to - from)) * 100) : 100
-    return { name: current.name, index: REP_TIERS.indexOf(current), next: next?.name ?? null, pct, rep: r }
+    return { name: current.name, index: REP_TIERS.indexOf(current), next: next?.name ?? null, pct, rep: getRep(faction) }
   }
 
   function isExalted(faction) {
@@ -85,14 +104,25 @@ export const useReputationStore = defineStore('reputation', () => {
     collection.addToRoster(key, { silent: true })
   }
 
+  // Which pair is currently ahead based on combined rep
+  const leadingPair = computed(() => {
+    const pairScores = HOUSE_PAIRS.map(pair => ({
+      pair,
+      score: pair.reduce((s, h) => s + getRep(h), 0),
+    }))
+    pairScores.sort((a, b) => b.score - a.score)
+    if (pairScores[0].score === pairScores[1].score) return null  // tied
+    return pairScores[0].pair
+  })
+
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ rep: rep.value }))
   }
 
   return {
-    getRep, earnRep, setRep,
-    tier, isExalted,
+    getRep, earnRep, applyRepChanges, setRep,
+    tier, isExalted, leadingPair,
     lordKey, canClaimLord, claimLord,
-    REP_TIERS, HOUSE_LORD, REP_MAX,
+    REP_TIERS, HOUSE_LORD, HOUSE_PAIRS, ALL_HOUSES, REP_MAX,
   }
 })
