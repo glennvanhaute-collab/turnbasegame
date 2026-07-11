@@ -291,7 +291,8 @@ const arenaStyle = computed(() => ({
 // ── Phase state ───────────────────────────────────────────────────────
 const currentPhase   = ref(1)
 const showPhaseCard  = ref(false)
-const siegeResult    = ref(null)  // null | 'victory' | 'defeat'
+const siegeResult         = ref(null)  // null | 'victory' | 'defeat'
+const siegeVictoryRecorded = ref(false)
 
 // ── Phase 1: Simulation state ─────────────────────────────────────────
 const LANE_IDS   = ['west', 'gate', 'east']
@@ -528,7 +529,13 @@ function startPhase2() {
 import { watch } from 'vue'
 watch(() => battleStore.state, (state) => {
   if (currentPhase.value !== 2) return
-  if (state === BattleState.VICTORY) siegeResult.value = 'victory'
+  if (state === BattleState.VICTORY) {
+    siegeResult.value = 'victory'
+    if (!siegeVictoryRecorded.value) {
+      siegeVictoryRecorded.value = true
+      battleStore.recordSiegeVictory()
+    }
+  }
   if (state === BattleState.DEFEAT)  siegeResult.value = 'defeat'
 })
 

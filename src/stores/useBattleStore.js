@@ -36,7 +36,13 @@ export const useBattleStore = defineStore('battle', () => {
     localStorage.setItem('raid-clears', JSON.stringify([...clearedRaids.value]))
   }
 
-  const battleWins = ref(Number(localStorage.getItem('raid-battle-wins')) || 0)
+  const battleWins  = ref(Number(localStorage.getItem('raid-battle-wins'))   || 0)
+  const siegeClears = ref(Number(localStorage.getItem('raid-siege-clears')) || 0)
+
+  function recordSiegeVictory() {
+    siegeClears.value++
+    localStorage.setItem('raid-siege-clears', siegeClears.value)
+  }
 
   const lastAction = ref(null)
 
@@ -399,7 +405,7 @@ export const useBattleStore = defineStore('battle', () => {
     selectedSkillIndex, currentEncounterIndex, currentEncounter,
     autoplay, battleSpeed, lastReward, lastAction,
     batchTotal, batchDone, isBatchRunning,
-    clearedRaids, currentRaidId, battleWins,
+    clearedRaids, currentRaidId, battleWins, siegeClears, recordSiegeVictory,
     ENCOUNTERS,
     isPlayerTurn, canAct, isOver,
     initBattle, selectSkill, selectTarget,

@@ -54,7 +54,7 @@ export const QUESTS = [
     questPoints: 1,
     prerequisites: ['first_blood_oath'],
     objectives: [
-      { id: 'wins', type: 'battleWins', count: 1, label: 'Win your first battle' },
+      { id: 'wins', type: 'battleWins', count: 3, label: 'Win 3 battles' },
     ],
     dispatch: {
       sender: 'The Realm',
@@ -96,7 +96,8 @@ export const QUESTS = [
     questPoints: 1,
     prerequisites: ['farmstead_claim'],
     objectives: [
-      { id: 'wins', type: 'battleWins', count: 3, label: 'Win 3 battles to build your reputation on the road' },
+      { id: 'wins',   type: 'battleWins', count: 5, label: 'Win 5 battles' },
+      { id: 'heroes', type: 'heroCount',  count: 1, label: 'Recruit your first hero' },
     ],
     dispatch: {
       sender: 'The Realm',
@@ -137,7 +138,10 @@ export const QUESTS = [
     type: 'STORY',
     questPoints: 2,
     prerequisites: ['merchants_account'],
-    objectives: [],
+    objectives: [
+      { id: 'dungeon', type: 'dungeonClears', count: 1, label: 'Clear your first dungeon' },
+      { id: 'heroes',  type: 'heroCount',     count: 3, label: 'Have 3 heroes in your banner' },
+    ],
     dispatch: {
       sender: 'Unknown',
       subject: 'No Seal. No Name.',
@@ -186,7 +190,8 @@ export const QUESTS = [
     questPoints: 2,
     prerequisites: ['night_letter'],
     objectives: [
-      { id: 'wins', type: 'battleWins', count: 10, label: 'Win 10 battles' },
+      { id: 'wins',    type: 'battleWins',    count: 15, label: 'Win 15 battles' },
+      { id: 'dungeon', type: 'dungeonClears', count: 2,  label: 'Clear 2 dungeons' },
     ],
     dispatch: {
       sender: 'House Aldric',
@@ -220,7 +225,7 @@ export const QUESTS = [
     questPoints: 2,
     prerequisites: ['night_letter'],
     objectives: [
-      { id: 'dungeon', type: 'dungeonClears', count: 1, label: 'Clear at least one dungeon' },
+      { id: 'dungeon', type: 'dungeonClears', count: 3, label: 'Clear 3 dungeons' },
       { id: 'puzzle',  type: 'puzzle',                  label: 'Decode the Ashvein cipher' },
     ],
     dispatch: {
@@ -255,8 +260,9 @@ export const QUESTS = [
     questPoints: 3,
     prerequisites: ['iron_commission', 'ashvein_cipher'],
     objectives: [
-      { id: 'heroes', type: 'heroCount',   count: 4,  label: 'Recruit at least 4 heroes' },
-      { id: 'wins',   type: 'battleWins',  count: 20, label: 'Win 20 battles' },
+      { id: 'heroes', type: 'heroCount',  count: 5,  label: 'Have 5 heroes in your banner' },
+      { id: 'wins',   type: 'battleWins', count: 30, label: 'Win 30 battles' },
+      { id: 'raid',   type: 'raidClears', count: 1,  label: 'Clear at least one raid' },
     ],
     dispatch: {
       sender: 'Unknown',
@@ -290,7 +296,11 @@ export const QUESTS = [
     questPoints: 5,
     prerequisites: ['shadow_that_followed'],
     objectives: [
-      { id: 'raid', type: 'raidClears', count: 1, label: 'Clear at least one raid' },
+      { id: 'raids',    type: 'raidClears',    count: 2,  label: 'Clear both raids' },
+      { id: 'wins',     type: 'battleWins',    count: 50, label: 'Win 50 battles' },
+      { id: 'heroes',   type: 'heroCount',     count: 6,  label: 'Have 6 heroes in your banner' },
+      { id: 'dungeons', type: 'dungeonClears', count: 5,  label: 'Clear 5 dungeons' },
+      { id: 'siege',    type: 'siegeClears',   count: 1,  label: 'Complete at least one siege' },
     ],
     dispatch: {
       sender: 'The Realm',
@@ -331,6 +341,7 @@ export const useQuestStore = defineStore('quests', () => {
     if (obj.type === 'dungeonClears') return (gameStats.dungeonClears ?? 0) >= obj.count
     if (obj.type === 'raidClears')    return (gameStats.raidClears    ?? 0) >= obj.count
     if (obj.type === 'heroCount')     return (gameStats.heroCount     ?? 0) >= obj.count
+    if (obj.type === 'siegeClears')   return (gameStats.siegeClears   ?? 0) >= obj.count
     return manualProgress.value.has(`${quest.id}:${obj.id}`)
   }
 

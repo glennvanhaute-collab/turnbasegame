@@ -59,6 +59,26 @@
       </div>
     </div>
 
+    <!-- ── Final Siege (quest-locked) ──────────────────────────────── -->
+    <div class="final-siege-section">
+      <div class="tiers-label">The Final Reckoning</div>
+      <div v-if="finalSiegeUnlocked" class="final-siege-card" :style="{ '--fc': finalSiegeFaction?.color ?? '#888', backgroundImage: `url(${finalSiegeFaction?.img})` }">
+        <div class="fs-gradient" />
+        <div class="fs-body">
+          <div class="fs-house" :style="{ color: finalSiegeFaction?.color }">{{ finalSiegeFaction?.house }}</div>
+          <div class="fs-title">Siege of {{ finalSiegeFaction?.house }}</div>
+          <p class="fs-sub">Your choices made this enemy. The account is final.</p>
+        </div>
+      </div>
+      <div v-else class="final-siege-locked">
+        <span class="fs-lock-icon">🔒</span>
+        <div class="fs-lock-text">
+          <p class="fs-lock-title">Locked</p>
+          <p class="fs-lock-hint">Complete <em>The Final Breach</em> to unlock the final siege</p>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Rotation Strip ────────────────────────────────────────────── -->
     <div class="rotation-section">
       <div class="rotation-label">Faction Rotation</div>
@@ -106,9 +126,23 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import SiegeSetupScreen  from './SiegeSetupScreen.vue'
 import SiegeBattleArena  from './SiegeBattleArena.vue'
-import { useCampBuildingStore } from '../stores/useCampBuildingStore.js'
+import { useCampBuildingStore }  from '../stores/useCampBuildingStore.js'
+import { useQuestStore }         from '../stores/useQuestStore.js'
+import { useReputationStore, ALL_HOUSES } from '../stores/useReputationStore.js'
 
 const campBuildings = useCampBuildingStore()
+const questStore    = useQuestStore()
+const repStore      = useReputationStore()
+
+const finalSiegeUnlocked = computed(() => questStore.completedIds.has('final_breach'))
+
+const finalSiegeFaction = computed(() => {
+  if (!finalSiegeUnlocked.value) return null
+  const lowestHouse = ALL_HOUSES.reduce((min, h) =>
+    repStore.getRep(h) < repStore.getRep(min) ? h : min
+  )
+  return FACTIONS.find(f => f.house === lowestHouse) ?? null
+})
 import siegeAldric   from '../assets/lore/siege_aldric.png'
 import siegeValdris  from '../assets/lore/siege_Valdris.png'
 import siegeCaelwyn  from '../assets/lore/siege_caelwyn.png'
@@ -578,5 +612,88 @@ onUnmounted(() => clearInterval(timerInterval))
   font-size: 0.57rem;
   color: #555;
   font-style: italic;
+}
+
+/* ── Final Siege ── */
+.final-siege-section {
+  padding: 24px 24px 0;
+}
+
+.final-siege-card {
+  position: relative;
+  height: 100px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--fc, #888);
+  background-size: cover;
+  background-position: center 30%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.final-siege-card:hover { border-color: color-mix(in srgb, var(--fc) 80%, white); }
+
+.fs-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(9,8,12,0.85) 0%, rgba(9,8,12,0.4) 100%);
+}
+
+.fs-body {
+  position: relative;
+  z-index: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fs-house {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.fs-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e8dfc0;
+  margin: 0;
+}
+
+.fs-sub {
+  font-size: 0.68rem;
+  color: #7a6a50;
+  font-style: italic;
+  margin: 0;
+}
+
+.final-siege-locked {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: #0d0c0a;
+  border: 1px solid #1a1814;
+  border-radius: 6px;
+}
+
+.fs-lock-icon { font-size: 1.2rem; opacity: 0.4; flex-shrink: 0; }
+
+.fs-lock-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4a4030;
+  margin: 0 0 3px;
+}
+
+.fs-lock-hint {
+  font-size: 0.65rem;
+  color: #4a4030;
+  font-style: italic;
+  margin: 0;
 }
 </style>

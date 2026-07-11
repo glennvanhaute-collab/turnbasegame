@@ -26,6 +26,16 @@
           </div>
         </div>
       </div>
+      <!-- Locked final raid -->
+      <div class="raid-card raid-card--locked" v-if="!finalRaidUnlocked">
+        <div class="rc-overlay rc-overlay--locked" />
+        <div class="rc-content">
+          <div class="rc-subtitle">Final Encounter</div>
+          <div class="rc-name rc-name--locked">???</div>
+          <div class="rc-boss rc-boss--locked">Unknown</div>
+          <div class="rc-lock-hint">Complete <em>The Final Breach</em> to unlock</div>
+        </div>
+      </div>
     </div>
 
     <!-- Lore detail panel (right) -->
@@ -121,12 +131,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { RAIDS } from '../game/data/raids.js'
 import { useBattleStore } from '../stores/useBattleStore.js'
+import { useQuestStore }  from '../stores/useQuestStore.js'
 
 const emit = defineEmits(['enter-raid', 'auto-raid'])
 const battleStore = useBattleStore()
+const questStore  = useQuestStore()
+
+const finalRaidUnlocked = computed(() => questStore.completedIds.has('final_breach'))
 
 const _raidBgSources = {
   ...import.meta.glob('../assets/dungeons/*.png',    { eager: true }),
@@ -387,4 +401,21 @@ const selected = ref(RAIDS[0] ?? null)
   gap: 12px; color: #333; font-size: 0.72rem; font-style: italic;
 }
 .empty-icon { font-size: 2.5rem; opacity: 0.2; }
+
+/* ── Locked final raid ── */
+.raid-card--locked {
+  cursor: default;
+  border-color: #2a2418;
+  background: #0a0908;
+}
+.raid-card--locked:hover { transform: none; border-color: #2a2418; }
+.rc-overlay--locked { background: rgba(9,8,12,0.75); }
+.rc-name--locked { color: #4a4030; }
+.rc-boss--locked { color: #3a3028; }
+.rc-lock-hint {
+  font-size: 0.62rem;
+  color: #4a4030;
+  font-style: italic;
+  margin-top: 6px;
+}
 </style>
