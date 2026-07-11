@@ -7,6 +7,7 @@ import { useInventoryStore } from './useInventoryStore.js'
 import { useResourceStore } from './useResourceStore.js'
 import { useForgeStore } from './useForgeStore.js'
 import { useCodexStore } from './useCodexStore.js'
+import { useJournalStore, ENTRY_TYPES } from './useJournalStore.js'
 
 export const EXPLORE_COST = 5
 const STORAGE_KEY = 'raid-dungeons'
@@ -118,6 +119,10 @@ export const useDungeonStore = defineStore('dungeons', () => {
     if (dungeon) {
       currentOptions.value = currentOptions.value.filter(d => d.id !== dungeonId)
       pinnedDungeons.value = pinnedDungeons.value.filter(d => d.id !== dungeonId)
+      useJournalStore().addEntry({
+        type:  ENTRY_TYPES.FIRST_DUNGEON,
+        title: `First clear: ${dungeon.name}`,
+      })
     }
 
     useForgeStore().awardMaterials(effectiveTier)

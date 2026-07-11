@@ -149,7 +149,7 @@
             The chronicle awaits your first deed.
           </p>
           <div class="gh-entries" v-else>
-            <div class="gh-entry" v-for="entry in recentEntries" :key="entry.id">
+            <div class="gh-entry" :class="`gh-entry--${entry.type}`" v-for="entry in recentEntries" :key="entry.id">
               <span class="gh-entry-date">{{ entry.date }}</span>
               <span class="gh-entry-title">{{ entry.title }}</span>
             </div>
@@ -379,7 +379,7 @@ const highestWeaponTier    = computed(() => {
 })
 
 const recentEntries = computed(() =>
-  [...journalStore.entries].reverse().slice(0, 5)
+  journalStore.entries.slice(0, 8)
 )
 
 const deeds = computed(() => [
@@ -991,6 +991,12 @@ const houseColor   = computed(() => playerHouse.value?.color ?? '#d4af37')
   color: #c4b888;
   font-weight: 600;
 }
+
+.gh-entry--quest_complete  { border-left-color: #d4af37; }
+.gh-entry--first_raid      { border-left-color: #aa55ff; }
+.gh-entry--first_dungeon   { border-left-color: #44cc88; }
+.gh-entry--first_siege     { border-left-color: #ff7744; }
+.gh-entry--first_training  { border-left-color: #4488ff; }
 
 /* ── Player + Deeds column ── */
 .gh-col-player {

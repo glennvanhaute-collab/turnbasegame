@@ -8,12 +8,17 @@ function load() {
 }
 
 export const ENTRY_TYPES = {
-  GEAR_DROP:    'gear_drop',
-  LEVEL_UP:     'level_up',
-  LORE_FOUND:   'lore_found',
-  DUNGEON_CLEAR:'dungeon_clear',
-  RECRUIT:      'recruit',
-  MANUAL:       'manual',
+  GEAR_DROP:      'gear_drop',
+  LEVEL_UP:       'level_up',
+  LORE_FOUND:     'lore_found',
+  DUNGEON_CLEAR:  'dungeon_clear',
+  RECRUIT:        'recruit',
+  MANUAL:         'manual',
+  QUEST_COMPLETE: 'quest_complete',
+  FIRST_RAID:     'first_raid',
+  FIRST_DUNGEON:  'first_dungeon',
+  FIRST_SIEGE:    'first_siege',
+  FIRST_TRAINING: 'first_training',
 }
 
 export const useJournalStore = defineStore('journal', () => {

@@ -13,6 +13,7 @@ import { useInventoryStore }   from './useInventoryStore.js'
 import { rollOreDrops, rollTrainingOreDrops, rollDungeonGatheringDrops, rollTrainingKeyDrops, rollScrollDrops } from '../game/data/ores.js'
 import { rollRaidResourceDrops, RAID_ENCOUNTERS }  from '../game/data/raidEncounters.js'
 import { useCodexStore } from './useCodexStore.js'
+import { useJournalStore, ENTRY_TYPES } from './useJournalStore.js'
 
 export const useBattleStore = defineStore('battle', () => {
   const currency = useCurrencyStore()
@@ -36,10 +37,17 @@ export const useBattleStore = defineStore('battle', () => {
     localStorage.setItem('raid-clears', JSON.stringify([...clearedRaids.value]))
   }
 
-  const battleWins  = ref(Number(localStorage.getItem('raid-battle-wins'))   || 0)
-  const siegeClears = ref(Number(localStorage.getItem('raid-siege-clears')) || 0)
+  const battleWins          = ref(Number(localStorage.getItem('raid-battle-wins'))   || 0)
+  const siegeClears         = ref(Number(localStorage.getItem('raid-siege-clears')) || 0)
+  const trainingEverCleared = ref(localStorage.getItem('raid-training-cleared') === 'true')
 
   function recordSiegeVictory() {
+    if (siegeClears.value === 0) {
+      useJournalStore().addEntry({
+        type:  ENTRY_TYPES.FIRST_SIEGE,
+        title: 'Siege survived — first victory',
+      })
+    }
     siegeClears.value++
     localStorage.setItem('raid-siege-clears', siegeClears.value)
   }
@@ -199,9 +207,25 @@ export const useBattleStore = defineStore('battle', () => {
             raidDrops.gearDrops.forEach(inst => inventory.addInstance(inst))
           }
           if (currentRaidId.value) {
+            const isFirstRaidClear = !clearedRaids.value.has(currentRaidId.value)
             clearedRaids.value.add(currentRaidId.value)
             _persistClears()
+            if (isFirstRaidClear) {
+              const raidName = RAID_ENCOUNTERS[currentRaidId.value]?.name ?? currentRaidId.value
+              useJournalStore().addEntry({
+                type:  ENTRY_TYPES.FIRST_RAID,
+                title: `First victory: ${raidName}`,
+              })
+            }
           }
+        }
+        if (enc.isTraining && !trainingEverCleared.value) {
+          trainingEverCleared.value = true
+          localStorage.setItem('raid-training-cleared', 'true')
+          useJournalStore().addEntry({
+            type:  ENTRY_TYPES.FIRST_TRAINING,
+            title: 'First training bout completed',
+          })
         }
         // Lore fragment drop — 5% per battle victory
         let loreFragment = null

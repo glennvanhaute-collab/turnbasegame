@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useCurrencyStore } from './useCurrencyStore.js'
 import { useReputationStore } from './useReputationStore.js'
 import { useInventoryStore } from './useInventoryStore.js'
+import { useJournalStore, ENTRY_TYPES } from './useJournalStore.js'
 import { GearSlot } from '../game/Gear.js'
 
 const STORAGE_KEY = 'raid-quests'
@@ -535,6 +536,12 @@ export const useQuestStore = defineStore('quests', () => {
     completedIds.value  = new Set([...completedIds.value, questId])
     chosenOptions.value = { ...chosenOptions.value, [questId]: optionId }
     _persist()
+
+    useJournalStore().addEntry({
+      type:  ENTRY_TYPES.QUEST_COMPLETE,
+      title: `Quest complete: ${quest.name}`,
+      body:  option.outcomeText ?? '',
+    })
 
     return {
       questName:   quest.name,
