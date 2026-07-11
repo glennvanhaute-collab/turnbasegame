@@ -1,15 +1,15 @@
 <template>
-  <!-- Cipher puzzle modal -->
-  <Teleport to="body">
-    <div v-if="showCipher" class="ql-cipher-backdrop" @click.self="showCipher = false">
-      <div class="ql-cipher-modal">
-        <button class="ql-cipher-close" @click="showCipher = false">✕</button>
-        <CipherPuzzle @solved="onCipherSolved" />
-      </div>
-    </div>
-  </Teleport>
-
   <div class="ql-wrap">
+
+    <!-- Cipher puzzle modal -->
+    <Teleport to="body">
+      <div v-if="showCipher" class="ql-cipher-backdrop" @click.self="showCipher = false">
+        <div class="ql-cipher-modal">
+          <button class="ql-cipher-close" @click="showCipher = false">✕</button>
+          <CipherPuzzle @solved="onCipherSolved" />
+        </div>
+      </div>
+    </Teleport>
 
     <!-- ── Left: quest list ── -->
     <div class="ql-list">

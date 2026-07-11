@@ -463,7 +463,7 @@ export const useQuestStore = defineStore('quests', () => {
       const allSlots   = Object.values(GearSlot)
       return setsToCheck.some(setId =>
         allSlots.every(slot =>
-          inventory.ownedInstances.value.some(i => i.setId === setId && i.slot === slot)
+          inventory.ownedInstances.some(i => i.setId === setId && i.slot === slot)
         )
       )
     }
