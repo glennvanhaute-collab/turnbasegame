@@ -30,7 +30,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'The Realm',
       subject: 'A Call to the Field',
-      body: `[Placeholder — quest writing comes later]`,
+      body: `A crossing is disputed on the Ashveil's eastern tributary. Two armed groups have dug in on opposite banks and neither will yield without outside force. Your banner has been identified as available.\n\nThis is a straightforward engagement — or it can be. How you conduct it will be remembered by those who are watching.`,
     },
     options: [
       {
@@ -39,7 +39,7 @@ export const QUESTS = [
         text: 'Full commitment, visible command.',
         repChanges: { 'House Aldric': 300, 'House Mordaine': 100, 'House Caelwyn': -100, 'House Valdris': -200 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The crossing is yours by nightfall. Word travels fast. You are not subtle, but you are effective. House Aldric takes note.`,
       },
       {
         id: 'calculated',
@@ -47,7 +47,7 @@ export const QUESTS = [
         text: 'Intelligence before commitment.',
         repChanges: { 'House Valdris': 300, 'House Caelwyn': 150, 'House Aldric': -200, 'House Mordaine': -50 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You spend three days reading the terrain. When you move, you lose no one. House Valdris observes that you did not act until you understood. They find this encouraging.`,
       },
     ],
   },
@@ -64,7 +64,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'The Realm',
       subject: 'A Petition from the Borderlands',
-      body: `[Placeholder]`,
+      body: `Three farmsteads on the eastern Ashveil border have been occupied by an armed group. The landowner's petition has been passed through two intermediaries before reaching the great houses. No one is eager to handle this directly.\n\nThe group is armed but not organized. What they are doing there and why is not stated in the petition.`,
     },
     options: [
       {
@@ -73,7 +73,7 @@ export const QUESTS = [
         text: 'The farmstead is not theirs. You remove them.',
         repChanges: { 'House Aldric': 300, 'House Mordaine': 100, 'House Caelwyn': -150, 'House Valdris': -100 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `They are gone before dawn. The farmland returns to its owner. What drove them there is never asked. House Aldric approves of the efficiency.`,
       },
       {
         id: 'negotiate',
@@ -81,7 +81,7 @@ export const QUESTS = [
         text: 'Desperation has a source.',
         repChanges: { 'House Caelwyn': 300, 'House Valdris': 200, 'House Aldric': -200, 'House Mordaine': -100 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `They came from a village razed three weeks north. You find temporary shelter for the survivors and send a report to House Caelwyn. They do not forget this.`,
       },
       {
         id: 'shadow',
@@ -89,7 +89,7 @@ export const QUESTS = [
         text: "You don't appear. But word reaches the camp.",
         repChanges: { 'House Mordaine': 400, 'House Aldric': 100, 'House Caelwyn': -200, 'House Valdris': -150 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `They receive word that you have watched them for four days. The group dissolves before dawn. No confrontation, no record. House Mordaine finds this competent.`,
       },
     ],
   },
@@ -107,7 +107,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'The Realm',
       subject: 'A Matter Requiring Discretion',
-      body: `[Placeholder]`,
+      body: `A merchant ledger has gone missing between Caelwyn and the eastern trading post. The merchant insists it contains evidence relevant to a contract dispute with one of the great houses — which house is not stated in the request.\n\nA third party was seen with the ledger at the border crossing. Find it. Return it. Do not discuss the contents with anyone. That is the instruction as written.`,
     },
     options: [
       {
@@ -116,7 +116,7 @@ export const QUESTS = [
         text: 'A contract was made. You honor it.',
         repChanges: { 'House Aldric': 300, 'House Caelwyn': 100, 'House Mordaine': -100, 'House Valdris': -150 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The ledger is returned unmarked. Whatever was written in it stays between the merchant and their dispute. House Aldric notes you followed the terms exactly.`,
       },
       {
         id: 'copy',
@@ -124,7 +124,7 @@ export const QUESTS = [
         text: 'Understanding what someone values tells you something.',
         repChanges: { 'House Valdris': 200, 'House Mordaine': 300, 'House Aldric': -100, 'House Caelwyn': -200 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The contract dispute conceals something older — a debt that traces back further than the current houses. You keep a copy. It may be useful later. House Mordaine hears about this through channels you did not anticipate.`,
       },
       {
         id: 'buyer',
@@ -132,7 +132,7 @@ export const QUESTS = [
         text: "The ledger is already in someone else's hands.",
         repChanges: { 'House Mordaine': 400, 'House Valdris': 100, 'House Caelwyn': -100, 'House Aldric': -200 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The buyer is a factor operating on behalf of an unnamed interest. You sell back your discretion. The ledger disappears quietly into the kind of arrangement that does not get written down.`,
       },
     ],
   },
@@ -150,7 +150,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'Unknown',
       subject: 'No Seal. No Name.',
-      body: `[Placeholder]`,
+      body: `It arrived before dawn, slipped beneath the door of your quarters. No carrier to trace. The handwriting is careful — too careful to be in haste.\n\nThe letter knows about the farmsteads. It knows about the ledger. It names something it calls a pattern, and says you are part of it whether you have chosen to be or not.\n\nAt the end, it names a name. The name means nothing to you. The letter asks for nothing in return. It merely says you will need to decide what you do with what you now know.`,
     },
     options: [
       {
@@ -159,7 +159,7 @@ export const QUESTS = [
         text: 'Transparency serves the realm.',
         repChanges: { 'House Aldric': 300, 'House Caelwyn': 100, 'House Mordaine': -300, 'House Valdris': -100 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `House Aldric receives it with visible gravity. They do not explain what the name means. They thank you for the transparency and say the matter is being looked into.`,
       },
       {
         id: 'share_valdris',
@@ -167,7 +167,7 @@ export const QUESTS = [
         text: 'This kind of information needs rigorous verification.',
         repChanges: { 'House Valdris': 300, 'House Caelwyn': 100, 'House Aldric': -100, 'House Mordaine': -150 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `Valdris scholars spend six days on the letter before sending a reply. Their note says only: the name is old. Older than any of the houses. They are working on additional context.`,
       },
       {
         id: 'keep',
@@ -175,7 +175,7 @@ export const QUESTS = [
         text: "This is too valuable to place in someone else's hands.",
         repChanges: { 'House Mordaine': 400, 'House Valdris': 100, 'House Caelwyn': -200, 'House Aldric': -300 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You learn nothing new from holding it. But no one else knows you have it, which means you control what happens next. For now.`,
       },
       {
         id: 'burn',
@@ -183,7 +183,7 @@ export const QUESTS = [
         text: "This letter is a hook. You don't take it.",
         repChanges: { 'House Caelwyn': 400, 'House Valdris': -100, 'House Aldric': 100, 'House Mordaine': -200 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You burn it in the hearth without rereading it. Whatever was set in motion, you have declined the invitation. House Caelwyn later mentions, without elaboration, that they respect this kind of restraint.`,
       },
     ],
   },
@@ -201,7 +201,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'House Aldric',
       subject: 'A Personal Commission',
-      body: `[Placeholder]`,
+      body: `House Aldric writes directly — not through intermediaries. The letter carries their military seal and is notably short.\n\nThey have followed your record in the field. They have an interest in your forge output and your warband's demonstrated results. They are prepared to offer formal sponsorship under terms they describe as favorable to both parties.\n\nThey have expectations. They are not hidden about this. The letter closes with: we prefer to work with those who understand obligation.`,
     },
     options: [
       {
@@ -210,7 +210,7 @@ export const QUESTS = [
         text: 'You take the terms.',
         repChanges: { 'House Aldric': 500, 'House Mordaine': -200 },
         reward: [{ type: 'sealedCharter', amount: 1 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You send word of acceptance by midday. A rider from House Aldric arrives the following week with the first advance and a list of future expectations. The relationship is formal now.`,
       },
       {
         id: 'decline',
@@ -218,7 +218,7 @@ export const QUESTS = [
         text: 'You acknowledge the offer but do not commit.',
         repChanges: { 'House Caelwyn': 200, 'House Aldric': -100 },
         reward: [{ type: 'commonWrit', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You acknowledge the offer with the appropriate formality and decline without explanation. House Aldric notes it without visible displeasure. The door has not been closed. It has simply not been opened.`,
       },
     ],
   },
@@ -236,7 +236,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'The Realm',
       subject: 'On the Matter of What Was Found',
-      body: `[Placeholder]`,
+      body: `During clearance of a site in the Ashveil region, a stone tablet was recovered from a sealed chamber. The etchings are not a language any active scholar can place with certainty.\n\nA traveling archivist identified the pattern as a lockwork cipher — a puzzle type used by pre-Realm institutions to encode sensitive records. Once solved, the cipher reveals the actual text embedded within.\n\nThe archivist departed before the decoding was complete. The tablet is on your table. The pattern waits.`,
     },
     options: [
       {
@@ -245,7 +245,7 @@ export const QUESTS = [
         text: 'Knowledge is worth more than the object.',
         repChanges: { 'House Valdris': 400, 'House Caelwyn': 100, 'House Aldric': -100, 'House Mordaine': -150 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The decoded text describes a location and a warning attached to it. Both are now in your possession and in no one else's. House Valdris later inquires, politely but persistently, whether you found anything of scholarly interest.`,
       },
       {
         id: 'hold',
@@ -253,7 +253,7 @@ export const QUESTS = [
         text: 'Interested parties reveal themselves when you make them wait.',
         repChanges: { 'House Mordaine': 400, 'House Valdris': 100, 'House Caelwyn': -100, 'House Aldric': -200 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `Within a week, two separate parties send inquiries about what you recovered from the Ashveil site. You have said nothing. They are now identifiable. House Mordaine finds this approach professionally sound.`,
       },
     ],
   },
@@ -270,7 +270,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'House Aldric',
       subject: 'A Request of the Warband',
-      body: `[Placeholder]`,
+      body: `A letter stamped with House Aldric's military seal. Terse, as their warband correspondence always is.\n\nTheir northern deployment is underequipped. The resupply convoy was intercepted three weeks ago and they have not recovered the loss. They are calling in what they describe as a reasonable expectation from allied forges.\n\nThirty steel pieces. Weapons and armor both accepted. Delivery through their standard courier within the fortnight.`,
     },
     options: [
       {
@@ -279,7 +279,7 @@ export const QUESTS = [
         text: 'You honor the levy without condition.',
         repChanges: { 'House Aldric': 400, 'House Mordaine': 100, 'House Caelwyn': -200, 'House Valdris': -150 },
         reward: [{ type: 'sealedCharter', amount: 1 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The shipment leaves within the week. House Aldric sends a brief acknowledgment and the name of a contact for future requisitions. You are now on their resupply list.`,
       },
       {
         id: 'redirect',
@@ -287,7 +287,7 @@ export const QUESTS = [
         text: 'You have other uses for this steel.',
         repChanges: { 'House Caelwyn': 400, 'House Valdris': 100, 'House Aldric': -200, 'House Mordaine': -150 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The steel goes where you decide. House Aldric receives no direct refusal — only silence where a shipment should have been. They note the absence.`,
       },
     ],
   },
@@ -305,7 +305,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'Unknown',
       subject: 'The Arms Must Move',
-      body: `[Placeholder]`,
+      body: `No seal. No origin mark. The handwriting matches nothing in your files.\n\nThe letter describes a cache of darksteel arms and requests they be moved within a narrow window. The routing instructions are specific — specific enough that whoever wrote this knows your patrol schedules and your current storage capacity. They are not guessing at your resources.\n\nThere is no name to reply to. Only a location, a time, and the clear implication that someone capable of this kind of knowledge is waiting for your answer.`,
     },
     options: [
       {
@@ -314,7 +314,7 @@ export const QUESTS = [
         text: 'You ask nothing about where they go.',
         repChanges: { 'House Valdris': 300, 'House Mordaine': 200, 'House Aldric': -100, 'House Caelwyn': -200 },
         reward: [{ type: 'sealedCharter', amount: 1 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The arms are moved. No courier appears at the handoff. When you check the drop point a week later, everything is gone. Whoever this served, you have served them — and they now know you can be relied upon.`,
       },
       {
         id: 'route_own',
@@ -322,7 +322,7 @@ export const QUESTS = [
         text: 'You take the arms. No explanation given.',
         repChanges: { 'House Mordaine': 400, 'House Aldric': 100, 'House Caelwyn': -200, 'House Valdris': -150 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You redirect the shipment. The intended recipient receives nothing. You have twenty darksteel pieces and an unknown party who is now aware that you cannot be assumed cooperative.`,
       },
       {
         id: 'destroy',
@@ -330,7 +330,7 @@ export const QUESTS = [
         text: "You don't know who is waiting for these. Neither will anyone else.",
         repChanges: { 'House Caelwyn': 400, 'House Valdris': 200, 'House Aldric': -200, 'House Mordaine': -300 },
         reward: [{ type: 'commonWrit', amount: 3 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The cache is destroyed in place. You cannot be used as a courier for something you no longer hold. Whoever expected this delivery will need to find another path — and will spend time wondering whether you were compromised or simply unwilling.`,
       },
     ],
   },
@@ -349,7 +349,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'Unknown',
       subject: 'Something Left Unsaid',
-      body: `[Placeholder]`,
+      body: `One of your heroes has a past that predates your banner. That past has now walked into the present.\n\nA figure appeared at the edge of camp before dawn. One of your own recognized them. They spoke for less than a minute, voices low, and the figure was gone before your patrol completed its circuit.\n\nYour hero said nothing to you about it until you asked directly. They are not hiding that they know this person. They are not explaining who it is either.\n\nThere is history here. It is not clean.`,
     },
     options: [
       {
@@ -358,7 +358,7 @@ export const QUESTS = [
         text: 'No more silence.',
         repChanges: { 'House Aldric': 200, 'House Mordaine': 200, 'House Caelwyn': -100, 'House Valdris': -100 },
         reward: [{ type: 'sealedCharter', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You ask for a full account. Your hero provides it — slowly and with evident difficulty. The figure is not an enemy. Not exactly. But they are not safe to have near your banner either. You know more now. So does your hero, about where they stand with you.`,
       },
       {
         id: 'cover',
@@ -366,7 +366,7 @@ export const QUESTS = [
         text: 'What happened before is not your account to give.',
         repChanges: { 'House Caelwyn': 300, 'House Mordaine': 200, 'House Aldric': -200, 'House Valdris': -100 },
         reward: [{ type: 'sealedCharter', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You tell anyone who inquires that the meeting was a routine contact. It was not. Your hero does not forget that you covered for them. Whatever debt that creates, it is now part of the arrangement between you.`,
       },
     ],
   },
@@ -383,7 +383,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'The Realm',
       subject: 'What the Raids Left Behind',
-      body: `[Placeholder]`,
+      body: `The raids have been teaching you something. Not only in the fighting — in what the defeated left behind.\n\nYou now hold a complete set of arms and armor forged in a tradition that predates the great houses. Possibly predates the Realm itself. The craftsmanship is not comparable to anything your forge produces. Neither is what it implies about who wore it and where it came from.\n\nThere are those who would take this from you given the opportunity. There are those who would pay considerably simply to confirm you possess it. What you do next will be visible to both.`,
     },
     options: [
       {
@@ -392,7 +392,7 @@ export const QUESTS = [
         text: 'You wear it. You let them see it.',
         repChanges: { 'House Aldric': 300, 'House Mordaine': 300, 'House Caelwyn': -200, 'House Valdris': -200 },
         reward: [{ type: 'sealedCharter', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You make no effort to conceal what you carry. Within a week, three separate parties have sent representatives. The nature of these conversations has changed. You are no longer someone who can move quietly.`,
       },
       {
         id: 'conceal',
@@ -400,7 +400,7 @@ export const QUESTS = [
         text: 'The armor goes somewhere no one thinks to look.',
         repChanges: { 'House Caelwyn': 300, 'House Valdris': 300, 'House Aldric': -200, 'House Mordaine': -200 },
         reward: [{ type: 'sealedCharter', amount: 2 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `The armor is stored where only your innermost circle knows. You continue to move as though nothing has changed. For now, you are still someone who can make decisions that others cannot track.`,
       },
     ],
   },
@@ -421,7 +421,7 @@ export const QUESTS = [
     dispatch: {
       sender: 'The Realm',
       subject: 'The Account is Complete',
-      body: `[Placeholder]`,
+      body: `They have kept records on you. Not the great houses — though they have their own. The Realm itself. Whatever that means at this point.\n\nThe account is extensive. The crossing. The farmsteads. The ledger. The night letter and what you chose to do with it. The raids. The dungeons. The siege. The armor. Every decision, weighted and filed.\n\nThe letter does not explain what the Realm intends or what happens after. It gives a location and a time.\n\nEvery path you took led here. That is all it says.`,
     },
     options: [
       {
@@ -430,7 +430,7 @@ export const QUESTS = [
         text: 'Every choice has led here.',
         repChanges: {},
         reward: [{ type: 'houseSeal', amount: 1 }],
-        outcomeText: `[Placeholder]`,
+        outcomeText: `You go. The record that was kept on you is now part of something larger than any of the houses planned for. What comes after this is yours to determine — and no one else's to predict.`,
       },
     ],
   },
