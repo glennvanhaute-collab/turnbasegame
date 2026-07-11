@@ -299,6 +299,10 @@ export const useBattleStore = defineStore('battle', () => {
   }
 
   function stopBatch() {
+    if (batchDone.value > 0 && batchRewards.value) {
+      lastReward.value = { ...batchRewards.value }
+      state.value = BattleState.VICTORY
+    }
     batchTotal.value = 0
     batchDone.value  = 0
   }

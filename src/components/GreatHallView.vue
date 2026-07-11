@@ -19,8 +19,20 @@
       </div>
     </header>
 
+    <!-- TAB NAV -->
+    <nav class="gh-tabs">
+      <button class="gh-tab" :class="{ 'is-active': activeTab === 'hall' }" @click="activeTab = 'hall'">The Hall</button>
+      <button class="gh-tab" :class="{ 'is-active': activeTab === 'quests' }" @click="activeTab = 'quests'">
+        Quest Log
+        <span class="gh-tab-qp" v-if="questStore.totalQP > 0">{{ questStore.totalQP }} QP</span>
+      </button>
+    </nav>
+
+    <!-- QUEST LOG -->
+    <QuestLogPanel v-if="activeTab === 'quests'" class="gh-quest-log" />
+
     <!-- BODY -->
-    <div class="gh-body">
+    <div class="gh-body" v-else>
 
       <!-- LORD / STANDINGS — left -->
       <aside class="gh-col-lord">
@@ -92,20 +104,20 @@
         </section>
 
         <!-- ── READING A DISPATCH ── -->
-        <section class="gh-dispatch gh-dispatch--reading" v-else-if="dispatchState === 'reading' && activeQuest">
+        <section class="gh-dispatch gh-dispatch--reading" v-else-if="dispatchState === 'reading' && readyQuest">
           <div class="gh-dispatch-header">
-            <span class="gh-dispatch-sender">{{ activeQuest.dispatch.sender }}</span>
-            <span class="gh-dispatch-subject">{{ activeQuest.dispatch.subject }}</span>
+            <span class="gh-dispatch-sender">{{ readyQuest.dispatch.sender }}</span>
+            <span class="gh-dispatch-subject">{{ readyQuest.dispatch.subject }}</span>
           </div>
-          <p class="gh-dispatch-body" v-for="(line, i) in activeQuest.dispatch.body.split('\n\n')" :key="i">
+          <p class="gh-dispatch-body" v-for="(line, i) in readyQuest.dispatch.body.split('\n\n')" :key="i">
             {{ line }}
           </p>
           <div class="gh-dispatch-options">
             <button
               class="gh-option-btn"
-              v-for="opt in activeQuest.options"
+              v-for="opt in readyQuest.options"
               :key="opt.id"
-              @click="chooseOption(activeQuest.id, opt.id)"
+              @click="chooseOption(readyQuest.id, opt.id)"
             >
               <span class="gh-option-label">{{ opt.label }}</span>
               <span class="gh-option-sub">{{ opt.text }}</span>
@@ -114,13 +126,13 @@
         </section>
 
         <!-- ── DISPATCH AVAILABLE ── -->
-        <section class="gh-dispatch gh-dispatch--sealed" v-else-if="nextDispatch">
+        <section class="gh-dispatch gh-dispatch--sealed" v-else-if="readyQuest">
           <div class="gh-seal-icon">✉</div>
           <div class="gh-seal-info">
-            <p class="gh-seal-from">From: {{ nextDispatch.dispatch.sender }}</p>
-            <p class="gh-seal-subject">{{ nextDispatch.dispatch.subject }}</p>
+            <p class="gh-seal-from">From: {{ readyQuest.dispatch.sender }}</p>
+            <p class="gh-seal-subject">{{ readyQuest.dispatch.subject }}</p>
           </div>
-          <button class="gh-dispatch-btn" @click="openDispatch(nextDispatch.id)">
+          <button class="gh-dispatch-btn" @click="openDispatch()">
             Open Dispatch
           </button>
         </section>
@@ -182,6 +194,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import QuestLogPanel from './QuestLogPanel.vue'
 import { useReputationStore, ALL_HOUSES } from '../stores/useReputationStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useBattleStore } from '../stores/useBattleStore.js'
@@ -311,26 +324,24 @@ const houseStandings = computed(() =>
 
 // ── Quest + dispatch logic ──────────────────────────────────────────────────
 
+const activeTab = ref('hall')
+
 const dispatchState = ref('idle')  // 'idle' | 'reading' | 'outcome'
 const outcome       = ref(null)
 
 const currentStats = computed(() => ({
-  battleWins:       battleStore.battleWins,
-  dungeonClears:    dungeonStore.dungeonClears,
-  heroCount:        collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
-  raidClears:       battleStore.clearedRaids.size,
-  completedQuestIds: questStore.completedIds,
+  battleWins:    battleStore.battleWins,
+  dungeonClears: dungeonStore.dungeonClears,
+  heroCount:     collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
+  raidClears:    battleStore.clearedRaids.size,
 }))
 
-const nextDispatch = computed(() => {
+const readyQuest = computed(() => {
   if (dispatchState.value !== 'idle') return null
-  return questStore.getNextAvailable(currentStats.value)
+  return questStore.getReadyDispatch(currentStats.value)
 })
 
-const activeQuest = computed(() => questStore.getActiveQuest())
-
-function openDispatch(id) {
-  questStore.openDispatch(id)
+function openDispatch() {
   dispatchState.value = 'reading'
 }
 
@@ -396,6 +407,53 @@ const houseColor   = computed(() => playerHouse.value?.color ?? '#d4af37')
   color: #d4c9a8;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════
+   TABS
+   ══════════════════════════════════ */
+.gh-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #1e1a2a;
+  flex-shrink: 0;
+  padding: 0 20px;
+}
+
+.gh-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  font-size: 0.65rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #504868;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s;
+  margin-bottom: -1px;
+}
+.gh-tab:hover { color: #9a8e70; }
+.gh-tab.is-active {
+  color: #d4af37;
+  border-bottom-color: #d4af37;
+}
+
+.gh-tab-qp {
+  font-size: 0.58rem;
+  padding: 1px 5px;
+  background: #1a140a;
+  color: #d4af37;
+  border: 1px solid #3a2e10;
+  border-radius: 2px;
+}
+
+.gh-quest-log {
+  flex: 1;
   overflow: hidden;
 }
 
