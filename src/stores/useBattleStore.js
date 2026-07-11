@@ -159,10 +159,12 @@ export const useBattleStore = defineStore('battle', () => {
         }
         let componentDrops = []
         let forgeUnlock    = null
+        let soulVesselDrop = false
         if (enc.isDungeon) {
           const dungeonResult = useDungeonStore().onDungeonVictory(enc.dungeonId, enc.tier)
           componentDrops = dungeonResult?.componentDrops ?? []
           forgeUnlock    = dungeonResult?.forgeUnlock ?? null
+          soulVesselDrop = dungeonResult?.soulVesselDrop ?? false
         }
         let keyDrops = []
         if (enc.isTraining) {
@@ -215,7 +217,7 @@ export const useBattleStore = defineStore('battle', () => {
         battleWins.value++
         localStorage.setItem('raid-battle-wins', battleWins.value)
 
-        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, scrollDrops, raidDrops, forgeUnlock, loreFragments: loreFragment ? [loreFragment] : [] }
+        const runReward = { ...enc.rewards, xp: xpGained, levelsGained, oreDrops, gatherDrops, componentDrops, keyDrops, scrollDrops, raidDrops, forgeUnlock, soulVesselDrop, loreFragments: loreFragment ? [loreFragment] : [] }
 
         if (isBatchRunning.value) {
           // Accumulate into batch totals; don't display until final run

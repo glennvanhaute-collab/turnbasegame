@@ -399,6 +399,24 @@ export const useInventoryStore = defineStore('inventory', () => {
     return counts
   }
 
+  function countUnequippedByTier(tier) {
+    return ownedInstances.value.filter(
+      i => i.tier === tier && !getEquippedBy(i.instanceId)
+    ).length
+  }
+
+  function removeItemsByTier(tier, count) {
+    const toRemove = ownedInstances.value
+      .filter(i => i.tier === tier && !getEquippedBy(i.instanceId))
+      .slice(0, count)
+    if (toRemove.length < count) return false
+    for (const item of toRemove) {
+      const idx = ownedInstances.value.findIndex(i => i.instanceId === item.instanceId)
+      if (idx !== -1) ownedInstances.value.splice(idx, 1)
+    }
+    return true
+  }
+
   return {
     ownedInstances, ownedItems, loadouts,
     focusedHeroKey, pendingSlot,
@@ -416,5 +434,6 @@ export const useInventoryStore = defineStore('inventory', () => {
     awardSoulVessel, useSoulVessel, isProgressive,
     sellItem, sellAllByRarity,
     getSetPieces, quickEquip,
+    countUnequippedByTier, removeItemsByTier,
   }
 })

@@ -55,7 +55,17 @@
           :class="{ 'obj-done': obj.done }"
         >
           <span class="ql-obj-icon">{{ obj.done ? '✓' : '○' }}</span>
-          <span>{{ obj.label }}</span>
+          <span class="ql-obj-text">{{ obj.label }}</span>
+          <template v-if="obj.type === 'donate' && !obj.done">
+            <span class="ql-donate-count">
+              {{ questStore.donateAvailableCount(selected.quest.id, obj.id) }}/{{ obj.count }}
+            </span>
+            <button
+              class="ql-donate-btn"
+              :disabled="!questStore.canDonate(selected.quest.id, obj.id)"
+              @click="questStore.donateItems(selected.quest.id, obj.id)"
+            >Donate</button>
+          </template>
         </div>
         <div v-if="selected.status === 'dispatch_ready'" class="ql-dispatch-ready-note">
           A dispatch awaits you in the Hall.
@@ -116,6 +126,7 @@ const gameStats = computed(() => ({
   dungeonClears: dungeonStore.dungeonClears,
   heroCount:     collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
   raidClears:    battleStore.clearedRaids.size,
+  siegeClears:   battleStore.siegeClears,
 }))
 
 const selectedId = ref(null)
@@ -346,7 +357,7 @@ const groups = computed(() =>
 
 .ql-objective {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   font-size: 0.7rem;
   color: #9a8e70;
@@ -357,8 +368,38 @@ const groups = computed(() =>
   flex-shrink: 0;
   width: 12px;
 }
+.ql-obj-text { flex: 1; }
 .ql-objective.obj-done         { color: #4a7a5a; }
 .ql-objective.obj-done .ql-obj-icon { color: #4dff88; }
+
+.ql-donate-count {
+  font-size: 0.6rem;
+  color: #5a5070;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ql-donate-btn {
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  background: #1a1508;
+  border: 1px solid #3a3020;
+  color: #d4af37;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+.ql-donate-btn:hover:not(:disabled) {
+  background: #241e0a;
+  border-color: #5a5030;
+}
+.ql-donate-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
 .ql-dispatch-ready-note {
   font-size: 0.68rem;

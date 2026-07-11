@@ -74,6 +74,9 @@
         >
           📜 Lore Fragment
         </div>
+        <div v-if="store.lastReward.soulVesselDrop" class="drop-chip drop-chip--soul" style="--c: #cc88ff">
+          ✦ Soul Vessel
+        </div>
         <div
           v-for="sd in store.lastReward.scrollDrops"
           :key="'sc_'+sd.type"
@@ -510,6 +513,13 @@ function startBatch100() { store.startBatchRun(100) }
   border: 1px solid color-mix(in srgb, var(--c) 30%, #2a1a08);
   border-radius: 20px;
   padding: 4px 10px 4px 7px;
+}
+.drop-chip--soul {
+  border-color: #9944cc;
+  background: #120818;
+  color: #cc88ff;
+  box-shadow: 0 0 8px rgba(180, 80, 255, 0.25);
+  font-weight: 700;
 }
 .dot {
   width: 8px;

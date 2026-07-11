@@ -2,17 +2,21 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useCurrencyStore } from './useCurrencyStore.js'
 import { useReputationStore } from './useReputationStore.js'
+import { useInventoryStore } from './useInventoryStore.js'
+import { GearSlot } from '../game/Gear.js'
 
 const STORAGE_KEY = 'raid-quests'
 
 // Objective types:
-//   { id, type: 'battleWins',    count, label }
-//   { id, type: 'dungeonClears', count, label }
-//   { id, type: 'raidClears',    count, label }
-//   { id, type: 'heroCount',     count, label }
-//   { id, type: 'puzzle',               label }  — completed via markManualDone
-//   { id, type: 'craft',   itemId,      label }  — completed via markManualDone
-//   { id, type: 'donate',  resource, amount, label } — completed via markManualDone
+//   { id, type: 'battleWins',      count, label }
+//   { id, type: 'dungeonClears',   count, label }
+//   { id, type: 'raidClears',      count, label }
+//   { id, type: 'heroCount',       count, label }
+//   { id, type: 'siegeClears',     count, label }
+//   { id, type: 'raidSetComplete', setId, label }  — 'any' or specific setId; checked via inventory
+//   { id, type: 'puzzle',                 label }  — completed via markManualDone
+//   { id, type: 'craft',   itemId,        label }  — completed via markManualDone
+//   { id, type: 'donate',  itemTier, count, label } — completed via donateItems()
 
 export const QUESTS = [
   {
@@ -254,11 +258,88 @@ export const QUESTS = [
   },
 
   {
+    id: 'iron_levy',
+    name: 'The Iron Levy',
+    type: 'HOUSE',
+    questPoints: 2,
+    prerequisites: ['iron_commission'],
+    objectives: [
+      { id: 'steel_gear', type: 'donate', itemTier: 'steel', count: 30, label: 'Donate 30 steel gear pieces' },
+    ],
+    dispatch: {
+      sender: 'House Aldric',
+      subject: 'A Request of the Warband',
+      body: `[Placeholder]`,
+    },
+    options: [
+      {
+        id: 'comply',
+        label: 'Send the shipment as requested.',
+        text: 'You honor the levy without condition.',
+        repChanges: { 'House Aldric': 400, 'House Mordaine': 100, 'House Caelwyn': -200, 'House Valdris': -150 },
+        reward: [{ type: 'sealedCharter', amount: 1 }],
+        outcomeText: `[Placeholder]`,
+      },
+      {
+        id: 'redirect',
+        label: 'Redirect the shipment elsewhere.',
+        text: 'You have other uses for this steel.',
+        repChanges: { 'House Caelwyn': 400, 'House Valdris': 100, 'House Aldric': -200, 'House Mordaine': -150 },
+        reward: [{ type: 'commonWrit', amount: 3 }],
+        outcomeText: `[Placeholder]`,
+      },
+    ],
+  },
+
+  {
+    id: 'dark_requisition',
+    name: 'The Dark Requisition',
+    type: 'STORY',
+    questPoints: 2,
+    prerequisites: ['ashvein_cipher'],
+    objectives: [
+      { id: 'dungeons',      type: 'dungeonClears', count: 6,  label: 'Clear 6 dungeons' },
+      { id: 'darksteel_gear',type: 'donate', itemTier: 'darksteel', count: 20, label: 'Donate 20 darksteel gear pieces' },
+    ],
+    dispatch: {
+      sender: 'Unknown',
+      subject: 'The Arms Must Move',
+      body: `[Placeholder]`,
+    },
+    options: [
+      {
+        id: 'deliver',
+        label: 'Deliver the arms as directed.',
+        text: 'You ask nothing about where they go.',
+        repChanges: { 'House Valdris': 300, 'House Mordaine': 200, 'House Aldric': -100, 'House Caelwyn': -200 },
+        reward: [{ type: 'sealedCharter', amount: 1 }],
+        outcomeText: `[Placeholder]`,
+      },
+      {
+        id: 'route_own',
+        label: 'Route them to your own stores.',
+        text: 'You take the arms. No explanation given.',
+        repChanges: { 'House Mordaine': 400, 'House Aldric': 100, 'House Caelwyn': -200, 'House Valdris': -150 },
+        reward: [{ type: 'commonWrit', amount: 3 }],
+        outcomeText: `[Placeholder]`,
+      },
+      {
+        id: 'destroy',
+        label: 'Destroy the cache.',
+        text: "You don't know who is waiting for these. Neither will anyone else.",
+        repChanges: { 'House Caelwyn': 400, 'House Valdris': 200, 'House Aldric': -200, 'House Mordaine': -300 },
+        reward: [{ type: 'commonWrit', amount: 3 }],
+        outcomeText: `[Placeholder]`,
+      },
+    ],
+  },
+
+  {
     id: 'shadow_that_followed',
     name: 'The Shadow That Followed',
     type: 'CHARACTER',
     questPoints: 3,
-    prerequisites: ['iron_commission', 'ashvein_cipher'],
+    prerequisites: ['iron_levy', 'dark_requisition'],
     objectives: [
       { id: 'heroes', type: 'heroCount',  count: 5,  label: 'Have 5 heroes in your banner' },
       { id: 'wins',   type: 'battleWins', count: 30, label: 'Win 30 battles' },
@@ -290,11 +371,45 @@ export const QUESTS = [
   },
 
   {
+    id: 'fallen_kings_mantle',
+    name: "The Fallen King's Mantle",
+    type: 'ENDGAME',
+    questPoints: 4,
+    prerequisites: ['shadow_that_followed'],
+    objectives: [
+      { id: 'raid_set', type: 'raidSetComplete', setId: 'any', label: 'Obtain a complete raid set (all 7 pieces)' },
+    ],
+    dispatch: {
+      sender: 'The Realm',
+      subject: 'What the Raids Left Behind',
+      body: `[Placeholder]`,
+    },
+    options: [
+      {
+        id: 'claim_openly',
+        label: 'Claim the power openly.',
+        text: 'You wear it. You let them see it.',
+        repChanges: { 'House Aldric': 300, 'House Mordaine': 300, 'House Caelwyn': -200, 'House Valdris': -200 },
+        reward: [{ type: 'sealedCharter', amount: 2 }],
+        outcomeText: `[Placeholder]`,
+      },
+      {
+        id: 'conceal',
+        label: 'Conceal what you found.',
+        text: 'The armor goes somewhere no one thinks to look.',
+        repChanges: { 'House Caelwyn': 300, 'House Valdris': 300, 'House Aldric': -200, 'House Mordaine': -200 },
+        reward: [{ type: 'sealedCharter', amount: 2 }],
+        outcomeText: `[Placeholder]`,
+      },
+    ],
+  },
+
+  {
     id: 'final_breach',
     name: 'The Final Breach',
     type: 'FINAL',
     questPoints: 5,
-    prerequisites: ['shadow_that_followed'],
+    prerequisites: ['fallen_kings_mantle'],
     objectives: [
       { id: 'raids',    type: 'raidClears',    count: 2,  label: 'Clear both raids' },
       { id: 'wins',     type: 'battleWins',    count: 50, label: 'Win 50 battles' },
@@ -342,6 +457,16 @@ export const useQuestStore = defineStore('quests', () => {
     if (obj.type === 'raidClears')    return (gameStats.raidClears    ?? 0) >= obj.count
     if (obj.type === 'heroCount')     return (gameStats.heroCount     ?? 0) >= obj.count
     if (obj.type === 'siegeClears')   return (gameStats.siegeClears   ?? 0) >= obj.count
+    if (obj.type === 'raidSetComplete') {
+      const inventory  = useInventoryStore()
+      const setsToCheck = obj.setId === 'any' ? ['regret', 'null_panoply'] : [obj.setId]
+      const allSlots   = Object.values(GearSlot)
+      return setsToCheck.some(setId =>
+        allSlots.every(slot =>
+          inventory.ownedInstances.value.some(i => i.setId === setId && i.slot === slot)
+        )
+      )
+    }
     return manualProgress.value.has(`${quest.id}:${obj.id}`)
   }
 
@@ -367,6 +492,31 @@ export const useQuestStore = defineStore('quests', () => {
   function markManualDone(questId, objectiveId) {
     manualProgress.value = new Set([...manualProgress.value, `${questId}:${objectiveId}`])
     _persist()
+  }
+
+  function canDonate(questId, objectiveId) {
+    if (manualProgress.value.has(`${questId}:${objectiveId}`)) return false
+    const quest = QUESTS.find(q => q.id === questId)
+    const obj   = quest?.objectives.find(o => o.id === objectiveId)
+    if (!obj || obj.type !== 'donate') return false
+    return useInventoryStore().countUnequippedByTier(obj.itemTier) >= obj.count
+  }
+
+  function donateItems(questId, objectiveId) {
+    if (!canDonate(questId, objectiveId)) return false
+    const quest = QUESTS.find(q => q.id === questId)
+    const obj   = quest?.objectives.find(o => o.id === objectiveId)
+    const removed = useInventoryStore().removeItemsByTier(obj.itemTier, obj.count)
+    if (!removed) return false
+    markManualDone(questId, objectiveId)
+    return true
+  }
+
+  function donateAvailableCount(questId, objectiveId) {
+    const quest = QUESTS.find(q => q.id === questId)
+    const obj   = quest?.objectives.find(o => o.id === objectiveId)
+    if (!obj || obj.type !== 'donate') return 0
+    return useInventoryStore().countUnequippedByTier(obj.itemTier)
   }
 
   function complete(questId, optionId) {
@@ -408,5 +558,6 @@ export const useQuestStore = defineStore('quests', () => {
     completedIds, chosenOptions,
     questStatus, objectiveProgress, getReadyDispatch,
     markManualDone, complete,
+    canDonate, donateItems, donateAvailableCount,
   }
 })

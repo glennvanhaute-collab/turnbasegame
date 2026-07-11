@@ -144,13 +144,15 @@ export const useDungeonStore = defineStore('dungeons', () => {
       }
     }
 
-    if (effectiveTier === 'Nightmare' && Math.random() < 0.04) {
+    let soulVesselDrop = false
+    if (effectiveTier === 'Nightmare' && Math.random() < 0.015) {
       useInventoryStore().awardSoulVessel()
+      soulVesselDrop = true
     }
 
     dungeonClears.value++
     persist()
-    return { componentDrops, forgeUnlock }
+    return { componentDrops, forgeUnlock, soulVesselDrop }
   }
 
   function findDungeon(id) {

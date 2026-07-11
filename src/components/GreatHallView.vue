@@ -334,6 +334,7 @@ const currentStats = computed(() => ({
   dungeonClears: dungeonStore.dungeonClears,
   heroCount:     collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
   raidClears:    battleStore.clearedRaids.size,
+  siegeClears:   battleStore.siegeClears,
 }))
 
 const readyQuest = computed(() => {
