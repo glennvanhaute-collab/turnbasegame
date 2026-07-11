@@ -1,4 +1,14 @@
 <template>
+  <!-- Cipher puzzle modal -->
+  <Teleport to="body">
+    <div v-if="showCipher" class="ql-cipher-backdrop" @click.self="showCipher = false">
+      <div class="ql-cipher-modal">
+        <button class="ql-cipher-close" @click="showCipher = false">✕</button>
+        <CipherPuzzle @solved="onCipherSolved" />
+      </div>
+    </div>
+  </Teleport>
+
   <div class="ql-wrap">
 
     <!-- ── Left: quest list ── -->
@@ -66,6 +76,9 @@
               @click="questStore.donateItems(selected.quest.id, obj.id)"
             >Donate</button>
           </template>
+          <template v-if="obj.type === 'puzzle' && !obj.done">
+            <button class="ql-donate-btn" @click="showCipher = true">Open Cipher</button>
+          </template>
         </div>
         <div v-if="selected.status === 'dispatch_ready'" class="ql-dispatch-ready-note">
           A dispatch awaits you in the Hall.
@@ -102,6 +115,7 @@ import { useQuestStore } from '../stores/useQuestStore.js'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { useDungeonStore } from '../stores/useDungeonStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import CipherPuzzle from './CipherPuzzle.vue'
 
 const questStore   = useQuestStore()
 const battleStore  = useBattleStore()
@@ -129,7 +143,24 @@ const gameStats = computed(() => ({
   siegeClears:   battleStore.siegeClears,
 }))
 
-const selectedId = ref(null)
+const selectedId  = ref(null)
+const showCipher  = ref(false)
+
+function onCipherSolved() {
+  showCipher.value = false
+  // find which quest+objective has type 'puzzle' that is currently in progress
+  for (const q of questStore.QUESTS) {
+    for (const obj of q.objectives ?? []) {
+      if (obj.type === 'puzzle' && !questStore.completedIds.has(q.id)) {
+        const status = questStore.questStatus(q.id, gameStats.value)
+        if (status === 'available' || status === 'dispatch_ready') {
+          questStore.markManualDone(q.id, obj.id)
+          return
+        }
+      }
+    }
+  }
+}
 
 const questsWithStatus = computed(() =>
   questStore.QUESTS.map(q => ({
@@ -167,6 +198,39 @@ const groups = computed(() =>
 </script>
 
 <style scoped>
+/* ── Cipher modal ── */
+.ql-cipher-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ql-cipher-modal {
+  position: relative;
+  border: 1px solid #3a2e18;
+  border-radius: 4px;
+  background: #09080c;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), 0 0 20px rgba(80, 60, 20, 0.2);
+}
+
+.ql-cipher-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: #4a4030;
+  font-size: 0.9rem;
+  cursor: pointer;
+  z-index: 1;
+  transition: color 0.12s;
+}
+.ql-cipher-close:hover { color: #9a8e70; }
+
 .ql-wrap {
   display: flex;
   height: 100%;
