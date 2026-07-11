@@ -32,18 +32,30 @@ function loadSaved() {
 export const useDungeonStore = defineStore('dungeons', () => {
   const saved = loadSaved()
 
-  const currentOptions  = ref((saved?.currentOptions ?? []).filter(d => !d.isDungeon))
-  const pinnedDungeons  = ref((saved?.pinnedDungeons ?? []).filter(d => !d.isDungeon))
-  const dungeonClears   = ref(saved?.dungeonClears ?? 0)
+  const currentOptions    = ref((saved?.currentOptions ?? []).filter(d => !d.isDungeon))
+  const pinnedDungeons    = ref((saved?.pinnedDungeons ?? []).filter(d => !d.isDungeon))
+  const dungeonClears     = ref(saved?.dungeonClears ?? 0)
+  const clearedDungeonIds = ref(new Set(saved?.clearedDungeonIds ?? []))
   const pendingNodeId       = ref(null)   // node awaiting item pick
   const pendingTavernId     = ref(null)   // tavern node awaiting claim
   const pendingTavernFrag   = ref(null)   // { heroId, heroTitle, frag } pre-rolled for modal
 
+  // One-time migration: old saves have dungeonClears > 0 but no clearedDungeonIds
+  if (dungeonClears.value > 0 && clearedDungeonIds.value.size === 0) {
+    useJournalStore().addEntry({
+      type:  ENTRY_TYPES.FIRST_DUNGEON,
+      title: `${dungeonClears.value} dungeon${dungeonClears.value > 1 ? 's' : ''} cleared before chronicle began`,
+    })
+    // Mark migration done so this never fires again by seeding a sentinel
+    clearedDungeonIds.value.add('__migrated__')
+  }
+
   function persist() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      currentOptions: currentOptions.value,
-      pinnedDungeons: pinnedDungeons.value,
-      dungeonClears:  dungeonClears.value,
+      currentOptions:    currentOptions.value,
+      pinnedDungeons:    pinnedDungeons.value,
+      dungeonClears:     dungeonClears.value,
+      clearedDungeonIds: [...clearedDungeonIds.value],
     }))
   }
 
@@ -119,6 +131,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
     if (dungeon) {
       currentOptions.value = currentOptions.value.filter(d => d.id !== dungeonId)
       pinnedDungeons.value = pinnedDungeons.value.filter(d => d.id !== dungeonId)
+      clearedDungeonIds.value.add(dungeonId)
       useJournalStore().addEntry({
         type:  ENTRY_TYPES.FIRST_DUNGEON,
         title: `First clear: ${dungeon.name}`,
@@ -253,7 +266,7 @@ export const useDungeonStore = defineStore('dungeons', () => {
   }
 
   return {
-    currentOptions, pinnedDungeons, dungeonClears, pendingNodeId,
+    currentOptions, pinnedDungeons, dungeonClears, clearedDungeonIds, pendingNodeId,
     pendingTavernId, pendingTavernFrag,
     EXPLORE_COST,
     explore, pin, unpin, onDungeonVictory, findDungeon,
