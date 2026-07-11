@@ -337,10 +337,7 @@ const currentStats = computed(() => ({
   siegeClears:   battleStore.siegeClears,
 }))
 
-const readyQuest = computed(() => {
-  if (dispatchState.value !== 'idle') return null
-  return questStore.getReadyDispatch(currentStats.value)
-})
+const readyQuest = computed(() => questStore.getReadyDispatch(currentStats.value))
 
 function openDispatch() {
   dispatchState.value = 'reading'
