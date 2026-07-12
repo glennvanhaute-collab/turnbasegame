@@ -449,6 +449,17 @@ export const useQuestStore = defineStore('quests', () => {
   // 'questId:objectiveId' keys for puzzle/craft/donate objectives
   const manualProgress = ref(new Set(saved?.manualProgress ?? []))
 
+  // One-time migration: award the house lord for players who completed final_breach
+  // before the lordUnlock reward type existed.
+  if (completedIds.value.has('final_breach') && localStorage.getItem('quest-lord-unlock-done') !== 'true') {
+    const repStore   = useReputationStore()
+    const allHouses  = ['House Aldric', 'House Mordaine', 'House Caelwyn', 'House Valdris']
+    const highest    = allHouses.reduce((best, h) => repStore.getRep(h) > repStore.getRep(best) ? h : best)
+    const lKey       = repStore.lordKey(highest)
+    if (lKey) useCollectionStore().addToRoster(lKey, { silent: true })
+    localStorage.setItem('quest-lord-unlock-done', 'true')
+  }
+
   const totalQP = computed(() =>
     QUESTS.filter(q => completedIds.value.has(q.id)).reduce((s, q) => s + q.questPoints, 0)
   )
@@ -542,6 +553,7 @@ export const useQuestStore = defineStore('quests', () => {
           useCollectionStore().addToRoster(lKey, { silent: true })
           lordUnlock = { faction: highest, lordKey: lKey }
         }
+        localStorage.setItem('quest-lord-unlock-done', 'true')
       } else {
         currency.addScroll(type, amount)
       }
