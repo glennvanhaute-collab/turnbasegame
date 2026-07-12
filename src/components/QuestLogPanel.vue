@@ -79,6 +79,17 @@
           <template v-if="obj.type === 'puzzle' && !obj.done">
             <button class="ql-donate-btn" @click="showCipher = true">Open Cipher</button>
           </template>
+          <template v-if="obj.type === 'raidSetComplete' && !obj.done">
+            <div class="ql-raidset-progress">
+              <span class="ql-raidset-count">{{ questStore.raidSetSlotProgress(selected.quest.id, obj.id)?.count ?? 0 }}/5</span>
+              <span
+                v-for="s in (questStore.raidSetSlotProgress(selected.quest.id, obj.id)?.slots ?? [])"
+                :key="s.slot"
+                class="ql-raidset-slot"
+                :class="{ 'ql-raidset-slot--owned': s.owned }"
+              >{{ SLOT_LABELS[s.slot] }}</span>
+            </div>
+          </template>
         </div>
         <div v-if="selected.status === 'dispatch_ready'" class="ql-dispatch-ready-note">
           A dispatch awaits you in the Hall.
@@ -134,6 +145,8 @@ const SCROLL_LABEL = {
   sealedCharter: 'Sealed Charter',
   houseSeal:     'House Seal',
 }
+
+const SLOT_LABELS = { head: 'Helm', chest: 'Chest', legs: 'Legs', boots: 'Boots', gloves: 'Gloves' }
 
 const gameStats = computed(() => ({
   battleWins:    battleStore.battleWins,
@@ -463,6 +476,38 @@ const groups = computed(() =>
 .ql-donate-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+.ql-raidset-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.ql-raidset-count {
+  font-size: 0.62rem;
+  color: #6a6040;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  min-width: 24px;
+}
+
+.ql-raidset-slot {
+  font-size: 0.62rem;
+  padding: 2px 7px;
+  border-radius: 2px;
+  border: 1px solid #2a2418;
+  color: #4a4030;
+  background: #0d0b0a;
+  letter-spacing: 0.04em;
+}
+
+.ql-raidset-slot--owned {
+  color: #4dcc88;
+  border-color: #1a4a2a;
+  background: #0a1a10;
 }
 
 .ql-dispatch-ready-note {

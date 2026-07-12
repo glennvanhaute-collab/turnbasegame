@@ -560,11 +560,32 @@ export const useQuestStore = defineStore('quests', () => {
     }))
   }
 
+  // Returns the best-progressing set's slot breakdown for raidSetComplete objectives.
+  // { setId, setName, slots: [{ slot, owned }], count, total }
+  function raidSetSlotProgress(questId, objectiveId) {
+    const quest = QUESTS.find(q => q.id === questId)
+    const obj   = quest?.objectives.find(o => o.id === objectiveId)
+    if (!obj || obj.type !== 'raidSetComplete') return null
+    const inventory   = useInventoryStore()
+    const setsToCheck = obj.setId === 'any' ? ['regret', 'null_panoply'] : [obj.setId]
+    const allSlots    = Object.values(GearSlot)
+    const SET_NAMES   = { regret: 'Regalia of Regret', null_panoply: 'Null Panoply' }
+    const results = setsToCheck.map(setId => {
+      const slots = allSlots.map(slot => ({
+        slot,
+        owned: inventory.ownedInstances.some(i => i.setId === setId && i.slot === slot),
+      }))
+      return { setId, setName: SET_NAMES[setId] ?? setId, slots, count: slots.filter(s => s.owned).length, total: allSlots.length }
+    })
+    return results.sort((a, b) => b.count - a.count)[0]
+  }
+
   return {
     QUESTS, totalQP,
     completedIds, chosenOptions,
     questStatus, objectiveProgress, getReadyDispatch,
     markManualDone, complete,
     canDonate, donateItems, donateAvailableCount,
+    raidSetSlotProgress,
   }
 })
