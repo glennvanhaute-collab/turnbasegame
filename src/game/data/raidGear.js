@@ -1,9 +1,9 @@
 import { createItemInstance } from '../Gear.js'
-import { GearSlot, GearType, WeaponType } from '../Gear.js'
+import { GearSlot, GearType } from '../Gear.js'
 
 // ── Regalia of Regret — drops from The Throne of Regret ────────────────────
-// Full 7-piece Legendary set. Each piece is a pre-built instance ready for
-// addInstance(). Stats sit ~50% above moonsilver Epic equivalents.
+// 5-piece Legendary armor set (head/chest/legs/boots/gloves).
+// Stats sit ~50% above moonsilver Epic equivalents.
 export const REGRET_SET = {
   id:    'regret',
   name:  'Regalia of Regret',
@@ -12,22 +12,6 @@ export const REGRET_SET = {
 }
 
 const BASE_PIECES = [
-  {
-    id: 'regret_sword', name: 'Sword of Undying Regret',
-    slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD,
-    rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
-    stats: { atk: 640, critRate: 0.08, critDmg: 0.16 },
-    description: 'The blade weeps a thin shadow-ichor. It has never forgotten the hand that first wielded it.',
-    image: 'regret_sword',
-  },
-  {
-    id: 'regret_shield', name: 'Aegis of the Empty Throne',
-    slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD,
-    rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'regret',
-    stats: { def: 460, hp: 8000 },
-    description: 'Carved from the throne itself. It stopped being a shield long ago — now it just endures.',
-    image: 'regret_shield',
-  },
   {
     id: 'regret_helm', name: 'Crown of the Fallen King',
     slot: GearSlot.HEAD, gearType: GearType.HELMET,
@@ -72,7 +56,7 @@ const BASE_PIECES = [
 
 export const REGRET_PIECES_BY_SLOT = Object.fromEntries(BASE_PIECES.map(p => [p.slot, p]))
 
-// ── Null Panoply — drops from The Null Throne (Malachar) ───────────────────
+// ── Null Panoply — drops from The Null Throne (Malachar) — 5-piece armor set ─
 export const NULL_SET = {
   id:    'null_panoply',
   name:  'Null Panoply',
@@ -81,22 +65,6 @@ export const NULL_SET = {
 }
 
 const NULL_PIECES = [
-  {
-    id: 'null_sword', name: 'Blade of Unbecoming',
-    slot: GearSlot.MAIN_HAND, gearType: GearType.WEAPON, weaponType: WeaponType.SWORD,
-    rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'null_panoply',
-    stats: { atk: 680, critDmg: 0.22, accuracy: 0.08 },
-    description: 'The void flame that runs its length was never lit. It was always there, waiting for the sword to catch up.',
-    image: 'null_sword',
-  },
-  {
-    id: 'null_shield', name: 'Bulwark of the Absent',
-    slot: GearSlot.OFF_HAND, gearType: GearType.SHIELD,
-    rarity: 'Legendary', tier: 'raid', armorType: 'plate', setId: 'null_panoply',
-    stats: { def: 490, hp: 8400, resistance: 0.08 },
-    description: 'The chains hanging from it lead nowhere. They always have.',
-    image: 'null_shield',
-  },
   {
     id: 'null_helm', name: 'Crown of the Null Sovereign',
     slot: GearSlot.HEAD, gearType: GearType.HELMET,

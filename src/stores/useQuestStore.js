@@ -378,7 +378,7 @@ export const QUESTS = [
     questPoints: 4,
     prerequisites: ['shadow_that_followed'],
     objectives: [
-      { id: 'raid_set', type: 'raidSetComplete', setId: 'any', label: 'Obtain a complete raid set (all 7 pieces)' },
+      { id: 'raid_set', type: 'raidSetComplete', setId: 'any', label: 'Obtain a complete raid set (all 5 armor pieces)' },
     ],
     dispatch: {
       sender: 'The Realm',
