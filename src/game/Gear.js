@@ -96,6 +96,7 @@ export function createItemInstance(baseItem) {
     baseStats:   baseItem.baseStats ? { ...baseItem.baseStats } : { ...baseItem.stats },
     tier:        baseItem.tier       ?? null,
     slot:        baseItem.slot       ?? null,
+    setId:       baseItem.setId      ?? null,
     image:       baseItem.image      ?? null,
     frame:       baseItem.frame      ?? null,
     armorType:   baseItem.armorType  ?? null,
