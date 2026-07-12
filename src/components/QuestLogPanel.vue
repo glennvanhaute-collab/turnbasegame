@@ -81,9 +81,9 @@
           </template>
           <template v-if="obj.type === 'raidSetComplete' && !obj.done">
             <div class="ql-raidset-progress">
-              <span class="ql-raidset-count">{{ questStore.raidSetSlotProgress(selected.quest.id, obj.id)?.count ?? 0 }}/5</span>
+              <span class="ql-raidset-count">{{ raidSetProgress.count }}/5</span>
               <span
-                v-for="s in (questStore.raidSetSlotProgress(selected.quest.id, obj.id)?.slots ?? [])"
+                v-for="s in raidSetProgress.slots"
                 :key="s.slot"
                 class="ql-raidset-slot"
                 :class="{ 'ql-raidset-slot--owned': s.owned }"
@@ -156,8 +156,21 @@ const gameStats = computed(() => ({
   heroCount:       collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
   raidClears:      battleStore.clearedRaids.size,
   siegeClears:     battleStore.siegeClears,
-  inventorySize:   inventory.ownedInstances.length,  // tracks raid gear drops
+  ownedInstances:  inventory.ownedInstances,
 }))
+
+const GEAR_SLOTS = ['head', 'chest', 'legs', 'boots', 'gloves']
+
+const raidSetProgress = computed(() => {
+  const instances = inventory.ownedInstances
+  const make = (setId, setName) => {
+    const slots = GEAR_SLOTS.map(slot => ({ slot, owned: instances.some(i => i.setId === setId && i.slot === slot) }))
+    return { setId, setName, slots, count: slots.filter(s => s.owned).length }
+  }
+  const r = make('regret', 'Regalia of Regret')
+  const n = make('null_panoply', 'Null Panoply')
+  return r.count >= n.count ? r : n
+})
 
 const selectedId  = ref(null)
 const showCipher  = ref(false)

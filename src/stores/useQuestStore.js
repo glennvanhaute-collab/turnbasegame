@@ -459,12 +459,12 @@ export const useQuestStore = defineStore('quests', () => {
     if (obj.type === 'heroCount')     return (gameStats.heroCount     ?? 0) >= obj.count
     if (obj.type === 'siegeClears')   return (gameStats.siegeClears   ?? 0) >= obj.count
     if (obj.type === 'raidSetComplete') {
-      const inventory  = useInventoryStore()
+      const instances  = gameStats.ownedInstances ?? useInventoryStore().ownedInstances
       const setsToCheck = obj.setId === 'any' ? ['regret', 'null_panoply'] : [obj.setId]
       const allSlots   = Object.values(GearSlot)
       return setsToCheck.some(setId =>
         allSlots.every(slot =>
-          inventory.ownedInstances.some(i => i.setId === setId && i.slot === slot)
+          instances.some(i => i.setId === setId && i.slot === slot)
         )
       )
     }

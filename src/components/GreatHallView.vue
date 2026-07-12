@@ -203,6 +203,7 @@ import { useWeaponStore } from '../stores/useWeaponStore.js'
 import { useJournalStore } from '../stores/useJournalStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useQuestStore } from '../stores/useQuestStore.js'
+import { useInventoryStore } from '../stores/useInventoryStore.js'
 
 import shieldAldric      from '../assets/lore/house_aldric.png'
 import shieldValdris     from '../assets/lore/house_valdris.png'
@@ -258,6 +259,7 @@ const weaponStore  = useWeaponStore()
 const journalStore = useJournalStore()
 const playerHero   = usePlayerHeroStore()
 const questStore   = useQuestStore()
+const inventory    = useInventoryStore()
 
 // ── House identity ──────────────────────────────────────────────────────────
 
@@ -330,11 +332,12 @@ const dispatchState = ref('idle')  // 'idle' | 'reading' | 'outcome'
 const outcome       = ref(null)
 
 const currentStats = computed(() => ({
-  battleWins:    battleStore.battleWins,
-  dungeonClears: dungeonStore.dungeonClears,
-  heroCount:     collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
-  raidClears:    battleStore.clearedRaids.size,
-  siegeClears:   battleStore.siegeClears,
+  battleWins:      battleStore.battleWins,
+  dungeonClears:   dungeonStore.dungeonClears,
+  heroCount:       collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
+  raidClears:      battleStore.clearedRaids.size,
+  siegeClears:     battleStore.siegeClears,
+  ownedInstances:  inventory.ownedInstances,
 }))
 
 const readyQuest = computed(() => questStore.getReadyDispatch(currentStats.value))
