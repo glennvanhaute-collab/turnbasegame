@@ -95,8 +95,15 @@
               </span>
             </div>
           </div>
+          <div v-if="outcome.lordUnlock" class="gh-lord-unlock" :style="{ '--house-color': HOUSE_META[outcome.lordUnlock.faction]?.color ?? '#d4af37' }">
+            <img :src="HOUSE_META[outcome.lordUnlock.faction]?.shield" class="gh-lord-crest" alt="" />
+            <div class="gh-lord-unlock-text">
+              <span class="gh-lord-unlock-label">Joins your banner</span>
+              <span class="gh-lord-unlock-name">{{ HOUSE_META[outcome.lordUnlock.faction]?.lordName ?? outcome.lordUnlock.lordKey }}</span>
+            </div>
+          </div>
           <div class="gh-dispatch-reward">
-            <span v-for="r in outcome.reward" :key="r.type" class="gh-reward-chip">
+            <span v-for="r in outcome.reward.filter(r => r.type !== 'lordUnlock')" :key="r.type" class="gh-reward-chip">
               {{ r.amount }}× {{ SCROLL_LABEL[r.type] }}
             </span>
           </div>
@@ -910,6 +917,42 @@ const houseColor   = computed(() => playerHouse.value?.color ?? '#d4af37')
 
 .gh-rep-delta.pos { color: #4dff88; }
 .gh-rep-delta.neg { color: #ff4444; }
+
+.gh-lord-unlock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--house-color, #d4af37);
+  background: color-mix(in srgb, var(--house-color, #d4af37) 8%, #0d0b10);
+  border-radius: 4px;
+}
+
+.gh-lord-crest {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.gh-lord-unlock-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gh-lord-unlock-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #888;
+}
+
+.gh-lord-unlock-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--house-color, #d4af37);
+}
 
 .gh-dispatch-reward {
   display: flex;

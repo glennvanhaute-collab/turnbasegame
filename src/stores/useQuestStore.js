@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useCurrencyStore } from './useCurrencyStore.js'
 import { useReputationStore } from './useReputationStore.js'
+import { useCollectionStore } from './useCollectionStore.js'
 import { useInventoryStore } from './useInventoryStore.js'
 import { useJournalStore, ENTRY_TYPES } from './useJournalStore.js'
 import { GearSlot } from '../game/Gear.js'
@@ -429,7 +430,7 @@ export const QUESTS = [
         label: 'Lead the siege.',
         text: 'Every choice has led here.',
         repChanges: {},
-        reward: [{ type: 'houseSeal', amount: 1 }],
+        reward: [{ type: 'lordUnlock', amount: 1 }],
         outcomeText: `You go. The record that was kept on you is now part of something larger than any of the houses planned for. What comes after this is yours to determine — and no one else's to predict.`,
       },
     ],
@@ -525,12 +526,27 @@ export const useQuestStore = defineStore('quests', () => {
     const option = quest?.options.find(o => o.id === optionId)
     if (!quest || !option) return null
 
-    const currency = useCurrencyStore()
+    const currency  = useCurrencyStore()
+    const repStore  = useReputationStore()
+    const ALL_HOUSES = ['House Aldric', 'House Mordaine', 'House Caelwyn', 'House Valdris']
+
+    let lordUnlock = null
     for (const { type, amount } of option.reward) {
-      currency.addScroll(type, amount)
+      if (type === 'lordUnlock') {
+        // Award the lord of whichever house the player has the most rep with
+        const highest = ALL_HOUSES.reduce((best, h) =>
+          repStore.getRep(h) > repStore.getRep(best) ? h : best
+        )
+        const lKey = repStore.lordKey(highest)
+        if (lKey) {
+          useCollectionStore().addToRoster(lKey, { silent: true })
+          lordUnlock = { faction: highest, lordKey: lKey }
+        }
+      } else {
+        currency.addScroll(type, amount)
+      }
     }
 
-    const repStore = useReputationStore()
     repStore.applyRepChanges(option.repChanges)
 
     completedIds.value  = new Set([...completedIds.value, questId])
@@ -549,6 +565,7 @@ export const useQuestStore = defineStore('quests', () => {
       outcomeText: option.outcomeText,
       repChanges:  option.repChanges,
       reward:      option.reward,
+      lordUnlock,
     }
   }
 
