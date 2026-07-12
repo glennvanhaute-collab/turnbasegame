@@ -126,12 +126,14 @@ import { useQuestStore } from '../stores/useQuestStore.js'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { useDungeonStore } from '../stores/useDungeonStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { useInventoryStore } from '../stores/useInventoryStore.js'
 import CipherPuzzle from './CipherPuzzle.vue'
 
 const questStore   = useQuestStore()
 const battleStore  = useBattleStore()
 const dungeonStore = useDungeonStore()
 const collection   = useCollectionStore()
+const inventory    = useInventoryStore()
 
 const STATUS_LABEL = {
   completed:      'Completed',
@@ -149,11 +151,12 @@ const SCROLL_LABEL = {
 const SLOT_LABELS = { head: 'Helm', chest: 'Chest', legs: 'Legs', boots: 'Boots', gloves: 'Gloves' }
 
 const gameStats = computed(() => ({
-  battleWins:    battleStore.battleWins,
-  dungeonClears: dungeonStore.dungeonClears,
-  heroCount:     collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
-  raidClears:    battleStore.clearedRaids.size,
-  siegeClears:   battleStore.siegeClears,
+  battleWins:      battleStore.battleWins,
+  dungeonClears:   dungeonStore.dungeonClears,
+  heroCount:       collection.ownedKeys.filter(k => k !== 'PLAYER_CHARACTER').length,
+  raidClears:      battleStore.clearedRaids.size,
+  siegeClears:     battleStore.siegeClears,
+  inventorySize:   inventory.ownedInstances.length,  // tracks raid gear drops
 }))
 
 const selectedId  = ref(null)
