@@ -66,7 +66,7 @@
 
         <!-- Lord info -->
         <div class="gh-lord-info">
-          <p class="gh-lord-name">{{ playerHouse?.lordName ?? '— —' }}</p>
+          <p class="gh-lord-name">{{ ownedLordEntry?.lordName ?? playerHouse?.lordName ?? '— —' }}</p>
           <p class="gh-lord-role">{{ playerHouseLordPortrait ? 'House Lord' : 'No oath sworn' }}</p>
         </div>
       </aside>
@@ -292,10 +292,25 @@ const playerHouse = computed(() => {
   return { name: starterFaction.value, ...meta }
 })
 
+// Finds the house lord the player actually owns in their collection.
+// Prefers the player's own house lord; falls back to any owned lord (quest unlock may be from highest-rep house).
+const ownedLordEntry = computed(() => {
+  const ownHouse = playerHouse.value
+  if (ownHouse?.lordKey && collection.ownedKeys.includes(ownHouse.lordKey)) {
+    return { houseName: ownHouse.name, ...ownHouse }
+  }
+  for (const [houseName, meta] of Object.entries(HOUSE_META)) {
+    if (meta.lordKey && collection.ownedKeys.includes(meta.lordKey)) {
+      return { houseName, ...meta }
+    }
+  }
+  return null
+})
+
 const houseLordHero = computed(() => {
-  const meta = playerHouse.value
-  if (!meta?.lordKey) return null
-  return HERO_TEMPLATES[meta.lordKey]?.() ?? null
+  const entry = ownedLordEntry.value
+  if (!entry?.lordKey) return null
+  return HERO_TEMPLATES[entry.lordKey]?.() ?? null
 })
 
 const playerHouseLordPortrait = computed(() => {
