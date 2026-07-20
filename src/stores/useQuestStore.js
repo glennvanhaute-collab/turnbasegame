@@ -5,6 +5,7 @@ import { useReputationStore } from './useReputationStore.js'
 import { useCollectionStore } from './useCollectionStore.js'
 import { useInventoryStore } from './useInventoryStore.js'
 import { useJournalStore, ENTRY_TYPES } from './useJournalStore.js'
+import { usePlayerHeroStore } from './usePlayerHeroStore.js'
 import { GearSlot } from '../game/Gear.js'
 
 const STORAGE_KEY = 'raid-quests'
@@ -456,8 +457,22 @@ export const useQuestStore = defineStore('quests', () => {
     const allHouses  = ['House Aldric', 'House Mordaine', 'House Caelwyn', 'House Valdris']
     const highest    = allHouses.reduce((best, h) => repStore.getRep(h) > repStore.getRep(best) ? h : best)
     const lKey       = repStore.lordKey(highest)
-    if (lKey) useCollectionStore().addToRoster(lKey, { silent: true })
+    if (lKey) {
+      useCollectionStore().addToRoster(lKey, { silent: true })
+      usePlayerHeroStore().setFaction(highest)
+    }
     localStorage.setItem('quest-lord-unlock-done', 'true')
+    localStorage.setItem('quest-lord-faction-sync-done', 'true')
+  }
+
+  // One-time migration: sync player faction to the lord's house for players who
+  // already ran the lord-unlock migration but pre-date the faction-sync fix.
+  if (completedIds.value.has('final_breach') && localStorage.getItem('quest-lord-faction-sync-done') !== 'true') {
+    const repStore  = useReputationStore()
+    const allHouses = ['House Aldric', 'House Mordaine', 'House Caelwyn', 'House Valdris']
+    const highest   = allHouses.reduce((best, h) => repStore.getRep(h) > repStore.getRep(best) ? h : best)
+    usePlayerHeroStore().setFaction(highest)
+    localStorage.setItem('quest-lord-faction-sync-done', 'true')
   }
 
   const totalQP = computed(() =>
@@ -551,6 +566,7 @@ export const useQuestStore = defineStore('quests', () => {
         const lKey = repStore.lordKey(highest)
         if (lKey) {
           useCollectionStore().addToRoster(lKey, { silent: true })
+          usePlayerHeroStore().setFaction(highest)
           lordUnlock = { faction: highest, lordKey: lKey }
         }
         localStorage.setItem('quest-lord-unlock-done', 'true')

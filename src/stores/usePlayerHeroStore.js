@@ -188,12 +188,17 @@ export const usePlayerHeroStore = defineStore('player-hero', () => {
     return hero
   }
 
+  function setFaction(faction) {
+    heroFaction.value = faction
+    persist()
+  }
+
   return {
     heroName, heroFaction, heroAvatar, heroArtisanSkill, level, xp,
     isCreated, rarity, xpProgress, xpToNextLevel,
     XP_PER_LEVEL: xpToNextLevel,
     PLAYER_FACTIONS: [Faction.ALDRIC, Faction.VALDRIS, Faction.CAELWYN, Faction.MORDAINE],
     HOUSE_META,
-    create, addXp, xpForDifficulty, buildHeroInstance, levelMultiplier, nextUnlock,
+    create, addXp, xpForDifficulty, buildHeroInstance, levelMultiplier, nextUnlock, setFaction,
   }
 })
