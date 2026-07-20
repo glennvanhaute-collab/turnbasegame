@@ -53,6 +53,18 @@
             <!-- Scrollable body -->
             <div class="info-body">
 
+              <!-- Archetype / Role identity -->
+              <section class="section archetype-section" v-if="hero.archetype">
+                <div class="archetype-header">
+                  <span class="archetype-role-badge">{{ hero.archetype.role }}</span>
+                  <span class="archetype-name">{{ hero.archetype.name }}</span>
+                </div>
+                <p class="archetype-desc">{{ hero.archetype.desc }}</p>
+                <div class="archetype-tags">
+                  <span class="archetype-tag" v-for="tag in hero.archetype.tags" :key="tag">{{ tag }}</span>
+                </div>
+              </section>
+
               <!-- Lore -->
               <section class="section" v-if="hero.lore">
                 <h3 class="section-title">Lore</h3>
@@ -566,6 +578,23 @@ const stats = computed(() => {
 .info-body::-webkit-scrollbar-thumb:hover { background: #5c2810; }
 .section { margin-bottom: 18px; }
 .section-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 10px; }
+
+/* Archetype */
+.archetype-section { border-bottom: 1px solid #2a1a0e; padding-bottom: 16px; }
+.archetype-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.archetype-role-badge {
+  font-size: 0.58rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 4px;
+  background: #1e1208; color: #d4af37; border: 1px solid #d4af3755;
+}
+.archetype-name { font-family: var(--font-head); font-size: 1.05rem; font-weight: 700; color: #f0deb4; }
+.archetype-desc { font-size: 0.78rem; color: #a89870; line-height: 1.5; margin-bottom: 10px; }
+.archetype-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.archetype-tag {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.5px;
+  padding: 3px 10px; border-radius: 20px;
+  background: #1a1008; color: #c8a96e; border: 1px solid #3a2510;
+}
 
 /* Progression */
 .prog-level { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }

@@ -60,6 +60,7 @@ export class Hero {
     lore = null,
     forgeAffinities = [],
     role = null,
+    archetype = null,
   }) {
     this.id = id
     this.name = name
@@ -71,6 +72,7 @@ export class Hero {
     this.lore = lore
     this.forgeAffinities = forgeAffinities
     this.role = role
+    this.archetype = archetype
 
     // Base stats
     this.baseHp = baseHp

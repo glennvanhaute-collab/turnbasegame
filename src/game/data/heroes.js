@@ -23,6 +23,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'sword',
+    archetype: { role: 'Warrior', name: 'Hedge Knight', desc: 'A rough fighter still finding his footing. Hits hard, plans later.', tags: ['Physical Damage', 'Self-Buff'] },
   }),
 
   HEDGE_MAGE: () => new Hero({
@@ -33,6 +34,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.FIREBALL, SKILLS.SLASH],
     artisanSkills: [ARTISAN.apothecary],
     isPlayer: true, role: 'mage', weaponType: 'wand',
+    archetype: { role: 'Mage', name: 'Hedge Mage', desc: 'Raw arcane talent without refinement. Burns first, thinks second.', tags: ['Single Target', 'Burn'] },
   }),
 
   HEDGE_WARDEN: () => new Hero({
@@ -43,6 +45,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.SLASH],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true, role: 'healer', weaponType: 'staff',
+    archetype: { role: 'Healer', name: 'Hedge Warden', desc: 'A wandering mender. Keeps allies alive while still learning the craft.', tags: ['Single Heal', 'Physical Damage'] },
   }),
 
   // ── Starters ────────────────────────────────────────────────────
@@ -54,6 +57,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'sword',
+    archetype: { role: 'Warrior', name: 'Battle Leader', desc: 'Anchors the frontline while lifting his allies. The steady hand in any engagement.', tags: ['AOE Damage', 'Team ATK Buff'] },
   }),
 
   SERAPHEL: () => new Hero({
@@ -64,6 +68,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.FIREBALL, SKILLS.BLIZZARD, SKILLS.ARCANE_SHIELD],
     artisanSkills: [ARTISAN.tailoring, ARTISAN.apothecary],
     isPlayer: true, role: 'mage', weaponType: 'wand',
+    archetype: { role: 'Mage', name: 'Frost Mage', desc: 'Dominates the battlefield through AOE freeze and arcane shielding. Slows enemy formations to a halt.', tags: ['AOE Damage', 'Freeze', 'Party Shield'] },
   }),
 
   MIRA: () => new Hero({
@@ -74,6 +79,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.MASS_HEAL, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.apothecary],
     isPlayer: true, role: 'healer', weaponType: 'staff',
+    archetype: { role: 'Healer', name: 'Battle Healer', desc: 'A complete healing package. Emergency single saves, mass restores, and sustained regeneration.', tags: ['Single Heal', 'AOE Heal', 'Continuous Heal'] },
   }),
 
   VELMORN: () => new Hero({
@@ -84,6 +90,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.BACKSTAB, SKILLS.MULTI_STAB],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'ranger', weaponType: 'dagger',
+    archetype: { role: 'Ranger', name: 'Shadow Ranger', desc: 'Fast and lethal. Poisons targets and strikes them repeatedly before they can react.', tags: ['Poison', 'Multi-Hit', 'High Crit'] },
   }),
 
   // ── Normal Portal — House Aldric (Force · Warriors) ─────────────
@@ -95,6 +102,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'tank', weaponType: 'sword',
+    archetype: { role: 'Tank', name: 'Iron Knight', desc: 'Forces enemies to focus him while buffing his own offensive output.', tags: ['Physical Damage', 'ATK Buff', 'Endurance'] },
   }),
 
   DURWALD: () => new Hero({
@@ -105,6 +113,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.PROVOKE, SKILLS.IRON_BASTION],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'tank', weaponType: 'warhammer',
+    archetype: { role: 'Tank', name: 'Vanguard', desc: 'The immovable object. Draws all fire and becomes harder to kill the longer he stands.', tags: ['Provoke', 'High DEF', 'DEF Buff'] },
   }),
 
   ALDRIC_MARKSMAN: () => new Hero({
@@ -115,6 +124,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'ranger', weaponType: 'bow',
+    archetype: { role: 'Ranger', name: 'Crossbowman', desc: 'Precise ranged pressure. Picks off single targets or punishes grouped enemies with volleys.', tags: ['Single Target', 'AOE', 'Physical Damage'] },
   }),
 
   GWENDAL: () => new Hero({
@@ -125,6 +135,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.WHIRLWIND, SKILLS.PROVOKE, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'greatsword',
+    archetype: { role: 'Warrior', name: 'Ironvow Fighter', desc: 'A versatile frontliner who can both sweep enemy lines and hold the front when needed.', tags: ['AOE Damage', 'Provoke', 'ATK Buff'] },
   }),
 
   BRENNA: () => new Hero({
@@ -135,6 +146,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'warrior', weaponType: 'shield',
+    archetype: { role: 'Warrior', name: 'Shieldmaiden', desc: 'Aggressive and self-reliant. Sweeps the enemy line while building momentum for a killing blow.', tags: ['AOE Damage', 'Self-Buff'] },
   }),
 
   LORD_ALDRIC: () => new Hero({
@@ -145,6 +157,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring],
     isPlayer: true, role: 'warrior', weaponType: 'warhammer',
+    archetype: { role: 'Warrior', name: 'Warlord', desc: 'The iron fist of House Aldric. Raw force backed by relentless offensive pressure on every front.', tags: ['Single Target', 'AOE Damage', 'ATK Buff'] },
   }),
 
   HELGA: () => new Hero({
@@ -155,6 +168,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.IRON_BASTION, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.apothecary],
     isPlayer: true, role: 'tank', weaponType: 'mace',
+    archetype: { role: 'Tank', name: 'Iron Bulwark', desc: 'A legendary warrior who absorbs damage and grows stronger the longer the fight lasts.', tags: ['Provoke', 'DEF Buff', 'ATK Buff'] },
   }),
 
   // ── Normal Portal — House Valdris (Magic · Arcane) ───────────────
@@ -166,6 +180,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.FIREBALL],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'mage', weaponType: 'sword',
+    archetype: { role: 'Warrior', name: 'Spellblade', desc: 'A martial mage who combines precise sword strikes with arcane fire. Neither soldier nor scholar — both.', tags: ['Single Target', 'Burn', 'Physical Damage'] },
   }),
 
   ELARA: () => new Hero({
@@ -176,6 +191,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.BLIZZARD, SKILLS.ARCANE_SHIELD],
     artisanSkills: [ARTISAN.apothecary],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'Frost Weaver', desc: 'A crowd control specialist. Freezes enemy formations and shields the team from retaliation.', tags: ['Freeze', 'AOE Damage', 'Party Shield'] },
   }),
 
   MIRENA: () => new Hero({
@@ -186,6 +202,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.FIREBALL, SKILLS.DARK_WAVE],
     artisanSkills: [ARTISAN.tailoring],
     isPlayer: true, role: 'mage', weaponType: 'wand',
+    archetype: { role: 'Mage', name: 'Void Mage', desc: 'Combines burning damage with weaken debuffs to soften enemies for the rest of the team.', tags: ['AOE Damage', 'Weaken', 'Burn'] },
   }),
 
   CAIUS: () => new Hero({
@@ -196,6 +213,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.BLIZZARD, SKILLS.DARK_WAVE, SKILLS.ARCANE_SHIELD],
     artisanSkills: [ARTISAN.tailoring],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'Storm Binder', desc: 'An offensive mage who hammers enemies with elemental forces while shielding his allies from harm.', tags: ['AOE Damage', 'Freeze', 'Weaken', 'Party Shield'] },
   }),
 
   ARCHMAGE_KELVAR: () => new Hero({
@@ -206,6 +224,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.BLIZZARD, SKILLS.DARK_WAVE, SKILLS.ARCANE_SHIELD],
     artisanSkills: [ARTISAN.tailoring, ARTISAN.apothecary],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'Archmage', desc: 'Peak arcane offensive power. Weakens and freezes entire formations without mercy.', tags: ['AOE Damage', 'Freeze', 'Weaken', 'Party Shield'] },
   }),
 
   // ── Normal Portal — House Caelwyn (Spirit · Rangers & Healers) ──
@@ -217,6 +236,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'healer', weaponType: 'staff',
+    archetype: { role: 'Healer', name: 'Grove Warden', desc: 'Steady healing support anchored in Caelwyn tradition. Single mends and sustained regeneration.', tags: ['Single Heal', 'Continuous Heal'] },
   }),
 
   LYRETH: () => new Hero({
@@ -227,6 +247,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true, role: 'ranger', weaponType: 'bow',
+    archetype: { role: 'Ranger', name: 'Moondrift Archer', desc: 'A fast ranger who applies consistent ranged pressure. Goes early, hits often.', tags: ['Single Target', 'AOE', 'High SPD'] },
   }),
 
   CAELWYN_HERBALIST: () => new Hero({
@@ -236,6 +257,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true, role: 'healer', weaponType: 'staff',
+    archetype: { role: 'Healer', name: 'Herbalist', desc: 'A quiet field healer who keeps allies standing with steady, patient care.', tags: ['Single Heal', 'Continuous Heal'] },
   }),
 
   ARENDIAL: () => new Hero({
@@ -246,6 +268,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true, role: 'ranger', weaponType: 'bow',
+    archetype: { role: 'Ranger', name: 'Grove Archer', desc: 'Combines precise single shots with volley fire to wear down enemy formations from range.', tags: ['Single Target', 'AOE', 'High SPD'] },
   }),
 
   THRANDYL: () => new Hero({
@@ -256,6 +279,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true, role: 'healer', weaponType: 'staff',
+    archetype: { role: 'Healer', name: 'Grove Keeper', desc: 'A gentle but reliable healer. Tends the wounded with patience and restores hope turn by turn.', tags: ['Single Heal', 'Continuous Heal'] },
   }),
 
   GORUNDAL: () => new Hero({
@@ -266,6 +290,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.PROVOKE, SKILLS.FORTIFY],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'tank', weaponType: 'sword',
+    archetype: { role: 'Tank', name: 'Grove Shield', desc: 'A spirit-touched guardian who absorbs punishment and fortifies his position turn after turn.', tags: ['Provoke', 'DEF Buff', 'Endurance'] },
   }),
 
   EILISTRA: () => new Hero({
@@ -276,6 +301,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.CROSSBOW_SHOT, SKILLS.VOLLEY, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.herbalism],
     isPlayer: true, role: 'ranger', weaponType: 'bow',
+    archetype: { role: 'Ranger', name: 'Shadow Archer', desc: 'A versatile archer who deals ranged damage and patches allies mid-battle. Offence and sustain in one.', tags: ['Single Target', 'AOE', 'Healing Support'] },
   }),
 
   ERON: () => new Hero({
@@ -286,6 +312,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.VERDANT_HEX, SKILLS.RAVENS_CURSE, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.apothecary],
     isPlayer: true, role: 'debuffer', weaponType: 'wand',
+    archetype: { role: 'Debuffer', name: 'Poison Debuffer', desc: 'Corrupts enemies with poison while reducing their offensive power. Also sustains allies when needed.', tags: ['Poison', 'ATK Shred', 'Healing Support'] },
   }),
 
   SYLARA: () => new Hero({
@@ -296,6 +323,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.MASS_HEAL, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.apothecary],
     isPlayer: true, role: 'healer', weaponType: 'wand',
+    archetype: { role: 'Healer', name: 'Battle Medic', desc: 'A combat healer who keeps allies fighting and lifts the whole team when the battle turns against them.', tags: ['Single Heal', 'AOE Heal', 'ATK Buff'] },
   }),
 
   THERON: () => new Hero({
@@ -306,6 +334,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.MEND, SKILLS.MASS_HEAL, SKILLS.REVITALIZE],
     artisanSkills: [ARTISAN.herbalism, ARTISAN.apothecary],
     isPlayer: true, role: 'healer', weaponType: 'staff',
+    archetype: { role: 'Healer', name: 'Legendary Healer', desc: 'The pinnacle of Caelwyn healing. Master of sustained party restoration across every situation.', tags: ['Single Heal', 'AOE Heal', 'Continuous Heal'] },
   }),
 
   // ── Void Portal — House Mordaine (Void · Shadow) ─────────────────
@@ -317,6 +346,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.PROVOKE, SKILLS.DARK_WAVE],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'tank', weaponType: 'warhammer',
+    archetype: { role: 'Tank', name: 'Hollow Guard', desc: 'A void-touched tank who absorbs punishment and disrupts enemies with dark energy.', tags: ['Provoke', 'AOE Debuff', 'Void Resistance'] },
   }),
 
   SERIX: () => new Hero({
@@ -327,6 +357,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.CRUSH],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'greatsword',
+    archetype: { role: 'Warrior', name: 'Forsaken Blade', desc: 'A heavy-hitting void warrior who overpowers enemies through sheer relentless force.', tags: ['Single Target', 'High Damage', 'Physical Damage'] },
   }),
 
   NYXARA: () => new Hero({
@@ -337,6 +368,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.SLASH, SKILLS.DARK_WAVE],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'debuffer', weaponType: 'dagger',
+    archetype: { role: 'Debuffer', name: 'Void Walker', desc: 'Slips through shadows to weaken enemies with void corruption. Reduces their power before they can act.', tags: ['Weaken', 'ATK Debuff', 'Physical Damage'] },
   }),
 
   MORD: () => new Hero({
@@ -347,6 +379,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.BACKSTAB, SKILLS.MULTI_STAB],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'ranger', weaponType: 'crossbow',
+    archetype: { role: 'Ranger', name: 'Void Stalker', desc: 'A high-crit assassin who poisons targets and shreds them with rapid multi-hit strikes.', tags: ['Poison', 'Multi-Hit', 'High Crit'] },
   }),
 
   THALRIC: () => new Hero({
@@ -357,6 +390,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.PROVOKE, SKILLS.IRON_BASTION, SKILLS.SLASH],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'tank', weaponType: 'sword',
+    archetype: { role: 'Tank', name: 'Void Bulwark', desc: 'An immovable void shield who draws all fire and fortifies his position against anything.', tags: ['Provoke', 'High DEF', 'DEF Buff'] },
   }),
 
   GRIBZAK: () => new Hero({
@@ -367,6 +401,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.CRYSTAL_STRIKE, SKILLS.EMERGENCY_PATCH, SKILLS.SCRAP_SURGE],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'mage', weaponType: 'wand',
+    archetype: { role: 'Support Mage', name: 'Crystal Artificer', desc: 'A hybrid who deals damage while patching allies mid-battle. Debuffs enemy ATK as a bonus.', tags: ['Single Target', 'Ally Heal + DEF', 'ATK Debuff'] },
     forgeAffinities: ['vaultmetal', 'runeite'],
     quote: "If it's broken and glowing, that's just more power waiting to happen.",
     lore: "Gribzak Gearvein was not born into prestige. He began as a back-alley tinkerer beneath the floating citadels, collecting broken rune parts and cracked crystal cores that fancier artificers had thrown away. His green-crystal hammer started life as a damaged mining-core stabilizer. House Valdris scholars mocked his methods — until he repaired an overloaded crystal engine none of them dared touch. He is not the most polished artificer in Valdris. He is the one who can fix a war machine while it is exploding.",
@@ -380,6 +415,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.SKYBREAKER_STRIKE, SKILLS.ARC_DISCHARGE, SKILLS.ARTIFICERS_SHIELD],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'warhammer',
+    archetype: { role: 'Warrior', name: 'Arcane Warlord', desc: 'A hammer-wielding battle mage who hits everything and then shields his allies. Damage and protection in one.', tags: ['Single Target', 'AOE Stun', 'Party DEF Shield'] },
     forgeAffinities: ['vaultmetal', 'runeite'],
     quote: "Skybreaker doesn't care how fancy your spell theory is.",
     lore: "Borrik Stormcog is one of the most respected master smiths ever accepted into the upper forges of House Valdris. To him, a rune is just a gear made of light, and a crystal is simply a furnace that remembers spells. His great blue hextech warhammer, Skybreaker, was forged around a refined arc-core from the upper citadels. Despite his terrifying equipment, Borrik became beloved because he is unusually warm-hearted for someone of his status. He can flatten a siege construct — then spend the evening teaching a young apprentice how to balance a crystal housing correctly.",
@@ -393,6 +429,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.RUNIC_SMASH, SKILLS.HAMMER_ROUND, SKILLS.STONE_RESOLVE],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'warhammer',
+    archetype: { role: 'Warrior', name: 'Runic Brawler', desc: 'Hits everything enthusiastically. Stuns enemy lines and becomes harder to kill the longer the fight lasts.', tags: ['Single Target', 'AOE Stun', 'Self-Sustain'] },
     quote: 'I fight the same way I dance. Enthusiastically and without warning.',
     lore: 'Zwierls of House Valdris has three passions: his rune-hammer, a cold ale, and anyone willing to dance until sunrise. He extends this warmth to everyone he meets, enemies included — right up until the moment he does not. Those who have fought alongside him say the strangest part is not the hammer. It is the fact that he is still grinning when he swings it.',
     forgeAffinities: ['vaultmetal', 'runeite'],
@@ -406,6 +443,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.VERDANT_HEX, SKILLS.FROM_THE_ARCHIVES, SKILLS.THE_LEDGER],
     artisanSkills: [ARTISAN.herbalism, ARTISAN.apothecary],
     isPlayer: true, role: 'debuffer', weaponType: 'wand',
+    archetype: { role: 'Debuffer', name: 'The Witch', desc: 'Corrupts everything. Strips ATK, DEF, and SPD simultaneously from the entire enemy formation.', tags: ['DEF Shred', 'ATK Shred', 'Speed Control', 'AOE Debuff'] },
     quote: 'I remember everything. Even the things you would rather I forgot.',
     lore: 'Her library is the largest in Caelwyn. Visitors assume it is filled with ancient wisdom and forgotten spells — and they are not entirely wrong. But most of the shelves hold something more dangerous: meticulous records of every person she has ever met. What they promised. What they did instead. What they owe. Arri is generous, patient, and genuinely warm. She is also the only person in Westrun nobody has ever double-crossed twice.',
   }),
@@ -418,6 +456,7 @@ export const HERO_TEMPLATES = {
     skills: [SKILLS.HONOUR_SLASH, SKILLS.THOUSAND_CUTS, SKILLS.WARLORDS_RESOLVE],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'sword',
+    archetype: { role: 'Warrior', name: 'Blade Master', desc: 'Self-reliant precision fighter. Builds momentum through self-buffs, then sweeps the field or picks apart a single target.', tags: ['Single Target', 'AOE Damage', 'ATK + SPD Buff'] },
     quote: 'For rice and honer.',
     lore: `Nobody knows where Kyver came from. He has been asked many times, and the answer changes: a fishing village, a burned monastery, the road between two places he cannot name. He always says it with the same solemn nod, so it is unclear whether he is being honest or whether he has been answering this question long enough that it no longer matters.
 
@@ -442,6 +481,7 @@ His battle cry is four words. The spelling is his own. He has never once questio
     skills: [SKILLS.FIREBALL, SKILLS.BLIZZARD, SKILLS.DARK_WAVE],
     artisanSkills: [ARTISAN.apothecary, ARTISAN.blacksmithing],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'Undying Mage', desc: 'A void-touched mage of immense power who burns and freezes enemy formations with ruthless efficiency.', tags: ['AOE Damage', 'Burn', 'Freeze', 'Weaken'] },
   }),
 
   AURELAN: () => new Hero({
@@ -452,6 +492,7 @@ His battle cry is four words. The spelling is his own. He has never once questio
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring],
     isPlayer: true, role: 'warrior', weaponType: 'greatsword',
+    archetype: { role: 'Warrior', name: 'Dawn Champion', desc: 'A mythical warrior of raw offensive might. Sweeps entire formations while buffing allies for a decisive push.', tags: ['Single Target', 'AOE Damage', 'ATK Buff'] },
   }),
 
   JADE_DRAGONFORGE: () => new Hero({
@@ -462,6 +503,7 @@ His battle cry is four words. The spelling is his own. He has never once questio
     skills: [SKILLS.DRAGON_LANCE, SKILLS.SEARING_DIVE, SKILLS.FORGE_WRATH],
     artisanSkills: [ARTISAN.blacksmithing],
     isPlayer: true, role: 'warrior', weaponType: 'greatsword',
+    archetype: { role: 'Warrior', name: 'Dragon Warrior', desc: 'Her dragon amplifies everything. Burns entire formations while she fortifies herself for a devastating single kill.', tags: ['Single Target', 'AOE Burn', 'Self-Sustain'] },
     quote: 'I did not come here to hurt you. But I will not leave until this is done.',
     lore: 'The dragon did not choose a conqueror. It chose her because she was the first person in three hundred years to offer it food before asking for anything in return. Jade Dragonforge has never started a war — but she has ended several. Her enemies remember the fire. Her allies remember that she learned every one of their names on the first day.',
   }),
@@ -474,6 +516,7 @@ His battle cry is four words. The spelling is his own. He has never once questio
     skills: [SKILLS.ARCANE_LANCE, SKILLS.THEORY_OF_RUIN, SKILLS.TEMPORAL_SEAL, SKILLS.THE_ABSOLUTE],
     artisanSkills: [ARTISAN.apothecary, ARTISAN.leatherworking],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'The Absolute', desc: 'Unmatched single-target obliteration. Weakens, stuns, and then ends the target with a finality that leaves no argument.', tags: ['Single Target Burst', 'Stun', 'Weaken', 'ATK Shred'] },
     quote: 'I did not study magic to feel wonder. I studied it until wonder ran out of places to hide.',
     lore: `No one remembers who built the first tower. The records do not begin there. They begin with Valdris.
 
@@ -494,6 +537,7 @@ When he speaks in battle, he does not threaten. He explains what is about to hap
     skills: [SKILLS.MOONLIT_SEVERANCE, SKILLS.MARBLE_DECREE, SKILLS.OATH_OF_THE_WHITE_GROVE, SKILLS.LETHARIEL_ASCENDANT],
     artisanSkills: [ARTISAN.herbalism, ARTISAN.apothecary],
     isPlayer: true, role: 'champion', weaponType: 'sword',
+    archetype: { role: 'Champion', name: 'First Lord', desc: 'The anchor of the White Grove. Shreds defences, shields allies, and passes final judgment when the moment demands it.', tags: ['DEF Shred', 'Party Shield + Heal', 'AOE Debuff', 'Execute'] },
     quote: 'The grove remembers what crowns forget.',
     lore: `Long before Caelwyn was a house, it was a vow. Lord Caelwyn was the one who made it.
 
@@ -516,6 +560,7 @@ He returns, it is said, when the house forgets its vow. Not to reclaim a throne.
     skills: [SKILLS.BLOOD_DRAIN, SKILLS.CRIMSON_EDICT, SKILLS.SHADOW_DOMINION, SKILLS.THE_VOID_RECEIVES],
     artisanSkills: [ARTISAN.apothecary, ARTISAN.tailoring],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Champion', name: 'Blood Arbiter', desc: 'Every strike drains. Every decree weakens. He sustains himself entirely on what he takes from others.', tags: ['Vampiric Sustain', 'ATK Shred', 'Weaken', 'Poison Execute'] },
     quote: 'You mistake what I do for cruelty. I simply let the void show you what was already true.',
     lore: `Before Mordaine was a house, it was a question. Lord Mordaine was the one who asked it — and did not flinch when the void answered.
 
@@ -541,6 +586,7 @@ He simply also does not stop.`,
     skills: [SKILLS.HEAVY_STRIKE, SKILLS.WHIRLWIND, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.leatherworking],
     isPlayer: true, role: 'warrior', weaponType: 'greatsword',
+    archetype: { role: 'Warrior', name: 'Frost Jarl', desc: 'A relentless raider who leads every charge with unrelenting force. Takes no prisoners, asks no questions.', tags: ['AOE Damage', 'Single Target', 'ATK Buff'] },
     quote: 'I have taken kingdoms. She was the only thing I could not take — so I had to earn her instead.',
     lore: 'Arne Frostbound earned his title on the northern shores, where the ice never fully leaves the ground and mercy is considered a tactical error. As Jarl, he led his warband across twelve territories, each won through force of arms and sheer refusal to stop. He expected the same of Hilda. What he found instead was the one opponent who made him rethink his methods entirely — not because she was stronger, though she was, but because she simply did not care how many lands he had taken. She only asked what he planned to do with them. He has been trying to answer that question ever since.',
   }),
@@ -553,6 +599,7 @@ He simply also does not stop.`,
     skills: [SKILLS.PROVOKE, SKILLS.IRON_BASTION, SKILLS.BATTLE_CRY],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.tailoring, ARTISAN.apothecary, ARTISAN.herbalism],
     isPlayer: true, role: 'tank', weaponType: 'shield',
+    archetype: { role: 'Tank', name: 'Shield Wall', desc: 'A defensive warrior who holds the line for those behind her. Taunts, fortifies, and lifts her allies.', tags: ['Provoke', 'DEF Buff', 'ATK Buff'] },
     quote: 'He fights to conquer. I fight so that the people behind me never have to.',
     lore: 'Hilda did not become a shieldmaiden because she was told to. She became one because nobody else was doing it well enough. Born in a raided village on the western edge of Ignar territory, she rebuilt it herself, trained its defenders herself, and held it against three separate incursions before anyone in Ignar command even knew her name. When Arne came with his warband, she met him at the gate alone. He expected a battle. What he got was a negotiation — and he lost. She has never let him forget it, and he has never wanted to.',
   }),
@@ -567,6 +614,7 @@ He simply also does not stop.`,
     skills: [SKILLS.STELLAR_STRIKE, SKILLS.STELLAR_RIFT, SKILLS.ASTRAL_FORM],
     artisanSkills: [ARTISAN.apothecary, ARTISAN.tailoring],
     isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'Astral Mage', desc: 'An ancient cosmic force who shreds enemy defences and controls the battle\'s tempo through speed and immunity.', tags: ['DEF Shred', 'Speed Boost', 'Immunity', 'AOE Damage'] },
   }),
 
   VAERIC: () => new Hero({
@@ -578,6 +626,7 @@ He simply also does not stop.`,
     skills: [SKILLS.SANGUINE_STRIKE, SKILLS.RAVENS_CURSE, SKILLS.DUSK_COMMUNION],
     artisanSkills: [ARTISAN.blacksmithing, ARTISAN.apothecary],
     isPlayer: true, role: 'debuffer', weaponType: 'staff',
+    archetype: { role: 'Debuffer', name: 'Blood Ancient', desc: 'An ancient vampire lord who drains enemy ATK and retreats into shadow to recover. Patient and relentless.', tags: ['ATK Shred', 'Self-Sustain', 'Immunity'] },
   }),
 
   // ── Training-tier enemies — very weak, for first encounter ──────
