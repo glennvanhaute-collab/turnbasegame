@@ -15,6 +15,9 @@
           <button class="nav-btn" :class="{ active: view === 'gear' }"    @click="navigate('gear')">Arsenal</button>
           <button class="nav-btn" :class="{ active: view === 'combat' }"  @click="navigate('combat')">Combat</button>
           <button class="nav-btn" :class="{ active: view === 'realm' }"   @click="navigate('realm')">Realm</button>
+          <button v-if="isBattleActive" class="nav-btn nav-btn--battle-live" @click="showBattle = true" title="Return to running battle">
+            ⚔ Battle Running
+          </button>
           <button class="nav-btn nav-icon-btn" :class="{ active: showCollection }" @click="showCollection = true" title="Hero Collection">
             <img :src="collectionIcon" class="nav-icon-img" alt="Collection" />
           </button>
@@ -416,6 +419,10 @@ const showBattle      = ref(false)
 const showRaidBattle  = ref(false)
 const activeRaidId    = ref(null)
 
+const isBattleActive = computed(() =>
+  battleStore.isBatchRunning || (!battleStore.isOver && battleStore.engine !== null)
+)
+
 function closeAllPanels() {
   showCollection.value      = false
   showBlacksmith.value      = false
@@ -567,6 +574,7 @@ function onHeroCreated() {
 }
 
 function startBattle(encounterIndex) {
+  if (isBattleActive.value) { showBattle.value = true; return }
   const team = collectionStore.buildTeam()
   battleStore.initBattle(encounterIndex, team)
   playBattleForTeam(team.map(h => h.id))
@@ -574,6 +582,7 @@ function startBattle(encounterIndex) {
 }
 
 function startDungeonBattle(dungeon) {
+  if (isBattleActive.value) { showBattle.value = true; return }
   const team = collectionStore.buildTeam()
   const encounter = buildDungeonEncounter(dungeon)
   if (dungeon.batchCount > 1) battleStore.setupBatch(dungeon.batchCount)
@@ -709,6 +718,17 @@ body {
 .nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
 
 .nav-icon-btn { padding: 4px 8px; border-bottom: 2px solid transparent; }
+
+.nav-btn--battle-live {
+  color: #4dff88;
+  border-bottom-color: #4dff88;
+  animation: battle-live-pulse 1.6s ease-in-out infinite;
+}
+.nav-btn--battle-live:hover { color: #88ffaa; border-bottom-color: #88ffaa; }
+@keyframes battle-live-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
 .nav-icon-btn:hover { border-bottom-color: var(--gold-dim); }
 .nav-icon-btn.active { border-bottom-color: var(--gold); }
 .nav-icon-img { width: 35px; height: 35px; object-fit: contain; display: block; filter: brightness(0.75) sepia(0.3); transition: filter 0.15s; }

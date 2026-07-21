@@ -178,9 +178,25 @@ let   numCounter      = 0
 
 function timings() {
   const s = store.battleSpeed
-  if (s === 3) return { lungeMs: 160, numMs: 400,  impactMs: 55  }
-  if (s === 2) return { lungeMs: 350, numMs: 750,  impactMs: 120 }
-  return             { lungeMs: 520, numMs: 1000, impactMs: 180 }
+  if (s === 3) return { lungeMs: 160, numMs: 700,  impactMs: 55  }
+  if (s === 2) return { lungeMs: 350, numMs: 1300, impactMs: 120 }
+  return             { lungeMs: 520, numMs: 1800, impactMs: 180 }
+}
+
+const ROLE_COLORS = {
+  Warrior:  '#ff8c42',
+  Mage:     '#7b8fff',
+  Healer:   '#44ff88',
+  Tank:     '#6a9fd8',
+  Rogue:    '#c8ff44',
+  Ranger:   '#44ddcc',
+  Debuffer: '#cc66ff',
+  Support:  '#ffd700',
+}
+
+function getRoleColor(hero) {
+  if (!hero) return '#ff4444'
+  return ROLE_COLORS[hero.archetype?.role] ?? '#ff4444'
 }
 
 const isSelectingTarget = computed(() => store.state === BattleState.SELECTING_TARGET)
@@ -200,7 +216,7 @@ function onEnemyClick(hero) {
   if (isSelectingTarget.value && !hero.isDead) store.selectTarget(hero)
 }
 
-function spawnNumber(hit) {
+function spawnNumber(hit, casterColor = '#ff4444') {
   const el = stageEl.value?.querySelector(`[data-id="${hit.targetId}"]`)
   if (!el || !stageEl.value) return
   const rect  = el.getBoundingClientRect()
@@ -221,6 +237,7 @@ function spawnNumber(hit) {
       left:             x + 'px',
       top:              y + 'px',
       '--num-duration': timings().numMs + 'ms',
+      '--dmg-color':    isCrit ? '#ffd700' : casterColor,
       fontSize:         isCrit ? '1.6rem' : '1.1rem',
     },
   })
@@ -229,22 +246,53 @@ function spawnNumber(hit) {
   }, timings().numMs + 100)
 }
 
+function spawnSkillName(action, casterColor) {
+  const el = stageEl.value?.querySelector(`[data-id="${action.casterId}"]`)
+  if (!el || !stageEl.value || !action.skillName) return
+  const rect  = el.getBoundingClientRect()
+  const sRect = stageEl.value.getBoundingClientRect()
+  const x = rect.left - sRect.left + rect.width  / 2
+  const y = rect.top  - sRect.top  - 10
+
+  const dur = Math.round(timings().numMs * 1.4)
+  const id  = numCounter++
+
+  floatingNumbers.value.push({
+    id,
+    text:  action.skillName,
+    cls:   'num-skill',
+    style: {
+      left:             x + 'px',
+      top:              y + 'px',
+      '--num-duration': dur + 'ms',
+      '--skill-color':  casterColor,
+    },
+  })
+  setTimeout(() => {
+    floatingNumbers.value = floatingNumbers.value.filter(n => n.id !== id)
+  }, dur + 100)
+}
+
 function setAdd(s, id)    { return new Set([...s, id]) }
 function setRemove(s, id) { return new Set([...s].filter(x => x !== id)) }
 
 watch(() => store.lastAction, (action) => {
   if (!action?.hits?.length) return
-  const t  = timings()
-  const id = action.casterId
+  const t      = timings()
+  const id     = action.casterId
+  const caster = [...store.playerTeam, ...store.enemyTeam].find(h => h.id === id)
+  const color  = caster?.isPlayer ? getRoleColor(caster) : '#ff4444'
 
   lungingIds.value = setAdd(lungingIds.value, id)
   setTimeout(() => { lungingIds.value = setRemove(lungingIds.value, id) }, t.lungeMs)
+
+  spawnSkillName(action, color)
 
   setTimeout(() => {
     for (const hit of action.hits) {
       hitIds.value = setAdd(hitIds.value, hit.targetId)
       setTimeout(() => { hitIds.value = setRemove(hitIds.value, hit.targetId) }, 300)
-      spawnNumber(hit)
+      spawnNumber(hit, color)
     }
   }, t.lungeMs * 0.42)
 })
@@ -330,11 +378,11 @@ watch(() => store.battleKey, () => {
 /* Lunge */
 @keyframes lunge-right {
   0%, 100% { transform: translate(-50%, -50%); }
-  42%      { transform: translate(calc(-50% + 55px), -50%); }
+  42%      { transform: translate(calc(-50% + 32px), -50%); }
 }
 @keyframes lunge-left {
   0%, 100% { transform: translate(-50%, -50%); }
-  42%      { transform: translate(calc(-50% - 55px), -50%); }
+  42%      { transform: translate(calc(-50% - 32px), -50%); }
 }
 .hero-unit.lunge-right { animation: lunge-right var(--lunge-ms, 520ms) ease both; }
 .hero-unit.lunge-left  { animation: lunge-left  var(--lunge-ms, 520ms) ease both; }
@@ -503,24 +551,40 @@ watch(() => store.battleKey, () => {
   0%   { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, -80px); }
 }
+@keyframes skill-announce {
+  0%   { opacity: 0;   transform: translate(-50%, 0px); }
+  12%  { opacity: 1;   transform: translate(-50%, -16px); }
+  70%  { opacity: 1;   transform: translate(-50%, -22px); }
+  100% { opacity: 0;   transform: translate(-50%, -34px); }
+}
 .float-num {
   position: absolute;
   font-family: 'Segoe UI', system-ui, sans-serif;
   font-weight: 900;
   pointer-events: none;
-  animation: float-up var(--num-duration, 1000ms) ease-out forwards;
+  animation: float-up var(--num-duration, 1800ms) ease-out forwards;
   text-shadow: 0 0 6px #000, 0 0 12px #000;
 }
-.num-dmg  { color: #ff4444; }
+.num-dmg  { color: var(--dmg-color, #ff4444); }
 .num-heal { color: #4dff88; }
 .num-crit {
-  color: #ffd700;
-  text-shadow: 0 0 10px #ffd700, 0 0 6px #000;
-  animation: float-up var(--num-duration, 1000ms) ease-out forwards,
+  color: var(--dmg-color, #ffd700);
+  text-shadow: 0 0 10px var(--dmg-color, #ffd700), 0 0 6px #000;
+  animation: float-up var(--num-duration, 1800ms) ease-out forwards,
              crit-pop 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 @keyframes crit-pop {
   from { transform: translate(-50%, 0) scale(0.5); }
   to   { transform: translate(-50%, 0) scale(1); }
+}
+.num-skill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--skill-color, #fff);
+  text-shadow: 0 0 12px var(--skill-color, #fff), 0 0 4px #000, 0 2px 4px #000;
+  animation: skill-announce var(--num-duration, 1500ms) ease-out forwards;
+  white-space: nowrap;
 }
 </style>

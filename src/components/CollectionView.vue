@@ -459,12 +459,12 @@ const activeBonds = computed(() =>
 .roster-card.rarity-mythical:hover .card-footer::before,
 .roster-card.rarity-mythical:hover .card-footer::after { color: #ff2244; }
 
-.roster-card.rarity-legendary { border-color: #8a6418; }
+.roster-card.rarity-legendary { border-color: #c09020; }
 .roster-card.rarity-legendary::after,
 .roster-card.rarity-legendary .card-portrait::before,
 .roster-card.rarity-legendary .card-footer::before,
-.roster-card.rarity-legendary .card-footer::after { color: #8a6418; }
-.roster-card.rarity-legendary:hover { border-color: #a87c28; }
+.roster-card.rarity-legendary .card-footer::after { color: #c09020; }
+.roster-card.rarity-legendary:hover { border-color: #d4a836; }
 
 .roster-card.rarity-epic      { border-color: #6a2890; }
 .roster-card.rarity-epic::after,
@@ -487,8 +487,7 @@ const activeBonds = computed(() =>
 .roster-card.rarity-common    { border-color: #383030; }
 
 .roster-card.selected {
-  border-color: var(--gold-bright) !important;
-  box-shadow: 0 2px 14px rgba(0,0,0,0.55), inset 0 0 12px rgba(201,162,39,0.08);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.55), inset 0 0 16px rgba(255,255,255,0.06), 0 0 0 1px var(--gold-bright);
 }
 .roster-card.selected::after,
 .roster-card.selected .card-portrait::before,

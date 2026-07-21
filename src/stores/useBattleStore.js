@@ -279,7 +279,8 @@ export const useBattleStore = defineStore('battle', () => {
           br.loreFragments.push(...(runReward.loreFragments ?? []))
           batchDone.value++
           if (batchDone.value < batchTotal.value) {
-            setTimeout(() => _runBatchNext(), 250)
+            const hidden = typeof document !== 'undefined' && document.hidden
+            setTimeout(() => _runBatchNext(), hidden ? 0 : 250)
             return
           }
           // Final run — show cumulative summary, end batch mode
@@ -299,15 +300,10 @@ export const useBattleStore = defineStore('battle', () => {
   }
 
   async function _runAutoTurn() {
-    // Pause while tab is hidden — browsers throttle timers aggressively in background
-    // tabs, causing accumulated turns to burst-fire on return. Waiting for visibility
-    // first means the turn delay starts only when the player is actually watching.
-    if (typeof document !== 'undefined') {
-      while (document.hidden) {
-        await new Promise(r => document.addEventListener('visibilitychange', r, { once: true }))
-      }
-    }
-    await new Promise(r => setTimeout(r, turnDelay.value))
+    // When tab is hidden, skip visual delay and process instantly so batch runs complete
+    // in the background. When visible, use the normal speed delay.
+    const hidden = typeof document !== 'undefined' && document.hidden
+    if (!hidden) await new Promise(r => setTimeout(r, turnDelay.value))
     if (!engine.value) return
     const result = runAI(engine.value)
     if (result) _applyResult(result)
