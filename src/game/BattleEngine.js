@@ -111,6 +111,20 @@ export class BattleEngine {
       return this.nextTurn()
     }
 
+    if (!hero.skills.some(s => !s.passive && s.isReady())) {
+      // FF-style: always have a basic attack available when all skills are on cooldown
+      const enemies = hero.isPlayer ? this.livingEnemies : this.livingPlayers
+      if (enemies.length === 0) return this._checkBattleEnd() ?? this.nextTurn()
+      const target = enemies.reduce((a, b) => (a.hp / a.maxHp < b.hp / b.maxHp ? a : b))
+      const autoAttack = {
+        name: 'Attack',
+        targetType: TargetType.SINGLE_ENEMY,
+        effects: [{ type: EffectType.DAMAGE, multiplier: 1.0, hits: 1 }],
+        use() {},
+      }
+      return this.executeSkill(hero, autoAttack, target, -1)
+    }
+
     if (hero.isPlayer) {
       this.state = BattleState.SELECTING_SKILL
     } else {

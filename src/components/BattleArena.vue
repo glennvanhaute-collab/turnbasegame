@@ -186,12 +186,12 @@
             <GameIcon :icon="fiberIcon(drop.id)" :size="18" />{{ FIBERS[drop.id]?.name ?? drop.id }} ×{{ drop.amount }}
           </div>
           <div
-            v-for="key in store.lastReward.componentDrops"
-            :key="key"
+            v-for="c in stackedComponents"
+            :key="c.id"
             class="drop-chip"
-            :style="{ '--c': UPGRADE_COMPONENTS[key]?.color ?? '#888' }"
+            :style="{ '--c': UPGRADE_COMPONENTS[c.id]?.color ?? '#888' }"
           >
-            ✨ {{ UPGRADE_COMPONENTS[key]?.name ?? key }}
+            ✨ {{ UPGRADE_COMPONENTS[c.id]?.name ?? c.id }} ×{{ c.amount }}
           </div>
           <div
             v-for="kd in store.lastReward.keyDrops"
