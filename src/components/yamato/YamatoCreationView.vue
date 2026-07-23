@@ -90,7 +90,9 @@ function confirm() {
 
 <style scoped>
 .yamato-creation {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background: #060806;
   display: flex;
   flex-direction: column;
@@ -121,7 +123,7 @@ function confirm() {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 0;
 }
 
 .region-map-wrap {
