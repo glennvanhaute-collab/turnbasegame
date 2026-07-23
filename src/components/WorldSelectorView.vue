@@ -98,11 +98,19 @@ function enter(world) {
 .selector-bg {
   position: fixed;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 50%, #1a0a02 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 50%, #0a0c0a 0%, transparent 60%),
-    #080604;
+  background-image: url('/turnbasegame/world_select.png');
+  background-size: cover;
+  background-position: center;
   z-index: 0;
+}
+.selector-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(26,10,2,0.7) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 50%, rgba(10,12,10,0.7) 0%, transparent 60%),
+    rgba(8,6,4,0.45);
 }
 
 .selector-header {
