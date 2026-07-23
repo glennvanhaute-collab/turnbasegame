@@ -1,6 +1,7 @@
 <template>
   <div class="yamato-creation">
     <div class="creation-bg" />
+    <button class="world-back-btn" @click="worldStore.exitWorld()">⟵ Choose realm</button>
 
     <div class="creation-inner">
       <div class="creation-header">
@@ -61,8 +62,10 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useYamatoPlayerStore, YAMATO_REGIONS } from '../../stores/useYamatoPlayerStore.js'
+import { useWorldStore } from '../../stores/useWorldStore.js'
 
 const emit = defineEmits(['done'])
+const worldStore = useWorldStore()
 
 const yamatoStore     = useYamatoPlayerStore()
 const step            = ref('region')
@@ -79,6 +82,24 @@ function confirm() {
 </script>
 
 <style scoped>
+.world-back-btn {
+  position: fixed;
+  top: 16px;
+  left: 20px;
+  z-index: 10;
+  background: none;
+  border: 1px solid #2a3a2a;
+  border-radius: 4px;
+  color: #4a5a4a;
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.world-back-btn:hover { color: #cc4433; border-color: #cc443355; }
+
 .yamato-creation {
   min-height: 100vh;
   display: flex;
