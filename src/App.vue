@@ -1,12 +1,19 @@
 <template>
-  <!-- First-run: create your character -->
-  <HeroCreationView v-if="!playerHeroStore.isCreated" @done="onHeroCreated" />
+  <!-- World selector — shown when no world is active -->
+  <WorldSelectorView v-if="!worldStore.activeWorld" />
 
-  <!-- Main app -->
+  <!-- Yamato no Kuni -->
+  <YamatoShell v-else-if="worldStore.activeWorld === 'yamato'" />
+
+  <!-- Westrun: first-run character creation -->
+  <HeroCreationView v-else-if="!playerHeroStore.isCreated" @done="onHeroCreated" />
+
+  <!-- Westrun: Main app -->
   <div class="app" v-else>
     <header class="app-header">
       <div class="app-header-bg" :style="{ backgroundImage: `url(${navBg})` }" />
       <div class="header-inner">
+        <button class="hub-return-btn" @click="worldStore.exitWorld()" title="Return to world select">⟵</button>
         <img :src="navLogo" class="logo-img" alt="" @click="navigate('hall')" style="cursor:pointer" />
         <h1 class="logo" @click="navigate('hall')" style="cursor:pointer">Bannerlords of Westrun</h1>
         <nav class="nav">
@@ -355,6 +362,9 @@ import { usePlayerHeroStore } from './stores/usePlayerHeroStore.js'
 import { useInventoryStore } from './stores/useInventoryStore.js'
 import { useForgeStore } from './stores/useForgeStore.js'
 import { ENCOUNTERS } from './game/data/heroes.js'
+import { useWorldStore } from './stores/useWorldStore.js'
+import WorldSelectorView from './components/WorldSelectorView.vue'
+import YamatoShell from './components/yamato/YamatoShell.vue'
 import StarterPickView from './components/StarterPickView.vue'
 import HeroCreationView from './components/HeroCreationView.vue'
 import GreatHallView from './components/GreatHallView.vue'
@@ -504,6 +514,7 @@ onMounted(() => {
 
 onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 
+const worldStore = useWorldStore()
 const advisorStore = useAdvisorStore()
 const battleStore = useBattleStore()
 const collectionStore = useCollectionStore()
@@ -765,6 +776,21 @@ body {
   transform: scale(1.06);
   opacity: 0.85;
 }
+
+.hub-return-btn {
+  background: none;
+  border: 1px solid var(--border-brown);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-size: 1rem;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+  margin-left: -8px;
+}
+.hub-return-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
 
 .icon-btn {
   background: var(--bg-panel);
