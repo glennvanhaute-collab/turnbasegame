@@ -1,5 +1,6 @@
 <template>
   <div class="creation-wrap">
+    <button class="world-back-btn" @click="worldStore.exitWorld()">⟵ Choose realm</button>
 
     <div class="creation-card">
 
@@ -131,6 +132,7 @@
 import { ref, computed } from 'vue'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
+import { useWorldStore } from '../stores/useWorldStore.js'
 import logoNav          from '../assets/ui/logo-nav.png'
 import startupBg        from '../assets/backgrounds/startup_background.png'
 import houseAldricImg   from '../assets/lore/house_aldric.png'
@@ -172,6 +174,7 @@ const ARTISAN_OPTIONS = [
 ]
 
 const emit = defineEmits(['done'])
+const worldStore = useWorldStore()
 
 const playerHero = usePlayerHeroStore()
 const collection = useCollectionStore()
@@ -209,6 +212,25 @@ function tryBegin() {
 </script>
 
 <style scoped>
+.world-back-btn {
+  position: fixed;
+  top: 16px;
+  left: 20px;
+  z-index: 10;
+  background: none;
+  border: 1px solid var(--border-brown);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-family: var(--font-head);
+  font-size: 0.68rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.world-back-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
 .creation-wrap {
   min-height: 100vh;
   display: flex;
