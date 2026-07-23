@@ -150,7 +150,7 @@ function confirm() {
 
 /* Dim all siblings when any is hovered */
 .hotspots:has(.hotspot:hover) .hotspot:not(:hover) {
-  background: rgba(0, 0, 0, 0.52);
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.52) 45%, rgba(0,0,0,0.18) 100%);
 }
 
 /* Dim non-selected when selection exists */
@@ -168,9 +168,9 @@ function confirm() {
 }
 .hotspot:last-child { border-right: none; }
 
-/* Hover: subtle warm highlight */
+/* Hover: warm highlight rising from bottom, transparent above midpoint */
 .hotspot:hover {
-  background: rgba(255, 240, 200, 0.07);
+  background: linear-gradient(to top, rgba(255,240,200,0.13) 0%, rgba(255,240,200,0.07) 40%, transparent 65%);
 }
 
 /* Selected: colored top border + glow tint */
