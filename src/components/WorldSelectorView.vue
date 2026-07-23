@@ -11,8 +11,7 @@
       <button class="world-card westrun-card" @click="enter('westrun')">
         <div class="world-card-bg westrun-bg" />
         <div class="world-card-inner">
-          <div class="world-badge westrun-badge">I</div>
-          <h2 class="world-name westrun-name">Bannerlords<br>of Westrun</h2>
+          <img :src="westrunLogoImg" class="westrun-logo-img" alt="Bannerlords of Westrun" />
           <p class="world-tagline">A hedge knight seeks balance<br>in a fractured realm.</p>
           <div class="world-meta">
             <span class="world-affinity">Force · Magic · Spirit · Void</span>
@@ -68,7 +67,8 @@ import { computed } from 'vue'
 import { useWorldStore } from '../stores/useWorldStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useYamatoPlayerStore } from '../stores/useYamatoPlayerStore.js'
-import yamatoLogoImg from '../assets/yamato/ui/logo_yamato.png'
+import yamatoLogoImg   from '../assets/yamato/ui/logo_yamato.png'
+import westrunLogoImg  from '../assets/ui/logo-nav.png'
 
 const worldStore       = useWorldStore()
 const playerHeroStore  = usePlayerHeroStore()
@@ -294,6 +294,19 @@ function enter(world) {
 .yamato-card:hover .yamato-enter  { color: #cc5544; }
 
 .yamato-card-inner { align-items: center; text-align: center; }
+.westrun-logo-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), filter 0.3s;
+  filter: brightness(0.75) sepia(0.3) saturate(0.8);
+  align-self: flex-start;
+}
+.westrun-card:hover .westrun-logo-img {
+  transform: scale(1.04);
+  filter: brightness(1) sepia(0.15) saturate(1.1);
+}
+
 .yamato-logo-img {
   width: 220px;
   height: 220px;
