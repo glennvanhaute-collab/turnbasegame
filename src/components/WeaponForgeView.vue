@@ -234,10 +234,9 @@ const collection   = useCollectionStore()
 const resources    = useResourceStore()
 const weaponStore  = useWeaponStore()
 
-// Auto-discovers soul weapon images: src/assets/soul_weapons/hp_t1.png etc.
-const _soulImgs = import.meta.glob('../assets/soul_weapons/*.png', { eager: true, import: 'default' })
+const _swB = import.meta.env.BASE_URL
 function getSoulImg(category, tier) {
-  return _soulImgs[`../assets/soul_weapons/${category}_t${tier}.png`] ?? null
+  return _swB + `soul_weapons/${category}_t${tier}.png`
 }
 
 const TIERS = [

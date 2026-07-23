@@ -275,16 +275,9 @@ import GameIcon from './ui/GameIcon.vue'
 import HeroAvatar from './HeroAvatar.vue'
 import ValdrisBg  from '../assets/lore/Valdris.png'
 import AldricBg   from '../assets/lore/Aldric.png'
-import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
+import { getPortrait as _getHeroPortrait, PLAYER_AVATARS } from '../game/portraits.js'
 import { useWeaponStore } from '../stores/useWeaponStore.js'
 import weaponsIcon from '../assets/ui/weapons_icon.png'
-const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
-const PLAYER_AVATARS = Object.fromEntries(
-  Object.entries(_avatarModules).map(([path, mod]) => {
-    const id = path.match(/avatar_\d+/)?.[0]
-    return [id, mod.default]
-  }).filter(([id]) => id)
-)
 
 const HOUSE_BACKGROUNDS = {
   'House Valdris': ValdrisBg,

@@ -309,17 +309,30 @@ const KEY_EMOJI     = { easy: '🗝️', medium: '🗝️', hard: '🗝️', nig
 
 defineEmits(['back'])
 
-// ── Dungeon victory background (same logic as DungeonCard) ─────────
-const _dungeonBgs = import.meta.glob('../assets/dungeons/dungeon_*.png', { eager: true })
-const DUNGEON_TIER_PREFIX = { medium: 'intermediate' }
-function dungeonTierBgs(tier) {
-  const prefix = `dungeon_${DUNGEON_TIER_PREFIX[tier.toLowerCase()] ?? tier.toLowerCase()}_`
-  return Object.entries(_dungeonBgs).filter(([p]) => p.includes(prefix)).map(([, m]) => m.default)
+// ── Dungeon victory background ──────────────────────────────────────
+import _ba_easy01   from '../assets/dungeons/dungeon_easy_01.png'
+import _ba_easyG    from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
+import _ba_int01    from '../assets/dungeons/dungeon_intermediate_01.png'
+import _ba_intA     from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
+import _ba_intT     from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
+import _ba_hard01   from '../assets/dungeons/dungeon_hard_01.png'
+import _ba_hard02   from '../assets/dungeons/dungeon_hard_02.png'
+import _ba_hardS    from '../assets/dungeons/dungeon_hard_dread_spire.png'
+import _ba_hardTh   from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
+import _ba_nm01     from '../assets/dungeons/dungeon_nightmare_01.png'
+import _ba_nmB      from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+import _ba_nmC      from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _BA_TIER_POOLS = {
+  easy:         [_ba_easy01, _ba_easyG],
+  intermediate: [_ba_int01, _ba_intA, _ba_intT],
+  hard:         [_ba_hard01, _ba_hard02, _ba_hardS, _ba_hardTh],
+  nightmare:    [_ba_nm01, _ba_nmB, _ba_nmC],
 }
 const dungeonBg = computed(() => {
   const enc = encounter.value
   if (!enc?.isDungeon) return null
-  const pool = dungeonTierBgs(enc.tier ?? 'easy')
+  const key = enc.tier?.toLowerCase() === 'medium' ? 'intermediate' : enc.tier?.toLowerCase() ?? 'easy'
+  const pool = _BA_TIER_POOLS[key] ?? []
   if (!pool.length) return null
   const seed = enc.id ?? enc.dungeonId ?? ''
   const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length

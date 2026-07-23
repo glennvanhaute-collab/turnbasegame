@@ -140,27 +140,36 @@ function mechanicHints(dungeon) {
 }
 
 // Background images — explicit per-dungeon assignments for thematic accuracy
-const _dungeonBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
+import _dngEasyGoblin      from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
+import _dngEasyCrypt        from '../assets/dungeons/easy_undead_crypt.png'
+import _dngEasySwamp        from '../assets/dungeons/easy_desolate_swamp.png'
+import _dngIntAsh           from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
+import _dngIntThorn         from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
+import _dngIntLair          from '../assets/dungeons/intermediate_forgotten lair.png'
+import _dngHardThorn        from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
+import _dngHardSpire        from '../assets/dungeons/dungeon_hard_dread_spire.png'
+import _dngHardVampire      from '../assets/dungeons/hard_vampire_castle.png'
+import _dngNmBarrow         from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+import _dngNmNecropolis     from '../assets/dungeons/ungeon_nightmare_necropolis_of_valdris.png'
+import _dngNmCrypts         from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
 
 const DUNGEON_IMAGE_MAP = {
-  dng_goblin_warrens:        'dungeon_easy_goblin_warrens.png',
-  dng_crypt_of_ash:          'easy_undead_crypt.png',
-  dng_bandit_cave:           'easy_desolate_swamp.png',
-  dng_ashveil_mine:          'dungeon_intermediate_ashveil_mine.png',
-  dng_thornwood_depths:      'dungeon_intermediate_thornwood_depths.png',
-  dng_ruins_of_vel:          'intermediate_forgotten lair.png',
-  dng_thornhaven_ruins:      'dungeon_hard_thornhaven_ruins.png',
-  dng_the_dread_spire:       'dungeon_hard_dread_spire.png',
-  dng_the_crimson_hold:      'hard_vampire_castle.png',
-  dng_barrow_kings_tomb:     'dungeon_nightmare_barrow_kings_tomb.png',
-  dng_necropolis_of_valdris: 'ungeon_nightmare_necropolis_of_valdris.png',
-  dng_the_wailing_crypts:    'dungeon_nightmare_wailing_crypts.png',
+  dng_goblin_warrens:        _dngEasyGoblin,
+  dng_crypt_of_ash:          _dngEasyCrypt,
+  dng_bandit_cave:           _dngEasySwamp,
+  dng_ashveil_mine:          _dngIntAsh,
+  dng_thornwood_depths:      _dngIntThorn,
+  dng_ruins_of_vel:          _dngIntLair,
+  dng_thornhaven_ruins:      _dngHardThorn,
+  dng_the_dread_spire:       _dngHardSpire,
+  dng_the_crimson_hold:      _dngHardVampire,
+  dng_barrow_kings_tomb:     _dngNmBarrow,
+  dng_necropolis_of_valdris: _dngNmNecropolis,
+  dng_the_wailing_crypts:    _dngNmCrypts,
 }
 
 function pickBg(tier, id) {
-  const filename = DUNGEON_IMAGE_MAP[id]
-  if (!filename) return null
-  return _dungeonBgs[`../assets/dungeons/${filename}`]?.default ?? null
+  return DUNGEON_IMAGE_MAP[id] ?? null
 }
 
 function enterDungeon(dungeon) {

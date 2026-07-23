@@ -169,35 +169,55 @@ import { computed } from 'vue'
 import { POOL_LABELS, LOOT_LABEL, POOL_MECHANIC_HINTS, NODE_FORGE_STATS, NODE_BLESSED_STATS } from '../game/data/dungeons.js'
 import { FORGE_DISCOVERY_DATA } from '../stores/useDungeonStore.js'
 import { CITY_DATA } from '../game/data/cities.js'
-const _dungeonBgs = import.meta.glob('../assets/dungeons/*.png', { eager: true })
-const _tavernBg   = Object.values(import.meta.glob('../assets/dungeons/tavern.png', { eager: true }))[0]?.default
-const _cityBgs    = import.meta.glob('../assets/cities/*.png', { eager: true })
-const _forgeBgs   = import.meta.glob('../assets/forges/*.png', { eager: true })
+import _dungeonEasy01Bg        from '../assets/dungeons/dungeon_easy_01.png'
+import _dungeonEasyGoblins      from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
+import _dungeonEasySwamp        from '../assets/dungeons/easy_desolate_swamp.png'
+import _dungeonEasyCrypt        from '../assets/dungeons/easy_undead_crypt.png'
+import _dungeonIntermediate01   from '../assets/dungeons/dungeon_intermediate_01.png'
+import _dungeonIntermediateAsh  from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
+import _dungeonIntermediateThorn from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
+import _dungeonIntermediateLair from '../assets/dungeons/intermediate_forgotten lair.png'
+import _dungeonHard01           from '../assets/dungeons/dungeon_hard_01.png'
+import _dungeonHard02           from '../assets/dungeons/dungeon_hard_02.png'
+import _dungeonHardSpire        from '../assets/dungeons/dungeon_hard_dread_spire.png'
+import _dungeonHardThornhaven   from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
+import _dungeonHardVampire      from '../assets/dungeons/hard_vampire_castle.png'
+import _dungeonNightmare01      from '../assets/dungeons/dungeon_nightmare_01.png'
+import _dungeonNightmareBarrow  from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+import _dungeonNightmareCrypts  from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+import _tavernBg                from '../assets/dungeons/tavern.png'
+import _blessedGroveBg          from '../assets/dungeons/blessed_grove.png'
+import _ancientForgeBg          from '../assets/dungeons/ancient_forge.png'
+import _ashenForgeBg            from '../assets/dungeons/ashen_forge.png'
+import elvenForgeBg   from '../assets/forges/elven_forge.png'
+import goblinForgeBg  from '../assets/forges/goblin_forge.png'
+import dwarvenForgeBg from '../assets/forges/dwarven_forge.png'
 
-const FORGE_BG_NAMES = { elven: 'elven_forge', goblin: 'goblin_forge', dwarf: 'dwarven_forge' }
+const B = import.meta.env.BASE_URL
+const CITY_POOLS = {
+  aldric:   ['01', '02', '03'].map(n => B + `cities/city_aldric_${n}.png`),
+  valdris:  ['01', '02', '03'].map(n => B + `cities/city_valdris_${n}.png`),
+  caelwyn:  ['01', '02', '03'].map(n => B + `cities/city_caelwyn_${n}.png`),
+  mordaine: ['01', '02', '03'].map(n => B + `cities/city_mordaine_${n}.png`),
+}
+
+const FORGE_BG_NAMES = { elven: elvenForgeBg, goblin: goblinForgeBg, dwarf: dwarvenForgeBg }
 function forgeBgUrl(forgeType) {
-  const name = FORGE_BG_NAMES[forgeType]
-  if (!name) return null
-  const entry = Object.entries(_forgeBgs).find(([p]) => p.includes(`/${name}.png`))
-  return entry?.[1]?.default ?? null
+  return FORGE_BG_NAMES[forgeType] ?? null
 }
 
-const TIER_BG_PREFIX = { medium: 'intermediate' }
-function tierbgs(tier) {
-  const key = tier.toLowerCase()
-  const label = TIER_BG_PREFIX[key] ?? key
-  return Object.entries(_dungeonBgs)
-    .filter(([p]) => {
-      const file = p.split('/').pop()
-      return file.startsWith(`dungeon_${label}_`) || file.startsWith(`${label}_`)
-    })
-    .map(([, m]) => m.default)
+const DUNGEON_TIER_POOLS = {
+  easy:         [_dungeonEasy01Bg, _dungeonEasyGoblins, _dungeonEasySwamp, _dungeonEasyCrypt],
+  intermediate: [_dungeonIntermediate01, _dungeonIntermediateAsh, _dungeonIntermediateThorn, _dungeonIntermediateLair],
+  hard:         [_dungeonHard01, _dungeonHard02, _dungeonHardSpire, _dungeonHardThornhaven, _dungeonHardVampire],
+  nightmare:    [_dungeonNightmare01, _dungeonNightmareBarrow, _dungeonNightmareCrypts],
 }
+const TIER_ALIAS = { medium: 'intermediate' }
 
 function pickBg(tier, seed) {
-  const pool = tierbgs(tier)
+  const key = TIER_ALIAS[tier?.toLowerCase()] ?? tier?.toLowerCase()
+  const pool = DUNGEON_TIER_POOLS[key] ?? []
   if (!pool.length) return null
-  // stable pick per dungeon: sum char codes mod pool length
   const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
   return pool[idx]
 }
@@ -212,11 +232,8 @@ const RARITY_COLORS = { Rare: '#4fa8ff', Epic: '#b44fff', Legendary: '#ffd700', 
 
 function pickCityBg(faction, seed) {
   const short = CITY_DATA[faction]?.short ?? 'aldric'
-  const pool  = Object.entries(_cityBgs)
-    .filter(([p]) => p.includes(`city_${short}_`))
-    .map(([, m]) => m.default)
-  if (!pool.length) return null
-  const idx = [...(seed ?? '')].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
+  const pool  = CITY_POOLS[short] ?? CITY_POOLS.aldric
+  const idx   = [...(seed ?? '')].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
   return pool[idx]
 }
 
@@ -224,22 +241,13 @@ const cityData   = computed(() => CITY_DATA[props.dungeon.faction] ?? {})
 const cityBg     = computed(() => props.dungeon.nodeType === 'city' ? pickCityBg(props.dungeon.faction, props.dungeon.id) : null)
 const forgeBg    = computed(() => props.dungeon.nodeType === 'forge_discovery' ? forgeBgUrl(props.dungeon.forgeType) : null)
 
-const BLESSED_BG_KEY = 'blessed_grove'
-const FORGE_NODE_BG_NAMES = {
-  'Ancient Forge':   'ancient_forge',
-  'Ashen Smithy':    'ashen_forge',
+const FORGE_NODE_BG = {
+  'Ancient Forge': _ancientForgeBg,
+  'Ashen Smithy':  _ashenForgeBg,
 }
 const nodeBg = computed(() => {
-  if (props.dungeon.nodeType === 'blessed') {
-    const entry = Object.entries(_dungeonBgs).find(([p]) => p.includes(`/${BLESSED_BG_KEY}.`))
-    return entry?.[1]?.default ?? null
-  }
-  if (props.dungeon.nodeType === 'forge') {
-    const bgName = FORGE_NODE_BG_NAMES[props.dungeon.name]
-    if (!bgName) return null
-    const entry = Object.entries(_dungeonBgs).find(([p]) => p.includes(`/${bgName}.`))
-    return entry?.[1]?.default ?? null
-  }
+  if (props.dungeon.nodeType === 'blessed') return _blessedGroveBg
+  if (props.dungeon.nodeType === 'forge')   return FORGE_NODE_BG[props.dungeon.name] ?? null
   return null
 })
 const heroRarCol = computed(() => RARITY_COLORS[props.dungeon.heroRarity] ?? '#aaa')

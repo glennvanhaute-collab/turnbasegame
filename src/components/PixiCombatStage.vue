@@ -68,7 +68,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { BattleState } from '../game/BattleEngine.js'
-import { getPortrait } from '../game/portraits.js'
+import { getPortrait, PLAYER_AVATARS } from '../game/portraits.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import HeroAvatar from './HeroAvatar.vue'
 import battlegroundBg  from '../assets/backgrounds/battleground_background.png'
@@ -104,17 +104,30 @@ const playerHero = usePlayerHeroStore()
 const stageEl    = ref(null)
 
 // ── Contextual battle background ──────────────────────────────────
-const _dungeonBgs = import.meta.glob('../assets/dungeons/dungeon_*.png', { eager: true })
-const DUNGEON_TIER_PREFIX = { medium: 'intermediate' }
-function dungeonTierBgs(tier) {
-  const prefix = `dungeon_${DUNGEON_TIER_PREFIX[tier.toLowerCase()] ?? tier.toLowerCase()}_`
-  return Object.entries(_dungeonBgs).filter(([p]) => p.includes(prefix)).map(([, m]) => m.default)
+import _px_easy01 from '../assets/dungeons/dungeon_easy_01.png'
+import _px_easyG  from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
+import _px_int01  from '../assets/dungeons/dungeon_intermediate_01.png'
+import _px_intA   from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
+import _px_intT   from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
+import _px_hard01 from '../assets/dungeons/dungeon_hard_01.png'
+import _px_hard02 from '../assets/dungeons/dungeon_hard_02.png'
+import _px_hardS  from '../assets/dungeons/dungeon_hard_dread_spire.png'
+import _px_hardTh from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
+import _px_nm01   from '../assets/dungeons/dungeon_nightmare_01.png'
+import _px_nmB    from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+import _px_nmC    from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _PX_TIER_POOLS = {
+  easy:         [_px_easy01, _px_easyG],
+  intermediate: [_px_int01, _px_intA, _px_intT],
+  hard:         [_px_hard01, _px_hard02, _px_hardS, _px_hardTh],
+  nightmare:    [_px_nm01, _px_nmB, _px_nmC],
 }
 const bgStyle = computed(() => {
   const enc = store.currentEncounter
   let url = battlegroundBg
   if (enc?.isDungeon) {
-    const pool = dungeonTierBgs(enc.tier ?? 'easy')
+    const key = enc.tier?.toLowerCase() === 'medium' ? 'intermediate' : enc.tier?.toLowerCase() ?? 'easy'
+    const pool = _PX_TIER_POOLS[key] ?? []
     if (pool.length) {
       const seed = enc.id ?? enc.dungeonId ?? ''
       const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length
@@ -125,13 +138,6 @@ const bgStyle = computed(() => {
 })
 
 // ── Portrait card helpers ─────────────────────────────────────────
-const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
-const PLAYER_AVATARS = Object.fromEntries(
-  Object.entries(_avatarModules).map(([path, mod]) => {
-    const id = path.match(/avatar_\d+/)?.[0]
-    return [id, mod.default]
-  }).filter(([id]) => id)
-)
 
 const _RARITY_BORDER = {
   Mythical: '#ff2244', Legendary: '#ffd700', Epic: '#b44fff',

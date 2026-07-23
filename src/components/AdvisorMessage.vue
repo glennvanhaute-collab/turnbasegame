@@ -31,7 +31,8 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useAdvisorStore } from '../stores/useAdvisorStore.js'
-import frameImg from '../assets/units/advisor_with_text_v2.png'
+import { PORTRAIT_MAP } from '../game/portraits.js'
+const frameImg = PORTRAIT_MAP['advisor_with_text_v2']
 import closeImg from '../assets/ui/close.png'
 import nextImg  from '../assets/ui/next_nobg.png'
 import prevImg  from '../assets/ui/prev_nobg.png'

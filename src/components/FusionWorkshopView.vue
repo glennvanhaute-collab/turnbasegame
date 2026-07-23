@@ -185,12 +185,7 @@ import arcaneBg   from '../assets/backgrounds/fusion_workshop.png'
 import shadowBg   from '../assets/backgrounds/shadow_loom_background.png'
 import tanneryBg  from '../assets/backgrounds/iron_loom_background.png'
 
-const _gearSources = import.meta.glob('../assets/gear/*.png', { eager: true })
-const gearImageMap = {}
-for (const [path, mod] of Object.entries(_gearSources)) {
-  const key = path.split('/').pop().replace(/\.png$/i, '')
-  gearImageMap[key] = mod.default
-}
+const _gearB = import.meta.env.BASE_URL
 
 const activeAtelierId = ref('arcane')
 const selectedRecipe  = ref(null)
@@ -372,7 +367,7 @@ const activeTierName = computed(() => {
 
 const gearImage = computed(() => {
   const key = selectedRecipe.value?.image
-  return key ? (gearImageMap[key] ?? null) : null
+  return key ? _gearB + 'gear/' + key + '.png' : null
 })
 
 // ── Stores ────────────────────────────────────────────────────────────

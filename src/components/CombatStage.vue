@@ -111,18 +111,31 @@ function cardBorder(hero) { return HOUSE_CARD_BORDERS[hero.faction] ?? null }
 const store = useBattleStore()
 
 // ── Contextual battle background ──────────────────────────────────
-const _dungeonBgs = import.meta.glob('../assets/dungeons/dungeon_*.png', { eager: true })
-const DUNGEON_TIER_PREFIX = { medium: 'intermediate' }
-function dungeonTierBgs(tier) {
-  const prefix = `dungeon_${DUNGEON_TIER_PREFIX[tier.toLowerCase()] ?? tier.toLowerCase()}_`
-  return Object.entries(_dungeonBgs).filter(([p]) => p.includes(prefix)).map(([, m]) => m.default)
+import _cs_easy01 from '../assets/dungeons/dungeon_easy_01.png'
+import _cs_easyG  from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
+import _cs_int01  from '../assets/dungeons/dungeon_intermediate_01.png'
+import _cs_intA   from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
+import _cs_intT   from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
+import _cs_hard01 from '../assets/dungeons/dungeon_hard_01.png'
+import _cs_hard02 from '../assets/dungeons/dungeon_hard_02.png'
+import _cs_hardS  from '../assets/dungeons/dungeon_hard_dread_spire.png'
+import _cs_hardTh from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
+import _cs_nm01   from '../assets/dungeons/dungeon_nightmare_01.png'
+import _cs_nmB    from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+import _cs_nmC    from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _CS_TIER_POOLS = {
+  easy:         [_cs_easy01, _cs_easyG],
+  intermediate: [_cs_int01, _cs_intA, _cs_intT],
+  hard:         [_cs_hard01, _cs_hard02, _cs_hardS, _cs_hardTh],
+  nightmare:    [_cs_nm01, _cs_nmB, _cs_nmC],
 }
 const bgArtStyle = computed(() => {
   const enc = store.currentEncounter
   let url = battleBg
   if (enc?.isTraining) url = trainingBg
   else if (enc?.isDungeon) {
-    const pool = dungeonTierBgs(enc.tier ?? 'easy')
+    const key = enc.tier?.toLowerCase() === 'medium' ? 'intermediate' : enc.tier?.toLowerCase() ?? 'easy'
+    const pool = _CS_TIER_POOLS[key] ?? []
     if (pool.length) {
       const seed = enc.id ?? enc.dungeonId ?? ''
       const idx = [...seed].reduce((s, c) => s + c.charCodeAt(0), 0) % pool.length

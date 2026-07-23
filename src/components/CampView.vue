@@ -140,15 +140,10 @@ const HOUSE_BGS = {
 
 const campBg = computed(() => HOUSE_BGS[settings.theme] ?? campBgDefault)
 
-// Eager-load building images
-const _buildingBgs = import.meta.glob('../assets/camp/*.png', { eager: true })
-
+const _campB = import.meta.env.BASE_URL
 function cardBg(id) {
-  const house    = settings.theme  // 'aldric' | 'valdris' | 'caelwyn' | 'mordaine'
-  const houseKey = `../assets/camp/${house}_${id}.png`
-  const generic  = `../assets/camp/${CAMP_BUILDINGS[id]?.image ?? ''}`
-  const url = (_buildingBgs[houseKey] ?? _buildingBgs[generic])?.default
-  return url ? { backgroundImage: `url(${url})` } : {}
+  const img = CAMP_BUILDINGS[id]?.image
+  return img ? { backgroundImage: `url(${_campB + 'camp/' + img})` } : {}
 }
 
 let interval = null

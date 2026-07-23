@@ -200,7 +200,9 @@ import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { playRaid, playVoidHeir, playMalachar, playMain } from '../game/music.js'
-import arenaBg  from '../assets/dungeons/raid_fallen_room.jpeg'
+import _arenaMalachar    from '../assets/backgrounds/malachar_raid.png'
+import _arenaFallenRoom  from '../assets/dungeons/raid_fallen_room.jpeg'
+import _arenaVoidHeir    from '../assets/dungeons/dungeon_battle_arena_Aurelian-Dragonforge.png'
 
 const props = defineProps({
   raidId:       { type: String,  required: true },
@@ -214,19 +216,13 @@ const collection = useCollectionStore()
 const encounter = RAID_ENCOUNTERS[props.raidId]
 
 // ── Arena background (per-raid) ──────────────────────────────────
-const _arenaImagesPng  = import.meta.glob('../assets/dungeons/*.png',    { eager: true })
-const _arenaImagesJpeg = import.meta.glob('../assets/dungeons/*.jpeg',   { eager: true })
-const _arenaImagesBg   = import.meta.glob('../assets/backgrounds/*.png', { eager: true })
-const _arenaImages = { ..._arenaImagesPng, ..._arenaImagesJpeg, ..._arenaImagesBg }
-const ARENA_BG_MAP = {
-  malachar_void:    'malachar_raid',
-  throne_of_regret: 'raid_fallen_room',
-  void_heir:        'dungeon_battle_arena_Aurelian-Dragonforge',
+const ARENA_BG = {
+  malachar_void:    _arenaMalachar,
+  throne_of_regret: _arenaFallenRoom,
+  void_heir:        _arenaVoidHeir,
 }
 const arenaStyle = computed(() => {
-  const key = ARENA_BG_MAP[props.raidId] ?? ''
-  const entry = Object.entries(_arenaImages).find(([p]) => p.includes(key))
-  const url = entry?.[1]?.default ?? arenaBg
+  const url = ARENA_BG[props.raidId] ?? _arenaFallenRoom
   return { backgroundImage: `url(${url})` }
 })
 

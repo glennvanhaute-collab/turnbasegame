@@ -186,16 +186,8 @@ import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { usePlayerHeroStore, RARITY_FLOOR_LEVEL } from '../stores/usePlayerHeroStore.js'
 import { formatCP } from '../game/cp.js'
 import HeroDetailModal from './HeroDetailModal.vue'
-import { getPortrait as _getHeroPortrait } from '../game/portraits.js'
+import { getPortrait as _getHeroPortrait, PLAYER_AVATARS } from '../game/portraits.js'
 import { BONDS } from '../game/data/bonds.js'
-const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
-
-const PLAYER_AVATARS = Object.fromEntries(
-  Object.entries(_avatarModules).map(([path, mod]) => {
-    const id = path.match(/avatar_\d+/)?.[0]
-    return [id, mod.default]
-  }).filter(([id]) => id)
-)
 
 function getPortrait(hero) {
   if (hero.id === 'player_character') return PLAYER_AVATARS[hero.avatarId] ?? null

@@ -31,11 +31,8 @@ import { GearSlot, SLOT_LABELS, computeLineStats } from '../game/Gear.js'
 import { SLOT_TO_ICON, tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
 
-const _gearSources = import.meta.glob('../assets/gear/*.png', { eager: true })
-const gearImageMap = {}
-for (const [path, mod] of Object.entries(_gearSources)) {
-  gearImageMap[path.split('/').pop().replace(/\.png$/i, '')] = mod.default
-}
+const _B = import.meta.env.BASE_URL
+function gearImageUrl(key) { return key ? _B + 'gear/' + key + '.png' : null }
 
 const props = defineProps({
   slotId:  { type: String, required: true },
@@ -47,12 +44,8 @@ defineEmits(['click'])
 
 const gearImg = computed(() => {
   if (!props.item) return null
-  // Explicit key first (handles edge cases like Moonveil using Eclipse_ filenames)
-  if (props.item.gearImageKey && gearImageMap[props.item.gearImageKey])
-    return gearImageMap[props.item.gearImageKey]
-  // Derive from item name: "Arcane Hauberk" → "Arcane_Hauberk"
-  const derived = props.item.name?.replace(/\s+/g, '_')
-  return derived ? (gearImageMap[derived] ?? null) : null
+  const key = props.item.gearImageKey ?? props.item.name?.replace(/\s+/g, '_')
+  return gearImageUrl(key)
 })
 
 const slotIcon = computed(() =>

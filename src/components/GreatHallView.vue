@@ -225,7 +225,7 @@ import frameMordaine     from '../assets/ui/mordaine_border_195x260_transparent.
 import frameAldric       from '../assets/ui/aldric_red_border_195x260_transparent.png'
 import frameValdris      from '../assets/ui/valdris_border_195x260_transparent.png'
 import _parchmentBg      from '../assets/ui/background_parchment.png'
-import { getPortrait }   from '../game/portraits.js'
+import { getPortrait, PLAYER_AVATARS } from '../game/portraits.js'
 import { HERO_TEMPLATES, STARTER_KEYS } from '../game/data/heroes.js'
 
 const emit = defineEmits(['navigate'])
@@ -250,13 +250,6 @@ const SIEGE_IMAGES = {
   'House Mordaine': siegeMordaine,
 }
 
-const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
-const PLAYER_AVATARS = Object.fromEntries(
-  Object.entries(_avatarModules).map(([path, mod]) => {
-    const id = path.match(/avatar_\d+/)?.[0]
-    return [id, mod.default]
-  }).filter(([id]) => id)
-)
 
 const repStore     = useReputationStore()
 const collection   = useCollectionStore()

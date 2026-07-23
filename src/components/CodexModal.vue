@@ -276,9 +276,7 @@ import { LORE, BOND_LORE } from '../game/data/lore.js'
 import { SET_BONUSES, SET_PASSIVE_6, SET_NAMES } from '../game/data/setBonus.js'
 import bondHelgaAldricImg  from '../assets/lore/bond-unlocked-helga-aldric.png'
 import bondHildaArneImg    from '../assets/lore/bond-unlocked-hilda-arne.png'
-import avatarAldric  from '../assets/units/legendary/lord-aldric.png'
-import avatarHelga   from '../assets/units/legendary/Helga.png'
-import avatarGarrett from '../assets/units/rare/garrett-the-unbroken.png'
+import { PORTRAIT_MAP } from '../game/portraits.js'
 
 defineEmits(['close'])
 
@@ -319,7 +317,7 @@ const hasHiddenHeroes = computed(() =>
 )
 
 const BOND_IMAGES   = { iron_vow: bondHelgaAldricImg, last_conquest: bondHildaArneImg }
-const HERO_AVATARS  = { lord_aldric: avatarAldric, helga: avatarHelga, hedge_blade: avatarGarrett }
+const HERO_AVATARS  = { lord_aldric: PORTRAIT_MAP['lord-aldric'], helga: PORTRAIT_MAP['helga'], hedge_blade: PORTRAIT_MAP['garrett-the-unbroken'] }
 const writing = ref(false)
 const newTitle = ref('')
 const newBody  = ref('')

@@ -139,8 +139,7 @@ import houseAldricImg   from '../assets/lore/house_aldric.png'
 import houseValdrisImg  from '../assets/lore/house_valdris.png'
 import houseCaelwynImg  from '../assets/lore/house_caelwyn.png'
 import houseMordaineImg from '../assets/lore/house_mordaine.png'
-
-const _avatarModules = import.meta.glob('../assets/units/avatar_*.png', { eager: true })
+import { PLAYER_AVATARS } from '../game/portraits.js'
 
 const HOUSE_IMAGES = {
   'House Aldric':   houseAldricImg,
@@ -185,9 +184,8 @@ const selectedAvatar  = ref(null)
 const selectedFaction = ref(null)
 const selectedArtisan = ref(null)
 
-const AVATAR_OPTIONS = Object.entries(_avatarModules)
-  .map(([path, mod]) => ({ id: path.match(/avatar_\d+/)?.[0], src: mod.default }))
-  .filter(a => a.id)
+const AVATAR_OPTIONS = Object.entries(PLAYER_AVATARS)
+  .map(([id, src]) => ({ id, src }))
   .sort((a, b) => a.id.localeCompare(b.id))
 
 const meta     = (faction) => playerHero.HOUSE_META[faction] ?? {}

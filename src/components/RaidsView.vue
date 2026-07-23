@@ -142,18 +142,16 @@ const questStore  = useQuestStore()
 
 const finalRaidUnlocked = computed(() => questStore.completedIds.has('final_breach'))
 
-const _raidBgSources = {
-  ...import.meta.glob('../assets/dungeons/*.png',    { eager: true }),
-  ...import.meta.glob('../assets/backgrounds/*.png', { eager: true }),
+import _raidBgFallenKing from '../assets/dungeons/Raid_fallen-king-batman.png'
+import _raidBgMalachar   from '../assets/backgrounds/malachar_raid.png'
+import _raidBgAurelian   from '../assets/dungeons/Aurelian-Dragonforge.png'
+const RAID_BG_MAP = {
+  'Raid_fallen-king-batman': _raidBgFallenKing,
+  'malachar_raid':           _raidBgMalachar,
+  'Aurelian-Dragonforge':    _raidBgAurelian,
 }
-const raidBgMap = {}
-for (const [path, mod] of Object.entries(_raidBgSources)) {
-  const key = path.split('/').pop().replace(/\.png$/i, '')
-  raidBgMap[key] = mod.default
-}
-
 function bgStyle(raid) {
-  const url = raidBgMap[raid.bgFile]
+  const url = RAID_BG_MAP[raid.bgFile]
   return url ? { backgroundImage: `url(${url})` } : {}
 }
 
