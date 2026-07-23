@@ -1,59 +1,65 @@
 <template>
   <div class="yamato-creation">
-    <div class="creation-bg" />
     <button class="world-back-btn" @click="worldStore.exitWorld()">⟵ Choose realm</button>
 
-    <div class="creation-inner">
-      <div class="creation-header">
-        <p class="creation-jp">大和の国</p>
-        <h1 class="creation-title">Yamato no Kuni</h1>
-        <p class="creation-sub">Choose your clan. Put your region on the map.</p>
-      </div>
+    <!-- ── Step 1: Region selection ── -->
+    <div class="region-screen" v-if="step === 'region'">
+      <div class="region-map-wrap">
+        <img :src="regionMapImg" class="region-map-img" alt="Yamato no Kuni regions" draggable="false" />
 
-      <!-- Step 1: pick region -->
-      <div class="step" v-if="step === 'region'">
-        <h2 class="step-heading">Select your clan region</h2>
-        <div class="regions-grid">
+        <!-- 9 hotspot overlays, one per panel -->
+        <div class="hotspots" :class="{ 'has-selection': selectedRegion }">
           <button
-            class="region-card"
-            v-for="r in YAMATO_REGIONS"
+            v-for="(r, i) in YAMATO_REGIONS"
             :key="r.id"
+            class="hotspot"
             :class="{ selected: selectedRegion === r.id }"
-            :style="{ '--region-color': r.color }"
+            :style="{ '--rc': r.color, '--i': i }"
             @click="selectedRegion = r.id"
-          >
-            <span class="region-kanji">{{ r.kanji }}</span>
-            <span class="region-name">{{ r.name }}</span>
-            <span class="region-sub">{{ r.sub }}</span>
-            <span class="region-affinity">{{ r.affinity }}</span>
-          </button>
+            :title="r.name"
+          />
         </div>
-        <button class="cta-btn" :disabled="!selectedRegion" @click="step = 'name'">
-          Continue
-        </button>
       </div>
 
-      <!-- Step 2: name -->
-      <div class="step" v-else-if="step === 'name'">
-        <div class="selected-region-banner" :style="{ '--region-color': selectedRegionData?.color }">
-          <span class="srb-kanji">{{ selectedRegionData?.kanji }}</span>
+      <!-- Bottom bar: shows selected info + CTA -->
+      <div class="region-footer">
+        <Transition name="fade">
+          <div class="selected-info" v-if="selectedRegion && selectedRegionData" :style="{ '--rc': selectedRegionData.color }">
+            <span class="si-kanji">{{ selectedRegionData.kanji }}</span>
+            <div class="si-text">
+              <p class="si-name">{{ selectedRegionData.name }}</p>
+              <p class="si-sub">{{ selectedRegionData.sub }} · {{ selectedRegionData.affinity }}</p>
+            </div>
+            <button class="cta-btn" @click="step = 'name'">Choose this clan</button>
+          </div>
+          <p class="footer-hint" v-else>Hover a province to explore · Click to choose your clan</p>
+        </Transition>
+      </div>
+    </div>
+
+    <!-- ── Step 2: Name entry ── -->
+    <div class="name-screen" v-else-if="step === 'name'">
+      <div class="name-inner">
+        <div class="selected-banner" :style="{ '--rc': selectedRegionData?.color }">
+          <span class="sb-kanji">{{ selectedRegionData?.kanji }}</span>
           <div>
-            <p class="srb-name">{{ selectedRegionData?.name }}</p>
-            <p class="srb-sub">{{ selectedRegionData?.sub }}</p>
+            <p class="sb-name">{{ selectedRegionData?.name }}</p>
+            <p class="sb-sub">{{ selectedRegionData?.sub }}</p>
           </div>
         </div>
-        <h2 class="step-heading">How are you known?</h2>
+        <h2 class="name-heading">How are you known?</h2>
         <input
           class="name-input"
           v-model="playerName"
           placeholder="Your name..."
           maxlength="24"
+          autofocus
           @keyup.enter="playerName.trim() && confirm()"
         />
-        <button class="cta-btn" :disabled="!playerName.trim()" @click="confirm">
-          Begin
-        </button>
-        <button class="back-btn" @click="step = 'region'">← Back</button>
+        <div class="name-actions">
+          <button class="back-btn" @click="step = 'region'">← Back</button>
+          <button class="cta-btn" :disabled="!playerName.trim()" @click="confirm">Begin</button>
+        </div>
       </div>
     </div>
   </div>
@@ -63,14 +69,15 @@
 import { ref, computed } from 'vue'
 import { useYamatoPlayerStore, YAMATO_REGIONS } from '../../stores/useYamatoPlayerStore.js'
 import { useWorldStore } from '../../stores/useWorldStore.js'
+import regionMapImg from '../../assets/yamato/ui/startscreen_chose_region.png'
 
 const emit = defineEmits(['done'])
-const worldStore = useWorldStore()
+const worldStore  = useWorldStore()
+const yamatoStore = useYamatoPlayerStore()
 
-const yamatoStore     = useYamatoPlayerStore()
-const step            = ref('region')
-const selectedRegion  = ref(null)
-const playerName      = ref('')
+const step           = ref('region')
+const selectedRegion = ref(null)
+const playerName     = ref('')
 
 const selectedRegionData = computed(() => YAMATO_REGIONS.find(r => r.id === selectedRegion.value))
 
@@ -82,12 +89,20 @@ function confirm() {
 </script>
 
 <style scoped>
+.yamato-creation {
+  min-height: 100vh;
+  background: #060806;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
 .world-back-btn {
   position: fixed;
   top: 16px;
   left: 20px;
-  z-index: 10;
-  background: none;
+  z-index: 20;
+  background: rgba(6,8,6,0.7);
   border: 1px solid #2a3a2a;
   border-radius: 4px;
   color: #4a5a4a;
@@ -97,162 +112,179 @@ function confirm() {
   padding: 6px 14px;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
+  backdrop-filter: blur(4px);
 }
 .world-back-btn:hover { color: #cc4433; border-color: #cc443355; }
 
-.yamato-creation {
+/* ── Region screen ── */
+.region-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+}
+
+.region-map-wrap {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.region-map-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  user-select: none;
+}
+
+/* ── Hotspot grid ── */
+.hotspots {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+/* Dim all siblings when any is hovered */
+.hotspots:has(.hotspot:hover) .hotspot:not(:hover) {
+  background: rgba(0, 0, 0, 0.52);
+}
+
+/* Dim non-selected when selection exists */
+.hotspots.has-selection .hotspot:not(.selected) {
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.hotspot {
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+.hotspot:last-child { border-right: none; }
+
+/* Hover: subtle warm highlight */
+.hotspot:hover {
+  background: rgba(255, 240, 200, 0.07);
+}
+
+/* Selected: colored top border + glow tint */
+.hotspot.selected {
+  background: color-mix(in srgb, var(--rc) 12%, transparent);
+  box-shadow: inset 0 0 30px color-mix(in srgb, var(--rc) 15%, transparent);
+}
+.hotspot.selected::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--rc);
+  box-shadow: 0 0 12px var(--rc);
+}
+
+/* ── Footer bar ── */
+.region-footer {
+  background: rgba(6,8,6,0.92);
+  border-top: 1px solid #1e2a1e;
+  min-height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
-  position: relative;
-  overflow: hidden;
+  padding: 0 24px;
+  backdrop-filter: blur(6px);
 }
 
-.creation-bg {
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 0%, #0e1008 0%, #060806 60%),
-    #060806;
-  z-index: 0;
-}
-
-.creation-inner {
-  position: relative;
-  z-index: 1;
-  max-width: 780px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.creation-header { text-align: center; }
-.creation-jp {
+.footer-hint {
   font-family: 'Georgia', serif;
-  font-size: 1.2rem;
-  color: #cc4433;
-  letter-spacing: 4px;
-  margin-bottom: 8px;
-}
-.creation-title {
-  font-family: 'Georgia', serif;
-  font-size: 2.4rem;
+  font-size: 0.72rem;
   font-style: italic;
-  color: #e8ddd0;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-.creation-sub {
-  font-size: 0.78rem;
-  color: #5a6a5a;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.step { display: flex; flex-direction: column; gap: 24px; align-items: center; }
-.step-heading {
-  font-family: 'Georgia', serif;
-  font-size: 1.1rem;
-  color: #b0a898;
-  font-style: italic;
-  text-align: center;
-}
-
-/* ── Region grid ── */
-.regions-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  width: 100%;
-}
-
-.region-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 16px 12px;
-  background: #0c0e0a;
-  border: 1px solid #1e2a1e;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s, transform 0.15s;
-  text-align: center;
-}
-.region-card:hover {
-  border-color: var(--region-color);
-  background: #0e100c;
-  transform: translateY(-2px);
-}
-.region-card.selected {
-  border-color: var(--region-color);
-  background: #0e100c;
-  box-shadow: 0 0 16px color-mix(in srgb, var(--region-color) 20%, transparent);
-}
-
-.region-kanji {
-  font-family: 'Georgia', serif;
-  font-size: 1.4rem;
-  color: var(--region-color);
-  line-height: 1;
-}
-.region-name {
-  font-family: 'Georgia', serif;
-  font-size: 0.78rem;
-  font-style: italic;
-  color: #c0b8b0;
-  font-weight: 600;
-}
-.region-sub {
-  font-size: 0.6rem;
-  color: #4a5a4a;
-  text-transform: uppercase;
+  color: #2a3a2a;
   letter-spacing: 1px;
 }
-.region-affinity {
-  font-size: 0.58rem;
-  color: var(--region-color);
+
+.selected-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.si-kanji {
+  font-family: 'Georgia', serif;
+  font-size: 2rem;
+  color: var(--rc);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.si-text { flex: 1; }
+.si-name {
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  font-style: italic;
+  color: #e0d8d0;
+  font-weight: 700;
+}
+.si-sub {
+  font-size: 0.62rem;
+  color: var(--rc);
   opacity: 0.7;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   margin-top: 2px;
 }
 
-/* ── Selected banner ── */
-.selected-region-banner {
+/* ── Name screen ── */
+.name-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 50% 0%, #0e1008 0%, #060806 60%),
+    #060806;
+}
+
+.name-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  max-width: 420px;
+  width: 100%;
+  padding: 24px;
+}
+
+.selected-banner {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 16px 24px;
   background: #0c0e0a;
-  border: 1px solid var(--region-color);
+  border: 1px solid var(--rc);
   border-radius: 8px;
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 0 20px color-mix(in srgb, var(--region-color) 15%, transparent);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--rc) 12%, transparent);
 }
-.srb-kanji {
-  font-family: 'Georgia', serif;
-  font-size: 2.2rem;
-  color: var(--region-color);
-  line-height: 1;
-}
-.srb-name {
-  font-family: 'Georgia', serif;
-  font-size: 1rem;
-  font-style: italic;
-  color: #e0d8d0;
-  font-weight: 600;
-}
-.srb-sub { font-size: 0.65rem; color: #4a5a4a; text-transform: uppercase; letter-spacing: 1px; }
+.sb-kanji { font-family: 'Georgia', serif; font-size: 2.4rem; color: var(--rc); line-height: 1; }
+.sb-name  { font-family: 'Georgia', serif; font-size: 1.05rem; font-style: italic; color: #e0d8d0; font-weight: 700; }
+.sb-sub   { font-size: 0.62rem; color: #4a5a4a; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
-/* ── Name input ── */
+.name-heading {
+  font-family: 'Georgia', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  color: #7a8a7a;
+}
+
 .name-input {
   width: 100%;
-  max-width: 360px;
   background: #0a0c08;
   border: 1px solid #2a3a2a;
   border-radius: 6px;
@@ -268,20 +300,28 @@ function confirm() {
 .name-input:focus { border-color: #cc4433; }
 .name-input::placeholder { color: #2a3a2a; }
 
-/* ── Buttons ── */
+.name-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ── Shared buttons ── */
 .cta-btn {
   background: #cc4433;
   border: none;
   border-radius: 6px;
   color: #f0e8e0;
   font-family: 'Georgia', serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-style: italic;
   font-weight: 700;
-  padding: 12px 40px;
+  padding: 11px 28px;
   cursor: pointer;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  white-space: nowrap;
   transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
 }
 .cta-btn:hover:not(:disabled) { background: #ee5544; transform: translateY(-1px); }
 .cta-btn:disabled { opacity: 0.3; cursor: not-allowed; }
@@ -289,17 +329,18 @@ function confirm() {
 .back-btn {
   background: none;
   border: none;
-  color: #4a5a4a;
-  font-size: 0.7rem;
+  color: #3a4a3a;
+  font-family: 'Georgia', serif;
+  font-size: 0.75rem;
+  font-style: italic;
   cursor: pointer;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 1px;
   transition: color 0.2s;
   padding: 4px 8px;
 }
 .back-btn:hover { color: #8a9a8a; }
 
-@media (max-width: 540px) {
-  .regions-grid { grid-template-columns: repeat(2, 1fr); }
-}
+/* ── Transition ── */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>

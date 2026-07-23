@@ -38,10 +38,9 @@
       <!-- Yamato no Kuni -->
       <button class="world-card yamato-card" @click="enter('yamato')">
         <div class="world-card-bg yamato-bg" />
-        <div class="world-card-inner">
-          <div class="world-badge yamato-badge">二</div>
-          <h2 class="world-name yamato-name">Yamato<br>no Kuni</h2>
-          <p class="world-tagline">大和の国<br>Put your clan on the map.</p>
+        <div class="world-card-inner yamato-card-inner">
+          <img :src="yamatoLogoImg" class="yamato-logo-img" alt="Yamato no Kuni" />
+          <p class="world-tagline yamato-tagline">Put your clan on the map.</p>
           <div class="world-meta">
             <span class="world-affinity yamato-affinity">Seiryōzan · Kazanbi · Sakuragawa · Heianjo</span>
           </div>
@@ -69,6 +68,7 @@ import { computed } from 'vue'
 import { useWorldStore } from '../stores/useWorldStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useYamatoPlayerStore } from '../stores/useYamatoPlayerStore.js'
+import yamatoLogoImg from '../assets/yamato/ui/logo_yamato.png'
 
 const worldStore       = useWorldStore()
 const playerHeroStore  = usePlayerHeroStore()
@@ -284,6 +284,21 @@ function enter(world) {
 .westrun-card:hover .world-enter { color: var(--gold); }
 .yamato-enter { color: #2a3a2a; font-style: normal; }
 .yamato-card:hover .yamato-enter  { color: #cc5544; }
+
+.yamato-card-inner { align-items: center; text-align: center; }
+.yamato-logo-img {
+  width: 220px;
+  height: 220px;
+  object-fit: contain;
+  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), filter 0.3s;
+  filter: brightness(0.8) saturate(0.85);
+}
+.yamato-card:hover .yamato-logo-img {
+  transform: scale(1.04);
+  filter: brightness(1) saturate(1.1);
+}
+.yamato-tagline { color: #7a8a7a; }
+.yamato-card .world-meta { margin-top: 0; }
 
 /* ── Divider ── */
 .worlds-divider {
