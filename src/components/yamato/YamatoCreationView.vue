@@ -150,12 +150,12 @@ function confirm() {
 
 /* Dim all siblings when any is hovered */
 .hotspots:has(.hotspot:hover) .hotspot:not(:hover) {
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.52) 45%, rgba(0,0,0,0.18) 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 30%, transparent 55%);
 }
 
 /* Dim non-selected when selection exists */
 .hotspots.has-selection .hotspot:not(.selected) {
-  background: rgba(0, 0, 0, 0.38);
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.55) 30%, transparent 55%);
 }
 
 .hotspot {
