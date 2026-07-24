@@ -52,10 +52,8 @@
       </div>
 
       <!-- Realm -->
-      <div class="yamato-placeholder" v-else>
-        <span class="ph-kanji">国</span>
-        <h2 class="ph-title">The Realm</h2>
-        <p class="ph-msg">Yamato no Kuni stretches across nine provinces. Exploration coming soon.</p>
+      <div class="yamato-realm" v-else>
+        <img :src="realmMapImg" class="realm-map-img" alt="Yamato no Kuni" draggable="false" />
       </div>
     </main>
   </div>
@@ -66,6 +64,7 @@ import { ref } from 'vue'
 import { useWorldStore } from '../../stores/useWorldStore.js'
 import { useYamatoPlayerStore } from '../../stores/useYamatoPlayerStore.js'
 import YamatoCreationView from './YamatoCreationView.vue'
+import realmMapImg from '../../assets/yamato/backgrounds/realm.png'
 
 const worldStore  = useWorldStore()
 const yamatoStore = useYamatoPlayerStore()
@@ -236,5 +235,20 @@ function onCreated() {
   color: #3a4a3a;
   max-width: 380px;
   line-height: 1.6;
+}
+
+/* ── Realm map ── */
+.yamato-realm {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+.realm-map-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  user-select: none;
 }
 </style>
