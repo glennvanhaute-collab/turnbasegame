@@ -310,18 +310,19 @@ const KEY_EMOJI     = { easy: '🗝️', medium: '🗝️', hard: '🗝️', nig
 defineEmits(['back'])
 
 // ── Dungeon victory background ──────────────────────────────────────
-import _ba_easy01   from '../assets/dungeons/dungeon_easy_01.png'
-import _ba_easyG    from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
-import _ba_int01    from '../assets/dungeons/dungeon_intermediate_01.png'
-import _ba_intA     from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
-import _ba_intT     from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
-import _ba_hard01   from '../assets/dungeons/dungeon_hard_01.png'
-import _ba_hard02   from '../assets/dungeons/dungeon_hard_02.png'
-import _ba_hardS    from '../assets/dungeons/dungeon_hard_dread_spire.png'
-import _ba_hardTh   from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
-import _ba_nm01     from '../assets/dungeons/dungeon_nightmare_01.png'
-import _ba_nmB      from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
-import _ba_nmC      from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _B = import.meta.env.BASE_URL
+const _ba_easy01   = _B + 'dungeons/dungeon_easy_01.png'
+const _ba_easyG    = _B + 'dungeons/dungeon_easy_goblin_warrens.png'
+const _ba_int01    = _B + 'dungeons/dungeon_intermediate_01.png'
+const _ba_intA     = _B + 'dungeons/dungeon_intermediate_ashveil_mine.png'
+const _ba_intT     = _B + 'dungeons/dungeon_intermediate_thornwood_depths.png'
+const _ba_hard01   = _B + 'dungeons/dungeon_hard_01.png'
+const _ba_hard02   = _B + 'dungeons/dungeon_hard_02.png'
+const _ba_hardS    = _B + 'dungeons/dungeon_hard_dread_spire.png'
+const _ba_hardTh   = _B + 'dungeons/dungeon_hard_thornhaven_ruins.png'
+const _ba_nm01     = _B + 'dungeons/dungeon_nightmare_01.png'
+const _ba_nmB      = _B + 'dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+const _ba_nmC      = _B + 'dungeons/dungeon_nightmare_wailing_crypts.png'
 const _BA_TIER_POOLS = {
   easy:         [_ba_easy01, _ba_easyG],
   intermediate: [_ba_int01, _ba_intA, _ba_intT],

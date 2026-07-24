@@ -76,7 +76,8 @@
 <script setup>
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { useForgeStore } from '../stores/useForgeStore.js'
-import soulVesselImg from '../assets/ui/soulvessel.png'
+const _B = import.meta.env.BASE_URL
+const soulVesselImg = _B + 'ui/soulvessel.png'
 import OrbIcon from './OrbIcon.vue'
 
 const inventory = useInventoryStore()

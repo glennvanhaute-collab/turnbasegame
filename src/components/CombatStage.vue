@@ -93,12 +93,13 @@ import { ref, computed, reactive, watch } from 'vue'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { getPortrait } from '../game/portraits.js'
 import HeroAvatar from './HeroAvatar.vue'
-import battleBg        from '../assets/backgrounds/battle.png'
-import trainingBg      from '../assets/backgrounds/training_camp.png'
-import borderAldric    from '../assets/ui/aldric_red_border_195x260_transparent.png'
-import borderMordaine  from '../assets/ui/mordaine_border_195x260_transparent.png'
+const _B = import.meta.env.BASE_URL
+const battleBg        = _B + 'backgrounds/battle.png'
+const trainingBg      = _B + 'backgrounds/training_camp.png'
+const borderAldric    = _B + 'ui/aldric_red_border_195x260_transparent.png'
+const borderMordaine  = _B + 'ui/mordaine_border_195x260_transparent.png'
 import borderValdris   from '../assets/ui/valdris_border_195x260_transparent.png'
-import borderCaelwyn   from '../assets/ui/caelwyn_thin_border_transparent_full.png'
+const borderCaelwyn   = _B + 'ui/caelwyn_thin_border_transparent_full.png'
 
 const HOUSE_CARD_BORDERS = {
   'House Aldric':   borderAldric,
@@ -111,18 +112,18 @@ function cardBorder(hero) { return HOUSE_CARD_BORDERS[hero.faction] ?? null }
 const store = useBattleStore()
 
 // ── Contextual battle background ──────────────────────────────────
-import _cs_easy01 from '../assets/dungeons/dungeon_easy_01.png'
-import _cs_easyG  from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
-import _cs_int01  from '../assets/dungeons/dungeon_intermediate_01.png'
-import _cs_intA   from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
-import _cs_intT   from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
-import _cs_hard01 from '../assets/dungeons/dungeon_hard_01.png'
-import _cs_hard02 from '../assets/dungeons/dungeon_hard_02.png'
-import _cs_hardS  from '../assets/dungeons/dungeon_hard_dread_spire.png'
-import _cs_hardTh from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
-import _cs_nm01   from '../assets/dungeons/dungeon_nightmare_01.png'
-import _cs_nmB    from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
-import _cs_nmC    from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _cs_easy01 = _B + 'dungeons/dungeon_easy_01.png'
+const _cs_easyG  = _B + 'dungeons/dungeon_easy_goblin_warrens.png'
+const _cs_int01  = _B + 'dungeons/dungeon_intermediate_01.png'
+const _cs_intA   = _B + 'dungeons/dungeon_intermediate_ashveil_mine.png'
+const _cs_intT   = _B + 'dungeons/dungeon_intermediate_thornwood_depths.png'
+const _cs_hard01 = _B + 'dungeons/dungeon_hard_01.png'
+const _cs_hard02 = _B + 'dungeons/dungeon_hard_02.png'
+const _cs_hardS  = _B + 'dungeons/dungeon_hard_dread_spire.png'
+const _cs_hardTh = _B + 'dungeons/dungeon_hard_thornhaven_ruins.png'
+const _cs_nm01   = _B + 'dungeons/dungeon_nightmare_01.png'
+const _cs_nmB    = _B + 'dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+const _cs_nmC    = _B + 'dungeons/dungeon_nightmare_wailing_crypts.png'
 const _CS_TIER_POOLS = {
   easy:         [_cs_easy01, _cs_easyG],
   intermediate: [_cs_int01, _cs_intA, _cs_intT],

@@ -225,7 +225,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import forgeBg from '../assets/backgrounds/weaponsmith_background.png'
+const _B = import.meta.env.BASE_URL
+const forgeBg = _B + 'backgrounds/weaponsmith_background.png'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useResourceStore }   from '../stores/useResourceStore.js'
 import { useWeaponStore, SOUL_CATEGORIES, STAT_LABELS, generateWeaponName } from '../stores/useWeaponStore.js'

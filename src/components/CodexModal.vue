@@ -274,8 +274,9 @@ import { useBondStore } from '../stores/useBondStore.js'
 import { useCodexStore } from '../stores/useCodexStore.js'
 import { LORE, BOND_LORE } from '../game/data/lore.js'
 import { SET_BONUSES, SET_PASSIVE_6, SET_NAMES } from '../game/data/setBonus.js'
-import bondHelgaAldricImg  from '../assets/lore/bond-unlocked-helga-aldric.png'
-import bondHildaArneImg    from '../assets/lore/bond-unlocked-hilda-arne.png'
+const _B = import.meta.env.BASE_URL
+const bondHelgaAldricImg  = _B + 'lore/bond-unlocked-helga-aldric.png'
+const bondHildaArneImg    = _B + 'lore/bond-unlocked-hilda-arne.png'
 import { PORTRAIT_MAP } from '../game/portraits.js'
 
 defineEmits(['close'])

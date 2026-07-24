@@ -200,9 +200,10 @@ import { TargetType }         from '../game/Skill.js'
 import { RAID_ENCOUNTERS }    from '../game/data/raidEncounters.js'
 import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { playRaid, playVoidHeir, playMalachar, playMain } from '../game/music.js'
-import _arenaMalachar    from '../assets/backgrounds/malachar_raid.png'
-import _arenaFallenRoom  from '../assets/dungeons/raid_fallen_room.jpeg'
-import _arenaVoidHeir    from '../assets/dungeons/dungeon_battle_arena_Aurelian-Dragonforge.png'
+const _B = import.meta.env.BASE_URL
+const _arenaMalachar    = _B + 'backgrounds/malachar_raid.png'
+const _arenaFallenRoom  = _B + 'dungeons/raid_fallen_room.jpeg'
+const _arenaVoidHeir    = _B + 'dungeons/dungeon_battle_arena_Aurelian-Dragonforge.png'
 
 const props = defineProps({
   raidId:       { type: String,  required: true },

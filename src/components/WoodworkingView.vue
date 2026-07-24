@@ -362,7 +362,8 @@ import { PLANK_LIST, PLANKS } from '../game/data/planks.js'
 import { BOWSTRINGS } from '../game/data/bowstrings.js'
 import { WOOD_RECIPE_TIERS } from '../game/data/woodworkingRecipes.js'
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
-import wwBg from '../assets/backgrounds/woodworking_bg.png'
+const _B = import.meta.env.BASE_URL
+const wwBg = _B + 'backgrounds/woodworking_bg.png'
 
 const resources  = useResourceStore()
 const inventory  = useInventoryStore()

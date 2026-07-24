@@ -352,11 +352,12 @@ import { playBattleForTeam, playMain } from './game/music.js'
 import { useSmeltingTick } from './composables/useSmeltingTick.js'
 import { useTanningTick }  from './composables/useTanningTick.js'
 import { useWeavingTick }  from './composables/useWeavingTick.js'
-import logoNav from './assets/ui/logo-nav.png'
-import shieldAldric  from './assets/lore/house_aldric.png'
-import shieldValdris from './assets/lore/house_valdris.png'
-import shieldCaelwyn from './assets/lore/house_caelwyn.png'
-import shieldMordaine from './assets/lore/house_mordaine.png'
+const _B = import.meta.env.BASE_URL
+const logoNav       = _B + 'ui/logo-nav.png'
+const shieldAldric  = _B + 'lore/house_aldric.png'
+const shieldValdris = _B + 'lore/house_valdris.png'
+const shieldCaelwyn = _B + 'lore/house_caelwyn.png'
+const shieldMordaine = _B + 'lore/house_mordaine.png'
 import { useBattleStore } from './stores/useBattleStore.js'
 import { useCollectionStore } from './stores/useCollectionStore.js'
 import { useCurrencyStore } from './stores/useCurrencyStore.js'
@@ -399,11 +400,11 @@ import CodexModal from './components/CodexModal.vue'
 import AdvisorMessage from './components/AdvisorMessage.vue'
 import DevMenu from './components/DevMenu.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
-import arsenalBg     from './assets/backgrounds/arsenal.png'
-import explorationBg from './assets/backgrounds/exploration_bg.png'
-import navBg from './assets/backgrounds/bg_nav.png'
+const arsenalBg     = _B + 'backgrounds/arsenal.png'
+const explorationBg = _B + 'backgrounds/exploration_bg.png'
+const navBg         = _B + 'backgrounds/bg_nav.png'
 import codexIcon from './assets/ui/codex.png'
-import collectionIcon from './assets/ui/collection-icon.png'
+const collectionIcon = _B + 'ui/collection-icon.png'
 import closeImg  from './assets/ui/close.png'
 import GameIcon from './components/ui/GameIcon.vue'
 import { useAdvisorStore } from './stores/useAdvisorStore.js'
@@ -891,7 +892,7 @@ body {
 .battle-modal-panel {
   background:
     linear-gradient(rgba(0,0,0,0.82), rgba(0,0,0,0.82)),
-    url('./assets/backgrounds/battle.png') center / cover no-repeat;
+    url('/turnbasegame/backgrounds/battle.png') center / cover no-repeat;
 }
 .coll-modal-close {
   position: absolute;

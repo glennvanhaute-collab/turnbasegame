@@ -179,8 +179,9 @@
 <script setup>
 import { computed } from 'vue'
 const emit = defineEmits(['back'])
-import collectionBg from '../assets/backgrounds/collection_bg.png'
-import starImg from '../assets/ui/star.png'
+const _B = import.meta.env.BASE_URL
+const collectionBg = _B + 'backgrounds/collection_bg.png'
+const starImg = _B + 'ui/star.png'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'
 import { usePlayerHeroStore, RARITY_FLOOR_LEVEL } from '../stores/usePlayerHeroStore.js'

@@ -102,9 +102,10 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import recruitImg  from '../assets/ui/recruit.png'
-import recruit2Img from '../assets/ui/recruit_2.png'
-import recruit3Img from '../assets/ui/recruit_3.png'
+const _B = import.meta.env.BASE_URL
+const recruitImg  = _B + 'ui/recruit.png'
+const recruit2Img = _B + 'ui/recruit_2.png'
+const recruit3Img = _B + 'ui/recruit_3.png'
 
 const props = defineProps({
   portal:      { type: Object,  required: true },

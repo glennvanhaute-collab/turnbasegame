@@ -181,9 +181,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import arcaneBg   from '../assets/backgrounds/fusion_workshop.png'
-import shadowBg   from '../assets/backgrounds/shadow_loom_background.png'
-import tanneryBg  from '../assets/backgrounds/iron_loom_background.png'
+const _B = import.meta.env.BASE_URL
+const arcaneBg   = _B + 'backgrounds/fusion_workshop.png'
+const shadowBg   = _B + 'backgrounds/shadow_loom_background.png'
+const tanneryBg  = _B + 'backgrounds/iron_loom_background.png'
 
 const _gearB = import.meta.env.BASE_URL
 

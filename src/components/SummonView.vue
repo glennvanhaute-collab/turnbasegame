@@ -182,10 +182,11 @@
 
 <script setup>
 import { computed } from 'vue'
-import recruitmentBg from '../assets/backgrounds/recruitment_bg.png'
-import starImg from '../assets/ui/star.png'
-import bondUnlockImage     from '../assets/lore/bond-unlocked-helga-aldric.png'
-import bondHildaArneImage  from '../assets/lore/bond-unlocked-hilda-arne.png'
+const _B = import.meta.env.BASE_URL
+const recruitmentBg = _B + 'backgrounds/recruitment_bg.png'
+const starImg = _B + 'ui/star.png'
+const bondUnlockImage     = _B + 'lore/bond-unlocked-helga-aldric.png'
+const bondHildaArneImage  = _B + 'lore/bond-unlocked-hilda-arne.png'
 import { BOND_LORE } from '../game/data/lore.js'
 import { useSummonStore } from '../stores/useSummonStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'

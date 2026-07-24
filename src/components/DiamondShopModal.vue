@@ -139,8 +139,9 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import OrbIcon from './OrbIcon.vue'
-import soulVesselImg from '../assets/ui/soulvessel.png'
-import theTruthImg from '../assets/lore/The truth.png'
+const _B = import.meta.env.BASE_URL
+const soulVesselImg = _B + 'ui/soulvessel.png'
+const theTruthImg = _B + 'lore/The truth.png'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
 import { useForgeStore, ORBS } from '../stores/useForgeStore.js'
 import { useInventoryStore } from '../stores/useInventoryStore.js'

@@ -69,7 +69,7 @@
 import { ref, computed } from 'vue'
 import { useYamatoPlayerStore, YAMATO_REGIONS } from '../../stores/useYamatoPlayerStore.js'
 import { useWorldStore } from '../../stores/useWorldStore.js'
-import regionMapImg from '../../assets/yamato/ui/startscreen_chose_region.png'
+const regionMapImg = import.meta.env.BASE_URL + 'yamato/startscreen_chose_region.png'
 
 const emit = defineEmits(['done'])
 const worldStore  = useWorldStore()

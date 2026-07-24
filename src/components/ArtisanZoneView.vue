@@ -51,9 +51,10 @@
 import { computed } from 'vue'
 import GameIcon from './ui/GameIcon.vue'
 import { useResourceStore } from '../stores/useResourceStore.js'
-import zoneBg          from '../assets/backgrounds/artisan-zone_bg.png'
-import fusionIcon        from '../assets/ui/fusion_worshop_icon.png'
-import weaponsmithIcon  from '../assets/ui/weaponsmith_icon.png'
+const _B = import.meta.env.BASE_URL
+const zoneBg          = _B + 'backgrounds/artisan-zone_bg.png'
+const fusionIcon        = _B + 'ui/fusion_worshop_icon.png'
+const weaponsmithIcon  = _B + 'ui/weaponsmith_icon.png'
 
 defineEmits(['open-blacksmith', 'open-leatherworking', 'open-tailoring', 'open-woodworking', 'open-fusion-workshop', 'open-weapon-forge'])
 

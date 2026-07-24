@@ -221,7 +221,8 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import huntBg from '../assets/backgrounds/hunting_ground_bg.png'
+const _B = import.meta.env.BASE_URL
+const huntBg = _B + 'backgrounds/hunting_ground_bg.png'
 import { useHuntStore }       from '../stores/useHuntStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
 import { HUNTS_BY_ID, HUNT_MISSIONS, FORAGE_MISSIONS, LUMBER_MISSIONS } from '../game/data/hunts.js'

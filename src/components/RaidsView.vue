@@ -142,9 +142,10 @@ const questStore  = useQuestStore()
 
 const finalRaidUnlocked = computed(() => questStore.completedIds.has('final_breach'))
 
-import _raidBgFallenKing from '../assets/dungeons/Raid_fallen-king-batman.png'
-import _raidBgMalachar   from '../assets/backgrounds/malachar_raid.png'
-import _raidBgAurelian   from '../assets/dungeons/Aurelian-Dragonforge.png'
+const _B = import.meta.env.BASE_URL
+const _raidBgFallenKing = _B + 'dungeons/Raid_fallen-king-batman.png'
+const _raidBgMalachar   = _B + 'backgrounds/malachar_raid.png'
+const _raidBgAurelian   = _B + 'dungeons/Aurelian-Dragonforge.png'
 const RAID_BG_MAP = {
   'Raid_fallen-king-batman': _raidBgFallenKing,
   'malachar_raid':           _raidBgMalachar,

@@ -387,7 +387,8 @@ import { TAILORING_RECIPES, TAILORING_RECIPE_TIERS, TAILORING_XP_PER_TIER } from
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
 import { SLOT_TO_ICON, tierSlotIcon, fiberIcon, clothIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
-import tailoringBg from '../assets/backgrounds/tailoring_bg.png'
+const _B = import.meta.env.BASE_URL
+const tailoringBg = _B + 'backgrounds/tailoring_bg.png'
 
 const bg = tailoringBg
 

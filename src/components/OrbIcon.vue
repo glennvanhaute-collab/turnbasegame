@@ -4,7 +4,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import orbSheet from '../assets/ui/orbs_icons.png'
+const _B = import.meta.env.BASE_URL
+const orbSheet = _B + 'ui/orbs_icons.png'
 
 const props = defineProps({
   orbId:  { type: String, required: true },   // 'cracked' | 'master' | 'dark'

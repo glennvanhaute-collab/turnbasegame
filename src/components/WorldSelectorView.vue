@@ -67,8 +67,9 @@ import { computed } from 'vue'
 import { useWorldStore } from '../stores/useWorldStore.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useYamatoPlayerStore } from '../stores/useYamatoPlayerStore.js'
-import yamatoLogoImg   from '../assets/yamato/ui/logo_yamato.png'
-import westrunLogoImg  from '../assets/ui/logo-nav.png'
+const yamatoLogoImg = import.meta.env.BASE_URL + 'yamato/logo_yamato.png'
+const _B = import.meta.env.BASE_URL
+const westrunLogoImg  = _B + 'ui/logo-nav.png'
 
 const worldStore       = useWorldStore()
 const playerHeroStore  = usePlayerHeroStore()

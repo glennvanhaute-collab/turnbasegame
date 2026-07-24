@@ -87,7 +87,8 @@ import { GearType } from '../game/Gear.js'
 import { Rarity } from '../game/Hero.js'
 import { tierSlotIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
-import marketBg from '../assets/backgrounds/market-bg.png'
+const _B = import.meta.env.BASE_URL
+const marketBg = _B + 'backgrounds/market-bg.png'
 
 const inventory = useInventoryStore()
 const currency  = useCurrencyStore()

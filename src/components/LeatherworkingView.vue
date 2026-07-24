@@ -368,7 +368,8 @@ import { LEATHER_RECIPES, LEATHER_RECIPE_TIERS, LEATHER_XP_PER_TIER } from '../g
 import { STAT_LABELS, formatStatValue } from '../game/data/recipes.js'
 import { SLOT_TO_ICON, tierSlotIcon, hideIcon, leatherIcon } from '../game/data/spritesheet.js'
 import GameIcon from './ui/GameIcon.vue'
-import leatherworkingBg from '../assets/backgrounds/leatherworking_bg.png'
+const _B = import.meta.env.BASE_URL
+const leatherworkingBg = _B + 'backgrounds/leatherworking_bg.png'
 
 const bg = leatherworkingBg
 

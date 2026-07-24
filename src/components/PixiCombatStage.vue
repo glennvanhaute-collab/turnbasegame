@@ -71,11 +71,12 @@ import { BattleState } from '../game/BattleEngine.js'
 import { getPortrait, PLAYER_AVATARS } from '../game/portraits.js'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import HeroAvatar from './HeroAvatar.vue'
-import battlegroundBg  from '../assets/backgrounds/battleground_background.png'
-import borderAldric    from '../assets/ui/aldric_red_border_195x260_transparent.png'
-import borderMordaine  from '../assets/ui/mordaine_border_195x260_transparent.png'
+const _B = import.meta.env.BASE_URL
+const battlegroundBg  = _B + 'backgrounds/battleground_background.png'
+const borderAldric    = _B + 'ui/aldric_red_border_195x260_transparent.png'
+const borderMordaine  = _B + 'ui/mordaine_border_195x260_transparent.png'
 import borderValdris   from '../assets/ui/valdris_border_195x260_transparent.png'
-import borderCaelwyn   from '../assets/ui/caelwyn_thin_border_transparent_full.png'
+const borderCaelwyn   = _B + 'ui/caelwyn_thin_border_transparent_full.png'
 
 const HOUSE_CARD_BORDERS = {
   'House Aldric':   borderAldric,
@@ -104,18 +105,18 @@ const playerHero = usePlayerHeroStore()
 const stageEl    = ref(null)
 
 // ── Contextual battle background ──────────────────────────────────
-import _px_easy01 from '../assets/dungeons/dungeon_easy_01.png'
-import _px_easyG  from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
-import _px_int01  from '../assets/dungeons/dungeon_intermediate_01.png'
-import _px_intA   from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
-import _px_intT   from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
-import _px_hard01 from '../assets/dungeons/dungeon_hard_01.png'
-import _px_hard02 from '../assets/dungeons/dungeon_hard_02.png'
-import _px_hardS  from '../assets/dungeons/dungeon_hard_dread_spire.png'
-import _px_hardTh from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
-import _px_nm01   from '../assets/dungeons/dungeon_nightmare_01.png'
-import _px_nmB    from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
-import _px_nmC    from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _px_easy01 = _B + 'dungeons/dungeon_easy_01.png'
+const _px_easyG  = _B + 'dungeons/dungeon_easy_goblin_warrens.png'
+const _px_int01  = _B + 'dungeons/dungeon_intermediate_01.png'
+const _px_intA   = _B + 'dungeons/dungeon_intermediate_ashveil_mine.png'
+const _px_intT   = _B + 'dungeons/dungeon_intermediate_thornwood_depths.png'
+const _px_hard01 = _B + 'dungeons/dungeon_hard_01.png'
+const _px_hard02 = _B + 'dungeons/dungeon_hard_02.png'
+const _px_hardS  = _B + 'dungeons/dungeon_hard_dread_spire.png'
+const _px_hardTh = _B + 'dungeons/dungeon_hard_thornhaven_ruins.png'
+const _px_nm01   = _B + 'dungeons/dungeon_nightmare_01.png'
+const _px_nmB    = _B + 'dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+const _px_nmC    = _B + 'dungeons/dungeon_nightmare_wailing_crypts.png'
 const _PX_TIER_POOLS = {
   easy:         [_px_easy01, _px_easyG],
   intermediate: [_px_int01, _px_intA, _px_intT],

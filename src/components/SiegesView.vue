@@ -143,10 +143,11 @@ const finalSiegeFaction = computed(() => {
   )
   return FACTIONS.find(f => f.house === lowestHouse) ?? null
 })
-import siegeAldric   from '../assets/lore/siege_aldric.png'
-import siegeValdris  from '../assets/lore/siege_Valdris.png'
-import siegeCaelwyn  from '../assets/lore/siege_caelwyn.png'
-import siegeMordaine from '../assets/lore/siege_mordaine.png'
+const _B = import.meta.env.BASE_URL
+const siegeAldric   = _B + 'lore/siege_aldric.png'
+const siegeValdris  = _B + 'lore/siege_Valdris.png'
+const siegeCaelwyn  = _B + 'lore/siege_caelwyn.png'
+const siegeMordaine = _B + 'lore/siege_mordaine.png'
 
 // ── Faction definitions ───────────────────────────────────────────
 const FACTIONS = [

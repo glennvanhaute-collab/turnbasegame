@@ -272,7 +272,8 @@ import { useReputationStore } from '../stores/useReputationStore.js'
 import HeroAvatar from './HeroAvatar.vue'
 import { HERO_TEMPLATES, STARTER_KEYS, NORMAL_POOL, VOID_POOL } from '../game/data/heroes.js'
 import { getPortrait } from '../game/portraits.js'
-import mapImg from '../assets/backgrounds/map.png'
+const _B = import.meta.env.BASE_URL
+const mapImg = _B + 'backgrounds/map.png'
 
 const collection = useCollectionStore()
 const artisan    = useArtisanStore()

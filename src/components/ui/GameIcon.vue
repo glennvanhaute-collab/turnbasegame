@@ -1,15 +1,16 @@
 <script setup>
 import { computed } from 'vue'
 import { ICONS, SHEET_COLS, SHEET_1_ROWS, SHEET_2_ROWS, SHEET_BS_COLS, SHEET_BS_ROWS, SHEET_LW_COLS, SHEET_LW_ROWS, SHEET_TW_COLS, SHEET_TW_ROWS, SHEET_MATS_COLS, SHEET_MATS_ROWS, SHEET_WW_COLS, SHEET_WW_ROWS, SHEET_ELV_COLS, SHEET_ELV_ROWS, SHEET_REGRET_COLS, SHEET_REGRET_ROWS } from '../../game/data/spritesheet.js'
-import sheet1Url      from '../../assets/ui/icons_1.png'
-import sheet2Url      from '../../assets/ui/icons_2.png'
-import sheetBsUrl     from '../../assets/ui/sprites_blacksmith.png'
-import sheetLwUrl     from '../../assets/ui/sprites_leatherworking.png'
-import sheetTwUrl     from '../../assets/ui/sprites_tailoring.png'
-import sheetMatsUrl   from '../../assets/ui/sprites_materials.png'
-import sheetWwUrl     from '../../assets/ui/sprites_woodworking.png'
-import sheetElvUrl    from '../../assets/ui/sprites_elvish.png'
-import sheetRegretUrl from '../../assets/ui/sprites_regret.png'
+const _B = import.meta.env.BASE_URL
+const sheet1Url      = _B + 'ui/icons_1.png'
+const sheet2Url      = _B + 'ui/icons_2.png'
+const sheetBsUrl     = _B + 'ui/sprites_blacksmith.png'
+const sheetLwUrl     = _B + 'ui/sprites_leatherworking.png'
+const sheetTwUrl     = _B + 'ui/sprites_tailoring.png'
+const sheetMatsUrl   = _B + 'ui/sprites_materials.png'
+const sheetWwUrl     = _B + 'ui/sprites_woodworking.png'
+const sheetElvUrl    = _B + 'ui/sprites_elvish.png'
+const sheetRegretUrl = _B + 'ui/sprites_regret.png'
 
 const SHEET_ROWS     = { 1: SHEET_1_ROWS, 2: SHEET_2_ROWS, bs: SHEET_BS_ROWS, lw: SHEET_LW_ROWS, tw: SHEET_TW_ROWS, mats: SHEET_MATS_ROWS, ww: SHEET_WW_ROWS, elv: SHEET_ELV_ROWS, regret: SHEET_REGRET_ROWS }
 const SHEET_URLS     = { 1: sheet1Url,    2: sheet2Url,    bs: sheetBsUrl,    lw: sheetLwUrl,    tw: sheetTwUrl,    mats: sheetMatsUrl,    ww: sheetWwUrl,    elv: sheetElvUrl,   regret: sheetRegretUrl    }

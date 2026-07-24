@@ -273,11 +273,12 @@ import { SLOT_TO_ICON, AFFINITY_ICON } from '../game/data/spritesheet.js'
 import { RARITY_FLOOR_LEVEL } from '../stores/usePlayerHeroStore.js'
 import GameIcon from './ui/GameIcon.vue'
 import HeroAvatar from './HeroAvatar.vue'
-import ValdrisBg  from '../assets/lore/Valdris.png'
-import AldricBg   from '../assets/lore/Aldric.png'
+const _B = import.meta.env.BASE_URL
+const ValdrisBg  = _B + 'lore/Valdris.png'
+const AldricBg   = _B + 'lore/Aldric.png'
 import { getPortrait as _getHeroPortrait, PLAYER_AVATARS } from '../game/portraits.js'
 import { useWeaponStore } from '../stores/useWeaponStore.js'
-import weaponsIcon from '../assets/ui/weapons_icon.png'
+const weaponsIcon = _B + 'ui/weapons_icon.png'
 
 const HOUSE_BACKGROUNDS = {
   'House Valdris': ValdrisBg,

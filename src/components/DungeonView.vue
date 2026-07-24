@@ -140,18 +140,19 @@ function mechanicHints(dungeon) {
 }
 
 // Background images — explicit per-dungeon assignments for thematic accuracy
-import _dngEasyGoblin      from '../assets/dungeons/dungeon_easy_goblin_warrens.png'
-import _dngEasyCrypt        from '../assets/dungeons/easy_undead_crypt.png'
-import _dngEasySwamp        from '../assets/dungeons/easy_desolate_swamp.png'
-import _dngIntAsh           from '../assets/dungeons/dungeon_intermediate_ashveil_mine.png'
-import _dngIntThorn         from '../assets/dungeons/dungeon_intermediate_thornwood_depths.png'
-import _dngIntLair          from '../assets/dungeons/intermediate_forgotten lair.png'
-import _dngHardThorn        from '../assets/dungeons/dungeon_hard_thornhaven_ruins.png'
-import _dngHardSpire        from '../assets/dungeons/dungeon_hard_dread_spire.png'
-import _dngHardVampire      from '../assets/dungeons/hard_vampire_castle.png'
-import _dngNmBarrow         from '../assets/dungeons/dungeon_nightmare_barrow_kings_tomb.png'
-import _dngNmNecropolis     from '../assets/dungeons/ungeon_nightmare_necropolis_of_valdris.png'
-import _dngNmCrypts         from '../assets/dungeons/dungeon_nightmare_wailing_crypts.png'
+const _B = import.meta.env.BASE_URL
+const _dngEasyGoblin      = _B + 'dungeons/dungeon_easy_goblin_warrens.png'
+const _dngEasyCrypt        = _B + 'dungeons/easy_undead_crypt.png'
+const _dngEasySwamp        = _B + 'dungeons/easy_desolate_swamp.png'
+const _dngIntAsh           = _B + 'dungeons/dungeon_intermediate_ashveil_mine.png'
+const _dngIntThorn         = _B + 'dungeons/dungeon_intermediate_thornwood_depths.png'
+const _dngIntLair          = _B + 'dungeons/intermediate_forgotten lair.png'
+const _dngHardThorn        = _B + 'dungeons/dungeon_hard_thornhaven_ruins.png'
+const _dngHardSpire        = _B + 'dungeons/dungeon_hard_dread_spire.png'
+const _dngHardVampire      = _B + 'dungeons/hard_vampire_castle.png'
+const _dngNmBarrow         = _B + 'dungeons/dungeon_nightmare_barrow_kings_tomb.png'
+const _dngNmNecropolis     = _B + 'dungeons/ungeon_nightmare_necropolis_of_valdris.png'
+const _dngNmCrypts         = _B + 'dungeons/dungeon_nightmare_wailing_crypts.png'
 
 const DUNGEON_IMAGE_MAP = {
   dng_goblin_warrens:        _dngEasyGoblin,

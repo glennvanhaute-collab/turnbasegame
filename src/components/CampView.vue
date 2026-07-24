@@ -110,11 +110,12 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted } from 'vue'
-import campBgDefault  from '../assets/backgrounds/training_camp.png'
-import campBgAldric   from '../assets/lore/siege_aldric.png'
-import campBgValdris  from '../assets/lore/siege_Valdris.png'
-import campBgCaelwyn  from '../assets/lore/siege_caelwyn.png'
-import campBgMordaine from '../assets/lore/siege_mordaine.png'
+const _B = import.meta.env.BASE_URL
+const campBgDefault  = _B + 'backgrounds/training_camp.png'
+const campBgAldric   = _B + 'lore/siege_aldric.png'
+const campBgValdris  = _B + 'lore/siege_Valdris.png'
+const campBgCaelwyn  = _B + 'lore/siege_caelwyn.png'
+const campBgMordaine = _B + 'lore/siege_mordaine.png'
 import { useCampStore }          from '../stores/useCampStore.js'
 import { useCurrencyStore }      from '../stores/useCurrencyStore.js'
 import { useResourceStore }      from '../stores/useResourceStore.js'
