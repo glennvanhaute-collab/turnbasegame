@@ -62,7 +62,7 @@ import { ref } from 'vue'
 import { useWorldStore } from '../../stores/useWorldStore.js'
 import { useYamatoPlayerStore } from '../../stores/useYamatoPlayerStore.js'
 import YamatoCreationView from './YamatoCreationView.vue'
-import realmMapImg from '../../assets/yamato/backgrounds/realm.png'
+const realmMapImg = import.meta.env.BASE_URL + 'yamato/realm.png'
 
 const worldStore  = useWorldStore()
 const yamatoStore = useYamatoPlayerStore()
