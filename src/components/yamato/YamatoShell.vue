@@ -77,7 +77,9 @@ function onCreated() {
 
 <style scoped>
 .yamato-app {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   background: #070906;
