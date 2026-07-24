@@ -239,6 +239,7 @@ function onCreated() {
 
 /* ── Realm map ── */
 .yamato-realm {
+  width: 100%;
   height: calc(100vh - 64px);
   background-size: cover;
   background-position: center;
