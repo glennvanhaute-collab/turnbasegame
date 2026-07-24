@@ -52,9 +52,7 @@
       </div>
 
       <!-- Realm -->
-      <div class="yamato-realm" v-else>
-        <img :src="realmMapImg" class="realm-map-img" alt="Yamato no Kuni" draggable="false" />
-      </div>
+      <div class="yamato-realm" v-else :style="{ backgroundImage: `url(${realmMapImg})` }" />
     </main>
   </div>
 </template>
@@ -241,16 +239,8 @@ function onCreated() {
 
 /* ── Realm map ── */
 .yamato-realm {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-}
-.realm-map-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  user-select: none;
+  height: calc(100vh - 64px);
+  background-size: cover;
+  background-position: center;
 }
 </style>
