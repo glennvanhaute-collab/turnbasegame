@@ -129,7 +129,9 @@ export const HOUSES = {
 export const CROWN = {
   id: 'hartvane',
   name: 'House Hartvane',
-  color: '#c9a227',
+  // Pale gilded gold. Aldric is the same hue family, so the Crown separates by
+  // value instead: gilded and bright against Aldric's darker iron-gate bronze.
+  color: '#e3c76b',
   region: 'The Stormhold',
   tagline: 'The Antlered Seat',
   sigil: 'A black hart rampant, crowned, on gold',
@@ -160,7 +162,7 @@ export const BANNERMEN = {
     id: 'ignar',
     name: 'House Ignar',
     liege: Faction.ALDRIC,
-    color: '#7fa8c4',
+    color: '#a9c8d8',
     region: 'The Frostmoors',
     tagline: 'Oathsworn of the Frostmoors',
     // Ignar keeps the Old Gods while sworn to a New Gods house. Aldric's own
@@ -219,7 +221,7 @@ export const BANNERMEN = {
     id: 'aegira',
     name: 'House Aegira',
     liege: Faction.VALDRIS,
-    color: '#4a9fd8',
+    color: '#2f8fa8',
     region: 'The Salt Colonnade',
     tagline: 'The Edge of the Tide',
     motto: 'Aegira Fortis Est',

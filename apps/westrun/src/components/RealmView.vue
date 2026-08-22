@@ -10,7 +10,7 @@
         :key="faction"
         class="map-hotspot"
         :class="{ active: selectedFaction === faction }"
-        :style="{ '--hc': meta.color, left: meta.mapX + '%', top: meta.mapY + '%' }"
+        :style="{ '--hc': houseColor(faction), left: meta.mapX + '%', top: meta.mapY + '%' }"
         @click="selectFaction(faction)"
         :title="faction"
       >
@@ -22,6 +22,23 @@
       <p class="map-hint" v-if="!selectedFaction">Select a territory</p>
     </div>
 
+    <!-- ── The Crown ────────────────────────────────────────────── -->
+    <section class="crown-banner" :style="{ '--house-color': crown.color }">
+      <div class="crown-mark">♔</div>
+      <div class="crown-body">
+        <div class="crown-title-row">
+          <h3 class="crown-name">{{ crown.name }}</h3>
+          <span class="crown-tag">{{ crown.tagline }}</span>
+        </div>
+        <p class="crown-sigil">{{ crown.sigil }}</p>
+        <p class="crown-creed">“{{ crown.creed }}”</p>
+      </div>
+      <div class="crown-note">
+        <span class="crown-note-label">The seat keeps no ledger</span>
+        <span class="crown-note-sub">Houses are loyal, or they are not</span>
+      </div>
+    </section>
+
     <!-- ── House sections ───────────────────────────────────────── -->
     <div class="houses">
       <section
@@ -30,7 +47,7 @@
         :id="houseId(faction)"
         class="house-section"
         :class="{ highlighted: selectedFaction === faction, dimmed: selectedFaction && selectedFaction !== faction }"
-        :style="{ '--house-color': meta.color }"
+        :style="{ '--house-color': houseColor(faction) }"
       >
         <div class="house-header">
           <div class="house-title-row">
@@ -84,6 +101,46 @@
           </template>
         </div>
 
+        <!-- ── Sworn houses ──────────────────────────────────────── -->
+        <div class="sworn" v-if="swornHouses(faction).length">
+          <div class="sworn-rule"><span>Sworn Houses</span></div>
+          <div
+            v-for="b in swornHouses(faction)"
+            :key="b.faction"
+            class="sworn-card"
+            :style="{ '--bc': b.color }"
+          >
+            <div class="sworn-head">
+              <span class="sworn-dot" />
+              <strong class="sworn-name">{{ b.name }}</strong>
+              <span class="sworn-tag">{{ b.tagline }}</span>
+              <span
+                class="faith-chip"
+                :class="{ differs: faithDiffers(b.faction) }"
+                :style="{ '--fc': faithColor(b.faction) }"
+              >{{ faithOf(b.faction) }}</span>
+            </div>
+            <p class="sworn-meta">{{ b.region }}<span v-if="b.motto"> · {{ b.motto }}</span></p>
+            <p class="sworn-summary">{{ b.summary }}</p>
+            <p class="sworn-note" v-if="faithDiffers(b.faction)">
+              Sworn across the faith — {{ faithOf(b.faction) }} beneath a {{ faithOf(faction) }} banner.
+            </p>
+            <div class="sworn-heroes" v-if="swornChampions(b.faction).length">
+              <button
+                v-for="{ key, hero } in swornChampions(b.faction)"
+                :key="key"
+                class="sworn-hero"
+                :class="{ owned: collection.ownsHero(key) }"
+                @click="detailHero = hero"
+                :title="hero.name"
+              >
+                <HeroAvatar :hero="hero" :size="42" />
+                <span class="sworn-hero-name">{{ hero.name }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="hero-grid">
           <div
             v-for="{ key, hero } in heroesForHouse(faction)"
@@ -135,7 +192,7 @@
           v-for="[faction, meta] in enemyHouseEntries"
           :key="faction"
           class="house-section"
-          :style="{ '--house-color': meta.color }"
+          :style="{ '--house-color': houseColor(faction) }"
         >
           <div class="house-header">
             <div class="house-title-row">
@@ -272,6 +329,10 @@ import { useReputationStore } from '../stores/useReputationStore.js'
 import HeroAvatar from './HeroAvatar.vue'
 import { HERO_TEMPLATES, STARTER_KEYS, NORMAL_POOL, VOID_POOL } from '../game/data/heroes.js'
 import { getPortrait } from '../game/portraits.js'
+import {
+  Faction, HOUSES, BANNERMEN, CROWN, FAITHS,
+  bannermenOf, houseInfo, houseFaith,
+} from '../game/data/westrun/factions.js'
 const _B = import.meta.env.BASE_URL
 const mapImg = _B + 'backgrounds/map.png'
 
@@ -310,14 +371,45 @@ const STARTER_SET    = new Set(STARTER_KEYS)
 const NORMAL_SET     = new Set(NORMAL_POOL.map(e => e.key))
 const VOID_SET       = new Set(VOID_POOL.map(e => e.key))
 
-// mapX / mapY are % positions over the castle structures visible on the map
+// View-only data. Colour, tagline, creed, faith and summary all live in
+// game/data/westrun/factions.js — this holds just what the map needs.
+// mapX / mapY are % positions over the castle structures visible on the map.
 const HOUSE_META = {
-  'House Aldric':    { color: '#c8962a', affinity: 'Force',  enemy: false, mapX: 35, mapY: 19, desc: 'Stalwart warriors sworn to defend the realm through honor and unyielding steel.' },
-  'House Valdris':   { color: '#4fa8ff', affinity: 'Magic',  enemy: false, mapX: 68, mapY: 28, desc: 'Scholars of forbidden lore who bend the elements to their iron will.' },
-  'House Caelwyn':   { color: '#4dff88', affinity: 'Spirit', enemy: false, mapX: 27, mapY: 47, desc: 'Ancient wardens of the green lands — healers and hunters in equal measure.' },
-  'House Mordaine':  { color: '#b44fff', affinity: 'Void',   enemy: false, mapX: 75, mapY: 63, desc: 'Exiles who walk the shadow between worlds, feared and misunderstood.' },
-  'House Bloodtusk': { color: '#ff6b6b', affinity: 'Force',  enemy: true,  desc: 'Ruthless raiders who take what they want and answer to no crown.' },
-  'House Ignar':     { color: '#ff9944', affinity: 'Void',   enemy: true,  desc: 'Infernal lords whose conquest of the mortal realm is written in flame.' },
+  'House Aldric':    { affinity: 'Force',  enemy: false, mapX: 35, mapY: 19 },
+  'House Valdris':   { affinity: 'Magic',  enemy: false, mapX: 68, mapY: 28 },
+  'House Caelwyn':   { affinity: 'Spirit', enemy: false, mapX: 27, mapY: 47 },
+  'House Mordaine':  { affinity: 'Void',   enemy: false, mapX: 75, mapY: 63 },
+  // Ignar is no longer here: it is a sworn bannerman of House Aldric, not an
+  // enemy. It now renders in Aldric's sworn-houses strip.
+  'House Bloodtusk': { affinity: 'Force',  enemy: true, desc: 'Ruthless raiders who take what they want and answer to no crown.' },
+}
+
+// ── Houses of the realm, resolved from faction data ────────────────
+const crown = CROWN
+
+function houseColor(faction)   { return houseInfo(faction)?.color ?? '#6a5a44' }
+function houseTagline(faction) { return houseInfo(faction)?.tagline ?? '' }
+function houseSummary(faction) { return houseInfo(faction)?.summary ?? '' }
+function houseCreed(faction)   { return houseInfo(faction)?.creed ?? '' }
+function faithOf(faction)      { return houseFaith(faction) }
+function faithColor(faction)   { return FAITHS[houseFaith(faction)]?.color ?? '#6a5a44' }
+
+// A bannerman whose faith differs from its liege is the interesting case —
+// surface it rather than burying it.
+function faithDiffers(faction) {
+  const b = BANNERMEN[faction]
+  return !!b && houseFaith(faction) !== houseFaith(b.liege)
+}
+
+function swornHouses(faction) {
+  return bannermenOf(faction).map(f => ({ faction: f, ...BANNERMEN[f] }))
+}
+
+// A sworn house's strip lists the champions you can actually field for it.
+// Enemy units sharing the faction tag — Ignar's Frostbound Cult, for one —
+// broke the oath and do not belong on their house's banner.
+function swornChampions(faction) {
+  return heroesForHouse(faction).filter(({ hero }) => hero.isPlayer)
 }
 
 const RARITY_ORDER = { Common: 0, Uncommon: 1, Rare: 2, Epic: 3, Legendary: 4 }
@@ -846,5 +938,167 @@ async function selectFaction(faction) {
 @media (max-width: 600px) {
   .rdm-modal { flex-direction: column; }
   .rdm-portrait { width: 100%; height: 160px; justify-content: flex-end; }
+}
+
+/* ── The Crown ─────────────────────────────────────────────────── */
+.crown-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  max-width: 1200px;
+  margin: 0 auto 22px;
+  padding: 16px 22px;
+  background: linear-gradient(90deg, rgba(20,15,8,0.92), rgba(12,9,5,0.88));
+  border: 1px solid color-mix(in srgb, var(--house-color) 42%, transparent);
+  border-radius: 8px;
+  box-shadow: 0 0 34px color-mix(in srgb, var(--house-color) 12%, transparent) inset;
+}
+.crown-mark {
+  font-size: 2.1rem;
+  line-height: 1;
+  color: var(--house-color);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--house-color) 55%, transparent);
+  flex-shrink: 0;
+}
+.crown-body { flex: 1; min-width: 0; }
+.crown-title-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.crown-name {
+  font-family: var(--font-head);
+  font-size: 1.02rem;
+  letter-spacing: 0.06em;
+  color: var(--house-color);
+}
+.crown-tag {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crown-sigil { margin-top: 4px; font-size: 0.7rem; color: #7a6647; font-style: italic; }
+.crown-creed { margin-top: 5px; font-size: 0.76rem; color: var(--text-parchment); }
+.crown-note { text-align: right; flex-shrink: 0; }
+.crown-note-label {
+  display: block;
+  font-family: var(--font-head);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--house-color);
+  opacity: 0.85;
+}
+.crown-note-sub { display: block; margin-top: 3px; font-size: 0.6rem; color: var(--text-dim); }
+
+/* ── Sworn houses ──────────────────────────────────────────────── */
+.sworn { margin: 14px 0 6px; }
+.sworn-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.sworn-rule::before,
+.sworn-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,162,39,0.22), transparent);
+}
+.sworn-rule span {
+  font-family: var(--font-head);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.sworn-card {
+  position: relative;
+  padding: 12px 14px 12px 18px;
+  margin-bottom: 10px;
+  background: rgba(10, 7, 4, 0.5);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-left: 3px solid var(--bc);
+  border-radius: 4px;
+}
+.sworn-head { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.sworn-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--bc);
+  box-shadow: 0 0 8px var(--bc);
+  flex-shrink: 0;
+  align-self: center;
+}
+.sworn-name {
+  font-family: var(--font-head);
+  font-size: 0.82rem;
+  color: var(--bc);
+  letter-spacing: 0.04em;
+}
+.sworn-tag {
+  font-size: 0.63rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+.faith-chip {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--fc) 45%, transparent);
+  background: color-mix(in srgb, var(--fc) 12%, transparent);
+  color: var(--fc);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.faith-chip.differs {
+  border-style: dashed;
+  font-weight: 700;
+}
+.sworn-meta {
+  margin-top: 5px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6a5a44;
+}
+.sworn-summary {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--text-parchment);
+  opacity: 0.86;
+}
+.sworn-note {
+  margin-top: 7px;
+  padding-left: 9px;
+  border-left: 2px solid color-mix(in srgb, var(--bc) 50%, transparent);
+  font-size: 0.66rem;
+  font-style: italic;
+  color: #8a7758;
+}
+.sworn-heroes { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+.sworn-hero {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 4px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 22px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.sworn-hero:hover { border-color: var(--bc); transform: translateY(-2px); }
+.sworn-hero.owned { border-color: color-mix(in srgb, var(--bc) 55%, transparent); }
+.sworn-hero-name {
+  font-size: 0.65rem;
+  color: var(--text-parchment);
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .crown-banner { flex-wrap: wrap; gap: 12px; }
+  .crown-note { text-align: left; }
 }
 </style>
