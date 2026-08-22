@@ -1,8 +1,9 @@
 <template>
-  <div class="combat-stage" :style="stageStyle">
+  <div class="combat-stage" :style="stageStyle" ref="stageEl">
     <div class="stage-bg-art" :style="bgArtStyle" />
     <div class="stage-bg-overlay" />
     <div class="stage-bg" />
+    <canvas ref="fxCanvas" class="fx-canvas" />
 
     <!-- Labels float in the corners — don't consume flex space -->
     <div class="stage-label stage-label--enemies">Enemies</div>
@@ -29,7 +30,7 @@
             </TransitionGroup>
           </div>
 
-          <div class="pcard" :class="spriteClass(hero.id, isDead, false)" :style="{ '--rarity': rarityBorder(hero) }">
+          <div class="pcard" :class="spriteClass(hero.id, isDead, false)" :style="{ '--rarity': rarityBorder(hero) }" :data-hero-id="hero.id">
             <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
             <div class="pcard-target" v-if="store.state === 'selecting_target' && !isDead" />
             <img v-if="portrait(hero)" :src="portrait(hero)" class="pcard-img" alt="" />
@@ -69,7 +70,7 @@
             </TransitionGroup>
           </div>
 
-          <div class="pcard" :class="spriteClass(hero.id, isDead, true)" :style="{ '--rarity': rarityBorder(hero) }">
+          <div class="pcard" :class="spriteClass(hero.id, isDead, true)" :style="{ '--rarity': rarityBorder(hero) }" :data-hero-id="hero.id">
             <div class="pcard-active" v-if="store.activeHero?.id === hero.id" />
             <img v-if="portrait(hero)" :src="portrait(hero)" class="pcard-img" alt="" />
             <HeroAvatar v-else :hero="hero" :size="140" :noBorder="true" class="pcard-avatar" />
@@ -89,7 +90,8 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch } from 'vue'
+import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue'
+import { useCanvasFx } from '../composables/useCanvasFx.js'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { getPortrait } from '../game/portraits.js'
 import HeroAvatar from './HeroAvatar.vue'
@@ -110,6 +112,10 @@ const HOUSE_CARD_BORDERS = {
 function cardBorder(hero) { return HOUSE_CARD_BORDERS[hero.faction] ?? null }
 
 const store = useBattleStore()
+
+// ── Canvas FX ─────────────────────────────────────────────────────
+const { fxCanvas, stageEl, brushFx, orbFx, sealFx, petalsFx, splashFx } = useCanvasFx()
+defineExpose({ brushFx, orbFx, sealFx, petalsFx, splashFx })
 
 // ── Contextual battle background ──────────────────────────────────
 const _cs_easy01 = _B + 'dungeons/dungeon_easy_01.png'
@@ -213,7 +219,7 @@ function spawnNumbers(hits, numMs) {
   }
 }
 
-// ── Watch lastAction → trigger animations ──
+// ── Watch lastAction → trigger animations + canvas FX ──
 watch(() => store.lastAction, (action) => {
   if (!action || !action.hits.length) return
   const t = animTiming.value
@@ -221,12 +227,20 @@ watch(() => store.lastAction, (action) => {
   const casterAnim = getAnim(action.casterId)
   casterAnim.attacking = true
 
+  const isAlly = store.playerTeam.some(h => h.id === action.casterId)
+
   setTimeout(() => {
     spawnNumbers(action.hits, t.numMs)
     for (const hit of action.hits) {
       const a = getAnim(hit.targetId)
       a.hit = true
       setTimeout(() => { a.hit = false }, t.hitMs)
+
+      if (hit.heal > 0) {
+        petalsFx(hit.targetId, '100,210,140')
+      } else {
+        brushFx(action.casterId, hit.targetId, isAlly ? '201,166,101' : '200,70,50')
+      }
     }
   }, t.impactMs)
 
@@ -279,6 +293,15 @@ function onSpriteClick(hero, isDead) {
 }
 @container combat-col (min-width: 2000px) {
   .combat-stage { min-height: 960px; }
+}
+
+/* Canvas FX overlay — above bg, below cards and UI */
+.fx-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  border-radius: 12px;
 }
 
 /* Background art layer */
