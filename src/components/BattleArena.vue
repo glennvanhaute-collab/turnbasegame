@@ -102,8 +102,14 @@
 
     <!-- ── Left: combat ──────────────────────────────────────────── -->
     <div class="col-combat">
-      <div class="encounter-label">{{ encounter?.name }} · {{ encounter?.difficulty }}</div>
-      <CombatStage />
+      <div class="encounter-label">
+        {{ encounter?.name }} · {{ encounter?.difficulty }}
+        <button class="stage-toggle" @click="useDuelStage = !useDuelStage">
+          {{ useDuelStage ? 'Classic view' : 'Duel view' }}
+        </button>
+      </div>
+      <WestrunBattleStage v-if="useDuelStage" />
+      <CombatStage v-else />
       <SkillPanel v-if="!store.isOver" />
     </div>
 
@@ -289,6 +295,7 @@ import { UPGRADE_COMPONENTS } from '../game/data/upgradeComponents.js'
 import { DUNGEON_KEY_NAMES, DUNGEON_KEY_COLORS } from '../game/data/dungeons.js'
 import { oreIcon, hideIcon, fiberIcon } from '../game/data/spritesheet.js'
 import CombatStage        from './PixiCombatStage.vue'
+import WestrunBattleStage from './westrun/WestrunBattleStage.vue'
 import SkillPanel          from './SkillPanel.vue'
 import BattleLog           from './BattleLog.vue'
 import GameIcon            from './ui/GameIcon.vue'
@@ -346,6 +353,8 @@ const isDungeonVictory = computed(() =>
 
 const playerHero = usePlayerHeroStore()
 const store      = useBattleStore()
+// Duel view: Yamato-style formation columns + large centre portraits.
+const useDuelStage = ref(true)
 const collection = useCollectionStore()
 
 
@@ -410,6 +419,22 @@ function startBatch100() { store.startBatchRun(100) }
   container-type: inline-size;
   container-name: combat-col;
 }
+
+.stage-toggle {
+  margin-left: 10px;
+  padding: 2px 9px;
+  background: rgba(20,14,8,0.8);
+  border: 1px solid rgba(201,162,39,0.35);
+  border-radius: 3px;
+  color: #9a856a;
+  font-family: var(--font-head);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.stage-toggle:hover { color: var(--gold); border-color: var(--gold-dim); }
 
 .encounter-label {
   font-size: 0.62rem;
