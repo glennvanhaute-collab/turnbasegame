@@ -1,9 +1,14 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 // Canvas-based combat skill FX — brush arcs, orb projectiles, seal circles, petal bursts.
-// Usage: const fx = useCanvasFx()
+// Usage: const fx = useCanvasFx()                          // Westrun: dark stage
+//        const fx = useCanvasFx({ blend: 'multiply',       // Yamato: painted parchment
+//                                 ambient: 'petal' })
 // Bind fx.stageEl to the combat stage root, fx.fxCanvas to a <canvas> element.
-export function useCanvasFx() {
+export function useCanvasFx(options = {}) {
+  const blend      = options.blend   ?? 'screen'  // 'screen' on dark grounds, 'multiply' on light
+  const ambientKind = options.ambient ?? 'gold'   // 'gold' motes or 'petal' blossom drift
+
   const fxCanvas = ref(null)
   const stageEl  = ref(null)
 
@@ -58,7 +63,7 @@ export function useCanvasFx() {
         const tt = _easeIO(t)
         const x  = e.from.x + (e.to.x - e.from.x) * tt
         const y  = e.from.y + (e.to.y - e.from.y) * tt
-        _ctx.globalCompositeOperation = 'screen'
+        _ctx.globalCompositeOperation = blend
         _ctx.lineCap = 'round'
         for (let i = 0; i < 4; i++) {
           _ctx.strokeStyle = `rgba(${e.rgb},${0.85 * (1 - t)})`
@@ -70,7 +75,7 @@ export function useCanvasFx() {
         }
       } else if (e.type === 'splash') {
         const r = 14 + _easeOut(t) * 64
-        _ctx.globalCompositeOperation = 'screen'
+        _ctx.globalCompositeOperation = blend
         _ctx.strokeStyle = `rgba(${e.rgb},${1 - t})`
         _ctx.lineWidth   = 4 * (1 - t) + 1
         _ctx.beginPath(); _ctx.arc(e.at.x, e.at.y, r, 0, 6.28); _ctx.stroke()
@@ -86,7 +91,7 @@ export function useCanvasFx() {
         const r = 28 + Math.sin(t * Math.PI) * 14
         _ctx.translate(e.at.x, e.at.y)
         _ctx.rotate(t * Math.PI * 1.4)
-        _ctx.globalCompositeOperation = 'screen'
+        _ctx.globalCompositeOperation = blend
         _ctx.strokeStyle = `rgba(${e.rgb},${Math.sin(t * Math.PI) * 0.9})`
         _ctx.lineWidth   = 2.5
         _ctx.beginPath(); _ctx.arc(0, 0, r, 0, 6.28); _ctx.stroke()
@@ -128,31 +133,49 @@ export function useCanvasFx() {
     }
   }
 
-  // ── Ambient spark/dust particles (gold motes drifting upward) ────
+  // ── Ambient drift — gold motes (Westrun) or cherry petals + ink (Yamato) ──
   function _seedAmb() {
-    _amb = Array.from({ length: 30 }, () => ({
+    const isPetal = ambientKind === 'petal'
+    _amb = Array.from({ length: isPetal ? 70 : 30 }, () => ({
       x: Math.random(), y: Math.random(),
-      speed: 0.003 + Math.random() * 0.008,
-      drift: (Math.random() - 0.5) * 0.012,
-      size:  0.5 + Math.random() * 1.5,
-      alpha: 0.03 + Math.random() * 0.09,
+      speed: isPetal ? 0.006 + Math.random() * 0.013 : 0.003 + Math.random() * 0.008,
+      drift: (Math.random() - 0.5) * (isPetal ? 0.02 : 0.012),
+      size:  isPetal ? 0.8 + Math.random() * 2.2 : 0.5 + Math.random() * 1.5,
+      alpha: isPetal ? 0.05 + Math.random() * 0.18 : 0.03 + Math.random() * 0.09,
       phase: Math.random() * 6.28,
+      ink:   isPetal && Math.random() >= 0.55,
     }))
   }
 
   function _drawAmb(w, h, dt) {
+    const isPetal = ambientKind === 'petal'
     for (const p of _amb) {
       p.y -= p.speed * dt
-      p.x += p.drift * dt * 0.05 + Math.sin(performance.now() / 1800 + p.phase) * 0.00004 * dt
+      p.x += p.drift * dt * (isPetal ? 0.06 : 0.05) +
+             Math.sin(performance.now() / (isPetal ? 1600 : 1800) + p.phase) *
+             (isPetal ? 0.00006 : 0.00004) * dt
       if (p.y < -0.05) { p.y = 1.05; p.x = Math.random() }
       if (p.x < -0.05)  p.x = 1.05
       if (p.x >  1.05)  p.x = -0.05
       const px = p.x * w, py = p.y * h
-      _ctx.fillStyle = `rgba(201,166,101,${p.alpha})`
+
+      if (p.ink) {
+        // Drifting ink speck
+        _ctx.fillStyle = `rgba(86,77,75,${p.alpha * 0.7})`
+        _ctx.beginPath()
+        _ctx.arc(px, py, p.size, 0, Math.PI * 2)
+        _ctx.fill()
+        continue
+      }
+
+      _ctx.fillStyle = isPetal
+        ? `rgba(205,112,135,${p.alpha})`     // cherry blossom
+        : `rgba(201,166,101,${p.alpha})`     // gold mote
+      const s = isPetal ? p.size : p.size * 0.8
       _ctx.beginPath()
       _ctx.moveTo(px, py)
-      _ctx.quadraticCurveTo(px + p.size * 2.2, py + p.size * 1.1, px, py + p.size * 2.2)
-      _ctx.quadraticCurveTo(px - p.size * 1.7, py + p.size * 1.1, px, py)
+      _ctx.quadraticCurveTo(px + s * 2.8, py + s * 1.4, px, py + s * 2.7)
+      _ctx.quadraticCurveTo(px - s * 2.2, py + s * 1.4, px, py)
       _ctx.fill()
     }
   }

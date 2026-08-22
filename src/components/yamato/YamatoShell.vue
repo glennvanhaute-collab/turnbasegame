@@ -44,16 +44,50 @@
         <p class="ph-msg">Recruit your clan's champions as you progress through the realm.</p>
       </div>
 
-      <!-- Combat -->
-      <div class="yamato-placeholder" v-else-if="tab === 'combat'">
-        <span class="ph-kanji">戦</span>
-        <h2 class="ph-title">Combat</h2>
-        <p class="ph-msg">The battlefield awaits. Zones and encounters are being prepared.</p>
+      <!-- Combat — training grounds -->
+      <div class="yamato-combat" v-else-if="tab === 'combat'">
+        <div class="combat-head">
+          <span class="combat-kanji">練</span>
+          <div>
+            <h2 class="combat-title">Training Grounds</h2>
+            <p class="combat-sub">Drill your vanguard against the ashen band.</p>
+          </div>
+        </div>
+
+        <div class="ground-grid">
+          <button
+            v-for="g in TRAINING_GROUNDS"
+            :key="g.id"
+            class="ground-card"
+            :style="{ backgroundImage: `url(${g.bg})` }"
+            @click="enterGround(g)"
+          >
+            <div class="ground-scrim" />
+            <span class="ground-kanji">{{ g.kanji }}</span>
+            <div class="ground-body">
+              <p class="ground-sub">{{ g.sub }} · {{ g.difficulty }}</p>
+              <h3 class="ground-name">{{ g.name }}</h3>
+              <p class="ground-desc">{{ g.desc }}</p>
+              <div class="ground-meta">
+                <span>{{ g.allies.length }} allies</span>
+                <span class="ground-vs">vs</span>
+                <span>{{ g.enemies.length }} enemies</span>
+              </div>
+            </div>
+          </button>
+        </div>
       </div>
 
       <!-- Realm -->
       <div class="yamato-realm" v-else :style="{ backgroundImage: `url(${realmMapImg})` }" />
     </main>
+
+    <!-- Battle arena — full-screen overlay -->
+    <YamatoBattleArena
+      v-if="activeGround"
+      :ground="activeGround"
+      @back="activeGround = null"
+    />
   </div>
 </template>
 
@@ -62,14 +96,21 @@ import { ref } from 'vue'
 import { useWorldStore } from '../../stores/useWorldStore.js'
 import { useYamatoPlayerStore } from '../../stores/useYamatoPlayerStore.js'
 import YamatoCreationView from './YamatoCreationView.vue'
+import YamatoBattleArena  from './YamatoBattleArena.vue'
+import { TRAINING_GROUNDS } from '../../game/data/yamato/trainingGrounds.js'
 const realmMapImg = import.meta.env.BASE_URL + 'yamato/realm.png'
 
-const worldStore  = useWorldStore()
-const yamatoStore = useYamatoPlayerStore()
-const tab         = ref('clan')
+const worldStore   = useWorldStore()
+const yamatoStore  = useYamatoPlayerStore()
+const tab          = ref('clan')
+const activeGround = ref(null)
 
 function onCreated() {
   tab.value = 'clan'
+}
+
+function enterGround(ground) {
+  activeGround.value = ground
 }
 </script>
 
@@ -199,6 +240,8 @@ function onCreated() {
 /* ── Main ── */
 .yamato-main {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,6 +279,121 @@ function onCreated() {
   max-width: 380px;
   line-height: 1.6;
 }
+
+/* ── Combat / training grounds ── */
+.yamato-combat {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 24px;
+  align-self: flex-start;
+}
+.combat-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 26px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #1e2a1e;
+}
+.combat-kanji {
+  font-family: 'Georgia', serif;
+  font-size: 3rem;
+  color: #cc4433;
+  line-height: 1;
+  opacity: 0.85;
+}
+.combat-title {
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
+  font-style: italic;
+  color: #c0b8b0;
+}
+.combat-sub {
+  font-size: 0.75rem;
+  color: #4a5a4a;
+  margin-top: 4px;
+}
+
+.ground-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+.ground-card {
+  position: relative;
+  min-height: 210px;
+  padding: 0;
+  border: 1px solid #1e2a1e;
+  border-radius: 6px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.ground-card:hover {
+  transform: translateY(-3px);
+  border-color: #cc443355;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+.ground-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 9, 6, 0.35) 0%, rgba(7, 9, 6, 0.88) 55%, rgba(7, 9, 6, 0.96) 100%);
+}
+.ground-kanji {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: 'Georgia', serif;
+  font-size: 2.4rem;
+  color: #cc4433;
+  opacity: 0.5;
+  line-height: 1;
+}
+.ground-body {
+  position: relative;
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  min-height: 210px;
+}
+.ground-sub {
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #cc4433;
+  opacity: 0.9;
+}
+.ground-name {
+  font-family: 'Georgia', serif;
+  font-size: 1.25rem;
+  font-style: italic;
+  color: #ded5c8;
+  margin-top: 4px;
+}
+.ground-desc {
+  font-size: 0.72rem;
+  color: #7a8a7a;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+.ground-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 0.62rem;
+  color: #5a6a5a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ground-vs { color: #cc4433; font-style: italic; }
 
 /* ── Realm map ── */
 .yamato-realm {
