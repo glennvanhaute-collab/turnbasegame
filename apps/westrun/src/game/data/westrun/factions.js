@@ -113,8 +113,65 @@ export const HOUSES = {
   },
 }
 
+// ── Bannermen ─────────────────────────────────────────────────────
+// Minor houses sworn to a great house. They add names, regions and colour to
+// the world without adding political poles: a bannerman has no reputation track
+// of its own — what you earn with them is credited to their liege.
+export const BANNERMEN = {
+  [Faction.IGNAR]: {
+    id: 'ignar',
+    name: 'House Ignar',
+    liege: Faction.ALDRIC,
+    color: '#7fa8c4',
+    region: 'The Frostmoors',
+    tagline: 'Oathsworn of the Frostmoors',
+    // Ignar keeps the Old Gods while sworn to a New Gods house. Aldric's own
+    // devotion is political, so it has never pressed the point — and Ignar has
+    // never once let the difference loosen the oath.
+    faith: Faith.OLD_GODS,
+    devotion: 'ancestral',
+    creed: 'The oath outlives the man who swore it.',
+    summary:
+      'A northern warband culture of jarls, shieldwalls and long memory, sworn to ' +
+      'Aldric three generations back and not one day late since. Ignar keeps the ' +
+      'Old Gods in the plain northern way — no rites, no priests, only the stones ' +
+      'their grandfathers were buried under. Southern houses mistake them for ' +
+      'raiders because they were, once, and because Ignar has never bothered to ' +
+      'correct anyone.',
+    // Those who broke with the house — the enemy Ignar you meet in the field.
+    splinter: {
+      name: 'The Frostbound Cult',
+      summary:
+        'Not every jarl accepted the oath to Aldric. Those who refused went north ' +
+        'past the moors and kept going, and what they kneel to now is older than ' +
+        'anything Ignar buried its dead beside. House Ignar does not call them ' +
+        'kin, and hunts them harder than any southern army would.',
+    },
+  },
+}
+
+export function isBannerman(faction) {
+  return Object.hasOwn(BANNERMEN, faction)
+}
+
+export function liegeOf(faction) {
+  return BANNERMEN[faction]?.liege ?? null
+}
+
+export function bannermenOf(house) {
+  return Object.entries(BANNERMEN)
+    .filter(([, b]) => b.liege === house)
+    .map(([faction]) => faction)
+}
+
+// The house a faction's reputation is credited to. Great houses answer for
+// themselves; bannermen pass it up to their liege.
+export function repHouseFor(faction) {
+  return BANNERMEN[faction]?.liege ?? faction
+}
+
 export function houseFaith(faction) {
-  return HOUSES[faction]?.faith ?? null
+  return HOUSES[faction]?.faith ?? BANNERMEN[faction]?.faith ?? null
 }
 
 export function sharesFaith(a, b) {

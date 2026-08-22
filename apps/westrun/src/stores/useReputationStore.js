@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useCollectionStore } from './useCollectionStore.js'
+import { repHouseFor } from '../game/data/westrun/factions.js'
 
 const STORAGE_KEY = 'raid-reputation'
 
@@ -58,15 +59,18 @@ export const useReputationStore = defineStore('reputation', () => {
   const saved = loadSaved()
   const rep = ref(saved?.rep ?? {})
 
-  // Rep can go negative — houses lose interest when you consistently oppose them
+  // Rep can go negative — houses lose interest when you consistently oppose them.
+  // Bannermen have no track of their own: repHouseFor() sends it up to the liege,
+  // so serving Ignar is serving Aldric as far as the ledger is concerned.
   function getRep(faction) {
-    return Math.min(REP_MAX, rep.value[faction] ?? 0)
+    return Math.min(REP_MAX, rep.value[repHouseFor(faction)] ?? 0)
   }
 
   // Legacy single-house gain (used by DevMenu)
   function earnRep(faction, amount) {
-    const current = getRep(faction)
-    rep.value = { ...rep.value, [faction]: Math.min(REP_MAX, current + amount) }
+    const house   = repHouseFor(faction)
+    const current = getRep(house)
+    rep.value = { ...rep.value, [house]: Math.min(REP_MAX, current + amount) }
     save()
   }
 
@@ -74,8 +78,9 @@ export const useReputationStore = defineStore('reputation', () => {
   function applyRepChanges(changes) {
     const updated = { ...rep.value }
     for (const [faction, delta] of Object.entries(changes)) {
-      const current = updated[faction] ?? 0
-      updated[faction] = Math.min(REP_MAX, current + delta)
+      const house   = repHouseFor(faction)
+      const current = updated[house] ?? 0
+      updated[house] = Math.min(REP_MAX, current + delta)
     }
     rep.value = updated
     save()
