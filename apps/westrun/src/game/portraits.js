@@ -56,6 +56,8 @@ const MANIFEST = {
   'carnax-the-destroyer': 'units/legendary/carnax-the-destroyer.png',
   'genesis':              'units/legendary/genesis.png',
   'lord-aldric':          'units/legendary/lord-aldric.png',
+  'king-hartvane':        'units/legendary/king-hartvane.png',
+  'ser-roswaine':         'units/legendary/ser-roswaine.png',
   'lord-aldric copy':     'units/legendary/lord-aldric copy.png',
   'seraphel':             'units/legendary/seraphel.png',
   'theron-greenmarch':    'units/legendary/theron-greenmarch.png',

@@ -68,7 +68,8 @@ export const useReputationStore = defineStore('reputation', () => {
 
   // Legacy single-house gain (used by DevMenu)
   function earnRep(faction, amount) {
-    const house   = repHouseFor(faction)
+    const house = repHouseFor(faction)
+    if (!house) return          // the Crown keeps no ledger
     const current = getRep(house)
     rep.value = { ...rep.value, [house]: Math.min(REP_MAX, current + amount) }
     save()
@@ -78,7 +79,8 @@ export const useReputationStore = defineStore('reputation', () => {
   function applyRepChanges(changes) {
     const updated = { ...rep.value }
     for (const [faction, delta] of Object.entries(changes)) {
-      const house   = repHouseFor(faction)
+      const house = repHouseFor(faction)
+      if (!house) continue      // the Crown keeps no ledger
       const current = updated[house] ?? 0
       updated[house] = Math.min(REP_MAX, current + delta)
     }

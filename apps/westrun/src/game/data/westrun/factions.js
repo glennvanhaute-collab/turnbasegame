@@ -5,8 +5,15 @@ export const Faction = {
   MORDAINE:       'House Mordaine',
   BLOODTUSK:      'House Bloodtusk',
   IGNAR:          'House Ignar',
+  HARTVANE:       'House Hartvane',
+  ROSWAINE:       'House Roswaine',
   ANCIENT_NOBLES: 'Ancient Nobles',
 }
+
+// The seat above the board. Hartvane is not one of the four — it is the thing
+// the four are arranged around. You do not earn reputation with a throne; you
+// are loyal to it or you are not, so it carries no rep track of its own.
+export const THE_CROWN = Faction.HARTVANE
 
 // ── The two faiths ────────────────────────────────────────────────
 // Westrun is split by belief as well as by banner, and the two splits do not
@@ -113,6 +120,35 @@ export const HOUSES = {
   },
 }
 
+// ── The Crown ─────────────────────────────────────────────────────
+// Hartvane sits outside HOUSES on purpose: it is not a pole on the board, it is
+// the seat the board is arranged around. Crowned by New Gods septons, which is
+// precisely why the Old Gods houses have never quite conceded the point.
+export const CROWN = {
+  id: 'hartvane',
+  name: 'House Hartvane',
+  color: '#c9a227',
+  region: 'The Stormhold',
+  tagline: 'The Antlered Seat',
+  sigil: 'A black hart rampant, crowned, on gold',
+  faith: Faith.NEW_GODS,
+  devotion: 'crowned',
+  creed: 'The realm answers to one seat, or it answers to no one.',
+  summary:
+    'Hartvane took the crown the direct way and has kept it the same way. Its kings ' +
+    'are warlike, plainspoken and impatient with council — a hammer where a scalpel ' +
+    'was wanted, but the only house that ever ended a war rather than inheriting one. ' +
+    'It was crowned in a New Gods sept, and the Old Gods houses have spent two ' +
+    'centuries being formally respectful about it.',
+  // What the four actually think about the seat
+  standing: {
+    [Faction.ALDRIC]:   'Sworn, and means it. Aldric built half those walls.',
+    [Faction.VALDRIS]:  'Sworn in writing, which Valdris considers the binding part.',
+    [Faction.CAELWYN]:  'Sworn in the way one is polite to weather.',
+    [Faction.MORDAINE]: 'Sworn. Mordaine has never said to what.',
+  },
+}
+
 // ── Bannermen ─────────────────────────────────────────────────────
 // Minor houses sworn to a great house. They add names, regions and colour to
 // the world without adding political poles: a bannerman has no reputation track
@@ -148,6 +184,29 @@ export const BANNERMEN = {
         'kin, and hunts them harder than any southern army would.',
     },
   },
+
+  [Faction.ROSWAINE]: {
+    id: 'roswaine',
+    name: 'House Roswaine',
+    liege: Faction.CAELWYN,
+    color: '#d4566e',
+    region: 'The Rosemarch',
+    tagline: 'The Cultivated Hand',
+    sigil: 'Three red roses on green',
+    // Same green world as its liege, opposite philosophy of it. Caelwyn keeps the
+    // grove wild because it was never theirs to touch; Roswaine prunes, grafts and
+    // improves — and considers that the higher devotion.
+    faith: Faith.OLD_GODS,
+    devotion: 'cultivated',
+    creed: 'A thing left wild is a thing left unloved.',
+    summary:
+      'The richest holding in Westrun and the least armed, which Roswaine regards ' +
+      'as the same sentence. It feeds four houses, marries into three, and has won ' +
+      'more ground with harvest ledgers and wedding contracts than Aldric has with ' +
+      'siege engines. Caelwyn finds its gardens faintly blasphemous. Roswaine finds ' +
+      "Caelwyn's grove sentimental. Neither has ever said so at table.",
+    splinter: null,
+  },
 }
 
 export function isBannerman(faction) {
@@ -165,9 +224,16 @@ export function bannermenOf(house) {
 }
 
 // The house a faction's reputation is credited to. Great houses answer for
-// themselves; bannermen pass it up to their liege.
+// themselves; bannermen pass it up to their liege. The Crown has no track at
+// all — loyalty to a throne is not a bar you fill — so it credits nothing.
 export function repHouseFor(faction) {
+  if (faction === THE_CROWN) return null
   return BANNERMEN[faction]?.liege ?? faction
+}
+
+export function houseInfo(faction) {
+  if (faction === THE_CROWN) return CROWN
+  return HOUSES[faction] ?? BANNERMEN[faction] ?? null
 }
 
 export function houseFaith(faction) {

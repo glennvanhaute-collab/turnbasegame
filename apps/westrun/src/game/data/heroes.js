@@ -160,6 +160,34 @@ export const HERO_TEMPLATES = {
     archetype: { role: 'Warrior', name: 'Warlord', desc: 'The iron fist of House Aldric. Raw force backed by relentless offensive pressure on every front.', tags: ['Single Target', 'AOE Damage', 'ATK Buff'] },
   }),
 
+  // ── The Crown — House Hartvane ──────────────────────────────────
+  KING_HARTVANE: () => new Hero({
+    id: 'king_hartvane', name: 'Kingurt Hartvane',
+    faction: Faction.HARTVANE, rarity: Rarity.LEGENDARY, affinity: Affinity.FORCE,
+    baseHp: 24500, baseAtk: 1780, baseDef: 1020, baseSpd: 92,
+    critRate: 0.28, critDmg: 0.72,
+    skills: [SKILLS.HAMMER_ROUND, SKILLS.WARLORDS_RESOLVE, SKILLS.BATTLE_CRY],
+    artisanSkills: [ARTISAN.blacksmithing],
+    isPlayer: true, role: 'warrior', weaponType: 'warhammer',
+    archetype: { role: 'Warrior', name: 'Crowned Hammer', desc: 'The seat of Westrun swung like a weapon. Ends fights early and apologises to no one afterwards.', tags: ['Single Target', 'ATK Buff', 'Execute'] },
+    quote: 'A crown is not an argument. It is what happens after the argument.',
+    lore: 'Hartvane kings are not raised to rule so much as raised to finish things, and Kingurt finished the last war personally, on foot, in the rain, with the hammer he still carries. The septons crowned him in gold and scripture and he has been faintly impatient with both ever since. He knows the four houses call him a blunt instrument. He also knows he is the only man in two centuries to end a war rather than inherit one, and he has never felt the need to say so.',
+  }),
+
+  // ── House Roswaine — sworn to Caelwyn ───────────────────────────
+  SER_ROSWAINE: () => new Hero({
+    id: 'ser_roswaine', name: 'Ser Aldan Roswaine',
+    faction: Faction.ROSWAINE, rarity: Rarity.LEGENDARY, affinity: Affinity.SPIRIT,
+    baseHp: 19800, baseAtk: 1420, baseDef: 1180, baseSpd: 104,
+    critRate: 0.22, critDmg: 0.58,
+    skills: [SKILLS.PROVOKE, SKILLS.OATH_OF_THE_WHITE_GROVE, SKILLS.FORTIFY],
+    artisanSkills: [ARTISAN.tailoring, ARTISAN.herbalism],
+    isPlayer: true, role: 'tank', weaponType: 'sword',
+    archetype: { role: 'Tank', name: 'Rose Knight', desc: 'Courtly steel. Holds the line beautifully, and makes certain the right people are watching.', tags: ['Provoke', 'DEF Buff', 'Team Heal'] },
+    quote: 'My house has never lost a war. We have simply never been impolite enough to start one.',
+    lore: 'The Rosemarch feeds four houses and arms almost none of them, which Roswaine has always considered the more durable arrangement. Aldan was raised on harvest ledgers and wedding contracts before he was handed a sword, and he is better with the first two. He is also genuinely, inconveniently brave — a fact his family finds charming and his liege at Caelwyn finds slightly alarming, since a Roswaine who fights is a Roswaine who might be seen to lose.',
+  }),
+
   HELGA: () => new Hero({
     id: 'helga', name: 'Helga',
     faction: Faction.ALDRIC, rarity: Rarity.LEGENDARY, affinity: Affinity.FORCE,
@@ -783,6 +811,9 @@ export const RECRUIT_POOL = [
   { key: 'SERAPHEL',            rarity: 'Legendary' },
   { key: 'KYVER',               rarity: 'Legendary' },
   { key: 'ARRI',                rarity: 'Legendary' },
+  { key: 'SER_ROSWAINE',        rarity: 'Legendary' },
+  // KING_HARTVANE is deliberately absent — you do not pull a crowned king out of a
+  // portal. He rides with you or he does not. Gate condition still to be decided.
   { key: 'ZWIERLS',             rarity: 'Epic' },
   // ── Mythical ─────────────────────────────────────────────────────
   { key: 'AURELAN',             rarity: 'Mythical' },
