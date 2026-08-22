@@ -7,17 +7,17 @@ export const LORE = {
 
   lord_aldric: {
     title:  'The Hedge Lord',
-    quote:  '"He never asked anyone to lift a stone he wouldn\'t lift himself." â€” Unknown conscript, House Aldric',
+    quote:  '"He never asked anyone to lift a stone he wouldn\'t lift himself." — Unknown conscript, House Aldric',
     leadership: {
       name:  'Lord\'s Efficiency',
       desc:  'Camp gathering speed increased by 150% while Lord Aldric is assigned as Camp Commander.',
-      flavour: '"Not magic. Not luck. Just a man who has done this before." â€” Camp Quartermaster',
+      flavour: '"Not magic. Not luck. Just a man who has done this before." — Camp Quartermaster',
     },
     fragments: [
       {
         id: 'aldric_f1',
         title: 'The Mud Years',
-        text: `Lord Aldric was not born to his title. He earned it the way most things worth having are earned â€” slowly, without glory, and with dirt under his fingernails.
+        text: `Lord Aldric was not born to his title. He earned it the way most things worth having are earned — slowly, without glory, and with dirt under his fingernails.
 
 He began as a hedge knight, the same as you. No house, no banner, no name anyone recognised. He slept in the same mud as the men he would one day lead and never once forgot what that felt like.`,
       },
@@ -36,7 +36,7 @@ When they finally gave him the title Lord, he accepted it quietly. Then he went 
       {
         id: 'aldric_f4',
         title: 'The Title',
-        text: `His soldiers say the camp runs at half the effort when he walks the grounds. Not because of magic. Because he has done it before, a hundred times, from nothing â€” and everyone around him knows it.
+        text: `His soldiers say the camp runs at half the effort when he walks the grounds. Not because of magic. Because he has done it before, a hundred times, from nothing — and everyone around him knows it.
 
 He is what a hedge knight becomes if they never forget where they came from.
 
@@ -50,23 +50,23 @@ He is what you are working toward.`,
           with: 'edran_ashveil',
           name: 'Embers of the Pact',
           desc: 'Lord Aldric and Edran Ashveil fight as one. Aldric\'s heat builds 25% faster and Edran\'s fire spells deal 20% bonus damage when both are in the same party.',
-          flavour: '"They never spoke of those winters. But watch them fight side by side â€” their fire moves like it remembers."',
+          flavour: '"They never spoke of those winters. But watch them fight side by side — their fire moves like it remembers."',
         },
-        text: `During his years as a hedge knight, Aldric crossed paths with a young scholar of House Valdris â€” an outcast mage named Edran, exiled from the Arcane Citadel for pursuing forbidden artefact research.
+        text: `During his years as a hedge knight, Aldric crossed paths with a young scholar of House Valdris — an outcast mage named Edran, exiled from the Arcane Citadel for pursuing forbidden artefact research.
 
-Edran had found something buried beneath the ruins of a nameless keep: a stone that pulsed with ancient heat. Not magical fire as the Citadel taught it â€” something older. Something that predated House Valdris entirely.
+Edran had found something buried beneath the ruins of a nameless keep: a stone that pulsed with ancient heat. Not magical fire as the Citadel taught it — something older. Something that predated House Valdris entirely.
 
 Edran could study it but could not wield it. Aldric, to both their surprise, could.
 
 Nobody understood why. Aldric least of all.
 
-Edran spent two winters teaching him to control it. Not as a weapon â€” as a discipline. The fire did not come from ambition or anger. It came from endurance. The longer you burn, the hotter it gets. The longer your enemy fights you, the more they are made to suffer the consequence of their own stubbornness.
+Edran spent two winters teaching him to control it. Not as a weapon — as a discipline. The fire did not come from ambition or anger. It came from endurance. The longer you burn, the hotter it gets. The longer your enemy fights you, the more they are made to suffer the consequence of their own stubbornness.
 
 Aldric never spoke of Edran after those winters. Whether they parted as friends or something happened between them, no record survives.
 
 What survived was the fire.
 
-Look at his gauntlets long enough in battle and you will see it â€” coiling around the knuckles, patient, waiting. It does not rush. Neither does he.
+Look at his gauntlets long enough in battle and you will see it — coiling around the knuckles, patient, waiting. It does not rush. Neither does he.
 
 The ancient stone was never found again.`,
       },
@@ -75,14 +75,14 @@ The ancient stone was never found again.`,
 
   helga: {
     title:  'The Golden Vow',
-    quote:  '"Her armor catches the sun before the battle begins. Every soldier in the line sees it. Nobody runs." â€” House Aldric soldier, Second Campaign',
+    quote:  '"Her armor catches the sun before the battle begins. Every soldier in the line sees it. Nobody runs." — House Aldric soldier, Second Campaign',
     fragments: [
       {
         id: 'helga_f1',
         title: 'The Armor',
         text: `Helga did not take Lord Aldric's name. This is one of those facts the histories note without comment, as if it were simply a detail, when in truth it is everything.
 
-She was already a warrior when she met him â€” not by title, but by the only measure that matters in Westrun: by the number of times she had bled and stood up anyway. Her armor had been in her family for three generations. The gold filigree was not decorative. It was added by her grandmother after surviving a siege where the only two people left standing at the wall were her grandmother and a blacksmith who loved her.
+She was already a warrior when she met him — not by title, but by the only measure that matters in Westrun: by the number of times she had bled and stood up anyway. Her armor had been in her family for three generations. The gold filigree was not decorative. It was added by her grandmother after surviving a siege where the only two people left standing at the wall were her grandmother and a blacksmith who loved her.
 
 The armor remembers. It has been in every battle since.`,
       },
@@ -98,7 +98,7 @@ He has never forgotten that.`,
       {
         id: 'helga_f3',
         title: 'What She Said',
-        text: `Neither has anyone who has seen them fight side by side â€” two people who learned a long time ago that words before a battle are wasted breath. They already know where the other one is going. The soldiers say you can hear it in the silence between them.
+        text: `Neither has anyone who has seen them fight side by side — two people who learned a long time ago that words before a battle are wasted breath. They already know where the other one is going. The soldiers say you can hear it in the silence between them.
 
 She does not fight in his shadow. She never has. When the line breaks and soldiers look for something to hold onto, they look for the gold that catches the light. They find her there, exactly where she said she would be.`,
       },
@@ -107,7 +107,7 @@ She does not fight in his shadow. She never has. When the line breaks and soldie
 
   hedge_blade: {
     title:   'The Unbroken',
-    quote:   '"He doesn\'t fight like a man who wants to win. He fights like a man who has nothing left to lose â€” and found out that\'s not the same thing as being weak." â€” Unknown soldier',
+    quote:   '"He doesn\'t fight like a man who wants to win. He fights like a man who has nothing left to lose — and found out that\'s not the same thing as being weak." — Unknown soldier',
     potential: {
       tier: 'Legendary',
       condition: 'Complete all Garrett fragments and discover his benefactor',
@@ -117,18 +117,18 @@ She does not fight in his shadow. She never has. When the line breaks and soldie
       {
         id: 'garrett_f1',
         title: 'What He Lost',
-        text: `Most men who lose everything break. The grief takes them â€” folds them in half, hollows them out, leaves something behind that only looks like a person.
+        text: `Most men who lose everything break. The grief takes them — folds them in half, hollows them out, leaves something behind that only looks like a person.
 
 Garrett did not break.
 
-Not because he didn't feel it. He felt every piece of it. He still does. But somewhere in the wreckage of what happened he made a decision so quiet nobody heard it â€” not even him, not really.`,
+Not because he didn't feel it. He felt every piece of it. He still does. But somewhere in the wreckage of what happened he made a decision so quiet nobody heard it — not even him, not really.`,
       },
       {
         id: 'garrett_f2',
         title: 'The Night He Didn\'t Break',
         text: `He would not stop.
 
-He doesn't seek glory. Glory is for men who need to be remembered. He doesn't know fear the way other soldiers do â€” not because he's brave, but because the thing fear usually threatens to take from you, he's already lost.`,
+He doesn't seek glory. Glory is for men who need to be remembered. He doesn't know fear the way other soldiers do — not because he's brave, but because the thing fear usually threatens to take from you, he's already lost.`,
       },
       {
         id: 'garrett_f3',
@@ -152,7 +152,7 @@ That is all.`,
     title:    'The Ashveil Scholar',
     locked:   true,
     unlockedBy: 'aldric_f5',
-    quote:    '"His name was struck from the Citadel\'s records. But fire does not forget who first called it." â€” Unknown',
+    quote:    '"His name was struck from the Citadel\'s records. But fire does not forget who first called it." — Unknown',
     leadership: {
       name:    'Forbidden Warmth',
       desc:    'Edran Ashveil\'s presence in the camp unlocks the Ancient Fire research plot, passively generating Ember Shards over time.',
@@ -183,10 +183,10 @@ That is all.`,
   },
 
 
-  // â”€â”€ Generated lore additions â€” all remaining HERO_TEMPLATES â”€â”€â”€â”€â”€
+  // ── Generated lore additions — all remaining HERO_TEMPLATES ─────
   hedge_mage: {
     title:  'The Crescent Flame',
-    quote:  '"She learned early that fire is not loud. The dangerous kind listens first." â€” Valdris field tutor',
+    quote:  '"She learned early that fire is not loud. The dangerous kind listens first." — Valdris field tutor',
     fragments: [
       {
         id: 'lyra_f1',
@@ -216,7 +216,7 @@ The crescent above her hand has grown sharper since then.`,
 
   hedge_warden: {
     title:  'The Wandering Green',
-    quote:  '"He talks to trees like they are old soldiers. The uncomfortable part is that sometimes they seem to answer." â€” Road guard',
+    quote:  '"He talks to trees like they are old soldiers. The uncomfortable part is that sometimes they seem to answer." — Road guard',
     fragments: [
       {
         id: 'rowan_f1',
@@ -250,7 +250,7 @@ The green has many doors. Rowan has spent his life learning how to knock.`,
 
   ser_roland: {
     title:  'The Banner Knight',
-    quote:  '"Roland makes ordinary men stand straighter. That is more dangerous than most magic." â€” House Aldric captain',
+    quote:  '"Roland makes ordinary men stand straighter. That is more dangerous than most magic." — House Aldric captain',
     fragments: [
       {
         id: 'roland_f1',
@@ -284,7 +284,7 @@ His banner is not feared because it promises victory. It is feared because every
 
   seraphel: {
     title:  'The Star-Crowned Flame',
-    quote:  '"She does not cast spells. She opens doors and decides what is allowed through." â€” Archmage Kelvar',
+    quote:  '"She does not cast spells. She opens doors and decides what is allowed through." — Archmage Kelvar',
     fragments: [
       {
         id: 'seraphel_f1',
@@ -318,7 +318,7 @@ The stars above Valdris do not shine brighter for her. They are merely easier to
 
   mira: {
     title:  'The Gentle Hand',
-    quote:  '"When Mira says you will live, even death seems embarrassed to argue." â€” Wounded spearman',
+    quote:  '"When Mira says you will live, even death seems embarrassed to argue." — Wounded spearman',
     fragments: [
       {
         id: 'mira_f1',
@@ -388,7 +388,7 @@ He did not answer the second time.`,
 
   velmorn: {
     title:  'The Shadow Between Bells',
-    quote:  '"If Velmorn wanted you dead, you would first notice him in the afterlife." â€” Mordaine fence',
+    quote:  '"If Velmorn wanted you dead, you would first notice him in the afterlife." — Mordaine fence',
     fragments: [
       {
         id: 'velmorn_f1',
@@ -422,7 +422,7 @@ People say he serves House Mordaine. Velmorn says very little. The difference is
 
   sir_hadvar: {
     title:  'The Gateholder',
-    quote:  '"Hadvar is not fast. Gates are not fast either. Try moving one." â€” Aldric quartermaster',
+    quote:  '"Hadvar is not fast. Gates are not fast either. Try moving one." — Aldric quartermaster',
     fragments: [
       {
         id: 'hadvar_f1',
@@ -456,7 +456,7 @@ When he says a position will hold, commanders stop worrying about that position.
 
   durwald: {
     title:  'The Immovable',
-    quote:  '"I have seen mountains with less patience." â€” Brenna Shieldmaiden',
+    quote:  '"I have seen mountains with less patience." — Brenna Shieldmaiden',
     fragments: [
       {
         id: 'durwald_f1',
@@ -490,7 +490,7 @@ Only a shield, a stubborn heart, and the quiet certainty that someone has to sta
 
   aldric_marksman: {
     title:  'The Hundred-Pace Eye',
-    quote:  '"He does not pray before firing. He already did the work." â€” Aldric bowyer',
+    quote:  '"He does not pray before firing. He already did the work." — Aldric bowyer',
     fragments: [
       {
         id: 'aldric_marksman_f1',
@@ -524,7 +524,7 @@ When battle begins, he finds the drummer, the banner hand, the mage with the exp
 
   gwendal: {
     title:  'The Iron Vow',
-    quote:  '"Gwendal does not shout to be heard. He shouts because battle is hard of hearing." â€” House Aldric veteran',
+    quote:  '"Gwendal does not shout to be heard. He shouts because battle is hard of hearing." — House Aldric veteran',
     fragments: [
       {
         id: 'gwendal_f1',
@@ -558,7 +558,7 @@ The enemy usually hears it only once.`,
 
   brenna: {
     title:  'The Shieldmaiden of the Red Field',
-    quote:  '"Brenna does not ask whether fear is present. She asks whether it has permission to lead." â€” Aldric shield-sister',
+    quote:  '"Brenna does not ask whether fear is present. She asks whether it has permission to lead." — Aldric shield-sister',
     fragments: [
       {
         id: 'brenna_f1',
@@ -592,7 +592,7 @@ Brenna protects loudly because the world hurts quietly.`,
 
   draven_spellblade: {
     title:  'The Burning Edge',
-    quote:  '"Half knight, half mage, fully impossible to schedule." â€” Valdris drill master',
+    quote:  '"Half knight, half mage, fully impossible to schedule." — Valdris drill master',
     fragments: [
       {
         id: 'draven_f1',
@@ -626,7 +626,7 @@ House Valdris has not expelled him because his results are excellent. They have 
 
   elara: {
     title:  'The Frostweaver',
-    quote:  '"Elara never raises her voice. Winter has no need to shout." â€” Valdris apprentice',
+    quote:  '"Elara never raises her voice. Winter has no need to shout." — Valdris apprentice',
     fragments: [
       {
         id: 'elara_f1',
@@ -660,7 +660,7 @@ Elara keeps a polite expression when they realise. She considers gloating ineffi
 
   mirena: {
     title:  'The Ashveil Ember',
-    quote:  '"She inherited the name. She chose what it would mean." â€” Edran Ashveil',
+    quote:  '"She inherited the name. She chose what it would mean." — Edran Ashveil',
     fragments: [
       {
         id: 'mirena_f1',
@@ -694,7 +694,7 @@ One day, she intends to read it all.`,
 
   caius: {
     title:  'The Stormbinder',
-    quote:  '"Caius was told lightning cannot be negotiated with. He took that personally." â€” Valdris stormwarden',
+    quote:  '"Caius was told lightning cannot be negotiated with. He took that personally." — Valdris stormwarden',
     fragments: [
       {
         id: 'caius_f1',
@@ -728,7 +728,7 @@ After that, they stop calling storms unlucky. They call them reinforcements.`,
 
   archmage_kelvar: {
     title:  'The Keeper of the Last Door',
-    quote:  '"Every forbidden spell in Valdris passed through Kelvar\'s hands. Some were allowed to leave." â€” Citadel archivist',
+    quote:  '"Every forbidden spell in Valdris passed through Kelvar\'s hands. Some were allowed to leave." — Citadel archivist',
     fragments: [
       {
         id: 'kelvar_f1',
@@ -762,7 +762,7 @@ When Kelvar says no, wise mages obey. Brilliant mages ask why. Dead mages alread
 
   caelwyn_warden: {
     title:  'The Green Shield',
-    quote:  '"A warden does not defend the forest from the world. A warden reminds the world it is part of the forest." â€” Caelwyn saying',
+    quote:  '"A warden does not defend the forest from the world. A warden reminds the world it is part of the forest." — Caelwyn saying',
     fragments: [
       {
         id: 'caelwyn_warden_f1',
@@ -796,7 +796,7 @@ The forest has many ways to say no. The warden is one of them.`,
 
   lyreth: {
     title:  'The Moonlit Arrow',
-    quote:  '"Lyreth does not hunt what she hates. She hunts what the grove can no longer tolerate." â€” Caelwyn elder',
+    quote:  '"Lyreth does not hunt what she hates. She hunts what the grove can no longer tolerate." — Caelwyn elder',
     fragments: [
       {
         id: 'lyreth_f1',
@@ -830,7 +830,7 @@ She still wanders. Caelwyn has learned to be grateful.`,
 
   caelwyn_herbalist: {
     title:  'The Bitterleaf Hand',
-    quote:  '"The difference between medicine and poison is usually patience." â€” Caelwyn herbalist',
+    quote:  '"The difference between medicine and poison is usually patience." — Caelwyn herbalist',
     fragments: [
       {
         id: 'herbalist_f1',
@@ -864,7 +864,7 @@ Caelwyn kindness has roots. Roots know how to strangle stone.`,
 
   sylara: {
     title:  'The Reviver',
-    quote:  '"Sylara does not call souls back. She reminds them who is waiting." â€” Grove mourner',
+    quote:  '"Sylara does not call souls back. She reminds them who is waiting." — Grove mourner',
     fragments: [
       {
         id: 'sylara_f1',
@@ -898,7 +898,7 @@ Her gift is not gentle. It is beautiful. It is terrible. And when battle turns h
 
   theron: {
     title:  'The Greenmarch',
-    quote:  '"Theron does not lead Caelwyn. The forest moves, and he happens to be where it becomes a man." â€” Old warden',
+    quote:  '"Theron does not lead Caelwyn. The forest moves, and he happens to be where it becomes a man." — Old warden',
     fragments: [
       {
         id: 'theron_f1',
@@ -932,7 +932,7 @@ He is not soft. The forest is not soft. It is simply more patient than those who
 
   zareth: {
     title:  'The Hollow Sentinel',
-    quote:  '"There is a man inside that armor. The problem is knowing how much of him remains." â€” Mordaine grave-smith',
+    quote:  '"There is a man inside that armor. The problem is knowing how much of him remains." — Mordaine grave-smith',
     fragments: [
       {
         id: 'zareth_f1',
@@ -968,7 +968,7 @@ He has never explained which answer is worse.`,
 
   serix: {
     title:  'The Wretched Blade',
-    quote:  '"Serix survived the curse. That does not mean the curse lost." â€” Mordaine exile',
+    quote:  '"Serix survived the curse. That does not mean the curse lost." — Mordaine exile',
     fragments: [
       {
         id: 'serix_f1',
@@ -1004,7 +1004,7 @@ It should have killed him first.`,
 
   nyxara: {
     title:  'The Voidwalker',
-    quote:  '"Nyxara steps where shadows overlap. Follow her only if you are comfortable being misplaced." â€” Mordaine scout',
+    quote:  '"Nyxara steps where shadows overlap. Follow her only if you are comfortable being misplaced." — Mordaine scout',
     fragments: [
       {
         id: 'nyxara_f1',
@@ -1038,7 +1038,7 @@ She keeps a journal tied to her belt and reads it before battle. It tells her wh
 
   mord: {
     title:  'The Forsaken',
-    quote:  '"Mord was abandoned by three masters, two gods, and one knife. The knife came back." â€” Mordaine gutter-priest',
+    quote:  '"Mord was abandoned by three masters, two gods, and one knife. The knife came back." — Mordaine gutter-priest',
     fragments: [
       {
         id: 'mord_f1',
@@ -1072,7 +1072,7 @@ Those who call him faithless misunderstand him. Mord has faith in exactly one pe
 
   thalric: {
     title:  'The Barrow-Bound Lord',
-    quote:  '"Thalric kneels to no throne. He has seen what sits beneath them." â€” Mordaine herald',
+    quote:  '"Thalric kneels to no throne. He has seen what sits beneath them." — Mordaine herald',
     fragments: [
       {
         id: 'thalric_f1',
@@ -1106,7 +1106,7 @@ The barrows taught him that some doors must hold. Thalric became one.`,
 
   gribzak: {
     title:  'The Gearvein Tinkerer',
-    quote:  '"If it\'s broken and glowing, that\'s just more power waiting to happen." â€” Gribzak Gearvein',
+    quote:  '"If it\'s broken and glowing, that\'s just more power waiting to happen." — Gribzak Gearvein',
     fragments: [
       {
         id: 'gribzak_f1',
@@ -1140,7 +1140,7 @@ He can fix a war machine while it is exploding because explosions are simply mac
 
   borrik: {
     title:  'The Stormcog Smith',
-    quote:  '"Skybreaker doesn\'t care how fancy your spell theory is." â€” Borrik Stormcog',
+    quote:  '"Skybreaker doesn\'t care how fancy your spell theory is." — Borrik Stormcog',
     fragments: [
       {
         id: 'borrik_f1',
@@ -1174,7 +1174,7 @@ After battle, he is often found repairing gear for anyone who asks, humming happ
 
   zwierls: {
     title:  'The Laughing Hammer',
-    quote:  '"I fight the same way I dance. Enthusiastically and without warning." â€” Zwierls',
+    quote:  '"I fight the same way I dance. Enthusiastically and without warning." — Zwierls',
     fragments: [
       {
         id: 'zwierls_f1',
@@ -1210,7 +1210,7 @@ House Valdris has produced many terrifying scholars. Zwierls is proof it also pr
 
   arri: {
     title:  'The Witch of Ledgers',
-    quote:  '"I remember everything. Even the things you would rather I forgot." â€” Arri the Witch',
+    quote:  '"I remember everything. Even the things you would rather I forgot." — Arri the Witch',
     fragments: [
       {
         id: 'arri_f1',
@@ -1244,7 +1244,7 @@ When her verdant hex settles over a battlefield, enemies feel roots tighten arou
 
   kyver: {
     title:  'The Rice Warlord',
-    quote:  '"For rice and honer." â€” Kyver',
+    quote:  '"For rice and honer." — Kyver',
     fragments: [
       {
         id: 'kyver_f1',
@@ -1278,7 +1278,7 @@ He says honour is like rice: plain until you need it, terrible when absent, and 
 
   vorath: {
     title:  'The Undying',
-    quote:  '"Vorath died with a kingdom watching. Then he stood up and made the witnesses regret staying." â€” Mordaine chronicle',
+    quote:  '"Vorath died with a kingdom watching. Then he stood up and made the witnesses regret staying." — Mordaine chronicle',
     fragments: [
       {
         id: 'vorath_f1',
@@ -1312,7 +1312,7 @@ He rules nothing openly, commands little directly, and still whole cults arrange
 
   aurelan: {
     title:  'The Dawnspire Prince',
-    quote:  '"Aurelan enters battle like sunrise through stained glass: beautiful, blinding, and impossible to argue with." â€” Aldric court poet',
+    quote:  '"Aurelan enters battle like sunrise through stained glass: beautiful, blinding, and impossible to argue with." — Aldric court poet',
     fragments: [
       {
         id: 'aurelan_f1',
@@ -1346,7 +1346,7 @@ When he raises his blade, the field seems to remember morning. Even the afraid s
 
   jade_dragonforge: {
     title:  'The Dragon\'s Chosen',
-    quote:  '"I did not come here to hurt you. But I will not leave until this is done." â€” Jade Dragonforge',
+    quote:  '"I did not come here to hurt you. But I will not leave until this is done." — Jade Dragonforge',
     fragments: [
       {
         id: 'jade_f1',
@@ -1382,7 +1382,7 @@ That is why the dragon carries her. It recognises a rare thing: power that does 
 
   valerius: {
     title:  'The Dawnchaser',
-    quote:  '"Valerius walks behind the sun and somehow arrives before it." â€” Ancient court astrologer',
+    quote:  '"Valerius walks behind the sun and somehow arrives before it." — Ancient court astrologer',
     fragments: [
       {
         id: 'valerius_f1',
@@ -1418,7 +1418,7 @@ When he enters battle, the air seems full of sunrise that has not happened yet. 
 
   vaeric: {
     title:  'The Raven of Corvayne',
-    quote:  '"Lord Vaeric does not drink blood because he needs it. He does it because rituals should be honest." â€” Corvayne chamberlain',
+    quote:  '"Lord Vaeric does not drink blood because he needs it. He does it because rituals should be honest." — Corvayne chamberlain',
     fragments: [
       {
         id: 'vaeric_f1',
@@ -1452,7 +1452,7 @@ He is not a monster by Ancient Noble standards. This says more about the standar
 
   sparring_dummy: {
     title:  'The Straw Champion',
-    quote:  '"It has defeated more recruits than most warlords." â€” Training yard instructor',
+    quote:  '"It has defeated more recruits than most warlords." — Training yard instructor',
     fragments: [
       {
         id: 'dummy_f1',
@@ -1486,7 +1486,7 @@ That is acceptable. Straw has never needed applause.`,
 
   militia_conscript: {
     title:  'The Borrowed Spear',
-    quote:  '"A conscript is just a frightened citizen standing where a soldier should be. Treat that with respect." â€” Aldric drill sergeant',
+    quote:  '"A conscript is just a frightened citizen standing where a soldier should be. Treat that with respect." — Aldric drill sergeant',
     fragments: [
       {
         id: 'conscript_f1',
@@ -1520,7 +1520,7 @@ He is not a hero yet. He is the reason heroes have a line to stand in.`,
 
   bloodtusk_raider: {
     title:  'The Red-Tusk Runner',
-    quote:  '"Raiders do not attack because they are fearless. They attack because hunger runs faster than fear." â€” Border scout',
+    quote:  '"Raiders do not attack because they are fearless. They attack because hunger runs faster than fear." — Border scout',
     fragments: [
       {
         id: 'bloodtusk_raider_f1',
@@ -1554,7 +1554,7 @@ The red paint thickens. The tusks lengthen. The raids grow bolder.`,
 
   bloodraider_tusk: {
     title:  'The Iron-Tusk Bruiser',
-    quote:  '"When the small raiders stop shouting, listen. It means the tusk is coming." â€” Aldric border captain',
+    quote:  '"When the small raiders stop shouting, listen. It means the tusk is coming." — Aldric border captain',
     fragments: [
       {
         id: 'bloodraider_tusk_f1',
@@ -1588,7 +1588,7 @@ Point him at a line, and the line must answer. Many do not answer well.`,
 
   karg: {
     title:  'The Bloodtusk Warlord',
-    quote:  '"Karg does not unite clans with speeches. He points at something bigger than their feuds." â€” Captured banner-chief',
+    quote:  '"Karg does not unite clans with speeches. He points at something bigger than their feuds." — Captured banner-chief',
     fragments: [
       {
         id: 'karg_f1',
@@ -1622,7 +1622,7 @@ The Bloodtusk follow him because he feeds them. They fear him because he is lear
 
   ignar_cultist: {
     title:  'The Black-Flame Convert',
-    quote:  '"Ignar does not recruit fools. It recruits the wounded and teaches the wound to speak." â€” Valdris inquisitor',
+    quote:  '"Ignar does not recruit fools. It recruits the wounded and teaches the wound to speak." — Valdris inquisitor',
     fragments: [
       {
         id: 'ignar_cultist_f1',
@@ -1656,7 +1656,7 @@ That is what makes him dangerous. Fanatics with memories know exactly what they 
 
   carnax: {
     title:  'The Destroyer',
-    quote:  '"Carnax is not the fire. He is what walks out after the fire has eaten enough." â€” Ignar ash-priest',
+    quote:  '"Carnax is not the fire. He is what walks out after the fire has eaten enough." — Ignar ash-priest',
     fragments: [
       {
         id: 'carnax_f1',
@@ -1690,7 +1690,7 @@ When he raises his weapon, followers call it judgement. Victims call it the end.
 
   skeleton_warrior: {
     title:  'The Bone That Remembers',
-    quote:  '"Do not mock the skeleton. It remembers swordwork better than you remember breakfast." â€” Barrow guide',
+    quote:  '"Do not mock the skeleton. It remembers swordwork better than you remember breakfast." — Barrow guide',
     fragments: [
       {
         id: 'skeleton_warrior_f1',
@@ -1724,7 +1724,7 @@ There is no hatred in it. Hatred would be warmer.`,
 
   zombie_brute: {
     title:  'The Grave-Muscled Brute',
-    quote:  '"It is not alive. Unfortunately, nobody told its arms." â€” Aldric pikeman',
+    quote:  '"It is not alive. Unfortunately, nobody told its arms." — Aldric pikeman',
     fragments: [
       {
         id: 'zombie_brute_f1',
@@ -1758,7 +1758,7 @@ Once it begins moving, the battlefield must rearrange itself around the fact of 
 
   barrow_knight: {
     title:  'The Knight Beneath the Hill',
-    quote:  '"The Barrow Knight still guards his lord. The tragedy is that his lord stopped being worth guarding several centuries ago." â€” Mordaine historian',
+    quote:  '"The Barrow Knight still guards his lord. The tragedy is that his lord stopped being worth guarding several centuries ago." — Mordaine historian',
     fragments: [
       {
         id: 'barrow_knight_f1',
@@ -1792,7 +1792,7 @@ Rage belongs to the living. The Barrow Knight has only duty, and duty has had ce
 
   lich_sovereign: {
     title:  'The Sovereign Below',
-    quote:  '"A king afraid of death is dangerous. A king who solved it is worse." â€” Forbidden Mordaine chronicle',
+    quote:  '"A king afraid of death is dangerous. A king who solved it is worse." — Forbidden Mordaine chronicle',
     fragments: [
       {
         id: 'lich_sovereign_f1',
@@ -1826,7 +1826,7 @@ When he speaks, old graves listen.`,
 
   architect: {
     title:  'The Maker Behind the Rules',
-    quote:  '"I designed this world. Every encounter, every rule, every exploit you found â€” I put it there." â€” The Architect',
+    quote:  '"I designed this world. Every encounter, every rule, every exploit you found — I put it there." — The Architect',
     fragments: [
       {
         id: 'architect_f1',
@@ -1853,7 +1853,7 @@ This may have been generosity. This may have been testing. The difference is dif
 
 It is a demonstration.
 
-Health, damage, speed, resistance, affinity â€” all the sacred numbers bend like wet ink. They do not cheat. Cheating implies rules belonging to someone else.
+Health, damage, speed, resistance, affinity — all the sacred numbers bend like wet ink. They do not cheat. Cheating implies rules belonging to someone else.
 
 The Architect simply edits the room until victory remembers who wrote it.`,
       },
@@ -1862,17 +1862,17 @@ The Architect simply edits the room until victory remembers who wrote it.`,
 
 }
 
-// Bond lore â€” keyed by bond id. Shown in the bond reveal modal and Codex Lore tab.
+// Bond lore — keyed by bond id. Shown in the bond reveal modal and Codex Lore tab.
 export const BOND_LORE = {
   iron_vow: {
     name:        'The Iron Vow',
     subtitle:    'Lord Aldric Â· Helga',
-    quote:       '"They don\'t need signals. They don\'t need orders. You put them on the same line and the battle just... resolves." â€” House Aldric commander',
+    quote:       '"They don\'t need signals. They don\'t need orders. You put them on the same line and the battle just... resolves." — House Aldric commander',
     body: `Nobody witnessed the vow. That is the point.
 
 There was no ceremony, no witness, no record written in the hall. They were standing at the edge of a field after a skirmish that had gone longer than it should have, and Aldric said something nobody else heard, and Helga said something back, and that was the whole of it.
 
-What is known is what changed afterward. The camp noticed it before the soldiers did. The way they moved through it â€” separately, differently â€” but always with an awareness of where the other one was. Not looking. Not checking. Just knowing.
+What is known is what changed afterward. The camp noticed it before the soldiers did. The way they moved through it — separately, differently — but always with an awareness of where the other one was. Not looking. Not checking. Just knowing.
 
 In battle it is something else entirely.
 
