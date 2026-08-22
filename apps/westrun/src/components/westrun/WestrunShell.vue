@@ -7,7 +7,6 @@
     <header class="app-header">
       <div class="app-header-bg" :style="{ backgroundImage: `url(${navBg})` }" />
       <div class="header-inner">
-        <button class="hub-return-btn" @click="worldStore.exitWorld()" title="Return to world select">⟵</button>
         <img :src="navLogo" class="logo-img" alt="" @click="navigate('hall')" style="cursor:pointer" />
         <h1 class="logo" @click="navigate('hall')" style="cursor:pointer">Bannerlords of Westrun</h1>
         <nav class="nav">
@@ -359,7 +358,6 @@ import { useEnergyStore }      from '../../stores/useEnergyStore.js'
 import { usePlayerHeroStore }  from '../../stores/usePlayerHeroStore.js'
 import { useInventoryStore }   from '../../stores/useInventoryStore.js'
 import { useForgeStore }       from '../../stores/useForgeStore.js'
-import { useWorldStore }       from '../../stores/useWorldStore.js'
 import { useAdvisorStore }     from '../../stores/useAdvisorStore.js'
 import { useSettingsStore }    from '../../stores/useSettingsStore.js'
 import { buildDungeonEncounter } from '../../game/data/dungeons.js'
@@ -420,7 +418,6 @@ const showRaidBattle     = ref(false)
 const activeRaidId       = ref(null)
 const isAutoRaid         = ref(false)
 
-const worldStore       = useWorldStore()
 const advisorStore     = useAdvisorStore()
 const battleStore      = useBattleStore()
 const collectionStore  = useCollectionStore()

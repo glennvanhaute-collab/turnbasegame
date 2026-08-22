@@ -1,6 +1,5 @@
 <template>
   <div class="yamato-creation">
-    <button class="world-back-btn" @click="worldStore.exitWorld()">⟵ Choose realm</button>
 
     <!-- ── Step 1: Region selection ── -->
     <div class="region-screen" v-if="step === 'region'">
@@ -67,12 +66,10 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useYamatoPlayerStore, YAMATO_REGIONS } from '../../stores/useYamatoPlayerStore.js'
-import { useWorldStore } from '../../stores/useWorldStore.js'
-const regionMapImg = import.meta.env.BASE_URL + 'yamato/startscreen_chose_region.png'
+import { useYamatoPlayerStore, YAMATO_REGIONS } from '../stores/useYamatoPlayerStore.js'
+const regionMapImg = import.meta.env.BASE_URL + 'startscreen_chose_region.png'
 
 const emit = defineEmits(['done'])
-const worldStore  = useWorldStore()
 const yamatoStore = useYamatoPlayerStore()
 
 const step           = ref('region')

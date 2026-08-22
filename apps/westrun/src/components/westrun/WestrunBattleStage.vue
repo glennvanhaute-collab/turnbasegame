@@ -136,7 +136,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useBattleStore } from '../../stores/useBattleStore.js'
 import { usePlayerHeroStore } from '../../stores/usePlayerHeroStore.js'
 import { getPortrait, PLAYER_AVATARS } from '../../game/portraits.js'
-import { useCanvasFx } from '../../composables/useCanvasFx.js'
+import { useCanvasFx } from '@turnbase/fx'
 import HeroAvatar from '../HeroAvatar.vue'
 
 const _B = import.meta.env.BASE_URL

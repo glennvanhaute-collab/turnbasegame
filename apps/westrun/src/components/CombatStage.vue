@@ -91,7 +91,7 @@
 
 <script setup>
 import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue'
-import { useCanvasFx } from '../composables/useCanvasFx.js'
+import { useCanvasFx } from '@turnbase/fx'
 import { useBattleStore } from '../stores/useBattleStore.js'
 import { getPortrait } from '../game/portraits.js'
 import HeroAvatar from './HeroAvatar.vue'

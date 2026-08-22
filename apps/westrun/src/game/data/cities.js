@@ -14,13 +14,13 @@ export const CITY_DATA = {
   'House Valdris': {
     short:      'valdris',
     color:      '#88aaff',
-    cityNames:  ["The Arcane Quarter", "Spire's End", 'Hexbridge', "The Scholar's Reach", 'Valdris Minor', 'The Glass Tower'],
+    cityNames:  ['Highsept', "Candlewatch", 'The Written Quarter', "The Scribe's Reach", 'Valdris Minor', 'The Gilded Sept'],
     rumour: (heroName, rarity) => rumourLine(heroName, rarity),
   },
   'House Mordaine': {
     short:      'mordaine',
     color:      '#aa66ff',
-    cityNames:  ['The Shroud', 'Voidmark', 'Ashport', 'The Hollow City', 'Nightfall Basin', 'The Unmarked City'],
+    cityNames:  ['The Shroud', 'Barrowmark', 'Ashport', 'The Hollow City', 'Nightfall Basin', 'The Standing Stones'],
     rumour: (heroName, rarity) => rumourLine(heroName, rarity),
   },
 }

@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
-  base: '/turnbasegame/westrun/',
+  base: '/turnbasegame/yamato/',
   build: {
     chunkSizeWarningLimit: 2000,
     rollupOptions: {

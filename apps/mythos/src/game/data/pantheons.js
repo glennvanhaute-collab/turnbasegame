@@ -2,7 +2,7 @@
 // Mirrors the shape of src/game/data/westrun/factions.js: realm-specific data,
 // kept out of the shared engine.
 
-const UI = import.meta.env.BASE_URL + 'mythos/ui/'
+const UI = import.meta.env.BASE_URL + 'ui/'
 
 export const Pantheon = {
   GREEK:    'Greek',

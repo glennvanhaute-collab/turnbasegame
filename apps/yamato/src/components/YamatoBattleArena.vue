@@ -280,14 +280,14 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useCanvasFx } from '../../composables/useCanvasFx.js'
-import { useYamatoBattle } from '../../composables/useYamatoBattle.js'
-import { STATUS_META } from '../../game/data/yamato/units.js'
+import { useCanvasFx } from '@turnbase/fx'
+import { useYamatoBattle } from '../composables/useYamatoBattle.js'
+import { STATUS_META } from '../game/data/units.js'
 
 const props = defineProps({ ground: { type: Object, required: true } })
 defineEmits(['back'])
 
-const A = import.meta.env.BASE_URL + 'yamato/battle/'
+const A = import.meta.env.BASE_URL + 'battle/'
 const art = {
   shell:     A + 'yamato_bottom_stage_v3.png',
   commander: A + 'commander_dossier_art.png',

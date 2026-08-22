@@ -4,7 +4,6 @@
   <div class="yamato-app" v-else>
     <header class="yamato-header">
       <div class="yamato-header-inner">
-        <button class="hub-btn" @click="worldStore.exitWorld()" title="Return to world select">⟵</button>
 
         <div class="yamato-title-block">
           <span class="yamato-kanji-small">{{ yamatoStore.region?.kanji }}</span>
@@ -93,14 +92,12 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useWorldStore } from '../../stores/useWorldStore.js'
-import { useYamatoPlayerStore } from '../../stores/useYamatoPlayerStore.js'
+import { useYamatoPlayerStore } from '../stores/useYamatoPlayerStore.js'
 import YamatoCreationView from './YamatoCreationView.vue'
 import YamatoBattleArena  from './YamatoBattleArena.vue'
-import { TRAINING_GROUNDS } from '../../game/data/yamato/trainingGrounds.js'
-const realmMapImg = import.meta.env.BASE_URL + 'yamato/realm.png'
+import { TRAINING_GROUNDS } from '../game/data/trainingGrounds.js'
+const realmMapImg = import.meta.env.BASE_URL + 'realm.png'
 
-const worldStore   = useWorldStore()
 const yamatoStore  = useYamatoPlayerStore()
 const tab          = ref('clan')
 const activeGround = ref(null)

@@ -1,19 +1,28 @@
 {
-  "name": "bannerlords-of-westrun",
+  "name": "turnbasegame",
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "pinia": "^3.0.4",
-    "vue": "^3.5.34"
+    "dev": "npm run dev -w @turnbase/westrun",
+    "dev:westrun": "npm run dev -w @turnbase/westrun",
+    "dev:yamato": "npm run dev -w @turnbase/yamato",
+    "dev:mythos": "npm run dev -w @turnbase/mythos",
+    "build": "npm run build --workspaces --if-present",
+    "build:westrun": "npm run build -w @turnbase/westrun",
+    "build:yamato": "npm run build -w @turnbase/yamato",
+    "build:mythos": "npm run build -w @turnbase/mythos"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.6",
     "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "pinia": "^3.0.4",
+    "vue": "^3.5.34"
   }
 }

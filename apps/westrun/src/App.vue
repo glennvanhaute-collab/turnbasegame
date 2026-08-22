@@ -1,18 +1,9 @@
 <template>
-  <WorldSelectorView v-if="!worldStore.activeWorld" />
-  <YamatoShell       v-else-if="worldStore.activeWorld === 'yamato'" />
-  <MythosShell       v-else-if="worldStore.activeWorld === 'mythos'" />
-  <WestrunShell      v-else />
+  <WestrunShell />
 </template>
 
 <script setup>
-import { useWorldStore } from './stores/useWorldStore.js'
-import WorldSelectorView from './components/WorldSelectorView.vue'
-import YamatoShell       from './components/yamato/YamatoShell.vue'
-import MythosShell       from './components/mythos/MythosShell.vue'
-import WestrunShell      from './components/westrun/WestrunShell.vue'
-
-const worldStore = useWorldStore()
+import WestrunShell from './components/westrun/WestrunShell.vue'
 </script>
 
 <style>

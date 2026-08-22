@@ -1,5 +1,5 @@
 import { reactive, computed } from 'vue'
-import { STATUS_META, PALETTE } from '../game/data/yamato/units.js'
+import { STATUS_META, PALETTE } from '../game/data/units.js'
 import { SKILL_FX } from '../game/data/skillFxLibrary.js'
 
 // Reactive port of the Yamato demo battle engine.

@@ -1,0 +1,13 @@
+{
+  "name": "@turnbase/fx",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/useCanvasFx.js",
+  "exports": {
+    ".": "./src/useCanvasFx.js"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.34"
+  }
+}

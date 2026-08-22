@@ -22,10 +22,30 @@ export const HOUSE_LORD = {
   'House Mordaine': 'LORD_MORDAINE',
 }
 
-// Which houses are bound together by shared worldview
+// Westrun is split twice, and the two splits do not line up.
+//
+// POWER — who should hold it, and how:
+//   Aldric + Mordaine   both believe the realm is ruled, not administered
+//   Caelwyn + Valdris   both believe something outranks the throne
+//
+// FAITH — see HOUSES_BY_FAITH in game/data/westrun/factions.js:
+//   New Gods            Aldric + Valdris
+//   Old Gods            Caelwyn + Mordaine
+//
+// So every alliance is half an alliance. Aldric and Mordaine agree on power and
+// nothing at the altar; Caelwyn and Valdris agree the throne is not the point,
+// and disagree entirely about what is. There is no pair that agrees on both,
+// which is the intended shape — a house is always your ally in one room and your
+// opponent in the other.
 export const HOUSE_PAIRS = [
-  ['House Aldric', 'House Mordaine'],   // old order vs new order — both are about power
-  ['House Caelwyn', 'House Valdris'],   // nature vs science — both look beyond human politics
+  ['House Aldric', 'House Mordaine'],   // power: the realm is ruled
+  ['House Caelwyn', 'House Valdris'],   // power: something outranks the throne
+]
+
+// The other map. Kept separate on purpose — faith cuts across the power pairs.
+export const FAITH_PAIRS = [
+  ['House Aldric', 'House Valdris'],    // faith: the New Gods
+  ['House Caelwyn', 'House Mordaine'],  // faith: the Old Gods
 ]
 
 export const ALL_HOUSES = ['House Aldric', 'House Mordaine', 'House Caelwyn', 'House Valdris']

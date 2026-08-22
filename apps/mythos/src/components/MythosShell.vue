@@ -5,8 +5,6 @@
     <div class="scrim scrim--bottom" />
     <div class="vignette" />
 
-    <button class="hub-btn" @click="worldStore.exitWorld()" title="Return to realm select">⟵</button>
-
     <!-- ── Title lockup ── -->
     <header class="lockup">
       <img :src="MYTHOS_ART.logo" class="crest" alt="" />
@@ -44,10 +42,8 @@
 </template>
 
 <script setup>
-import { useWorldStore } from '../../stores/useWorldStore.js'
-import { PANTHEONS, MYTHOS_ART } from '../../game/data/mythos/pantheons.js'
+import { PANTHEONS, MYTHOS_ART } from '../game/data/pantheons.js'
 
-const worldStore = useWorldStore()
 
 // TODO: hand off to Mythos character creation once useMythosPlayerStore exists.
 function choose(pantheon) {

@@ -240,8 +240,8 @@ const SCROLL_LABEL = {
 const HOUSE_META = {
   'House Caelwyn':  { shield: shieldCaelwyn,  color: '#4dff88', shortName: 'Caelwyn',  frame: frameCaelwyn,  lordKey: 'LORD_CAELWYN',     lordName: 'Lord Caelwyn',     tagline: 'Wardens of the Ancient Grove' },
   'House Aldric':   { shield: shieldAldric,   color: '#c8962a', shortName: 'Aldric',   frame: frameAldric,   lordKey: 'LORD_ALDRIC',       lordName: 'Lord Aldric',       tagline: 'Warriors of the Iron Gate' },
-  'House Valdris':  { shield: shieldValdris,  color: '#4fa8ff', shortName: 'Valdris',  frame: frameValdris,  lordKey: 'ARCHMAGE_VALDRIS',  lordName: 'Archmage Valdris',  tagline: 'Scholars of the Arcane Tower' },
-  'House Mordaine': { shield: shieldMordaine, color: '#b44fff', shortName: 'Mordaine', frame: frameMordaine, lordKey: 'LORD_MORDAINE',     lordName: 'Lord Mordaine',     tagline: 'Shadowblades of the Dark Spire' },
+  'House Valdris':  { shield: shieldValdris,  color: '#4fa8ff', shortName: 'Valdris',  frame: frameValdris,  lordKey: 'ARCHMAGE_VALDRIS',  lordName: 'Archmage Valdris',  tagline: 'Keepers of the Written Word' },
+  'House Mordaine': { shield: shieldMordaine, color: '#b44fff', shortName: 'Mordaine', frame: frameMordaine, lordKey: 'LORD_MORDAINE',     lordName: 'Lord Mordaine',     tagline: 'Keepers of the Old Silence' },
 }
 
 const SIEGE_IMAGES = {

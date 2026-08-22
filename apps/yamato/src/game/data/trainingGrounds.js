@@ -1,6 +1,6 @@
 import { ALLY_UNITS, ENEMY_UNITS } from './units.js'
 
-const A = import.meta.env.BASE_URL + 'yamato/battle/'
+const A = import.meta.env.BASE_URL + 'battle/'
 
 // One training ground to start. Add entries here as the realm grows.
 export const TRAINING_GROUNDS = [

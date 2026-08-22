@@ -2,7 +2,7 @@
 // Each skill carries an `fxId` that keys into SKILL_FX (src/game/data/skillFxLibrary.js),
 // so the 52-skill FX library drives the visuals without being modified.
 
-const A = import.meta.env.BASE_URL + 'yamato/battle/'
+const A = import.meta.env.BASE_URL + 'battle/'
 
 export const ALLY_UNITS = [
   {

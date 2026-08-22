@@ -1,6 +1,5 @@
 <template>
   <div class="creation-wrap">
-    <button class="world-back-btn" @click="worldStore.exitWorld()">⟵ Choose realm</button>
 
     <div class="creation-card">
 
@@ -132,7 +131,6 @@
 import { ref, computed } from 'vue'
 import { usePlayerHeroStore } from '../stores/usePlayerHeroStore.js'
 import { useCollectionStore } from '../stores/useCollectionStore.js'
-import { useWorldStore } from '../stores/useWorldStore.js'
 const _B = import.meta.env.BASE_URL
 const logoNav          = _B + 'ui/logo-nav.png'
 const startupBg        = _B + 'backgrounds/startup_background.png'
@@ -174,7 +172,6 @@ const ARTISAN_OPTIONS = [
 ]
 
 const emit = defineEmits(['done'])
-const worldStore = useWorldStore()
 
 const playerHero = usePlayerHeroStore()
 const collection = useCollectionStore()
