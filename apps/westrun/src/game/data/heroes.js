@@ -160,6 +160,20 @@ export const HERO_TEMPLATES = {
     archetype: { role: 'Warrior', name: 'Warlord', desc: 'The iron fist of House Aldric. Raw force backed by relentless offensive pressure on every front.', tags: ['Single Target', 'AOE Damage', 'ATK Buff'] },
   }),
 
+  // ── House Aegira — sworn to Valdris ─────────────────────────────
+  XANTHE_AEGIRA: () => new Hero({
+    id: 'xanthe_aegira', name: 'Xanthe of Aegira',
+    faction: Faction.AEGIRA, rarity: Rarity.EPIC, affinity: Affinity.MAGIC,
+    baseHp: 14200, baseAtk: 1620, baseDef: 640, baseSpd: 101,
+    critRate: 0.26, critDmg: 0.62,
+    skills: [SKILLS.BLIZZARD, SKILLS.ARCANE_LANCE, SKILLS.ARCANE_SHIELD],
+    artisanSkills: [ARTISAN.herbalism],
+    isPlayer: true, role: 'mage', weaponType: 'staff',
+    archetype: { role: 'Mage', name: 'Tide-Oracle', desc: 'Calls the sea up the beach and the storm down onto it. Speaks first and explains afterwards, if at all.', tags: ['AOE Damage', 'Single Target', 'Shield'] },
+    quote: 'Valdris says the gods finished speaking. Valdris has never stood in the water at night.',
+    lore: 'Aegira takes its oracles the way other houses take taxes — from whoever the tide picks, whether or not she wanted the work. Xanthe was fifteen and mending nets when the water started answering her, and the septons of the Salt Colonnade had her in a colonnade robe before the week was out. She has been formally correct with her liege ever since and privately unmoved by them: Valdris doctrine holds that revelation is finished and written down, and Xanthe has read the books, and knows what is not in them. She carries a trident because the first thing the sea ever gave her was a fisherman\'s tool, and she has never seen the argument for a better one.',
+  }),
+
   // ── The Crown — House Hartvane ──────────────────────────────────
   KING_HARTVANE: () => new Hero({
     id: 'king_hartvane', name: 'Kingurt Hartvane',
@@ -803,6 +817,7 @@ export const RECRUIT_POOL = [
   { key: 'MORD',                rarity: 'Epic' },
   { key: 'THALRIC',             rarity: 'Epic' },
   { key: 'BORRIK',              rarity: 'Epic' },
+  { key: 'XANTHE_AEGIRA',       rarity: 'Epic' },
   // ── Legendary ────────────────────────────────────────────────────
   // LORD_ALDRIC is reputation-gated — unlocked via House Aldric at Exalted standing
   { key: 'HELGA',               rarity: 'Legendary' },

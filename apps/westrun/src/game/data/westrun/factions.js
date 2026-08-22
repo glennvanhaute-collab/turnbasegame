@@ -6,6 +6,7 @@ export const Faction = {
   BLOODTUSK:      'House Bloodtusk',
   IGNAR:          'House Ignar',
   HARTVANE:       'House Hartvane',
+  AEGIRA:         'House Aegira',
   ROSWAINE:       'House Roswaine',
   ANCIENT_NOBLES: 'Ancient Nobles',
 }
@@ -183,6 +184,30 @@ export const BANNERMEN = {
         'anything Ignar buried its dead beside. House Ignar does not call them ' +
         'kin, and hunts them harder than any southern army would.',
     },
+  },
+
+  [Faction.AEGIRA]: {
+    id: 'aegira',
+    name: 'House Aegira',
+    liege: Faction.VALDRIS,
+    color: '#4a9fd8',
+    region: 'The Salt Colonnade',
+    tagline: 'The Drowned Library',
+    sigil: 'A silver trident on storm-blue, beneath a gorgon\'s head',
+    faith: Faith.NEW_GODS,
+    devotion: 'oracular',
+    creed: 'The gods did not stop speaking merely because we stopped writing.',
+    // The seam: Valdris doctrine holds that revelation is FINISHED. Aegira keeps
+    // oracles. Its liege has never called that heresy out loud, because Aegira
+    // also keeps the oldest texts in Westrun and Valdris cannot read them.
+    summary:
+      'An old maritime house of columns, harbours and salt-eaten marble, sworn to ' +
+      'Valdris since before either could produce the paperwork. Aegira keeps the ' +
+      'sea-roads, the tide-oracles, and a library half of which is underwater. ' +
+      'Its septons hold that the gods still speak — through storm, through water, ' +
+      'through the mouths of women who did not ask for it — which is precisely the ' +
+      'thing Valdris doctrine exists to deny.',
+    splinter: null,
   },
 
   [Faction.ROSWAINE]: {
