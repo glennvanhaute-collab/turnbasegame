@@ -277,6 +277,7 @@ import { SET_BONUSES, SET_PASSIVE_6, SET_NAMES } from '../game/data/setBonus.js'
 const _B = import.meta.env.BASE_URL
 const bondHelgaAldricImg  = _B + 'lore/bond-unlocked-helga-aldric.png'
 const bondHildaArneImg    = _B + 'lore/bond-unlocked-hilda-arne.png'
+const bondMarinaGlennios  = _B + 'lore/bond-unlocked-marina-glennios.png'
 import { PORTRAIT_MAP } from '../game/portraits.js'
 
 defineEmits(['close'])
@@ -317,7 +318,7 @@ const hasHiddenHeroes = computed(() =>
   )
 )
 
-const BOND_IMAGES   = { iron_vow: bondHelgaAldricImg, last_conquest: bondHildaArneImg }
+const BOND_IMAGES   = { iron_vow: bondHelgaAldricImg, last_conquest: bondHildaArneImg, edge_of_the_tide: bondMarinaGlennios }
 const HERO_AVATARS  = { lord_aldric: PORTRAIT_MAP['lord-aldric'], helga: PORTRAIT_MAP['helga'], hedge_blade: PORTRAIT_MAP['garrett-the-unbroken'] }
 const writing = ref(false)
 const newTitle = ref('')

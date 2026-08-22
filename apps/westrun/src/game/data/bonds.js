@@ -25,6 +25,17 @@ export const BONDS = [
       hilda_shieldmaiden: { hpPct: 0.20, defPct: 0.24 },
     },
   },
+  {
+    id:          'edge_of_the_tide',
+    name:        'The Edge of the Tide',
+    keys:        ['MARINA_AEGIRA', 'GLENNIOS_AEGIRA'],
+    heroes:      ['marina_aegira', 'glennios_aegira'],
+    description: 'She tells the sea where to go. He decides where it stops. Aegira has fought this way for four hundred years and sees no reason to improve on it.',
+    bonuses: {
+      marina_aegira:   { hpPct: 0.14, atkPct: 0.22 },
+      glennios_aegira: { hpPct: 0.20, defPct: 0.24 },
+    },
+  },
 ]
 
 // Apply all active bonds to an already-geared hero array (mutates in place).

@@ -1864,9 +1864,21 @@ The Architect simply edits the room until victory remembers who wrote it.`,
 
 // Bond lore — keyed by bond id. Shown in the bond reveal modal and Codex Lore tab.
 export const BOND_LORE = {
+  edge_of_the_tide: {
+    name:     'The Edge of the Tide',
+    subtitle: 'Marina of Aegira · Glennios of Aegira',
+    quote:    '"Aegira Fortis Est. It is carved over the harbour gate. Nobody in the Colonnade can agree whether it is a boast or an instruction." — Valdris septon, on assignment',
+    body: `The Colonnade assigns a guard to every oracle. It is an old rule, written when oracles were rarer and less inclined to walk into the surf at night, and for most of its history it has been a formality — a young spearman standing in a doorway, bored, waiting out a posting.
+
+Glennios volunteered before the sentence naming her was finished. The septons noted it, found it slightly irregular, and approved it anyway because nobody else had raised a hand.
+
+What they have is not a romance and not quite a friendship. She goes where the water tells her, often without warning and usually at the worst hour. He goes too, one pace off her shield side, and has never once asked her to explain the errand. When she is wrong — and the tide is wrong more often than Aegira admits in writing — he does not mention it afterwards.
+
+Valdris, which keeps records of these things, has an entry describing their arrangement as 'doctrinally untidy.' Aegira has never responded to it. The harbour has not fallen in four hundred years.`,
+  },
   iron_vow: {
     name:        'The Iron Vow',
-    subtitle:    'Lord Aldric Â· Helga',
+    subtitle:    'Lord Aldric · Helga',
     quote:       '"They don\'t need signals. They don\'t need orders. You put them on the same line and the battle just... resolves." — House Aldric commander',
     body: `Nobody witnessed the vow. That is the point.
 

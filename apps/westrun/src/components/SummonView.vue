@@ -187,6 +187,7 @@ const recruitmentBg = _B + 'backgrounds/recruitment_bg.png'
 const starImg = _B + 'ui/star.png'
 const bondUnlockImage     = _B + 'lore/bond-unlocked-helga-aldric.png'
 const bondHildaArneImage  = _B + 'lore/bond-unlocked-hilda-arne.png'
+const bondMarinaGlennios  = _B + 'lore/bond-unlocked-marina-glennios.png'
 import { BOND_LORE } from '../game/data/lore.js'
 import { useSummonStore } from '../stores/useSummonStore.js'
 import { useCurrencyStore } from '../stores/useCurrencyStore.js'
@@ -214,11 +215,11 @@ const portalLabel = computed(() => {
 })
 
 // Bond reveal helpers
-const BOND_IMAGES = { iron_vow: bondUnlockImage, last_conquest: bondHildaArneImage }
+const BOND_IMAGES = { iron_vow: bondUnlockImage, last_conquest: bondHildaArneImage, edge_of_the_tide: bondMarinaGlennios }
 const bondImage = computed(() => BOND_IMAGES[store.pendingBondReveal?.id] ?? null)
 const bondLore  = computed(() => store.pendingBondReveal ? BOND_LORE[store.pendingBondReveal.id] : null)
 
-const HERO_DISPLAY_NAMES = { lord_aldric: 'Lord Aldric', helga: 'Helga' }
+const HERO_DISPLAY_NAMES = { lord_aldric: 'Lord Aldric', helga: 'Helga', marina_aegira: 'Marina of Aegira', glennios_aegira: 'Glennios of Aegira' }
 function heroDisplayName(id) { return HERO_DISPLAY_NAMES[id] ?? id }
 </script>
 

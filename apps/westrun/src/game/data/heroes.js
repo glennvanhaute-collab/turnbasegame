@@ -161,8 +161,8 @@ export const HERO_TEMPLATES = {
   }),
 
   // ── House Aegira — sworn to Valdris ─────────────────────────────
-  XANTHE_AEGIRA: () => new Hero({
-    id: 'xanthe_aegira', name: 'Xanthe of Aegira',
+  MARINA_AEGIRA: () => new Hero({
+    id: 'marina_aegira', name: 'Marina of Aegira',
     faction: Faction.AEGIRA, rarity: Rarity.EPIC, affinity: Affinity.MAGIC,
     baseHp: 14200, baseAtk: 1620, baseDef: 640, baseSpd: 101,
     critRate: 0.26, critDmg: 0.62,
@@ -171,7 +171,20 @@ export const HERO_TEMPLATES = {
     isPlayer: true, role: 'mage', weaponType: 'staff',
     archetype: { role: 'Mage', name: 'Tide-Oracle', desc: 'Calls the sea up the beach and the storm down onto it. Speaks first and explains afterwards, if at all.', tags: ['AOE Damage', 'Single Target', 'Shield'] },
     quote: 'Valdris says the gods finished speaking. Valdris has never stood in the water at night.',
-    lore: 'Aegira takes its oracles the way other houses take taxes — from whoever the tide picks, whether or not she wanted the work. Xanthe was fifteen and mending nets when the water started answering her, and the septons of the Salt Colonnade had her in a colonnade robe before the week was out. She has been formally correct with her liege ever since and privately unmoved by them: Valdris doctrine holds that revelation is finished and written down, and Xanthe has read the books, and knows what is not in them. She carries a trident because the first thing the sea ever gave her was a fisherman\'s tool, and she has never seen the argument for a better one.',
+    lore: 'Aegira takes its oracles the way other houses take taxes — from whoever the tide picks, whether or not she wanted the work. Marina was fifteen and mending nets when the water started answering her, and the septons of the Salt Colonnade had her in a colonnade robe before the week was out. She has been formally correct with her liege ever since and privately unmoved by them: Valdris doctrine holds that revelation is finished and written down, and Marina has read the books, and knows what is not in them. She carries a trident because the first thing the sea ever gave her was a fisherman\'s tool, and she has never seen the argument for a better one.',
+  }),
+
+  GLENNIOS_AEGIRA: () => new Hero({
+    id: 'glennios_aegira', name: 'Glennios of Aegira',
+    faction: Faction.AEGIRA, rarity: Rarity.EPIC, affinity: Affinity.MAGIC,
+    baseHp: 19600, baseAtk: 1180, baseDef: 1120, baseSpd: 89,
+    critRate: 0.14, critDmg: 0.48,
+    skills: [SKILLS.PROVOKE, SKILLS.IRON_BASTION, SKILLS.ARCANE_SHIELD],
+    artisanSkills: [ARTISAN.blacksmithing],
+    isPlayer: true, role: 'tank', weaponType: 'spear',
+    archetype: { role: 'Tank', name: 'Tide-Shield', desc: 'A colonnade hoplite who treats a shield wall as architecture. Nothing gets past him twice.', tags: ['Provoke', 'DEF Buff', 'Shield'] },
+    quote: 'She reads the water. I stand in front of whatever it tells her is coming.',
+    lore: 'The Salt Colonnade raises spearmen the way it raises columns — slowly, in ranks, and to outlast the people who ordered them. Glennios came up through the harbour levies and never left the front rank, which in Aegira is less a rank than a vocation. He has no opinion on the oracles and no patience for the argument about them; he was handed a shield, told where the line was, and has been standing on it since. When Marina began speaking for the tide, the septons assigned her a guard and Glennios volunteered before the sentence was finished. He has never explained why, and nobody in the Colonnade has been rude enough to ask.',
   }),
 
   // ── The Crown — House Hartvane ──────────────────────────────────
@@ -817,7 +830,8 @@ export const RECRUIT_POOL = [
   { key: 'MORD',                rarity: 'Epic' },
   { key: 'THALRIC',             rarity: 'Epic' },
   { key: 'BORRIK',              rarity: 'Epic' },
-  { key: 'XANTHE_AEGIRA',       rarity: 'Epic' },
+  { key: 'MARINA_AEGIRA',       rarity: 'Epic' },
+  { key: 'GLENNIOS_AEGIRA',     rarity: 'Epic' },
   // ── Legendary ────────────────────────────────────────────────────
   // LORD_ALDRIC is reputation-gated — unlocked via House Aldric at Exalted standing
   { key: 'HELGA',               rarity: 'Legendary' },
