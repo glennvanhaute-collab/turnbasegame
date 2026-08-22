@@ -191,7 +191,10 @@ export const BANNERMEN = {
     id: 'vaeryn',
     name: 'House Vaeryn',
     liege: Faction.MORDAINE,
-    color: '#8f2c2c',
+    // Ember orange, taken from the armour trim and the fox on the shield. It is
+    // the only orange in Westrun's palette, which is the point — nothing else on
+    // the board reads as Vaeryn at a glance.
+    color: '#c26a28',
     region: 'The Ashen Reach',
     tagline: 'The Red Fox at the Pyre',
     motto: 'We Give Them Back',
