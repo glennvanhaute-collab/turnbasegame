@@ -40,6 +40,7 @@ const MANIFEST = {
   'arne-frostbound':     'units/epic/arne-frostbound.png',
   'marina-aegira':        'units/epic/marina-aegira.png',
   'glennios-aegira':      'units/epic/glennios-aegira.png',
+  'daemar-vaeryn':        'units/epic/daemar-vaeryn.png',
   'brenna-shieldmaiden': 'units/epic/brenna-shieldmaiden.png',
   'caelwyn-warden':      'units/epic/caelwyn-warden.png',
   'caius-stormbinder':   'units/epic/caius-stormbinder.png',

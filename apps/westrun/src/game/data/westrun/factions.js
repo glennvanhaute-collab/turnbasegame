@@ -7,6 +7,7 @@ export const Faction = {
   IGNAR:          'House Ignar',
   HARTVANE:       'House Hartvane',
   AEGIRA:         'House Aegira',
+  VAERYN:         'House Vaeryn',
   ROSWAINE:       'House Roswaine',
   ANCIENT_NOBLES: 'Ancient Nobles',
 }
@@ -184,6 +185,31 @@ export const BANNERMEN = {
         'anything Ignar buried its dead beside. House Ignar does not call them ' +
         'kin, and hunts them harder than any southern army would.',
     },
+  },
+
+  [Faction.VAERYN]: {
+    id: 'vaeryn',
+    name: 'House Vaeryn',
+    liege: Faction.MORDAINE,
+    color: '#8f2c2c',
+    region: 'The Ashen Reach',
+    tagline: 'The Red Hound at the Pyre',
+    motto: 'We Give Them Back',
+    sigil: 'A red hound\'s head on black, ringed in ash',
+    faith: Faith.OLD_GODS,
+    devotion: 'funerary',
+    creed: 'The ground keeps what it is given. Fire gives it back faster.',
+    // The seam: Mordaine BURIES — barrows, standing stones, the dark under the
+    // roots. Vaeryn BURNS. Same gods, same debt, opposite rite, and an argument
+    // two centuries old about which one the dead were actually promised.
+    summary:
+      'Pyre-keepers of the Ashen Reach, sworn to Mordaine and quietly at odds with ' +
+      'it since the day they swore. Mordaine lays its dead under stone and lets the ' +
+      'old things take their time. Vaeryn burns them, and holds that a debt settled ' +
+      'slowly is a debt still owed. Generations in pyre-smoke have taken the colour ' +
+      'out of them — white-haired by twenty, most of them, which the rest of Westrun ' +
+      'reads as sorcery and Vaeryn has never bothered to deny.',
+    splinter: null,
   },
 
   [Faction.AEGIRA]: {

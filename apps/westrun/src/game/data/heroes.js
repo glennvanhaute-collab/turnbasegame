@@ -187,6 +187,20 @@ export const HERO_TEMPLATES = {
     lore: 'The Salt Colonnade raises spearmen the way it raises columns — slowly, in ranks, and to outlast the people who ordered them. Glennios came up through the harbour levies and never left the front rank, which in Aegira is less a rank than a vocation. He has no opinion on the oracles and no patience for the argument about them; he was handed a shield, told where the line was, and has been standing on it since. When Marina began speaking for the tide, the septons assigned her a guard and Glennios volunteered before the sentence was finished. He has never explained why, and nobody in the Colonnade has been rude enough to ask.',
   }),
 
+  // ── House Vaeryn — sworn to Mordaine ────────────────────────────
+  DAEMAR_VAERYN: () => new Hero({
+    id: 'daemar_vaeryn', name: 'Daemar Vaeryn',
+    faction: Faction.VAERYN, rarity: Rarity.EPIC, affinity: Affinity.VOID,
+    baseHp: 18900, baseAtk: 1540, baseDef: 940, baseSpd: 93,
+    critRate: 0.21, critDmg: 0.60,
+    skills: [SKILLS.MOONLIT_SEVERANCE, SKILLS.WARLORDS_RESOLVE, SKILLS.DUSK_COMMUNION],
+    artisanSkills: [ARTISAN.blacksmithing],
+    isPlayer: true, role: 'warrior', weaponType: 'sword',
+    archetype: { role: 'Warrior', name: 'Pyre-Warden', desc: 'Fights the way his house buries — thoroughly, without hurry, and with no interest in being thanked.', tags: ['Single Target', 'ATK Buff', 'Lifesteal'] },
+    quote: 'Mordaine tells the dead to wait. I have never once seen the dead be improved by waiting.',
+    lore: 'A pyre-warden of the Ashen Reach, which is a soldier\'s post dressed as a priest\'s. Vaeryn burns what Mordaine buries, and somebody has to stand in the stone circle while it burns and make certain nothing walks out of it — that is the whole of the job, and Daemar has held it forty years. He has the white hair of everyone raised in that smoke and the temper of a man who has been told his rite is heresy by four generations of Mordaine wardens without once being told to stop performing it. He goes where his liege sends him. He does not pretend to agree.',
+  }),
+
   // ── The Crown — House Hartvane ──────────────────────────────────
   KING_HARTVANE: () => new Hero({
     id: 'king_hartvane', name: 'Kingurt Hartvane',
@@ -832,6 +846,7 @@ export const RECRUIT_POOL = [
   { key: 'BORRIK',              rarity: 'Epic' },
   { key: 'MARINA_AEGIRA',       rarity: 'Epic' },
   { key: 'GLENNIOS_AEGIRA',     rarity: 'Epic' },
+  { key: 'DAEMAR_VAERYN',       rarity: 'Epic' },
   // ── Legendary ────────────────────────────────────────────────────
   // LORD_ALDRIC is reputation-gated — unlocked via House Aldric at Exalted standing
   { key: 'HELGA',               rarity: 'Legendary' },
