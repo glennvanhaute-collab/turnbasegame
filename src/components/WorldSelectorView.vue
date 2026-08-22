@@ -54,6 +54,30 @@
           <div class="world-enter yamato-enter">大和へ入る</div>
         </div>
       </button>
+
+      <div class="worlds-divider">
+        <div class="divider-line" />
+        <span class="divider-symbol">⬡</span>
+        <div class="divider-line" />
+      </div>
+
+      <!-- Mythos Dominion -->
+      <button class="world-card mythos-card" @click="enter('mythos')">
+        <div class="world-card-bg mythos-bg" />
+        <div class="world-card-inner">
+          <img :src="mythosLogoImg" class="mythos-logo-img" alt="Mythos Dominion" />
+          <p class="mythos-wordmark">Mythos Dominion</p>
+          <p class="world-tagline mythos-tagline">Favor the Gods.</p>
+          <div class="world-meta">
+            <span class="world-affinity mythos-affinity">Greek · Roman · Egyptian · Norse</span>
+          </div>
+          <div class="world-status">
+            <span class="status-pip mythos-pip-off" />
+            Begin
+          </div>
+          <div class="world-enter mythos-enter">Enter the Dominion</div>
+        </div>
+      </button>
     </div>
 
     <p class="selector-footer">
@@ -70,6 +94,7 @@ import { useYamatoPlayerStore } from '../stores/useYamatoPlayerStore.js'
 const yamatoLogoImg = import.meta.env.BASE_URL + 'yamato/logo_yamato.png'
 const _B = import.meta.env.BASE_URL
 const westrunLogoImg  = _B + 'ui/logo-nav.png'
+const mythosLogoImg   = _B + 'mythos/ui/mythos_logo.png'
 
 const worldStore       = useWorldStore()
 const playerHeroStore  = usePlayerHeroStore()
@@ -132,7 +157,7 @@ function enter(world) {
   display: flex;
   align-items: stretch;
   gap: 0;
-  max-width: 900px;
+  max-width: 1280px;
   width: 100%;
   position: relative;
   z-index: 1;
@@ -177,13 +202,51 @@ function enter(world) {
     linear-gradient(160deg, #0c0e0a 0%, #060806 40%, #0e100a 100%);
   border: 1px solid #1e2a1e;
   border-left: none;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0;
   opacity: 0.9;
 }
 .yamato-card:hover .yamato-bg {
   border-color: #cc333355;
   box-shadow: inset 0 0 60px rgba(180,40,40,0.05), 0 0 40px rgba(180,40,40,0.08);
 }
+
+.mythos-bg {
+  background:
+    linear-gradient(160deg, #0e0f14 0%, #06070a 42%, #12100c 100%);
+  border: 1px solid #2a2620;
+  border-left: none;
+  border-radius: 0 12px 12px 0;
+  opacity: 0.9;
+}
+.mythos-card:hover .mythos-bg {
+  border-color: #c9a22755;
+  box-shadow: inset 0 0 60px rgba(201,162,39,0.06), 0 0 40px rgba(201,162,39,0.1);
+}
+
+.mythos-logo-img {
+  width: 116px;
+  height: auto;
+  align-self: flex-start;
+  filter: drop-shadow(0 6px 16px rgba(0,0,0,0.8));
+}
+.mythos-wordmark {
+  font-family: 'Marcellus SC', 'Cinzel', Georgia, serif;
+  font-size: 1.16rem;
+  letter-spacing: 0.1em;
+  line-height: 1.15;
+  color: #d8c391;
+  text-shadow: 0 0 18px rgba(201,162,39,0.28);
+}
+.mythos-card .world-tagline { color: #8a8172; }
+.mythos-tagline {
+  font-family: 'Marcellus SC', Georgia, serif;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+}
+.mythos-affinity { color: #4a4238; }
+.mythos-pip-off  { background: #2a2620; }
+.mythos-enter    { color: #4a4238; }
+.mythos-card:hover .world-enter { color: #d8b65a; }
 
 .world-card-inner {
   position: relative;
@@ -353,10 +416,11 @@ function enter(world) {
   z-index: 1;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1000px) {
   .worlds-row { flex-direction: column; }
   .westrun-bg { border-radius: 12px 12px 0 0; }
-  .yamato-bg  { border-left: 1px solid #1e2a1e; border-top: none; border-radius: 0 0 12px 12px; }
+  .yamato-bg  { border-left: 1px solid #1e2a1e; border-top: none; border-radius: 0; }
+  .mythos-bg  { border-left: 1px solid #2a2620; border-top: none; border-radius: 0 0 12px 12px; }
   .worlds-divider { flex-direction: row; padding: 2px 0; }
   .divider-line { flex: 1; width: auto; height: 1px; background: linear-gradient(to right, transparent, #2a1e1288, transparent); }
   .world-card { min-height: 260px; }

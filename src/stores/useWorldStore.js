@@ -6,6 +6,7 @@ const STORAGE_KEY = 'active-world'
 export const WORLDS = {
   WESTRUN: 'westrun',
   YAMATO:  'yamato',
+  MYTHOS:  'mythos',
 }
 
 export const useWorldStore = defineStore('world', () => {
