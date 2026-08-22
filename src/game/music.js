@@ -1,11 +1,12 @@
-import mainUrl          from '../assets/audio/main.ost?url'
-import battleUrl        from '../assets/audio/battle.mp3?url'
-import raidUrl          from '../assets/audio/Throne of regret.mp3?url'
-import voidHeirUrl      from '../assets/audio/Aurelian Dragonforge .mp3?url'
-import malacharUrl      from '../assets/audio/Malachar_trimmed.mp3?url'
-import siegeBreachUrl   from '../assets/audio/Siege of Mordaine - The Iron Thirst - Treblo.mp3?url'
-import siegeVanguardUrl from '../assets/audio/Siege of Mordaine - The Silent Pact - Treblo.mp3?url'
-import kyverUrl         from '../assets/audio/kyver.mp3?url'
+const _A = import.meta.env.BASE_URL + 'audio/'
+const mainUrl          = _A + 'main.ost'
+const battleUrl        = _A + 'battle.mp3'
+const raidUrl          = _A + 'Throne of regret.mp3'
+const voidHeirUrl      = _A + 'Aurelian Dragonforge .mp3'
+const malacharUrl      = _A + 'Malachar_trimmed.mp3'
+const siegeBreachUrl   = _A + 'Siege of Mordaine - The Iron Thirst - Treblo.mp3'
+const siegeVanguardUrl = _A + 'Siege of Mordaine - The Silent Pact - Treblo.mp3'
+const kyverUrl         = _A + 'kyver.mp3'
 
 const VOL = { main: 0.40, battle: 0.55, raid: 0.55, void_heir: 0.55, malachar: 0.55, siege_breach: 0.55, siege_vanguard: 0.50, kyver: 0.55 }
 
