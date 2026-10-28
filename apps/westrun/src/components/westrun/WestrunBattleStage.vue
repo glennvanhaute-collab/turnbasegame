@@ -36,7 +36,8 @@
     <div class="active-panel active-panel--ally" ref="allyPanelEl"
          :class="allyPulse" :data-hero-id="focusAlly?.id">
       <div class="panel-glow" />
-      <div class="panel-frame" :style="{ '--rarity': rarityColor(focusAlly) }">
+      <div class="panel-frame" :class="{ 'has-house': !!houseBorder(focusAlly) }"
+           :style="{ '--rarity': rarityColor(focusAlly) }">
         <img v-if="portraitOf(focusAlly)" :src="portraitOf(focusAlly)" class="panel-img" alt="" />
         <HeroAvatar v-else-if="focusAlly" :hero="focusAlly" :size="260" noBorder class="panel-img" />
         <img v-if="houseBorder(focusAlly)" :src="houseBorder(focusAlly)" class="panel-house" alt="" />
@@ -52,9 +53,11 @@
     <div class="active-panel active-panel--enemy" ref="enemyPanelEl"
          :class="enemyPulse" :data-hero-id="focusEnemy?.id">
       <div class="panel-glow panel-glow--foe" />
-      <div class="panel-frame" :style="{ '--rarity': rarityColor(focusEnemy) }">
+      <div class="panel-frame" :class="{ 'has-house': !!houseBorder(focusEnemy) }"
+           :style="{ '--rarity': rarityColor(focusEnemy) }">
         <img v-if="portraitOf(focusEnemy)" :src="portraitOf(focusEnemy)" class="panel-img" alt="" />
         <HeroAvatar v-else-if="focusEnemy" :hero="focusEnemy" :size="260" noBorder class="panel-img" />
+        <img v-if="houseBorder(focusEnemy)" :src="houseBorder(focusEnemy)" class="panel-house" alt="" />
         <div class="panel-veil" v-if="focusEnemy?.isDead" />
       </div>
       <div class="name-plate name-plate--enemy">
@@ -462,7 +465,22 @@ onUnmounted(() => window.removeEventListener('resize', onResize))
   transition: transform 0.22s ease, filter 0.22s ease;
 }
 .panel-img { width: 100%; height: 100%; object-fit: cover; object-position: center 16%; display: block; }
-.panel-house { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
+/* When an ornate house frame is layered on it IS the border; a second hard
+   stroke around it reads as a doubled, misaligned edge. Drop the solid rarity
+   border there and express rarity as a soft glow instead. */
+.panel-frame.has-house {
+  border-color: transparent;
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.75),
+    inset 0 0 42px rgba(0,0,0,0.5),
+    0 0 0 1px color-mix(in srgb, var(--rarity, #5a4a34) 30%, transparent),
+    0 0 20px color-mix(in srgb, var(--rarity, #5a4a34) 26%, transparent);
+}
+.panel-house {
+  position: absolute; inset: -1px;
+  width: calc(100% + 2px); height: calc(100% + 2px);
+  object-fit: fill; pointer-events: none;
+}
 .panel-veil { position: absolute; inset: 0; background: rgba(6,3,2,0.72); }
 .panel-glow {
   position: absolute; left: 8%; right: 8%; bottom: 2%; height: 22%; border-radius: 50%;
